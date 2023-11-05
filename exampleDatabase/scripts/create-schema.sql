@@ -31,4 +31,3 @@ CREATE TABLE IF NOT EXISTS "order"
     status              VARCHAR(20),
     notes               TEXT
 );
-

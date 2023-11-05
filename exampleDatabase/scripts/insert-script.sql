@@ -71,4 +71,3 @@ VALUES (1, '2023-11-05', 100.00, 'Credit Card', 1, true, '1234567890', 'Shipped'
        (18, '2023-11-22', 80.20, 'PayPal', 18, false, NULL, 'Pending', 'Sample order notes 18'),
        (19, '2023-11-23', 250.50, 'Credit Card', 19, true, '7654321098', 'Shipped', 'Sample order notes 19'),
        (20, '2023-11-24', 70.30, 'PayPal', 20, false, NULL, 'Pending', 'Sample order notes 20');
-
