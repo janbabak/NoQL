@@ -10,4 +10,4 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
-      - POSTGRES_DB=citizix_db
+      - POSTGRES_DB=database
