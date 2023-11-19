@@ -1,4 +1,5 @@
-CREATE TABLE  IF NOT EXISTS "user"
+-- create table user
+CREATE TABLE IF NOT EXISTS "user"
 (
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(100),
@@ -8,6 +9,7 @@ CREATE TABLE  IF NOT EXISTS "user"
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- create table address
 CREATE TABLE IF NOT EXISTS "address"
 (
     id          SERIAL PRIMARY KEY,
@@ -18,6 +20,7 @@ CREATE TABLE IF NOT EXISTS "address"
     postal_code VARCHAR(20)
 );
 
+-- create table order
 CREATE TABLE IF NOT EXISTS "order"
 (
     id                  SERIAL PRIMARY KEY,
@@ -30,4 +33,25 @@ CREATE TABLE IF NOT EXISTS "order"
     tracking_number     VARCHAR(50),
     status              VARCHAR(20),
     notes               TEXT
+);
+
+-- create schema cvut
+CREATE SCHEMA IF NOT EXISTS "cvut";
+
+-- create table specialization
+CREATE TABLE IF NOT EXISTS cvut.specialisation
+(
+    id     SERIAL PRIMARY KEY,
+    name   VARCHAR(100) NOT NULL,
+    garant VARCHAR(100) NOT NULL
+);
+
+-- create table student
+CREATE TABLE IF NOT EXISTS cvut.student
+(
+    id                SERIAL PRIMARY KEY,
+    name              VARCHAR(100) NOT NULL,
+    birthdate         DATE         NOT NULL,
+    grade             INT,
+    specialization_id INT REFERENCES cvut.specialisation (id)
 );
