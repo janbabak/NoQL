@@ -8,3 +8,10 @@ ALTER TABLE "order"
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS address;
 DROP TABLE IF EXISTS "user";
+
+-- Drop schema
+DROP TABLE IF EXISTS cvut.student;
+DROP TABLE IF EXISTS cvut.specialization;
+
+DROP SCHEMA IF EXISTS cvut CASCADE;
+
