@@ -36,7 +36,7 @@ public class GptApi implements QueryApi {
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-                    ? responseEntity.getBody().getChoices().getFirst().getMessage().getContent()
+                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {

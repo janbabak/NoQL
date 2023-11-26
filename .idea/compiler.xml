@@ -10,11 +10,6 @@
         <module name="noql-backend.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="com.janbabak.noql-bakend.test" target="21" />
-      <module name="noql-bakend" target="21" />
-      <module name="noql-bakend.main" target="21" />
-      <module name="noql-bakend.test" target="21" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>
