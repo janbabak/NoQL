@@ -1,61 +1,50 @@
 package com.janbabak.noqlbakend.service.api;
 
-import com.janbabak.noqlbakend.model.GptQuery;
-import org.springframework.http.MediaType;
+import com.janbabak.noqlbakend.model.gpt.GptQuery;
+import com.janbabak.noqlbakend.model.gpt.GptResponse;
+import lombok.NoArgsConstructor;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Objects;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-
+@NoArgsConstructor
 public class GptApi implements QueryApi {
 
-    private final URL url;
-
+    @SuppressWarnings("all")
+    private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
     private final String token = System.getenv("API_KEY");
+    private final RestTemplate restTemplate = new RestTemplate();
+    public String gptModel = GptQuery.GPT_3_5_TURBO;
 
-    public String gptModel = "gpt-3.5-turbo";
-
-    public GptApi() throws URISyntaxException, MalformedURLException {
-        this.url = new URI("https://api.openai.com/v1/chat/completions").toURL();
+    @SuppressWarnings("unused")
+    public GptApi(String gptModel) {
+        this.gptModel = gptModel;
     }
 
     public String queryModel(String query) throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(this.token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        // set connection properties
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty(AUTHORIZATION, "Bearer " + this.token);
-        connection.setRequestProperty(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        connection.setDoOutput(true);
+        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(query, gptModel), headers);
 
-        // input data
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
+        ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
+                GPT_URL, HttpMethod.POST, request, GptResponse.class);
 
-        outputStreamWriter.write(new GptQuery(query, gptModel).toJson());
-        outputStreamWriter.flush();
-        outputStreamWriter.close();
-        connection.getOutputStream().close();
-        connection.connect();
-
-        if (connection.getResponseCode() >= 300) {
-            throw new Exception("Retrieving query failed.");
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
+                    ? responseEntity.getBody().getChoices().getFirst().getMessage().getContent()
+                    : null;
         }
-
-        // output data
-        InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream());
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        StringBuilder responseContent = new StringBuilder();
-        String inputLine;
-        while ((inputLine = bufferedReader.readLine()) != null) {
-            responseContent.append(inputLine);
+        if (responseEntity.getStatusCode().is4xxClientError()) {
+            throw new Exception("Bad request, we are working on it, try it latter.");
         }
-        bufferedReader.close();
-        inputStreamReader.close();
-        connection.disconnect();
-
-        return responseContent.toString();
+        if (responseEntity.getStatusCode().is5xxServerError()) {
+            throw new Exception("Error on GPT side, try it latter");
+        }
+        return null;
     }
 }
