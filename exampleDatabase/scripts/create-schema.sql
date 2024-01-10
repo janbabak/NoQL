@@ -55,3 +55,27 @@ CREATE TABLE IF NOT EXISTS cvut.student
     grade             INT,
     specialization_id INT REFERENCES cvut.specialisation (id)
 );
+
+-- create table fit-wiki
+CREATE TABLE IF NOT EXISTS cvut.fit_wiki
+(
+    identifier       SERIAL PRIMARY KEY,
+    data             VARCHAR(300),
+    author           INT,
+    reviewer_of_data INTEGER REFERENCES cvut.student (id),
+    CONSTRAINT name_of_author_reference FOREIGN KEY (author) REFERENCES public."user" (id)
+);
+
+CREATE TABLE IF NOT EXISTS cvut.course
+(
+    "(identifier of course"   SERIAL PRIMARY KEY,
+    name VARCHAR(200)
+);
+
+-- create table exam
+CREATE TABLE IF NOT EXISTS cvut.exam
+(
+    student INTEGER REFERENCES cvut.student (id),
+    course  INTEGER REFERENCES cvut.course ("(identifier of course"),
+    PRIMARY KEY (student, course)
+)
