@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -41,21 +43,26 @@ public class Database {
                         .append(tableEntry.getValue().getName())
                         .append("\n(");
 
+                List<String> primaryKeys = tableEntry.getValue().getPrimaryKeys();
+
                 // columns
-                for (Map.Entry<String, Column> columnEntry : tableEntry.getValue().getColumns().entrySet()) {
+                for (Column column : tableEntry.getValue().getColumnsSortedByPrimaryKey()) {
                     script
                             .append("\n\t")
-                            .append(columnEntry.getValue().getName())
+                            .append(column.getName())
                             .append(" ")
-                            .append(columnEntry.getValue().getDataType().toUpperCase())
-                            .append(columnEntry.getValue().getPrimaryKey() ? " PRIMARY KEY," : "")
-                            .append(columnEntry.getValue().getForeignKey() != null
-                                    ? columnEntry.getValue().getForeignKey().getReferencingString()
-                                    : ""
-                            );
+                            .append(column.getDataType().toUpperCase())
+                            .append(primaryKeys.size() == 1 && column.getPrimaryKey()
+                                    ? " PRIMARY KEY," // table has only 1 primary key and this column is the primary key
+                                    : "")
+                            .append(column.getForeignKey() != null
+                                    ? column.getForeignKey().getReferencingString()
+                                    : "");
                 }
 
-                script.append("\n);\n");
+                script.append(primaryKeys.size() > 1 // table has multiple primary keys
+                        ? "\n\tPRIMARY KEY (" + String.join(", ", primaryKeys) + ")\n);\n"
+                        : "\n);\n");
             }
         }
         return script.toString();
@@ -84,6 +91,29 @@ public class Database {
         public Table(String name) {
             this.name = name;
             this.columns = new HashMap<>();
+        }
+
+        /**
+         * Get primary key(s) of the table
+         * @return names of columns
+         */
+        public List<String> getPrimaryKeys() {
+            List<String> primaryKeys = new ArrayList<>();
+            for (Map.Entry<String, Column> entry : columns.entrySet()) {
+                if (entry.getValue().primaryKey) {
+                    primaryKeys.add(entry.getKey());
+                }
+            }
+            return primaryKeys;
+        }
+
+        /**
+         * Definitions usually starts by defining the primary key.
+         * @return columns sorted by {@code primaryKey} - primary keys are at the beginning.
+         */
+        @SuppressWarnings("all")
+        public List<Column> getColumnsSortedByPrimaryKey() {
+            return columns.values().stream().sorted((a, b) -> a.primaryKey ? -1 : 1).toList();
         }
     }
 

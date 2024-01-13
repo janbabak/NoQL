@@ -14,9 +14,29 @@ public class PostgresInfo implements DatabaseInfo {
     private static final String PRIMARY_KEY_COLUMN_NAME = "primary_key";
     private static final String FOREIGN_KEY_DEFINITION_COLUMN_NAME = "constraint_definition";
 
-    public Database getSchema() throws SQLException {
+    /**
+     * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
+     * @return database information
+     * @throws SQLException SQL related errors
+     */
+    public Database retrieveSchema() throws SQLException {
         Connection connection = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/postgres", "user", "password");
+        Database db = new Database();
+
+        retrieveSchemasTablesColumns(connection, db);
+        retrieveForeignKeys(connection, db);
+
+        return db;
+    }
+
+    /**
+     * Retrieves database information about schemas, tables and columns, primary keys, (omits relations)
+     * @param connection connection to the database
+     * @param db empty database
+     * @throws SQLException SQL related errors
+     */
+    private void retrieveSchemasTablesColumns(Connection connection, Database db) throws SQLException {
         Statement statement = connection.createStatement();
         String selectSchemasTablesColumnsPrimaryKeys = """
                 SELECT columns.table_schema,
@@ -40,8 +60,6 @@ public class PostgresInfo implements DatabaseInfo {
 
         ResultSet resultSet = statement.executeQuery(selectSchemasTablesColumnsPrimaryKeys);
 
-        Database db = new Database();
-
         while (resultSet.next()) {
             String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
             String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
@@ -64,7 +82,15 @@ public class PostgresInfo implements DatabaseInfo {
             // columnName key definitely doesn't exist - no need of checking it out
             table.getColumns().put(columnName, new Database.Column(columnName, dataType, primaryKey));
         }
+    }
 
+    /**
+     * Retrieves information about relations in the database represented by foreign keys.
+     * @param connection connection to the database
+     * @param db database that already contains info about schemas, tables and colums
+     * @throws SQLException SQL related errors
+     */
+    private void retrieveForeignKeys(Connection connection, Database db) throws SQLException {
         String getForeignKeys = """
                 SELECT conrelid::regclass AS table_name,
                        conname AS foreign_key,
@@ -73,7 +99,9 @@ public class PostgresInfo implements DatabaseInfo {
                 WHERE  contype = 'f'
                 ORDER  BY conrelid::regclass::text, contype DESC;
                 """;
-        resultSet = statement.executeQuery(getForeignKeys);
+
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(getForeignKeys);
 
         while (resultSet.next()) {
             String constraintDefinition = resultSet.getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
@@ -98,8 +126,6 @@ public class PostgresInfo implements DatabaseInfo {
                 }
             }
         }
-
-        return db;
     }
 
     public PostgresInfo() {

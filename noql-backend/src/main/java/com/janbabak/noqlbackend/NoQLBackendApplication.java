@@ -34,7 +34,7 @@ public class NoQLBackendApplication {
     public static void getDbSchema() {
         PostgresInfo dbInfo = new PostgresInfo();
         try {
-            Database db = dbInfo.getSchema();
+            Database db = dbInfo.retrieveSchema();
             System.out.println(db.generateCreateScript());
         } catch (Exception e) {
             System.out.println(e.getMessage());
