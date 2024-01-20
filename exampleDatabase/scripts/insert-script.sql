@@ -74,19 +74,17 @@ VALUES (1, '2023-11-05', 100.00, 'Credit Card', 1, true, '1234567890', 'Shipped'
 
 -- Inserting sample data into specialisation table
 INSERT INTO cvut.specialisation (name, garant)
-VALUES
-    ('Computer Science', 'Dr. Smith'),
-    ('Electrical Engineering', 'Prof. Johnson'),
-    ('Mechanical Engineering', 'Dr. Williams');
+VALUES ('Computer Science', 'Dr. Smith'),
+       ('Electrical Engineering', 'Prof. Johnson'),
+       ('Mechanical Engineering', 'Dr. Williams');
 
 -- Inserting sample data into student table
 INSERT INTO cvut.student (name, birthdate, grade, specialization_id)
-VALUES
-    ('Alice', '1998-05-15', 1, 1),
-    ('Bob', '1999-09-22', 2, 2),
-    ('Charlie', '2000-02-10', 3, 3),
-    ('David', '1997-11-28', 3, 1),
-    ('Emma', '1999-07-09', 4, 2),
-    ('Frank', '2001-04-18', 5, 3),
-    ('Grace', '2000-12-05', 3, 1),
-    ('Henry', '1998-08-14', 1, 2);
+VALUES ('Alice', '1998-05-15', 1, 1),
+       ('Bob', '1999-09-22', 2, 2),
+       ('Charlie', '2000-02-10', 3, 3),
+       ('David', '1997-11-28', 3, 1),
+       ('Emma', '1999-07-09', 4, 2),
+       ('Frank', '2001-04-18', 5, 3),
+       ('Grace', '2000-12-05', 3, 1),
+       ('Henry', '1998-08-14', 1, 2);

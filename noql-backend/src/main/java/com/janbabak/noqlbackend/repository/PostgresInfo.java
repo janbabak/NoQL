@@ -5,6 +5,9 @@ import org.antlr.v4.runtime.misc.Pair;
 
 import java.sql.*;
 
+/**
+ * Retrieves Postgres database information.
+ */
 public class PostgresInfo implements DatabaseInfo {
 
     private static final String TABLE_SCHEMA_COLUMN_NAME = "table_schema";
@@ -16,6 +19,7 @@ public class PostgresInfo implements DatabaseInfo {
 
     /**
      * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
+     *
      * @return database information
      * @throws SQLException SQL related errors
      */
@@ -32,8 +36,9 @@ public class PostgresInfo implements DatabaseInfo {
 
     /**
      * Retrieves database information about schemas, tables and columns, primary keys, (omits relations)
+     *
      * @param connection connection to the database
-     * @param db empty database
+     * @param db         empty database
      * @throws SQLException SQL related errors
      */
     private void retrieveSchemasTablesColumns(Connection connection, Database db) throws SQLException {
@@ -86,8 +91,9 @@ public class PostgresInfo implements DatabaseInfo {
 
     /**
      * Retrieves information about relations in the database represented by foreign keys.
+     *
      * @param connection connection to the database
-     * @param db database that already contains info about schemas, tables and colums
+     * @param db         database that already contains info about schemas, tables and colums
      * @throws SQLException SQL related errors
      */
     private void retrieveForeignKeys(Connection connection, Database db) throws SQLException {
@@ -111,20 +117,23 @@ public class PostgresInfo implements DatabaseInfo {
 
             // insert that foreign key
             Database.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
-            if (schema != null) {
-                Database.Table table = schema.getTables().get(foreignKeyData.referencingTable);
-                if (table != null) {
-                    Database.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
-                    if (column != null) {
-                        // TODO: Do I want to verify existence of these data?
-                        column.setForeignKey(new Database.ForeignKey(
-                                foreignKeyData.referencedSchema,
-                                foreignKeyData.referencedTable,
-                                foreignKeyData.referencedColumn
-                        ));
-                    }
-                }
+            if (schema == null) {
+                continue;
             }
+            Database.Table table = schema.getTables().get(foreignKeyData.referencingTable);
+            if (table == null) {
+                continue;
+            }
+            Database.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
+            if (column == null) {
+                continue;
+            }
+            // TODO: Do I want to verify existence of these data?
+            column.setForeignKey(new Database.ForeignKey(
+                    foreignKeyData.referencedSchema,
+                    foreignKeyData.referencedTable,
+                    foreignKeyData.referencedColumn
+            ));
         }
     }
 
@@ -133,9 +142,10 @@ public class PostgresInfo implements DatabaseInfo {
 
     /**
      * Parse foreign key - extract all the necessary information like referencing and referenced schema, table, column
+     *
      * @param referencingSchemaAndTableName string that contains referencing schema and column
-     * @param constraintDefinition definition of the constraint from the database in the following format:
-     *                             {@code FOREIGN KEY (reviewer_of_data) REFERENCES cvut.student(id) }
+     * @param constraintDefinition          definition of the constraint from the database in the following format:
+     *                                      {@code FOREIGN KEY (reviewer_of_data) REFERENCES cvut.student(id) }
      * @return foreign key data
      */
     private ForeignKeyData parseForeignKey(String referencingSchemaAndTableName, String constraintDefinition) {
@@ -183,6 +193,7 @@ public class PostgresInfo implements DatabaseInfo {
     /**
      * Heuristic responsible for parsing schema and table string.
      * If the database contains dot in schema or table names, may not work properly.
+     *
      * @param data schema and table name together
      * @return [schemaName, tableName]
      */
@@ -208,5 +219,6 @@ public class PostgresInfo implements DatabaseInfo {
             String referencedSchema,
             String referencedTable,
             String referencedColumn
-    ) {}
+    ) {
+    }
 }

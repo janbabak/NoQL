@@ -1,14 +1,13 @@
 package com.janbabak.noqlbackend.model.gpt;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * GPT response object from the GPT API
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class GptResponse {
     private String id;
     private String object;
@@ -16,18 +15,20 @@ public class GptResponse {
     private Usage usage;
     private List<Choice> choices;
 
+    /**
+     * Information in the response about GPT API usage
+     */
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class Usage {
         private int prompt_tokens;
         private int completion_tokens;
         private int total_tokens;
     }
 
+    /**
+     * Choice object from the GPT response
+     */
     @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
     public static class Choice {
         private GptQuery.Message message;
         private String finish_reason;

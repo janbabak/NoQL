@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS cvut.student
     specialization_id INT REFERENCES cvut.specialisation (id)
 );
 
--- create table fit-wiki
+-- create table fit-wiki, foreign key constraint is defined differently in this definition.
 CREATE TABLE IF NOT EXISTS cvut.fit_wiki
 (
     identifier       SERIAL PRIMARY KEY,
@@ -66,13 +66,14 @@ CREATE TABLE IF NOT EXISTS cvut.fit_wiki
     CONSTRAINT name_of_author_reference FOREIGN KEY (author) REFERENCES public."user" (id)
 );
 
+-- create course table, the identifier contains "(" character
 CREATE TABLE IF NOT EXISTS cvut.course
 (
-    "(identifier of course"   SERIAL PRIMARY KEY,
-    name VARCHAR(200)
+    "(identifier of course" SERIAL PRIMARY KEY,
+    name                    VARCHAR(200)
 );
 
--- create table exam
+-- create table exam, the primary key is composed from multiple columns
 CREATE TABLE IF NOT EXISTS cvut.exam
 (
     student INTEGER REFERENCES cvut.student (id),
