@@ -23,6 +23,12 @@ public class GptApi implements QueryApi {
         this.gptModel = gptModel;
     }
 
+    /**
+     * Query the GPT API and retrieve the response.
+     * @param query query which is sent
+     * @return GPT response
+     * @throws Exception TODO: handle responses
+     */
     public String queryModel(String query) throws Exception {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
