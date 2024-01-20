@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.db;
+package com.janbabak.noqlbackend.model.database;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
