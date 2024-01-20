@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend;
 
-import com.janbabak.noqlbackend.db.Database;
-import com.janbabak.noqlbackend.repository.PostgresInfo;
+import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.service.database.PostgresService;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import org.springframework.boot.SpringApplication;
@@ -32,7 +32,7 @@ public class NoQLBackendApplication {
     }
 
     public static void getDbSchema() {
-        PostgresInfo dbInfo = new PostgresInfo();
+        PostgresService dbInfo = new PostgresService();
         try {
             Database db = dbInfo.retrieveSchema();
             System.out.println(db.generateCreateScript());

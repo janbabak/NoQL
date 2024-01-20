@@ -1,6 +1,8 @@
-package com.janbabak.noqlbackend.repository;
+package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.db.Database;
+import com.janbabak.noqlbackend.dao.DatabaseDAO;
+import com.janbabak.noqlbackend.dao.PostgresDAO;
+import com.janbabak.noqlbackend.model.database.Database;
 import org.antlr.v4.runtime.misc.Pair;
 
 import java.sql.*;
@@ -8,7 +10,7 @@ import java.sql.*;
 /**
  * Retrieves Postgres database information.
  */
-public class PostgresInfo implements DatabaseInfo {
+public class PostgresService implements DatabaseService {
 
     private static final String TABLE_SCHEMA_COLUMN_NAME = "table_schema";
     private static final String TABLE_NAME_COLUMN_NAME = "table_name";
@@ -16,6 +18,8 @@ public class PostgresInfo implements DatabaseInfo {
     private static final String DATA_TYPE_COLUMN_NAME = "data_type";
     private static final String PRIMARY_KEY_COLUMN_NAME = "primary_key";
     private static final String FOREIGN_KEY_DEFINITION_COLUMN_NAME = "constraint_definition";
+    private final DatabaseDAO databaseDAO = new PostgresDAO(
+            "localhost", "5432", "database", "user", "password"); // TODO pass the credentials as a parameter
 
     /**
      * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
@@ -24,12 +28,10 @@ public class PostgresInfo implements DatabaseInfo {
      * @throws SQLException SQL related errors
      */
     public Database retrieveSchema() throws SQLException {
-        Connection connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/postgres", "user", "password");
         Database db = new Database();
 
-        retrieveSchemasTablesColumns(connection, db);
-        retrieveForeignKeys(connection, db);
+        retrieveSchemasTablesColumns(db);
+        retrieveForeignKeys(db);
 
         return db;
     }
@@ -37,33 +39,11 @@ public class PostgresInfo implements DatabaseInfo {
     /**
      * Retrieves database information about schemas, tables and columns, primary keys, (omits relations)
      *
-     * @param connection connection to the database
      * @param db         empty database
      * @throws SQLException SQL related errors
      */
-    private void retrieveSchemasTablesColumns(Connection connection, Database db) throws SQLException {
-        Statement statement = connection.createStatement();
-        String selectSchemasTablesColumnsPrimaryKeys = """
-                SELECT columns.table_schema,
-                       columns.table_name,
-                       columns.column_name,
-                       columns.data_type,
-                       constraint_name IS NOT NULL AS primary_key
-                FROM information_schema.columns AS columns
-                LEFT JOIN information_schema.constraint_column_usage AS constrains
-                    ON (columns.table_schema, columns.table_name, columns.column_name) =
-                       (constrains.table_schema, constrains.table_name, constrains.column_name)
-                    AND constrains.constraint_name LIKE '%pkey'
-                WHERE columns.table_schema NOT LIKE 'pg_%'
-                  AND columns.table_schema != 'information_schema'
-                  AND columns.table_name IN (SELECT table_name
-                                     FROM information_schema.tables
-                                     WHERE table_type = 'BASE TABLE'
-                                       AND table_catalog = current_database())
-                ORDER BY table_schema, table_name, ordinal_position;
-                """;
-
-        ResultSet resultSet = statement.executeQuery(selectSchemasTablesColumnsPrimaryKeys);
+    private void retrieveSchemasTablesColumns(Database db) throws SQLException {
+        ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
 
         while (resultSet.next()) {
             String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
@@ -92,22 +72,11 @@ public class PostgresInfo implements DatabaseInfo {
     /**
      * Retrieves information about relations in the database represented by foreign keys.
      *
-     * @param connection connection to the database
      * @param db         database that already contains info about schemas, tables and colums
      * @throws SQLException SQL related errors
      */
-    private void retrieveForeignKeys(Connection connection, Database db) throws SQLException {
-        String getForeignKeys = """
-                SELECT conrelid::regclass AS table_name,
-                       conname AS foreign_key,
-                       pg_get_constraintdef(oid) AS constraint_definition
-                FROM   pg_constraint
-                WHERE  contype = 'f'
-                ORDER  BY conrelid::regclass::text, contype DESC;
-                """;
-
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(getForeignKeys);
+    private void retrieveForeignKeys(Database db) throws SQLException {
+        ResultSet resultSet = databaseDAO.getForeignKeys();
 
         while (resultSet.next()) {
             String constraintDefinition = resultSet.getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
@@ -137,7 +106,7 @@ public class PostgresInfo implements DatabaseInfo {
         }
     }
 
-    public PostgresInfo() {
+    public PostgresService() {
     }
 
     /**
