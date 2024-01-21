@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend;
 
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseService;
 import com.janbabak.noqlbackend.service.database.PostgresService;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
@@ -32,6 +33,26 @@ public class NoQLBackendApplication {
         }
     }
 
+    public static void testRealRequest(String[] args) {
+        SpringApplication.run(NoQLBackendApplication.class, args);
+        try {
+            QueryApi api = new GptApi();
+            DatabaseService databaseService = new PostgresService();
+            Database db = databaseService.retrieveSchema();
+            String NLQuery = "Find all male users.";
+            String query = QueryService.createQuery(
+                    NLQuery,
+                    db.generateCreateScript(),
+                    "postgres",
+                    true);
+            String response = api.queryModel(query);
+            System.out.println("response:\n" + response);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unused")
     public static void createQuery() {
         PostgresService dbInfo = new PostgresService();
         try {
@@ -47,6 +68,6 @@ public class NoQLBackendApplication {
     }
 
     public static void main(String[] args) {
-        createQuery();
+        testRealRequest(args);
     }
 }

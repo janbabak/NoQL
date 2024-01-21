@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "user"
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(100),
     age        INTEGER,
-    sex        CHAR(1),
+    sex        CHAR(10),
     email      VARCHAR(100),
     created_at TIMESTAMP DEFAULT NOW()
 );
