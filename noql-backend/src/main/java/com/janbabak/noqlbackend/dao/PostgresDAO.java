@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,8 +10,8 @@ import java.sql.ResultSet;
 @EqualsAndHashCode(callSuper = true)
 public class PostgresDAO extends DatabaseDAO {
 
-    public PostgresDAO(String host, String port, String database, String user, String password) {
-        super(host, port, database, user, password);
+    public PostgresDAO(Database database) {
+        super(database);
     }
 
     @SuppressWarnings("unused")
@@ -20,7 +21,8 @@ public class PostgresDAO extends DatabaseDAO {
 
     @Override
     protected String createConnectionUrl() {
-        return "jdbc:postgresql://" + host + ":" + port + "/" + database;
+        return "jdbc:postgresql://" + databaseMetadata.getHost() + ":" + databaseMetadata.getPort() +
+                "/" + databaseMetadata.getDatabase();
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import org.antlr.v4.runtime.misc.Pair;
 
 import java.sql.*;
@@ -10,16 +10,17 @@ import java.sql.*;
 /**
  * Retrieves Postgres database information.
  */
-public class PostgresService implements DatabaseService {
-
+public class PostgresService extends BaseDatabaseService implements DatabaseService {
     private static final String TABLE_SCHEMA_COLUMN_NAME = "table_schema";
     private static final String TABLE_NAME_COLUMN_NAME = "table_name";
     private static final String COLUMN_NAME_COLUMN_NAME = "column_name";
     private static final String DATA_TYPE_COLUMN_NAME = "data_type";
     private static final String PRIMARY_KEY_COLUMN_NAME = "primary_key";
     private static final String FOREIGN_KEY_DEFINITION_COLUMN_NAME = "constraint_definition";
-    private final DatabaseDAO databaseDAO = new PostgresDAO(
-            "localhost", "5432", "database", "user", "password"); // TODO pass the credentials as a parameter
+
+    public PostgresService(Database database) {
+        databaseDAO = new PostgresDAO(database);
+    }
 
     /**
      * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
@@ -27,8 +28,8 @@ public class PostgresService implements DatabaseService {
      * @return database information
      * @throws SQLException SQL related errors
      */
-    public Database retrieveSchema() throws SQLException {
-        Database db = new Database();
+    public DatabaseStructure retrieveSchema() throws SQLException {
+        DatabaseStructure db = new DatabaseStructure();
 
         retrieveSchemasTablesColumns(db);
         retrieveForeignKeys(db);
@@ -42,7 +43,7 @@ public class PostgresService implements DatabaseService {
      * @param db         empty database
      * @throws SQLException SQL related errors
      */
-    private void retrieveSchemasTablesColumns(Database db) throws SQLException {
+    private void retrieveSchemasTablesColumns(DatabaseStructure db) throws SQLException {
         ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
 
         while (resultSet.next()) {
@@ -52,20 +53,14 @@ public class PostgresService implements DatabaseService {
             String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
             Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
 
-            Database.Schema schema = db.getSchemas().get(tableSchema);
-            if (schema == null) {
-                schema = new Database.Schema(tableSchema);
-                db.getSchemas().put(tableSchema, schema);
-            }
+            DatabaseStructure.Schema schema =
+                    db.getSchemas().computeIfAbsent(tableSchema, DatabaseStructure.Schema::new);
 
-            Database.Table table = schema.getTables().get(tableName);
-            if (table == null) {
-                table = new Database.Table(tableName);
-                schema.getTables().put(tableName, table);
-            }
+            DatabaseStructure.Table table =
+                    schema.getTables().computeIfAbsent(tableName, DatabaseStructure.Table::new);
 
             // columnName key definitely doesn't exist - no need of checking it out
-            table.getColumns().put(columnName, new Database.Column(columnName, dataType, primaryKey));
+            table.getColumns().put(columnName, new DatabaseStructure.Column(columnName, dataType, primaryKey));
         }
     }
 
@@ -75,7 +70,7 @@ public class PostgresService implements DatabaseService {
      * @param db         database that already contains info about schemas, tables and colums
      * @throws SQLException SQL related errors
      */
-    private void retrieveForeignKeys(Database db) throws SQLException {
+    private void retrieveForeignKeys(DatabaseStructure db) throws SQLException {
         ResultSet resultSet = databaseDAO.getForeignKeys();
 
         while (resultSet.next()) {
@@ -85,28 +80,25 @@ public class PostgresService implements DatabaseService {
             ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 
             // insert that foreign key
-            Database.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
+            DatabaseStructure.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
             if (schema == null) {
                 continue;
             }
-            Database.Table table = schema.getTables().get(foreignKeyData.referencingTable);
+            DatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
             if (table == null) {
                 continue;
             }
-            Database.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
+            DatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
             if (column == null) {
                 continue;
             }
             // TODO: Do I want to verify existence of these data?
-            column.setForeignKey(new Database.ForeignKey(
+            column.setForeignKey(new DatabaseStructure.ForeignKey(
                     foreignKeyData.referencedSchema,
                     foreignKeyData.referencedTable,
                     foreignKeyData.referencedColumn
             ));
         }
-    }
-
-    public PostgresService() {
     }
 
     /**
@@ -171,7 +163,7 @@ public class PostgresService implements DatabaseService {
 
         // when dot is not found, table comes from the default (public) schema
         if (dotIndex == -1) {
-            return new Pair<>(Database.DEFAULT_SCHEMA, data);
+            return new Pair<>(DatabaseStructure.DEFAULT_SCHEMA, data);
         }
 
         // when dot is found, it usually separates the schema and table name (unless the schema name contains dot)
