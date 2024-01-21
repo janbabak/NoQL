@@ -1,9 +1,7 @@
 package com.janbabak.noqlbackend;
 
+import com.janbabak.noqlbackend.model.UserQueryRequest;
 import com.janbabak.noqlbackend.service.QueryService;
-import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.service.database.DatabaseService;
-import com.janbabak.noqlbackend.service.database.PostgresService;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import org.springframework.boot.SpringApplication;
@@ -12,9 +10,14 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+
 @RestController
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) // because postgres db has not been set up yet
 public class NoQLBackendApplication {
+
+    public static QueryService queryService = new QueryService();
 
     @GetMapping
     @SuppressWarnings("unused")
@@ -33,41 +36,29 @@ public class NoQLBackendApplication {
         }
     }
 
-    public static void testRealRequest(String[] args) {
-        SpringApplication.run(NoQLBackendApplication.class, args);
-        try {
-            QueryApi api = new GptApi();
-            DatabaseService databaseService = new PostgresService();
-            Database db = databaseService.retrieveSchema();
-            String NLQuery = "Find all male users.";
-            String query = QueryService.createQuery(
-                    NLQuery,
-                    db.generateCreateScript(),
-                    "postgres",
-                    true);
-            String response = api.queryModel(query);
-            System.out.println("response:\n" + response);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     @SuppressWarnings("unused")
-    public static void createQuery() {
-        PostgresService dbInfo = new PostgresService();
+    public static void testQuery() {
         try {
-            Database db = dbInfo.retrieveSchema();
+            ResultSet resultSet = queryService.handleQuery
+                    (new UserQueryRequest("id", "Find all users that are males."));
 
-            String NLQuery = "Find all users that are males.";
-            String query = QueryService.createQuery(NLQuery, db.generateCreateScript(), "Postgres", true);
-
-            System.out.println(query);
+            // print result
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int columnsNumber = rsmd.getColumnCount();
+            while (resultSet.next()) {
+                for (int i = 1; i <= columnsNumber; i++) {
+                    if (i > 1) System.out.print(",  ");
+                    String columnValue = resultSet.getString(i);
+                    System.out.print(columnValue + " " + rsmd.getColumnName(i));
+                }
+                System.out.println();
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        testRealRequest(args);
+        testQuery();
     }
 }

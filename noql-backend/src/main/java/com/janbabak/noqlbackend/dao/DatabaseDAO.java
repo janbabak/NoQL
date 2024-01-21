@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 
 import java.sql.*;
@@ -10,20 +11,12 @@ import java.sql.*;
  */
 @Data
 public abstract class DatabaseDAO {
-    protected String host;
-    protected String port;
-    protected String database;
-    protected String user;
-    protected String password;
+    protected Database databaseMetadata;
 
     protected Connection connection;
 
-    public DatabaseDAO(String host, String port, String database, String user, String password) {
-        this.host = host;
-        this.port = port;
-        this.database = database;
-        this.user = user;
-        this.password = password;
+    public DatabaseDAO(Database database) {
+        this.databaseMetadata = database;
         this.connection = null;
     }
 
@@ -32,11 +25,7 @@ public abstract class DatabaseDAO {
      * before establishing the connection.
      */
     public DatabaseDAO() {
-        host = null;
-        port = null;
-        database = null;
-        user = null;
-        password = null;
+        databaseMetadata = new Database();
         connection = null;
     }
 
@@ -87,8 +76,8 @@ public abstract class DatabaseDAO {
     protected void connect() throws SQLException {
         connection = DriverManager.getConnection(
                 createConnectionUrl(),
-                user, password
-        );
+                databaseMetadata.getUser(),
+                databaseMetadata.getPassword());
     }
 
     /**
