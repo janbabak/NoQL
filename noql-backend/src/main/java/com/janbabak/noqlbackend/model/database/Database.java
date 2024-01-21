@@ -71,7 +71,8 @@ public class Database {
                         : "\n);\n");
             }
         }
-        return script.toString();
+
+        return script.toString().trim();
     }
 
     /**
