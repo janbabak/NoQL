@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend;
 
+import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.service.database.PostgresService;
 import com.janbabak.noqlbackend.service.api.GptApi;
@@ -31,17 +32,21 @@ public class NoQLBackendApplication {
         }
     }
 
-    public static void getDbSchema() {
+    public static void createQuery() {
         PostgresService dbInfo = new PostgresService();
         try {
             Database db = dbInfo.retrieveSchema();
-            System.out.println(db.generateCreateScript());
+
+            String NLQuery = "Find all users that are males.";
+            String query = QueryService.createQuery(NLQuery, db.generateCreateScript(), "Postgres", true);
+
+            System.out.println(query);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     public static void main(String[] args) {
-        getDbSchema();
+        createQuery();
     }
 }
