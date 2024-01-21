@@ -13,9 +13,6 @@ import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
 import java.util.Locale;
 
-/**
- * Responsible for creating the LLMs query content.
- */
 @Service
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
