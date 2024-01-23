@@ -6,7 +6,6 @@ import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +13,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
 @RestController
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) // because postgres db has not been set up yet
+//@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class }) // because postgres db has not been set up yet
+@SpringBootApplication
 public class NoQLBackendApplication {
 
     public static QueryService queryService = new QueryService();
@@ -59,6 +59,6 @@ public class NoQLBackendApplication {
     }
 
     public static void main(String[] args) {
-        testQuery();
+        SpringApplication.run(NoQLBackendApplication.class, args);
     }
 }
