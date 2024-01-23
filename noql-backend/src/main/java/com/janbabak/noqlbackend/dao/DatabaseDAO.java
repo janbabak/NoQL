@@ -76,7 +76,7 @@ public abstract class DatabaseDAO {
     protected void connect() throws SQLException {
         connection = DriverManager.getConnection(
                 createConnectionUrl(),
-                databaseMetadata.getUser(),
+                databaseMetadata.getUserName(),
                 databaseMetadata.getPassword());
     }
 

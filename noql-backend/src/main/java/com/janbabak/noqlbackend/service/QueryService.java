@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class QueryService {
@@ -53,7 +54,8 @@ public class QueryService {
     public ResultSet handleQuery(UserQueryRequest request) throws Exception {
         // TODO retrieve persistence layer
         Database database = new Database(
-                "my-id",
+                UUID.randomUUID(),
+                "Example database",
                 "localhost",
                 "5432",
                 "database",
