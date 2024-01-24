@@ -30,13 +30,6 @@ public abstract class DatabaseDAO {
     }
 
     /**
-     * Create connection URL for specific database engine.
-     *
-     * @return connection URL
-     */
-    protected abstract String createConnectionUrl();
-
-    /**
      * Retrieve database schemas, tables columns and primary keys.
      *
      * @return query result
@@ -67,6 +60,21 @@ public abstract class DatabaseDAO {
         }
         return null;
     }
+
+    /**
+     * Test connection to database.
+     *
+     * @return true if connection established, false otherwise (e.g. bad credentials, etc.)
+     */
+    @SuppressWarnings("all")
+    public abstract boolean testConnection();
+
+    /**
+     * Create connection URL for specific database engine.
+     *
+     * @return connection URL
+     */
+    protected abstract String createConnectionUrl();
 
     /**
      * Connect to the database.

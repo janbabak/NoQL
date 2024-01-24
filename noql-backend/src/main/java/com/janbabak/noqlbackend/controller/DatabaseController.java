@@ -46,7 +46,7 @@ public class DatabaseController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@RequestBody Database request) {
+    public Database create(@RequestBody Database request) throws Exception {
         return databaseService.create(request);
     }
 

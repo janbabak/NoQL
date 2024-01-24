@@ -45,7 +45,11 @@ public class BaseDatabaseService {
      * @param database object to be saved
      * @return saved object with id
      */
-    public Database create(Database database) {
+    public Database create(Database database) throws Exception {
+        if (!DatabaseServiceFactory.getDatabaseDAO(database).testConnection()) {
+            throw new Exception("connection not established");
+        }
+
         return databaseRepository.save(database);
     }
 
@@ -89,6 +93,10 @@ public class BaseDatabaseService {
         }
         if (data.getIsSQL() != null) {
             database.setIsSQL(data.getIsSQL());
+        }
+
+        if (!DatabaseServiceFactory.getDatabaseDAO(database).testConnection()) {
+            throw new Exception("connection not established");
         }
 
         return databaseRepository.save(database);
