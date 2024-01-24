@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -15,7 +16,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @SuppressWarnings("unused")
-    public  PostgresDAO() {
+    public PostgresDAO() {
         super();
     }
 
@@ -64,5 +65,15 @@ public class PostgresDAO extends DatabaseDAO {
                 """;
 
         return query(select);
+    }
+
+    @Override
+    public boolean testConnection() {
+        try {
+            connect();
+        } catch (SQLException e) {
+            return false;
+        }
+        return connection != null;
     }
 }
