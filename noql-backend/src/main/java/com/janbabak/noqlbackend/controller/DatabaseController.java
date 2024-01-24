@@ -39,6 +39,39 @@ public class DatabaseController {
         return databaseService.findById(id);
     }
 
+    /**
+     * Create new database.
+     * @param request database object (without id)
+     * @return created object with its id.
+     */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Database create(@RequestBody Database request) {
+        return databaseService.create(request);
+    }
+
+    /**
+     * Update not null fields by database id.
+     * @param id database identifier
+     * @param request new data
+     * @return updated database
+     */
+    @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Database update(@PathVariable UUID id, @RequestBody Database request) throws Exception {
+        return databaseService.update(id, request);
+    }
+
+    /**
+     * Delete database by id
+     * @param id database identifier
+     */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable UUID id) {
+        databaseService.deleteById(id);
+    }
+
     // TODO: delete
     @GetMapping("insertSample")
     public String insertSampleData() {
