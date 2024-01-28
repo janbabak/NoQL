@@ -1,22 +1,26 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.model.UserQueryRequest;
+import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.model.QueryRequest;
 import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
+import com.janbabak.noqlbackend.model.database.QueryResponse;
+import com.janbabak.noqlbackend.model.database.QueryResponse.QueryResult;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.DatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.util.Locale;
-import java.util.UUID;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
+    private final DatabaseRepository databaseRepository;
 
     /**
      * Create query content for the LLM.
@@ -51,32 +55,29 @@ public class QueryService {
         return queryBuilder.toString();
     }
 
-    public ResultSet handleQuery(UserQueryRequest request) throws Exception {
-        // TODO retrieve persistence layer
-        Database database = new Database(
-                UUID.randomUUID(),
-                "Example database",
-                "localhost",
-                "5432",
-                "database",
-                "user",
-                "password",
-                DatabaseEngine.POSTGRES,
-                true);
+    /**
+     * Handle user's query - translate it via LLM to the database specific query language and execute it.
+     * @param request from the API
+     * @return query result
+     * @throws Exception when something went wrong.
+     */
+    public QueryResponse handleQuery(QueryRequest request) throws Exception {
+        Optional<Database> optionalDatabase = databaseRepository.findById(request.getDatabaseId());
 
-        DatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        DatabaseStructure databaseStructure = databaseService.retrieveSchema();
+        if (optionalDatabase.isEmpty()) {
+            throw new Exception("database not found"); // TODO: better exception
+        }
+
+        DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(optionalDatabase.get());
+        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
+
         String LLMQuery = createQuery(
                 request.getNaturalLanguageQuery(),
                 databaseStructure.generateCreateScript(),
-                database);
+                optionalDatabase.get());
+        String generatedQuery = queryApi.queryModel(LLMQuery);
 
-        System.out.println(databaseStructure.generateCreateScript());
-
-        String dbLanguageQuery = queryApi.queryModel(LLMQuery);
-
-        System.out.println(dbLanguageQuery);
-
-        return databaseService.executeQuery(dbLanguageQuery);
+        QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(generatedQuery));
+        return new QueryResponse(queryResult, generatedQuery);
     }
 }
