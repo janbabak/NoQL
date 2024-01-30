@@ -1,6 +1,8 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.QueryRequest;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
@@ -13,6 +15,7 @@ import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -57,15 +60,18 @@ public class QueryService {
 
     /**
      * Handle user's query - translate it via LLM to the database specific query language and execute it.
+     *
      * @param request from the API
      * @return query result
-     * @throws Exception when something went wrong.
+     * @throws EntityNotFoundException queried database not found.
+     * @throws LLMException            LLM request failed.
+     * @throws SQLException            TODO
      */
-    public QueryResponse handleQuery(QueryRequest request) throws Exception {
+    public QueryResponse handleQuery(QueryRequest request) throws EntityNotFoundException, LLMException, SQLException {
         Optional<Database> optionalDatabase = databaseRepository.findById(request.getDatabaseId());
 
         if (optionalDatabase.isEmpty()) {
-            throw new Exception("database not found"); // TODO: better exception
+            throw new EntityNotFoundException(EntityNotFoundException.Entity.DATABASE, request.getDatabaseId());
         }
 
         DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(optionalDatabase.get());

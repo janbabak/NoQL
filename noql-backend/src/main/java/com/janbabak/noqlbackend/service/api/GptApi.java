@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.gpt.GptQuery;
 import com.janbabak.noqlbackend.model.gpt.GptResponse;
 import lombok.NoArgsConstructor;
@@ -25,11 +26,12 @@ public class GptApi implements QueryApi {
 
     /**
      * Query the GPT API and retrieve the response.
+     *
      * @param query query which is sent
      * @return GPT response
-     * @throws Exception TODO: handle responses
+     * @throws LLMException Bad request to the GPT API or error on the GPT side.
      */
-    public String queryModel(String query) throws Exception {
+    public String queryModel(String query) throws LLMException {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -46,10 +48,10 @@ public class GptApi implements QueryApi {
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            throw new Exception("Bad request, we are working on it, try it latter.");
+            throw new LLMException("Bad request to the GPT model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
-            throw new Exception("Error on GPT side, try it latter");
+            throw new LLMException("Error on GPT side, try it latter");
         }
         return null;
     }
