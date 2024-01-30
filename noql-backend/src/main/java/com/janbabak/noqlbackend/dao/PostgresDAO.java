@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -68,12 +69,14 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public boolean testConnection() {
+    public void testConnection() throws DatabaseConnectionException {
         try {
             connect();
         } catch (SQLException e) {
-            return false;
+            throw new DatabaseConnectionException(e.getMessage());
         }
-        return connection != null;
+        if (connection == null) {
+            throw new DatabaseConnectionException();
+        }
     }
 }

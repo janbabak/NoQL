@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 
@@ -64,10 +65,10 @@ public abstract class DatabaseDAO {
     /**
      * Test connection to database.
      *
-     * @return true if connection established, false otherwise (e.g. bad credentials, etc.)
+     * @throws DatabaseConnectionException if connection failed (e.g. bad credentials, database not available, ...)
      */
     @SuppressWarnings("all")
-    public abstract boolean testConnection();
+    public abstract void testConnection() throws DatabaseConnectionException;
 
     /**
      * Create connection URL for specific database engine.
