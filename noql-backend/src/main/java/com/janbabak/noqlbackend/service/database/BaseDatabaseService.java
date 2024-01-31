@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service.database;
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
@@ -21,7 +22,7 @@ public class BaseDatabaseService {
     @Autowired
     protected DatabaseRepository databaseRepository;
 
-    public ResultSet executeQuery(String query) throws DatabaseConnectionException {
+    public ResultSet executeQuery(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         return databaseDAO.query(query);
     }
 

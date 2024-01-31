@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 
@@ -34,31 +35,35 @@ public abstract class DatabaseDAO {
      * Retrieve database schemas, tables columns and primary keys.
      *
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getSchemasTablesColumns() throws DatabaseConnectionException;
+    public abstract ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Retrieve foreign keys.
      *
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getForeignKeys() throws DatabaseConnectionException;
+    public abstract ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Query the database.
      *
      * @param query query string
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public ResultSet query(String query) throws DatabaseConnectionException {
+    public ResultSet query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+        connect();
+
         try {
-            connect();
             return connection.createStatement().executeQuery(query); // TODO create read only connection
-        } catch (SQLException exception) {
-            throw new DatabaseConnectionException(exception.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException(e.getMessage());
         } finally {
             disconnect();
         }
@@ -67,7 +72,7 @@ public abstract class DatabaseDAO {
     /**
      * Test connection to database.
      *
-     * @throws DatabaseConnectionException if connection failed (e.g. bad credentials, database not available, ...)
+     * @throws DatabaseConnectionException cannot establish connection with the database
      */
     @SuppressWarnings("all")
     public abstract void testConnection() throws DatabaseConnectionException;
@@ -82,13 +87,17 @@ public abstract class DatabaseDAO {
     /**
      * Connect to the database.
      *
-     * @throws SQLException cannot establish connection with the database
+     * @throws DatabaseConnectionException cannot establish connection with the database
      */
-    protected void connect() throws SQLException {
-        connection = DriverManager.getConnection(
-                createConnectionUrl(),
-                databaseMetadata.getUserName(),
-                databaseMetadata.getPassword());
+    protected void connect() throws DatabaseConnectionException {
+        try {
+            connection = DriverManager.getConnection(
+                    createConnectionUrl(),
+                    databaseMetadata.getUserName(),
+                    databaseMetadata.getPassword());
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e.getMessage());
+        }
     }
 
     /**
@@ -97,8 +106,8 @@ public abstract class DatabaseDAO {
     protected void disconnect() {
         try {
             this.connection.close();
-        } catch (SQLException exception) {
-            System.out.println(exception.getMessage()); // TODO: log
+        } catch (SQLException e) {
+            System.out.println(e.getMessage()); // TODO: log
         }
     }
 

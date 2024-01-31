@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import org.antlr.v4.runtime.misc.Pair;
@@ -27,9 +28,10 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
      * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
      *
      * @return database information
-     * @throws DatabaseConnectionException cannot establish connection with the database, sql error...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public DatabaseStructure retrieveSchema() throws DatabaseConnectionException {
+    public DatabaseStructure retrieveSchema() throws DatabaseConnectionException, DatabaseExecutionException {
         DatabaseStructure db = new DatabaseStructure();
 
         retrieveSchemasTablesColumns(db);
@@ -42,9 +44,11 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
      * Retrieves database information about schemas, tables and columns, primary keys, (omits relations)
      *
      * @param db empty database
-     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private void retrieveSchemasTablesColumns(DatabaseStructure db) throws DatabaseConnectionException {
+    private void retrieveSchemasTablesColumns(DatabaseStructure db)
+            throws DatabaseConnectionException, DatabaseExecutionException {
         ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
 
         try {
@@ -64,8 +68,8 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
                 // columnName key definitely doesn't exist - no need of checking it out
                 table.getColumns().put(columnName, new DatabaseStructure.Column(columnName, dataType, primaryKey));
             }
-        } catch (SQLException exception) {
-            throw new DatabaseConnectionException();
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException(e.getMessage());
         }
     }
 
@@ -73,9 +77,11 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
      * Retrieves information about relations in the database represented by foreign keys.
      *
      * @param db database that already contains info about schemas, tables and columns
-     * @throws DatabaseConnectionException cannot establish connection with the database, syntax errors, ...
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private void retrieveForeignKeys(DatabaseStructure db) throws DatabaseConnectionException {
+    private void retrieveForeignKeys(DatabaseStructure db)
+            throws DatabaseConnectionException, DatabaseExecutionException {
         ResultSet resultSet = databaseDAO.getForeignKeys();
 
         try {
@@ -105,8 +111,8 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
                         foreignKeyData.referencedColumn
                 ));
             }
-        } catch (SQLException exception) {
-            throw new DatabaseConnectionException(exception.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException(e.getMessage());
         }
     }
 

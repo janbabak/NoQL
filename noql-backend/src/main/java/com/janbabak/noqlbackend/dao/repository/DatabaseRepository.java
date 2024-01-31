@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
+/**
+ * Automatically generates CRUD and other methods.
+ */
 @Repository
 public interface DatabaseRepository extends JpaRepository<Database, UUID> {
 }
