@@ -21,7 +21,7 @@ public class BaseDatabaseService {
     @Autowired
     protected DatabaseRepository databaseRepository;
 
-    public ResultSet executeQuery(String query) {
+    public ResultSet executeQuery(String query) throws DatabaseConnectionException {
         return databaseDAO.query(query);
     }
 

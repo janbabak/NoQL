@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.QueryRequest;
@@ -65,9 +66,10 @@ public class QueryService {
      * @return query result
      * @throws EntityNotFoundException queried database not found.
      * @throws LLMException            LLM request failed.
-     * @throws SQLException            TODO
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
-    public QueryResponse handleQuery(QueryRequest request) throws EntityNotFoundException, LLMException, SQLException {
+    public QueryResponse handleQuery(QueryRequest request)
+            throws EntityNotFoundException, LLMException, DatabaseConnectionException {
         Optional<Database> optionalDatabase = databaseRepository.findById(request.getDatabaseId());
 
         if (optionalDatabase.isEmpty()) {
@@ -83,7 +85,11 @@ public class QueryService {
                 optionalDatabase.get());
         String generatedQuery = queryApi.queryModel(LLMQuery);
 
-        QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(generatedQuery));
-        return new QueryResponse(queryResult, generatedQuery);
+        try {
+            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(generatedQuery));
+            return new QueryResponse(queryResult, generatedQuery);
+        } catch (SQLException exception) {
+            throw new DatabaseConnectionException(exception.getMessage());
+        }
     }
 }

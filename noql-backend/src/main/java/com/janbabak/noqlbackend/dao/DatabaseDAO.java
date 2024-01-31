@@ -34,32 +34,34 @@ public abstract class DatabaseDAO {
      * Retrieve database schemas, tables columns and primary keys.
      *
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
-    public abstract ResultSet getSchemasTablesColumns();
+    public abstract ResultSet getSchemasTablesColumns() throws DatabaseConnectionException;
 
     /**
      * Retrieve foreign keys.
      *
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
-    public abstract ResultSet getForeignKeys();
+    public abstract ResultSet getForeignKeys() throws DatabaseConnectionException;
 
     /**
      * Query the database.
      *
      * @param query query string
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
-    public ResultSet query(String query) {
+    public ResultSet query(String query) throws DatabaseConnectionException {
         try {
             connect();
             return connection.createStatement().executeQuery(query); // TODO create read only connection
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            throw new DatabaseConnectionException(exception.getMessage());
         } finally {
             disconnect();
         }
-        return null;
     }
 
     /**
@@ -80,7 +82,7 @@ public abstract class DatabaseDAO {
     /**
      * Connect to the database.
      *
-     * @throws SQLException TODO
+     * @throws SQLException cannot establish connection with the database
      */
     protected void connect() throws SQLException {
         connection = DriverManager.getConnection(
@@ -96,7 +98,7 @@ public abstract class DatabaseDAO {
         try {
             this.connection.close();
         } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+            System.out.println(exception.getMessage()); // TODO: log
         }
     }
 

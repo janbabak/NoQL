@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.controller;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.QueryRequest;
@@ -9,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.SQLException;
 
 /**
  * Responsible for querying the user's database.
@@ -27,14 +26,14 @@ public class QueryController {
      *
      * @param request body
      * @return query result
-     * @throws EntityNotFoundException queried database not found.
-     * @throws LLMException            LLM request failed.
-     * @throws SQLException            TODO
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse queryDatabase(@RequestBody QueryRequest request)
-            throws SQLException, LLMException, EntityNotFoundException {
+            throws LLMException, EntityNotFoundException, DatabaseConnectionException {
         return queryService.handleQuery(request);
     }
 }

@@ -28,7 +28,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public ResultSet getSchemasTablesColumns() {
+    public ResultSet getSchemasTablesColumns() throws DatabaseConnectionException {
         // language=SQL
         String select = """
                 SELECT columns.table_schema,
@@ -54,7 +54,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public ResultSet getForeignKeys() {
+    public ResultSet getForeignKeys() throws DatabaseConnectionException {
         // language=SQL
         String select = """
                 SELECT conrelid::regclass AS table_name,

@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.PostgresDAO;
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import org.antlr.v4.runtime.misc.Pair;
@@ -26,9 +27,9 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
      * Retrieves information about database schema - schemas, tables, columns, primary and foreign keys, ...
      *
      * @return database information
-     * @throws SQLException SQL related errors
+     * @throws DatabaseConnectionException cannot establish connection with the database, sql error...
      */
-    public DatabaseStructure retrieveSchema() throws SQLException {
+    public DatabaseStructure retrieveSchema() throws DatabaseConnectionException {
         DatabaseStructure db = new DatabaseStructure();
 
         retrieveSchemasTablesColumns(db);
@@ -40,64 +41,72 @@ public class PostgresService extends BaseDatabaseService implements DatabaseServ
     /**
      * Retrieves database information about schemas, tables and columns, primary keys, (omits relations)
      *
-     * @param db         empty database
-     * @throws SQLException SQL related errors
+     * @param db empty database
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax error, ...
      */
-    private void retrieveSchemasTablesColumns(DatabaseStructure db) throws SQLException {
+    private void retrieveSchemasTablesColumns(DatabaseStructure db) throws DatabaseConnectionException {
         ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
 
-        while (resultSet.next()) {
-            String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
-            String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
-            String columnName = resultSet.getString(COLUMN_NAME_COLUMN_NAME);
-            String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
-            Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
+        try {
+            while (resultSet.next()) {
+                String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
+                String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
+                String columnName = resultSet.getString(COLUMN_NAME_COLUMN_NAME);
+                String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
+                Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
 
-            DatabaseStructure.Schema schema =
-                    db.getSchemas().computeIfAbsent(tableSchema, DatabaseStructure.Schema::new);
+                DatabaseStructure.Schema schema =
+                        db.getSchemas().computeIfAbsent(tableSchema, DatabaseStructure.Schema::new);
 
-            DatabaseStructure.Table table =
-                    schema.getTables().computeIfAbsent(tableName, DatabaseStructure.Table::new);
+                DatabaseStructure.Table table =
+                        schema.getTables().computeIfAbsent(tableName, DatabaseStructure.Table::new);
 
-            // columnName key definitely doesn't exist - no need of checking it out
-            table.getColumns().put(columnName, new DatabaseStructure.Column(columnName, dataType, primaryKey));
+                // columnName key definitely doesn't exist - no need of checking it out
+                table.getColumns().put(columnName, new DatabaseStructure.Column(columnName, dataType, primaryKey));
+            }
+        } catch (SQLException exception) {
+            throw new DatabaseConnectionException();
         }
     }
 
     /**
      * Retrieves information about relations in the database represented by foreign keys.
      *
-     * @param db         database that already contains info about schemas, tables and colums
-     * @throws SQLException SQL related errors
+     * @param db database that already contains info about schemas, tables and columns
+     * @throws DatabaseConnectionException cannot establish connection with the database, syntax errors, ...
      */
-    private void retrieveForeignKeys(DatabaseStructure db) throws SQLException {
+    private void retrieveForeignKeys(DatabaseStructure db) throws DatabaseConnectionException {
         ResultSet resultSet = databaseDAO.getForeignKeys();
 
-        while (resultSet.next()) {
-            String constraintDefinition = resultSet.getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
-            String referencingSchemaAndTable = resultSet.getString(TABLE_NAME_COLUMN_NAME);
+        try {
+            while (resultSet.next()) {
+                String constraintDefinition = resultSet.getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
+                String referencingSchemaAndTable = resultSet.getString(TABLE_NAME_COLUMN_NAME);
 
-            ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
+                ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 
-            // insert that foreign key
-            DatabaseStructure.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
-            if (schema == null) {
-                continue;
+                // insert that foreign key
+                DatabaseStructure.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
+                if (schema == null) {
+                    continue;
+                }
+                DatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
+                if (table == null) {
+                    continue;
+                }
+                DatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
+                if (column == null) {
+                    continue;
+                }
+                // TODO: Do I want to verify existence of these data?
+                column.setForeignKey(new DatabaseStructure.ForeignKey(
+                        foreignKeyData.referencedSchema,
+                        foreignKeyData.referencedTable,
+                        foreignKeyData.referencedColumn
+                ));
             }
-            DatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
-            if (table == null) {
-                continue;
-            }
-            DatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
-            if (column == null) {
-                continue;
-            }
-            // TODO: Do I want to verify existence of these data?
-            column.setForeignKey(new DatabaseStructure.ForeignKey(
-                    foreignKeyData.referencedSchema,
-                    foreignKeyData.referencedTable,
-                    foreignKeyData.referencedColumn
-            ));
+        } catch (SQLException exception) {
+            throw new DatabaseConnectionException(exception.getMessage());
         }
     }
 
