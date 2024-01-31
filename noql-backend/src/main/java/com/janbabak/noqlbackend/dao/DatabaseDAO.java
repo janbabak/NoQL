@@ -1,5 +1,7 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 
@@ -33,41 +35,47 @@ public abstract class DatabaseDAO {
      * Retrieve database schemas, tables columns and primary keys.
      *
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getSchemasTablesColumns();
+    public abstract ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Retrieve foreign keys.
      *
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getForeignKeys();
+    public abstract ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Query the database.
      *
      * @param query query string
      * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public ResultSet query(String query) {
+    public ResultSet query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+        connect();
+
         try {
-            connect();
             return connection.createStatement().executeQuery(query); // TODO create read only connection
-        } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException(e.getMessage());
         } finally {
             disconnect();
         }
-        return null;
     }
 
     /**
      * Test connection to database.
      *
-     * @return true if connection established, false otherwise (e.g. bad credentials, etc.)
+     * @throws DatabaseConnectionException cannot establish connection with the database
      */
     @SuppressWarnings("all")
-    public abstract boolean testConnection();
+    public abstract void testConnection() throws DatabaseConnectionException;
 
     /**
      * Create connection URL for specific database engine.
@@ -79,13 +87,17 @@ public abstract class DatabaseDAO {
     /**
      * Connect to the database.
      *
-     * @throws SQLException TODO
+     * @throws DatabaseConnectionException cannot establish connection with the database
      */
-    protected void connect() throws SQLException {
-        connection = DriverManager.getConnection(
-                createConnectionUrl(),
-                databaseMetadata.getUserName(),
-                databaseMetadata.getPassword());
+    protected void connect() throws DatabaseConnectionException {
+        try {
+            connection = DriverManager.getConnection(
+                    createConnectionUrl(),
+                    databaseMetadata.getUserName(),
+                    databaseMetadata.getPassword());
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException(e.getMessage());
+        }
     }
 
     /**
@@ -94,8 +106,8 @@ public abstract class DatabaseDAO {
     protected void disconnect() {
         try {
             this.connection.close();
-        } catch (SQLException exception) {
-            System.out.println(exception.getMessage());
+        } catch (SQLException e) {
+            System.out.println(e.getMessage()); // TODO: log
         }
     }
 

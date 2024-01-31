@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend;
 
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import org.springframework.boot.SpringApplication;
@@ -24,7 +25,7 @@ public class NoQLBackendApplication {
         try {
             QueryApi gptApi = new GptApi();
             System.out.println(gptApi.queryModel("What is the most common name in the USA."));
-        } catch (Exception e) {
+        } catch (LLMException e) {
             System.out.println(e.getMessage());
         }
     }

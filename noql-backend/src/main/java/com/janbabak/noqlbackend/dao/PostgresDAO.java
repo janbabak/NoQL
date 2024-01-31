@@ -1,11 +1,12 @@
 package com.janbabak.noqlbackend.dao;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -27,7 +28,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public ResultSet getSchemasTablesColumns() {
+    public ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
                 SELECT columns.table_schema,
@@ -53,7 +54,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public ResultSet getForeignKeys() {
+    public ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
                 SELECT conrelid::regclass AS table_name,
@@ -68,12 +69,11 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    public boolean testConnection() {
-        try {
-            connect();
-        } catch (SQLException e) {
-            return false;
+    public void testConnection() throws DatabaseConnectionException {
+        connect();
+
+        if (connection == null) {
+            throw new DatabaseConnectionException();
         }
-        return connection != null;
     }
 }

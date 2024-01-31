@@ -1,5 +1,9 @@
 package com.janbabak.noqlbackend.controller;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.QueryRequest;
 import com.janbabak.noqlbackend.model.database.QueryResponse;
 import com.janbabak.noqlbackend.service.QueryService;
@@ -20,13 +24,18 @@ public class QueryController {
 
     /**
      * Query the user's database.
+     *
      * @param request body
      * @return query result
-     * @throws Exception when something went wrong
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse queryDatabase(@RequestBody QueryRequest request) throws Exception {
+    public QueryResponse queryDatabase(@RequestBody QueryRequest request)
+            throws LLMException, EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
         return queryService.handleQuery(request);
     }
 }
