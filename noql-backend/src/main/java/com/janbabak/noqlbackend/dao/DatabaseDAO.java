@@ -61,6 +61,7 @@ public abstract class DatabaseDAO {
         connect();
 
         try {
+            System.out.println("query is: " + query); // TODO: log
             return connection.createStatement().executeQuery(query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());

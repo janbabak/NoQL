@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class QueryResponse {
     private QueryResult result;
-    private String generatedQuery;
+    private String query; // query used for retrieving the result above
 
     @Data
     public static class QueryResult {
@@ -36,7 +36,7 @@ public class QueryResponse {
             rows = new ArrayList<>();
             while (resultSet.next()) {
                 List<String> row = new ArrayList<>();
-                for (int i = 1; i < rsmd.getColumnCount(); i++) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                     row.add(resultSet.getString(i));
                 }
                 rows.add(row);

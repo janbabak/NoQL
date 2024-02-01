@@ -23,7 +23,7 @@ public class QueryController {
     private final QueryService queryService;
 
     /**
-     * Query the user's database.
+     * Query the user's database using natural language.
      *
      * @param request body
      * @return query result
@@ -32,10 +32,26 @@ public class QueryController {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    @PostMapping
+    @PostMapping("/nl")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse queryDatabase(@RequestBody QueryRequest request)
+    public QueryResponse executeNaturalLanguageQuery(@RequestBody QueryRequest request)
             throws LLMException, EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
-        return queryService.handleQuery(request);
+        return queryService.executeQuery(request, true);
+    }
+
+    /**
+     * Query the user's database using database query language.
+     * @param request body
+     * @return query result
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
+    @PostMapping("/ql")
+    @ResponseStatus(HttpStatus.OK)
+    public QueryResponse executeQueryLanguageQuery(@RequestBody QueryRequest request)
+            throws DatabaseConnectionException, DatabaseExecutionException, LLMException, EntityNotFoundException {
+        return queryService.executeQuery(request, false);
     }
 }
