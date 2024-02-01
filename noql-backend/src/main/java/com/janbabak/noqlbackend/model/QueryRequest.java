@@ -12,5 +12,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class QueryRequest {
     private UUID databaseId;
-    private String naturalLanguageQuery;
+    private String query;
 }

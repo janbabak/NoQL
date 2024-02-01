@@ -61,16 +61,19 @@ public class QueryService {
     }
 
     /**
-     * Handle user's query - translate it via LLM to the database specific query language and execute it.
+     * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
+     * and execute it.
      *
-     * @param request from the API
+     * @param request                  from the API
+     * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
+     *                                 otherwise it will be executed like it is.
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public QueryResponse handleQuery(QueryRequest request)
+    public QueryResponse executeQuery(QueryRequest request, boolean translateToQueryLanguage)
             throws EntityNotFoundException, LLMException, DatabaseConnectionException, DatabaseExecutionException {
         Optional<Database> optionalDatabase = databaseRepository.findById(request.getDatabaseId());
 
@@ -79,17 +82,24 @@ public class QueryService {
         }
 
         DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(optionalDatabase.get());
-        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
 
-        String LLMQuery = createQuery(
-                request.getNaturalLanguageQuery(),
-                databaseStructure.generateCreateScript(),
-                optionalDatabase.get());
-        String generatedQuery = queryApi.queryModel(LLMQuery);
+        String query;
+        // if query is in natural language, it needs to be translated
+        if (translateToQueryLanguage) {
+            DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
+
+            String LLMQuery = createQuery(
+                    request.getQuery(), // natural language query
+                    databaseStructure.generateCreateScript(),
+                    optionalDatabase.get());
+            query = queryApi.queryModel(LLMQuery);
+        } else {
+            query = request.getQuery(); // query language query
+        }
 
         try {
-            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(generatedQuery));
-            return new QueryResponse(queryResult, generatedQuery);
+            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));
+            return new QueryResponse(queryResult, query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         }
