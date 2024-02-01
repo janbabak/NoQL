@@ -61,7 +61,7 @@ public abstract class DatabaseDAO {
         connect();
 
         try {
-            return connection.createStatement().executeQuery(query); // TODO create read only connection
+            return connection.createStatement().executeQuery(query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         } finally {
@@ -95,6 +95,7 @@ public abstract class DatabaseDAO {
                     createConnectionUrl(),
                     databaseMetadata.getUserName(),
                     databaseMetadata.getPassword());
+            connection.setReadOnly(true);
         } catch (SQLException e) {
             throw new DatabaseConnectionException(e.getMessage());
         }
