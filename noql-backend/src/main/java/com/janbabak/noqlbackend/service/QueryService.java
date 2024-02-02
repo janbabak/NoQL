@@ -12,7 +12,7 @@ import com.janbabak.noqlbackend.model.database.QueryResponse;
 import com.janbabak.noqlbackend.model.database.QueryResponse.QueryResult;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
-import com.janbabak.noqlbackend.service.database.DatabaseService;
+import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -80,7 +80,7 @@ public class QueryService {
         Database database = databaseRepository.findById(request.getDatabaseId())
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, request.getDatabaseId()));
 
-        DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
         String query;
         // if query is in natural language, it needs to be translated
