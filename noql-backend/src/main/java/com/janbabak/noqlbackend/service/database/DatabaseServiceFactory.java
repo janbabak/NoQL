@@ -12,7 +12,7 @@ public class DatabaseServiceFactory {
      * @param database database metadata.
      * @return correct database service
      */
-    public static DatabaseService getDatabaseService(Database database) {
+    public static BaseDatabaseService getDatabaseService(Database database) {
         return switch (database.getEngine()) {
             case POSTGRES -> new PostgresService(database);
             case MYSQL -> null; // TODO: implement

@@ -5,7 +5,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
-import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
+import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DatabaseController {
 
-    private final BaseDatabaseService databaseService;
+    private final DatabaseEntityService databaseService;
 
     /**
      * Get all databases.

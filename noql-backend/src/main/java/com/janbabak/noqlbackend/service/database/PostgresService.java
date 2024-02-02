@@ -12,7 +12,7 @@ import java.sql.*;
 /**
  * Retrieves Postgres database information.
  */
-public class PostgresService extends BaseDatabaseService implements DatabaseService {
+public class PostgresService extends BaseDatabaseService {
     private static final String TABLE_SCHEMA_COLUMN_NAME = "table_schema";
     private static final String TABLE_NAME_COLUMN_NAME = "table_name";
     private static final String COLUMN_NAME_COLUMN_NAME = "column_name";
