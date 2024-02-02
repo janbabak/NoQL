@@ -7,13 +7,15 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+
+import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 
 @Service
 public class BaseDatabaseService {
@@ -34,13 +36,7 @@ public class BaseDatabaseService {
      * @throws EntityNotFoundException database of specified id not found.
      */
     public Database findById(UUID id) throws EntityNotFoundException {
-        Optional<Database> optionalDatabase = databaseRepository.findById(id);
-
-        if (optionalDatabase.isEmpty()) {
-            throw new EntityNotFoundException(EntityNotFoundException.Entity.DATABASE, id);
-        }
-
-        return optionalDatabase.get();
+        return databaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
     }
 
     /**
@@ -74,38 +70,20 @@ public class BaseDatabaseService {
      * @throws EntityNotFoundException database of specified id not found.
      * @throws DatabaseConnectionException connection to the updated database failed.
      */
-    public Database update(UUID id, Database data) throws EntityNotFoundException, DatabaseConnectionException {
-        Optional<Database> optionalDatabase = databaseRepository.findById(id);
-        if (optionalDatabase.isEmpty()) {
-            throw new EntityNotFoundException(EntityNotFoundException.Entity.DATABASE, id);
-        }
+    public Database update(UUID id, UpdateDatabaseRequest data)
+            throws EntityNotFoundException, DatabaseConnectionException {
 
-        Database database = optionalDatabase.get();
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
-        if (data.getName() != null) {
-            database.setName(data.getName());
-        }
-        if (data.getHost() != null) {
-            database.setHost(data.getHost());
-        }
-        if (data.getPort() != null) {
-            database.setPort(data.getPort());
-        }
-        if (data.getDatabase() != null) {
-            database.setDatabase(data.getDatabase());
-        }
-        if (data.getUserName() != null) {
-            database.setUserName(data.getUserName());
-        }
-        if (data.getPassword() != null) {
-            database.setPassword(data.getPassword());
-        }
-        if (data.getEngine() != null) {
-            database.setEngine(data.getEngine());
-        }
-        if (data.getIsSQL() != null) {
-            database.setIsSQL(data.getIsSQL());
-        }
+        if (data.getName() != null) database.setName(data.getName());
+        if (data.getHost() != null) database.setHost(data.getHost());
+        if (data.getPort() != null) database.setPort(data.getPort());
+        if (data.getDatabase() != null) database.setDatabase(data.getDatabase());
+        if (data.getUserName() != null) database.setUserName(data.getUserName());
+        if (data.getPassword() != null) database.setPassword(data.getPassword());
+        if (data.getEngine() != null) database.setEngine(data.getEngine());
+        if (data.getIsSQL() != null) database.setIsSQL(data.getIsSQL());
 
         DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
 
@@ -126,7 +104,7 @@ public class BaseDatabaseService {
         Database database1 = Database.builder()
                 .name("Postgres 1")
                 .host("localhost")
-                .port("5432")
+                .port(5432)
                 .database("database")
                 .userName("user")
                 .password("password")
@@ -137,7 +115,7 @@ public class BaseDatabaseService {
         Database database2 = Database.builder()
                 .name("Postgres 2")
                 .host("janbabak")
-                .port("5432")
+                .port(5432)
                 .database("data")
                 .userName("user")
                 .password("password")

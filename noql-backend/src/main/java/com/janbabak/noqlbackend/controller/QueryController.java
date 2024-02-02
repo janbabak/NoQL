@@ -7,6 +7,7 @@ import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.QueryRequest;
 import com.janbabak.noqlbackend.model.database.QueryResponse;
 import com.janbabak.noqlbackend.service.QueryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,7 +35,7 @@ public class QueryController {
      */
     @PostMapping("/nl")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeNaturalLanguageQuery(@RequestBody QueryRequest request)
+    public QueryResponse executeNaturalLanguageQuery(@RequestBody @Valid QueryRequest request)
             throws LLMException, EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
         return queryService.executeQuery(request, true);
     }
@@ -50,7 +51,7 @@ public class QueryController {
      */
     @PostMapping("/ql")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeQueryLanguageQuery(@RequestBody QueryRequest request)
+    public QueryResponse executeQueryLanguageQuery(@RequestBody @Valid QueryRequest request)
             throws DatabaseConnectionException, DatabaseExecutionException, LLMException, EntityNotFoundException {
         return queryService.executeQuery(request, false);
     }

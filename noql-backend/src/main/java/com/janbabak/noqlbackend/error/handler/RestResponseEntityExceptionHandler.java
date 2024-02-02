@@ -5,9 +5,14 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class handles exceptions thrown during REST API requests.<br />
@@ -25,7 +30,7 @@ public class RestResponseEntityExceptionHandler {
      */
     @ExceptionHandler({EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String entityNotFoundException(Exception e) {
+    public String handleEntityNotFoundException(Exception e) {
         return e.getMessage();
     }
 
@@ -38,8 +43,27 @@ public class RestResponseEntityExceptionHandler {
      */
     @ExceptionHandler({DatabaseConnectionException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String badRequestException(Exception e) {
+    public String handleDatabaseConnectionException(Exception e) {
         return e.getMessage();
+    }
+
+    /**
+     * Bad request - 400 <br />
+     * Input is not valid.
+     *
+     * @param e exception
+     * @return map of errors - filed->error message
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
     }
 
     /**
@@ -51,7 +75,7 @@ public class RestResponseEntityExceptionHandler {
      */
     @ExceptionHandler({LLMException.class, DatabaseExecutionException.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String internalServerError(Exception e) {
+    public String handleInternalServerErrorExceptions(Exception e) {
         return e.getMessage();
     }
 }

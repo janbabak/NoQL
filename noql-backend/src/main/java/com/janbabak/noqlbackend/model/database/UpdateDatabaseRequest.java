@@ -1,52 +1,36 @@
 package com.janbabak.noqlbackend.model.database;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.*;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
-/**
- * Represents customer's database.
- */
-@Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Database {
+public class UpdateDatabaseRequest {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
-
-    @NotBlank
+    @Nullable
     @Size(min = 1, max = 32)
     private String name;
 
-    @NotBlank
     private String host;
 
+    @Nullable
     @Min(1)
     private Integer port;
 
-    @NotBlank
     private String database;
 
-    @NotBlank
     private String userName;
 
-    @NotBlank
     private String password;
 
-    @NotNull
     private DatabaseEngine engine;
 
-    @NotNull
     private Boolean isSQL;
 }

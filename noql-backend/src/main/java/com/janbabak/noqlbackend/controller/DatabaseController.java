@@ -4,7 +4,9 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,7 +55,7 @@ public class DatabaseController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@RequestBody Database request) throws DatabaseConnectionException {
+    public Database create(@RequestBody @Valid Database request) throws DatabaseConnectionException {
         return databaseService.create(request);
     }
 
@@ -68,7 +70,7 @@ public class DatabaseController {
      */
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Database update(@PathVariable UUID id, @RequestBody Database request)
+    public Database update(@PathVariable UUID id, @RequestBody @Valid UpdateDatabaseRequest request)
             throws EntityNotFoundException, DatabaseConnectionException {
         return databaseService.update(id, request);
     }
