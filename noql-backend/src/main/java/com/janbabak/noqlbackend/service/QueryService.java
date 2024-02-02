@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.Locale;
-import java.util.Optional;
+
+import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 
 @Service
 @RequiredArgsConstructor
@@ -75,24 +76,18 @@ public class QueryService {
      */
     public QueryResponse executeQuery(QueryRequest request, boolean translateToQueryLanguage)
             throws EntityNotFoundException, LLMException, DatabaseConnectionException, DatabaseExecutionException {
-        Optional<Database> optionalDatabase = databaseRepository.findById(request.getDatabaseId());
 
-        if (optionalDatabase.isEmpty()) {
-            throw new EntityNotFoundException(EntityNotFoundException.Entity.DATABASE, request.getDatabaseId());
-        }
+        Database database = databaseRepository.findById(request.getDatabaseId())
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, request.getDatabaseId()));
 
-        DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(optionalDatabase.get());
+        DatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
         String query;
         // if query is in natural language, it needs to be translated
         if (translateToQueryLanguage) {
             DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-
-            String LLMQuery = createQuery(
-                    request.getQuery(), // natural language query
-                    databaseStructure.generateCreateScript(),
-                    optionalDatabase.get());
-            query = queryApi.queryModel(LLMQuery);
+            String LLMQuery = createQuery(request.getQuery(), databaseStructure.generateCreateScript(), database);
+            query = queryApi.queryModel(LLMQuery); // natural language query
         } else {
             query = request.getQuery(); // query language query
         }
