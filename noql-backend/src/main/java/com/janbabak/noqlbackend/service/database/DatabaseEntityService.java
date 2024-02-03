@@ -4,7 +4,6 @@ import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -93,33 +92,5 @@ public class DatabaseEntityService {
      */
     public void deleteById(UUID id) {
         databaseRepository.deleteById(id);
-    }
-
-    // TODO: delete
-    public void insertSampleData() {
-        Database database1 = Database.builder()
-                .name("Postgres 1")
-                .host("localhost")
-                .port(5432)
-                .database("database")
-                .userName("user")
-                .password("password")
-                .engine(DatabaseEngine.POSTGRES)
-                .isSQL(true)
-                .build();
-
-        Database database2 = Database.builder()
-                .name("Postgres 2")
-                .host("janbabak")
-                .port(5432)
-                .database("data")
-                .userName("user")
-                .password("password")
-                .engine(DatabaseEngine.POSTGRES)
-                .isSQL(true)
-                .build();
-
-        databaseRepository.save(database1);
-        databaseRepository.save(database2);
     }
 }
