@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+import databaseApi from '@/api/databaseApi'
+
+async function loadDatabases() {
+  try {
+    const response = await databaseApi.getAll()
+    console.log(response.data)
+  } catch (e) {
+    console.log(e.message)
+  }
+}
 </script>
 
 <template>
@@ -9,7 +19,7 @@ import HelloWorld from './components/HelloWorld.vue'
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-      <v-btn class="my-4">
+      <v-btn class="my-4" @click="loadDatabases">
         I'm a Vuetify button
       </v-btn>
 
