@@ -9,6 +9,9 @@ import HelloWorld from './components/HelloWorld.vue'
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
+      <v-btn class="my-4">
+        I'm a Vuetify button
+      </v-btn>
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
