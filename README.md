@@ -48,7 +48,7 @@ docker compose up -d # TODO: create docker compose file (instead of using exampl
 
 - Run the backend
   ```bash
-  cd noql-backend
+  cd backend
   TODO: solve gradlew wrapper issue https://support.snyk.io/hc/en-us/articles/360007745957-Snyk-test-Could-not-find-or-load-main-class-org-gradle-wrapper-GradleWrapperMain
   ```
 

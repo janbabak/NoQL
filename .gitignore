@@ -13,8 +13,8 @@ exampleProject/.env
 exampleProject/node_modules
 
 # NoQL backend
-/noql-backend/.idea/
-/noql-backend/noql-backend.iml
+/backend/.idea/
+/backend/backend.iml
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
