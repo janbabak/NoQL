@@ -2,9 +2,13 @@ package com.janbabak.noqlbackend.controller;
 
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.database.QueryResponse;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
+import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class DatabaseController {
 
     private final DatabaseEntityService databaseService;
+    private final QueryService queryService;
 
     /**
      * Get all databases.
@@ -60,12 +65,12 @@ public class DatabaseController {
     }
 
     /**
-     * Update not null fields by database id.
+     * Update database by id - set non-null fields.
      *
      * @param id      database identifier
      * @param request new data
      * @return updated database
-     * @throws EntityNotFoundException database of specified id not found.
+     * @throws EntityNotFoundException     database of specified id not found.
      * @throws DatabaseConnectionException connection to the updated database failed.
      */
     @PutMapping("/{id}")
@@ -86,10 +91,39 @@ public class DatabaseController {
         databaseService.deleteById(id);
     }
 
-    // TODO: delete
-    @GetMapping("insertSample")
-    public String insertSampleData() {
-        databaseService.insertSampleData();
-        return "inserted";
+    /**
+     * Query the user's database using natural language.
+     *
+     * @param id    database id
+     * @param query natural language query
+     * @return query result
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
+    @PostMapping("/{id}/query/natural-language")
+    @ResponseStatus(HttpStatus.OK)
+    public QueryResponse executeNaturalLanguageQuery(@PathVariable UUID id, @RequestBody String query)
+            throws LLMException, EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+        return queryService.executeQuery(id, query, true);
+    }
+
+    /**
+     * Query the user's database using database query language.
+     *
+     * @param id    database id
+     * @param query database query in corresponding database query language
+     * @return query result
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
+    @PostMapping("/{id}/query/query-language")
+    @ResponseStatus(HttpStatus.OK)
+    public QueryResponse executeQueryLanguageQuery(@PathVariable UUID id, @RequestBody String query)
+            throws DatabaseConnectionException, DatabaseExecutionException, LLMException, EntityNotFoundException {
+        return queryService.executeQuery(id, query, false);
     }
 }

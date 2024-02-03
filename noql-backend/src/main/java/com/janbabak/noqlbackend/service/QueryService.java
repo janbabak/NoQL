@@ -5,7 +5,6 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.QueryRequest;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.database.QueryResponse;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.Locale;
+import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 
@@ -65,7 +65,8 @@ public class QueryService {
      * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
      * and execute it.
      *
-     * @param request                  from the API
+     * @param id                       database id
+     * @param query                    in natural query or database query language
      * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
      *                                 otherwise it will be executed like it is.
      * @return query result
@@ -74,22 +75,19 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public QueryResponse executeQuery(QueryRequest request, boolean translateToQueryLanguage)
+    public QueryResponse executeQuery(UUID id, String query, boolean translateToQueryLanguage)
             throws EntityNotFoundException, LLMException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = databaseRepository.findById(request.getDatabaseId())
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, request.getDatabaseId()));
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
-        String query;
-        // if query is in natural language, it needs to be translated
+        // if query is in natural language, it needs to be translated to query language
         if (translateToQueryLanguage) {
             DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-            String LLMQuery = createQuery(request.getQuery(), databaseStructure.generateCreateScript(), database);
-            query = queryApi.queryModel(LLMQuery); // natural language query
-        } else {
-            query = request.getQuery(); // query language query
+            String LLMQuery = createQuery(query, databaseStructure.generateCreateScript(), database);
+            query = queryApi.queryModel(LLMQuery);
         }
 
         try {
