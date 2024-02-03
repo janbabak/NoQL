@@ -4,12 +4,14 @@ import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.gpt.GptQuery;
 import com.janbabak.noqlbackend.model.gpt.GptResponse;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.Objects;
 
+@Slf4j
 @NoArgsConstructor
 public class GptApi implements QueryApi {
 
@@ -32,6 +34,8 @@ public class GptApi implements QueryApi {
      * @throws LLMException Bad request to the GPT API or error on the GPT side.
      */
     public String queryModel(String query) throws LLMException {
+        log.info("Query GPT api.");
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -48,9 +52,13 @@ public class GptApi implements QueryApi {
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
+            log.error("Bad request to the GPT model, status_code={}, response={}.",
+                    responseEntity.getStatusCode(), responseEntity.getBody());
             throw new LLMException("Bad request to the GPT model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
+            log.error("Error on GPT side, status_code={}, response={}.",
+                    responseEntity.getStatusCode(), responseEntity.getBody());
             throw new LLMException("Error on GPT side, try it latter");
         }
         return null;

@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 
@@ -11,6 +12,7 @@ import java.sql.*;
  * Database data access object.<br />
  * Used to query user's databases.
  */
+@Slf4j
 @Data
 public abstract class DatabaseDAO {
     protected Database databaseMetadata;
@@ -61,7 +63,7 @@ public abstract class DatabaseDAO {
         connect();
 
         try {
-            System.out.println("query is: " + query); // TODO: log
+            log.info("Execute query={}.", query);
             return connection.createStatement().executeQuery(query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
@@ -98,6 +100,7 @@ public abstract class DatabaseDAO {
                     databaseMetadata.getPassword());
             connection.setReadOnly(true);
         } catch (SQLException e) {
+            log.error("Error while connecting to database - message={}.", e.getMessage());
             throw new DatabaseConnectionException(e.getMessage());
         }
     }
@@ -109,7 +112,7 @@ public abstract class DatabaseDAO {
         try {
             this.connection.close();
         } catch (SQLException e) {
-            System.out.println(e.getMessage()); // TODO: log
+            log.error("Error while disconnecting from database - message={}.", e.getMessage());
         }
     }
 
