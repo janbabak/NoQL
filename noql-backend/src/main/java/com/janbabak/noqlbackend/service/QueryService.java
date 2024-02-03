@@ -14,6 +14,7 @@ import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QueryService {
@@ -77,6 +79,8 @@ public class QueryService {
      */
     public QueryResponse executeQuery(UUID id, String query, boolean translateToQueryLanguage)
             throws EntityNotFoundException, LLMException, DatabaseConnectionException, DatabaseExecutionException {
+
+        log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
 
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));

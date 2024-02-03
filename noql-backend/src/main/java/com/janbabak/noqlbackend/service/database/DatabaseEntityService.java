@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
  * Database Entity Service handles CRUD operations and similar tasks for Database Entities, utilizing the
  * {@link DatabaseRepository} as a DAO.
  * */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DatabaseEntityService {
@@ -31,6 +33,8 @@ public class DatabaseEntityService {
      * @throws EntityNotFoundException database of specified id not found.
      */
     public Database findById(UUID id) throws EntityNotFoundException {
+        log.info("Get database by id={}.", id);
+
         return databaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
     }
 
@@ -40,6 +44,8 @@ public class DatabaseEntityService {
      * @return list of databases
      */
     public List<Database> findAll() {
+        log.info("Get all databases.");
+
         return databaseRepository.findAll();
     }
 
@@ -51,6 +57,8 @@ public class DatabaseEntityService {
      * @throws DatabaseConnectionException if connection to the database failed.
      */
     public Database create(Database database) throws DatabaseConnectionException {
+        log.info("Create new database.");
+
         DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
 
         return databaseRepository.save(database);
@@ -67,6 +75,8 @@ public class DatabaseEntityService {
      */
     public Database update(UUID id, UpdateDatabaseRequest data)
             throws EntityNotFoundException, DatabaseConnectionException {
+
+        log.info("Update database of id={}.", id);
 
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
@@ -91,6 +101,8 @@ public class DatabaseEntityService {
      * @param id identifier
      */
     public void deleteById(UUID id) {
+        log.info("Delete database by id={}.", id);
+
         databaseRepository.deleteById(id);
     }
 }
