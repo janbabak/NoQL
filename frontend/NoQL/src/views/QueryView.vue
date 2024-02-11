@@ -5,14 +5,15 @@ import databaseApi, { type Database, type QueryResponse } from '@/api/databaseAp
 
 const databaseId = useRoute().params.databaseId
 const database: Ref<Database | null> = ref(null)
+const naturalLanguageQuery: Ref<string> = ref('')
 const databaseLoading: Ref<boolean> = ref(false)
 const queryLoading: Ref<boolean> = ref(false)
 const queryResult: Ref<QueryResponse | null> = ref(null)
 const headers = computed(() => {
   return queryResult.value?.result.columnNames.map((columnName, index) => {
     return {
-      'title': columnName,
-      'key': `${index}`
+      title: columnName,
+      key: `${index}`
     }
   })
 })
@@ -20,7 +21,7 @@ const headers = computed(() => {
 onMounted(() => {
   // loadDatabase()
   // queryDatabase()
-  loadSampleData()
+  // loadSampleData()
   console.log(headers)
 })
 
@@ -127,10 +128,7 @@ function loadSampleData() {
 async function queryDatabase() {
   queryLoading.value = true
   try {
-    const response = await databaseApi.queryNaturalLanguage(
-      databaseId,
-      'get all users that are male'
-    )
+    const response = await databaseApi.queryNaturalLanguage(databaseId, naturalLanguageQuery.value)
     queryResult.value = response.data
   } catch (error: any) {
     console.log(error.message) // TODO: handles
@@ -156,8 +154,27 @@ async function loadDatabase() {
 <template>
   <div class="ma-16">
     <h1>Query</h1>
+    <!--natural language query-->
+    <v-textarea
+      v-model="naturalLanguageQuery"
+      label="Query"
+      variant="solo"
+      placeholder="Find all male users..."
+      hint="Hit enter to execute the query."
+      class="mb-4"
+      @keydown.enter="queryDatabase"
+      autofocus
+      :loading="queryLoading"
+      :rounded="false"
+    />
 
-    <v-data-table :items="queryResult?.result.rows" :headers="headers"/>
+    <!--generated query-->
+    <v-code v-if="queryResult != null && queryResult.query != null" class="mb-6 elevation-2">
+      {{ queryResult?.query }}
+    </v-code>
+
+    <!--table with result-->
+    <v-data-table :items="queryResult?.result.rows" :headers="headers" class="elevation-2" />
   </div>
 </template>
 
