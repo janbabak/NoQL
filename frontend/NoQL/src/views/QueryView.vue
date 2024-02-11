@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, type Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import databaseApi, { type Database, type QueryResponse } from '@/api/databaseApi'
+import databaseApi, { type QueryResponse } from '@/api/databaseApi'
 
 const databaseId = useRoute().params.databaseId
-const database: Ref<Database | null> = ref(null)
 const naturalLanguageQuery: Ref<string> = ref('')
-const databaseLoading: Ref<boolean> = ref(false)
 const queryLoading: Ref<boolean> = ref(false)
 const queryResult: Ref<QueryResponse | null> = ref(null)
 const headers = computed(() => {
@@ -19,10 +17,7 @@ const headers = computed(() => {
 })
 
 onMounted(() => {
-  // loadDatabase()
-  // queryDatabase()
   // loadSampleData()
-  console.log(headers)
 })
 
 function loadSampleData() {
@@ -136,45 +131,47 @@ async function queryDatabase() {
     queryLoading.value = false
   }
 }
-
-// get database from API
-async function loadDatabase() {
-  databaseLoading.value = true
-  try {
-    const response = await databaseApi.getById(databaseId)
-    database.value = response.data
-  } catch (error: any) {
-    console.log(error.message) // TODO: handles
-  } finally {
-    databaseLoading.value = false
-  }
-}
 </script>
 
 <template>
   <div class="ma-16">
     <h1>Query</h1>
+
     <!--natural language query-->
     <v-textarea
       v-model="naturalLanguageQuery"
+      :loading="queryLoading"
       label="Query"
-      variant="solo"
       placeholder="Find all male users..."
       hint="Hit enter to execute the query."
-      class="mb-4"
-      @keydown.enter="queryDatabase"
+      variant="solo"
+      class="my-2"
       autofocus
-      :loading="queryLoading"
-      :rounded="false"
+      rows="1"
+      @keydown.enter="queryDatabase"
     />
 
-    <!--generated query-->
-    <v-code v-if="queryResult != null && queryResult.query != null" class="mb-6 elevation-2">
-      {{ queryResult?.query }}
-    </v-code>
+    <!--result-->
+    <div v-if="queryResult != null">
+      <h2>Result</h2>
 
-    <!--table with result-->
-    <v-data-table :items="queryResult?.result.rows" :headers="headers" class="elevation-2" />
+      <!--generated query-->
+      <VCodeBlock
+        :code="queryResult?.query"
+        :indent="2"
+        highlightjs
+        theme="night-owl"
+        copy-button
+        class="mt-3 mb-5 elevation-2 rounded-lg"
+      />
+
+      <!--table with result-->
+      <v-data-table
+        :items="queryResult?.result.rows"
+        :headers="headers"
+        class="elevation-2 rounded-lg"
+      />
+    </div>
   </div>
 </template>
 
