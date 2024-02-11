@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import DatabasesView from '@/components/DatabasesList.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <DatabasesView class="ma-16" />
   </main>
 </template>

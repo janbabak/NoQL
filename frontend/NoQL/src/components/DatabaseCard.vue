@@ -25,7 +25,7 @@ const props = defineProps<{
 
     <!--actions-->
     <v-card-actions>
-      <v-btn>Query</v-btn>
+      <v-btn :href="'/query/' + props.database.id">Query</v-btn>
       <v-tooltip text="Not implemented yet">
         <template v-slot:activator="{ props }">
           <v-btn v-bind="props">Update</v-btn>
