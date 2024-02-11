@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, type Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import databaseApi, { type Database, type QueryResponse } from '@/api/databaseApi'
+import databaseApi, { type QueryResponse } from '@/api/databaseApi'
 
 const databaseId = useRoute().params.databaseId
 const naturalLanguageQuery: Ref<string> = ref('')
@@ -17,7 +17,7 @@ const headers = computed(() => {
 })
 
 onMounted(() => {
-  loadSampleData()
+  // loadSampleData()
 })
 
 function loadSampleData() {
@@ -136,29 +136,42 @@ async function queryDatabase() {
 <template>
   <div class="ma-16">
     <h1>Query</h1>
+
     <!--natural language query-->
     <v-textarea
       v-model="naturalLanguageQuery"
+      :loading="queryLoading"
       label="Query"
-      variant="solo"
       placeholder="Find all male users..."
       hint="Hit enter to execute the query."
+      variant="solo"
       class="my-2"
-      @keydown.enter="queryDatabase"
       autofocus
-      :loading="queryLoading"
-      :rounded="false"
+      rows="1"
+      @keydown.enter="queryDatabase"
     />
 
-    <h2>Result</h2>
+    <!--result-->
+    <div v-if="queryResult != null">
+      <h2>Result</h2>
 
-    <!--generated query-->
-    <v-code v-if="queryResult != null && queryResult.query != null" class="my-4 elevation-2">
-      {{ queryResult?.query }}
-    </v-code>
+      <!--generated query-->
+      <VCodeBlock
+        :code="queryResult?.query"
+        :indent="2"
+        highlightjs
+        theme="night-owl"
+        copy-button
+        class="mt-3 mb-5 elevation-2 rounded-lg"
+      />
 
-    <!--table with result-->
-    <v-data-table :items="queryResult?.result.rows" :headers="headers" class="elevation-2" />
+      <!--table with result-->
+      <v-data-table
+        :items="queryResult?.result.rows"
+        :headers="headers"
+        class="elevation-2 rounded-lg"
+      />
+    </div>
   </div>
 </template>
 
