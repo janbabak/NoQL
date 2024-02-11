@@ -28,7 +28,7 @@ public class QueryResponse {
 
             // columns
             columnNames = new ArrayList<>();
-            for (int i = 1; i < rsmd.getColumnCount(); i++) {
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnNames.add(rsmd.getColumnName(i));
             }
 
