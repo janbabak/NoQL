@@ -4,9 +4,7 @@ import { useRoute } from 'vue-router'
 import databaseApi, { type Database, type QueryResponse } from '@/api/databaseApi'
 
 const databaseId = useRoute().params.databaseId
-const database: Ref<Database | null> = ref(null)
 const naturalLanguageQuery: Ref<string> = ref('')
-const databaseLoading: Ref<boolean> = ref(false)
 const queryLoading: Ref<boolean> = ref(false)
 const queryResult: Ref<QueryResponse | null> = ref(null)
 const headers = computed(() => {
@@ -19,10 +17,7 @@ const headers = computed(() => {
 })
 
 onMounted(() => {
-  // loadDatabase()
-  // queryDatabase()
-  // loadSampleData()
-  console.log(headers)
+  loadSampleData()
 })
 
 function loadSampleData() {
@@ -136,19 +131,6 @@ async function queryDatabase() {
     queryLoading.value = false
   }
 }
-
-// get database from API
-async function loadDatabase() {
-  databaseLoading.value = true
-  try {
-    const response = await databaseApi.getById(databaseId)
-    database.value = response.data
-  } catch (error: any) {
-    console.log(error.message) // TODO: handles
-  } finally {
-    databaseLoading.value = false
-  }
-}
 </script>
 
 <template>
@@ -161,15 +143,17 @@ async function loadDatabase() {
       variant="solo"
       placeholder="Find all male users..."
       hint="Hit enter to execute the query."
-      class="mb-4"
+      class="my-2"
       @keydown.enter="queryDatabase"
       autofocus
       :loading="queryLoading"
       :rounded="false"
     />
 
+    <h2>Result</h2>
+
     <!--generated query-->
-    <v-code v-if="queryResult != null && queryResult.query != null" class="mb-6 elevation-2">
+    <v-code v-if="queryResult != null && queryResult.query != null" class="my-4 elevation-2">
       {{ queryResult?.query }}
     </v-code>
 
