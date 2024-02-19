@@ -52,3 +52,25 @@ docker compose up -d # TODO: create docker compose file (instead of using exampl
   TODO: solve gradlew wrapper issue https://support.snyk.io/hc/en-us/articles/360007745957-Snyk-test-Could-not-find-or-load-main-class-org-gradle-wrapper-GradleWrapperMain
   ```
 
+## Development
+
+- Connect to the AWS EC2 instance over SSH
+  ```bash
+  ssh ec2-user@3.68.195.75
+  ```
+- Install java
+  ```bash
+  sudo yum update
+  sudo yum install java-17-amazon-corretto-headless.x86_64
+  ```
+- Copy the jar
+  ```bash
+  scp build/libs/backend-0.0.1-SNAPSHOT.jar ec2-user@3.68.195.75:/home/ec2-user
+  ```
+- Run the jar
+  ```bash
+  java -jar backend-0.0.1-SNAPSHOT.jar # the app ends when the session ends
+  java -jar backend-0.0.1-SNAPSHOT.jar > noql.log 2>&1 & # detached with logging
+  ```
+  
+
