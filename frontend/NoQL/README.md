@@ -50,3 +50,19 @@ npm run test:unit
 ```sh
 npm run lint
 ```
+
+# Deployment
+
+- install nodejs on the machine
+   ```bash
+   sudo yum install -y nodejs
+   ```
+- install server
+   ```bash
+   sudo npm install -g serve
+   ```
+- run the frontend
+    ```bash
+    serve -s dist > noql.fe.log 2>&1 &
+  ```
+- app URL: http://ec2-3-68-195-75.eu-central-1.compute.amazonaws.com:3000

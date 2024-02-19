@@ -1,24 +1,19 @@
-import axios, {
-  type AxiosInstance,
-  type AxiosRequestConfig,
-  type AxiosResponse
-} from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 
 /** query parameter */
 interface ApiParameter {
-  name: string,
-  value: string | number | boolean;
+  name: string
+  value: string | number | boolean
 }
 
 class Api {
   axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080/', // TODO: setup via environment variable
+    baseURL: `${import.meta.env.VITE_NOQL_BE_HOST}:${import.meta.env.VITE_NOQL_BE_PORT}`,
     timeout: 10_000
   }) as AxiosInstance
 
   /** forbid constructor, because api is a singleton */
-  private constructor() {
-  }
+  private constructor() {}
 
   static instance = null as null | Api
 
@@ -29,6 +24,10 @@ class Api {
     if (this.instance == null) {
       this.instance = new Api()
     }
+    // TODO use logging
+    console.log(
+      'BE URL is: ' + `${import.meta.env.VITE_NOQL_BE_HOST}:${import.meta.env.VITE_NOQL_BE_PORT}`
+    )
     return this.instance
   }
 
