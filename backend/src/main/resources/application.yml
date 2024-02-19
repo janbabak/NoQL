@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/database
-    username: user
-    password: password
-    name: database
+    url: "jdbc:postgresql://${NOQL_DB_HOST}:${NOQL_DB_PORT}/${NOQL_DB_NAME}"
+    username: "${NOQL_DB_USERNAME}"
+    password: "${NOQL_DB_PASSWORD}"
+    name: "${NOQL_DB_NAME}"
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
