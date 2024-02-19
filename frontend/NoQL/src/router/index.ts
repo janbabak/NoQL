@@ -14,7 +14,7 @@ const router = createRouter({
       name: 'query',
       component: () => import('../views/QueryView.vue'),
       props: {
-        update: false,
+        update: false
       }
     }
   ]

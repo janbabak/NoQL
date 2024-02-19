@@ -36,7 +36,10 @@ const databaseApi = {
     return this.API.get(this.DOMAIN + '/' + id)
   },
 
-  queryNaturalLanguage(id: string | RouteParamValue[], query: string): Promise<AxiosResponse<QueryResponse>> {
+  queryNaturalLanguage(
+    id: string | RouteParamValue[],
+    query: string
+  ): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(this.DOMAIN + '/' + id + '/query/natural-language', query)
   }
 }

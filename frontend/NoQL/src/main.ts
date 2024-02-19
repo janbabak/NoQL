@@ -13,23 +13,23 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
 const vuetify = createVuetify({
-    components,
-    directives,
-    theme: {
-        // defaultTheme: 'dark',
-    },
+  components,
+  directives,
+  theme: {
+    // defaultTheme: 'dark',
+  }
 })
 
 // syntax highlighting
-import { createVCodeBlock } from '@wdns/vue-code-block';
+import { createVCodeBlock } from '@wdns/vue-code-block'
 
-const VCodeBlock = createVCodeBlock();
+const VCodeBlock = createVCodeBlock()
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)
-app.use(VCodeBlock);
+app.use(VCodeBlock)
 
 app.mount('#app')
