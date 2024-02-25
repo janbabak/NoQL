@@ -22,6 +22,7 @@ function App() {
     <>
       <Header />
       <main>
+        <a href="/example">example page</a>
         <Button />
         <DatabaseTile database={database}/>
         <DatabaseTile />
