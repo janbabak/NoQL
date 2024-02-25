@@ -10,21 +10,38 @@ interface Database {
   isSQL: boolean
 }
 
-function DatabaseTile() {
-  const database = {
-    id: '4594jl34jr5l34',
-    name: 'Localhost postgres',
-    host: 'localhost',
+DatabaseTile.defaultProps = {
+  database: {
+    id: 'null',
+    name: 'Default value',
+    host: 'default',
     port: 5432,
-    database: 'noql',
-    userName: 'postgres',
-    password: 'password',
-    engine: 'Postgres',
+    database: '',
+    userName: '',
+    password: '',
+    engine: '',
     isSQL: true
-  } as Database
+  }
+}
+
+function DatabaseTile(props: { database: Database }) {
+  const database = props.database as Database | null
+
+  if (!database) {
+    return (
+      <div>Database not available</div>
+    )
+  }
+
+  const style = {
+    border: '3px solid tomato',
+    borderRadius: '1rem',
+    margin: '1rem',
+    padding: '1rem'
+  }
 
   return (
-    <>
+    <div style={style}>
       <h2>{database.name}</h2>
       <ul>
         <li><span>Id:</span>{database.id}</li>
@@ -32,7 +49,7 @@ function DatabaseTile() {
         <li><span>Port:</span>{database.port}</li>
         <li><span>Engine:</span>{database.engine}</li>
       </ul>
-    </>
+    </div>
   )
 }
 
