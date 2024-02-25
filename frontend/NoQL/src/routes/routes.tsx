@@ -1,14 +1,14 @@
 import { createBrowserRouter } from 'react-router-dom'
-import App from '../App.tsx'
-import { ExamplePage } from '../pages/ExamplePage.tsx'
+import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx'
+import { DatabasePage } from '../pages/database/DatabasePage.tsx'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <DashboardPage />
   },
   {
-    path: '/example',
-    element: <ExamplePage />
+    path: '/database/:id',
+    element: <DatabasePage />
   }
 ])
