@@ -2,6 +2,7 @@ import { Header } from './Header.tsx'
 import { Footer } from './Footer.tsx'
 import DatabaseTile, { Database } from '../DatabaseTile.tsx'
 import { List } from './List.tsx'
+import { Button } from './Button.tsx'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
     <>
       <Header />
       <main>
+        <Button />
         <DatabaseTile database={database}/>
         <DatabaseTile />
         <List />
