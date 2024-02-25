@@ -1,16 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
-
-interface QueryResult {
-  columnNames: string[]
-  rows: string[][]
-}
-
-interface QueryResponse {
-  query: string
-  result: QueryResult
-}
+import { QueryResponse } from '../../types/QueryResponse.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
