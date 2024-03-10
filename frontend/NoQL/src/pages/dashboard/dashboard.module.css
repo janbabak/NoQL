@@ -1,0 +1,15 @@
+.databaseCard {
+    margin: 1rem;
+}
+
+.databaseCardFirstRow {
+    display: flex;
+    gap: 1rem;
+    margin: .5rem 0;
+}
+
+@media screen and (max-width: 400px) {
+    .databaseCardFirstRow {
+        flex-direction: column;
+    }
+}

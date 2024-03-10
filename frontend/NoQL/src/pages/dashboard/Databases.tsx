@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
+import { Typography } from '@mui/material'
+import styles from './dashboard.module.css'
 
 export function Databases() {
   const [databases, setDatabases] = useState<Database[]>([])
@@ -24,14 +26,18 @@ export function Databases() {
     }
   }
 
+  const Loading = <div>loading ...</div>
+
+  const DatabasesList =
+    <ul>{
+      databases.map((db: Database) =>
+        <DatabaseCard database={db} key={db.id} className={styles.databaseCard} />)
+    }</ul>
+
   return (
     <>
-      <h2>Databases</h2>
-      {
-        databasesLoading
-          ? <div>loading ...</div>
-          : <ul>{databases.map((db: Database) => <DatabaseCard database={db} key={db.id} />)}</ul>
-      }
+      <Typography variant="h4" component="h2">Databases</Typography>
+      {databasesLoading ? Loading : DatabasesList}
     </>
   )
 }
