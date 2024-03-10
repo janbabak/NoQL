@@ -4,3 +4,14 @@
     box-sizing: border-box;
     font-family: Roboto, sans-serif;
 }
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0 2rem;
+}
+
+#root h1 {
+    margin-bottom: 1rem;
+}

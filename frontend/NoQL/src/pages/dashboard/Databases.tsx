@@ -3,7 +3,7 @@ import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { Typography } from '@mui/material'
-import styles from './dashboard.module.css'
+import styles from './Dashboard.module.css'
 
 export function Databases() {
   const [databases, setDatabases] = useState<Database[]>([])

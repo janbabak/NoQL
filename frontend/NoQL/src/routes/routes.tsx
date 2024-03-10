@@ -1,14 +1,21 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx'
 import { DatabasePage } from '../pages/database/DatabasePage.tsx'
+import { Layout } from '../components/layout/Layout.tsx'
+import { DashboardPage } from '../pages/dashboard/DashboardPage.tsx'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <DashboardPage />
+    element: <Layout />,
+    children: [
+      {
+        path: '/',
+        element: <DashboardPage />
+      },
+      {
+        path: '/database/:id',
+        element: <DatabasePage />
+      }
+    ]
   },
-  {
-    path: '/database/:id',
-    element: <DatabasePage />
-  }
 ])

@@ -2,7 +2,7 @@ import { Database } from '../../types/Database.ts'
 import { Button, Card, CardActions, CardContent, Typography } from '@mui/material'
 import Chip from '@mui/material-next/Chip'
 import React from 'react'
-import styles from './dashboard.module.css'
+import styles from './Dashboard.module.css'
 
 export function DatabaseCard({ database, style, className }: {
   database: Database,
