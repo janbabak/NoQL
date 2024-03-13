@@ -1,7 +1,10 @@
 import { useParams } from 'react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
+import { TextField, Typography } from '@mui/material'
+import { LoadingButton } from '@mui/lab';
+import styles from './Database.module.css'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -9,7 +12,7 @@ export function DatabasePage() {
   const [databaseLoading, setDatabaseLoading] = useState<boolean>(false)
   const [queryResult, setQueryResult] = useState<QueryResponse | null>(null)
   const [queryLoading, setQueryLoading] = useState<boolean>(false)
-  const usersQuery = 'select all users' // TODO: get from input
+  const usersQuery = useRef<string>('')
 
   useEffect(() => {
     loadDatabase()
@@ -32,7 +35,7 @@ export function DatabasePage() {
   async function queryDatabase() {
     setQueryLoading(true)
     try {
-      const response = await databaseApi.queryNaturalLanguage(id || '', usersQuery)
+      const response = await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value)
       setQueryResult(response.data)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
@@ -41,32 +44,30 @@ export function DatabasePage() {
     }
   }
 
-  const databaseData =
-    <div>{
-      database
-        ? <div>url: {`${database.host}:${database.port}`}</div>
-        : <div>database not found</div>
-    }</div>
-
-  const queryData =
-    <div>
-      {
-        queryLoading
-          ? <div>query loading</div>
-          : <div>query: {queryResult?.query}</div>
-      }
-      <button onClick={queryDatabase}>Query db</button>
-    </div>
-
   return (
     <>
-      <h1>Database: {id}</h1>
-      {databaseLoading
-        ? <div>loading...</div>
-        : databaseData
-      }
-      <h2>Query data</h2>
-      {queryData}
+      <Typography variant="h2" component="h1">Query</Typography>
+      <Typography variant="h4" component="h2">{database?.name}</Typography>
+
+      <div className={styles.queryInput}>
+        <TextField
+          id="query"
+          label="Query"
+          variant="outlined"
+          inputRef={usersQuery}
+          fullWidth
+        />
+      </div>
+
+      <LoadingButton
+        loading={queryLoading}
+        fullWidth
+        variant="contained"
+        onClick={queryDatabase}>Query</LoadingButton>
+
+      <div style={{margin: '2rem 0'}}>
+        {JSON.stringify(queryResult)}
+      </div>
     </>
   )
 }
