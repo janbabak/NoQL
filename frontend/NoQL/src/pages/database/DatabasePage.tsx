@@ -10,10 +10,27 @@ import { GeneratedQuery } from './GeneratedQuery.tsx'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
-  const [database, setDatabase] = useState<Database | null>(null)
-  const [databaseLoading, setDatabaseLoading] = useState<boolean>(false)
-  const [queryResult, setQueryResult] = useState<QueryResponse | null>(null)
-  const [queryLoading, setQueryLoading] = useState<boolean>(false)
+
+  const [
+    database,
+    setDatabase
+  ] = useState<Database | null>(null)
+
+  const [
+    databaseLoading,
+    setDatabaseLoading
+  ] = useState<boolean>(false)
+
+  const [
+    queryResult,
+    setQueryResult
+  ] = useState<QueryResponse | null>(null)
+
+  const [
+    queryLoading,
+    setQueryLoading
+  ] = useState<boolean>(false)
+
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const usersQuery = useRef<any>('')
 
@@ -39,7 +56,8 @@ export function DatabasePage() {
   async function queryDatabase() {
     setQueryLoading(true)
     try {
-      const response = await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value)
+      const response =
+        await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value)
       setQueryResult(response.data)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
@@ -48,7 +66,7 @@ export function DatabasePage() {
     }
   }
 
-  const pageContent =
+  const PageContent =
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
 
@@ -81,7 +99,7 @@ export function DatabasePage() {
   return (
     <>
       <Typography variant="h2" component="h1">Query</Typography>
-      {!databaseLoading && pageContent}
+      {!databaseLoading && PageContent}
     </>
   )
 }

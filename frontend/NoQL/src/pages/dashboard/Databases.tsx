@@ -6,8 +6,15 @@ import { Typography } from '@mui/material'
 import styles from './Dashboard.module.css'
 
 export function Databases() {
-  const [databases, setDatabases] = useState<Database[]>([])
-  const [databasesLoading, setDatabasesLoading] = useState<boolean>(false)
+  const [
+    databases,
+    setDatabases
+  ] = useState<Database[]>([])
+
+  const [
+    databasesLoading,
+    setDatabasesLoading
+  ] = useState<boolean>(false)
 
   useEffect(() => {
     loadDatabases()
