@@ -105,9 +105,13 @@ public class DatabaseController {
      */
     @PostMapping("/{id}/query/natural-language")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeNaturalLanguageQuery(@PathVariable UUID id, @RequestBody String query)
-            throws LLMException, EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
-        return queryService.executeQuery(id, query, true);
+    public QueryResponse executeNaturalLanguageQuery(
+            @PathVariable UUID id,
+            @RequestBody String query,
+            @RequestParam Integer page,
+            @RequestParam Integer pageSize
+    ) throws Exception {
+        return queryService.executeQuery(id, query, true, page, pageSize);
     }
 
     /**
@@ -124,7 +128,7 @@ public class DatabaseController {
     @PostMapping("/{id}/query/query-language")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeQueryLanguageQuery(@PathVariable UUID id, @RequestBody String query)
-            throws DatabaseConnectionException, DatabaseExecutionException, LLMException, EntityNotFoundException {
-        return queryService.executeQuery(id, query, false);
+            throws Exception {
+        return queryService.executeQuery(id, query, false, 0, 0); // TODO pagination
     }
 }

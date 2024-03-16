@@ -17,7 +17,7 @@ export function Databases() {
   ] = useState<boolean>(false)
 
   useEffect(() => {
-    loadDatabases()
+    void loadDatabases()
   }, [])
 
   // Load list of databases from the backend
