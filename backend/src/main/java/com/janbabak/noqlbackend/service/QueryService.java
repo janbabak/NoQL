@@ -64,6 +64,75 @@ public class QueryService {
     }
 
     /**
+     * Set pagination in query.
+     *
+     * @param query    database language query
+     * @param page     number of pages (first page has index 0)
+     * @param pageSize number of items in one page
+     * @param database database object
+     * @return database language query with pagination
+     */
+    public String setPagination(String query, Integer page, Integer pageSize, Database database) {
+        // defaults
+        if (page == null) {
+            page = 0;
+        }
+        if (pageSize == null) {
+            pageSize = 50; // TODO: load default page size from env
+        }
+
+        query = query.trim();
+
+        return switch (database.getEngine()) {
+            case POSTGRES, MYSQL -> {
+                // removes trailing semicolon if it is present
+                if (query.charAt(query.length() - 1) == ';') {
+                    query = query.substring(0, query.length() - 1);
+                }
+
+                // add limit only if it is not present
+                if (!query.contains("LIMIT")) {
+                    query = "%s\nLIMIT %d".formatted(query, pageSize);
+                } else {
+                    // verify that the limit is not too big
+                    int limitIndex = query.indexOf("LIMIT");
+                    String queryAfterLimit = query.substring(limitIndex + "LIMIT ".length());
+                    if (queryAfterLimit.isEmpty()) {
+                        // TODO: query is in bad syntax
+                    }
+                    int indexOfCharAfterLimitValue = queryAfterLimit.indexOf(" ");
+                    if (indexOfCharAfterLimitValue == -1) {
+                        // space after limit value was not found, there might be a semicolon
+                        indexOfCharAfterLimitValue = queryAfterLimit.indexOf(";");
+                    }
+                    if (indexOfCharAfterLimitValue == -1) {
+                        indexOfCharAfterLimitValue = queryAfterLimit.length();
+                    }
+
+                    String limitValueString = queryAfterLimit.substring(0, indexOfCharAfterLimitValue);
+                    int limitValue = Integer.parseInt(limitValueString);
+                    int maxAllowedPageSize = 250; // TODO: load from environment variable
+                    if (limitValue > maxAllowedPageSize) {
+                        log.error("Page size={} greater than maximal allowed value={}",
+                                pageSize, maxAllowedPageSize);
+                        String queryBeforeLimitValue = query.substring(0, limitIndex + "LIMIT ".length());
+                        String queryAfterLimitValue = queryAfterLimit.substring(indexOfCharAfterLimitValue);
+                        query = queryBeforeLimitValue + maxAllowedPageSize + queryAfterLimitValue;
+                    }
+
+                }
+
+                // add offset only if it is not present
+                if (!query.contains("OFFSET")) {
+                    query = "%s\nOFFSET %d".formatted(query, page * pageSize);
+                }
+
+                yield query + ";";
+            }
+        };
+    }
+
+    /**
      * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
      * and execute it.
      *
@@ -77,8 +146,13 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public QueryResponse executeQuery(UUID id, String query, boolean translateToQueryLanguage)
-            throws EntityNotFoundException, LLMException, DatabaseConnectionException, DatabaseExecutionException {
+    public QueryResponse executeQuery(
+            UUID id,
+            String query,
+            Boolean translateToQueryLanguage,
+            Integer page,
+            Integer pageSize
+    ) throws Exception {
 
         log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
 
@@ -93,6 +167,8 @@ public class QueryService {
             String LLMQuery = createQuery(query, databaseStructure.generateCreateScript(), database);
             query = queryApi.queryModel(LLMQuery);
         }
+
+        query = setPagination(query, page, pageSize, database);
 
         try {
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));

@@ -13,7 +13,8 @@ class Api {
   }) as AxiosInstance
 
   /** forbid constructor, because api is a singleton */
-  private constructor() {}
+  private constructor() {
+  }
 
   static instance = null as null | Api
 
@@ -25,10 +26,7 @@ class Api {
       this.instance = new Api()
     }
     // TODO use logging
-    console.log(
-      'BE URL is: localhost:8080'
-      // 'BE URL is: ' + `${import.meta.env.VITE_NOQL_BE_HOST}:${import.meta.env.VITE_NOQL_BE_PORT}`
-    )
+    console.log('BE URL is: localhost:8080')
     return this.instance
   }
 
@@ -52,7 +50,8 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  post(path: string, data: any, parameters = [] as ApiParameter[]): Promise<AxiosResponse> {
+  post(path: string, data: string, parameters = [] as ApiParameter[]):
+    Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
       method: 'POST',
@@ -68,7 +67,8 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  put(path: string, data: any, parameters = [] as ApiParameter[]): Promise<AxiosResponse> {
+  put(path: string, data: string, parameters = [] as ApiParameter[]):
+    Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
       method: 'PUT',
