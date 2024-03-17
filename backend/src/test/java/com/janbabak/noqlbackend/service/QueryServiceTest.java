@@ -33,7 +33,7 @@ class QueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("paginationTestMethodSource")
-    void setPaginationTest2(String query, Integer page, Integer pageSize, String expectedQuery) {
+    void setPaginationTest(String query, Integer page, Integer pageSize, String expectedQuery) {
         String actualValue = queryService.setPagination(query, page, pageSize, postgresDatabase);
 
         assertEquals(expectedQuery, actualValue);
@@ -86,6 +86,22 @@ class QueryServiceTest {
                         LIMIT 1
                         OFFSET 30;""",
                 },
+                // limit already used, no semicolon
+                {
+                        """
+                        SELECT *
+                        FROM public.user
+                        ORDER BY created_at ASC
+                        LIMIT 19""",
+                        3,
+                        10,
+                        """
+                        SELECT *
+                        FROM public.user
+                        ORDER BY created_at ASC
+                        LIMIT 19
+                        OFFSET 30;""",
+                },
                 // limit and offset already used
                 {
                         "SELECT name FROM product LIMIT 50 OFFSET 4;",
@@ -93,6 +109,14 @@ class QueryServiceTest {
                         19,
                         """
                         SELECT name FROM product LIMIT 50 OFFSET 4;"""
+                },
+                // limit and offset already used, offset before limit
+                {
+                        "SELECT name FROM product OFFSET 4 LIMIT 50;",
+                        7,
+                        19,
+                        """
+                        SELECT name FROM product OFFSET 4 LIMIT 50;"""
                 },
                 // limit already used with value greater than allowed limit
                 {

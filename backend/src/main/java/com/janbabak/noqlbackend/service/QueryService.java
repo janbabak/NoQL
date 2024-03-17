@@ -81,6 +81,8 @@ public class QueryService {
             pageSize = 50; // TODO: load default page size from env
         }
 
+        query = query.trim();
+
         return switch (database.getEngine()) {
             case POSTGRES, MYSQL -> {
                 // removes trailing semicolon if it is present
@@ -166,7 +168,7 @@ public class QueryService {
             query = queryApi.queryModel(LLMQuery);
         }
 
-        setPagination(query, page, pageSize, database);
+        query = setPagination(query, page, pageSize, database);
 
         try {
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));
