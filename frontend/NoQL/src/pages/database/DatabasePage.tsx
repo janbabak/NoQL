@@ -66,6 +66,26 @@ export function DatabasePage() {
     }
   }
 
+  // get next page
+  async function onPageChange(page: number, pageSize: number) {
+    console.log("new page is: " + page) // TODO: remove
+
+    setQueryLoading(true)
+    try {
+      const response = await databaseApi.queryQueryLanguageQuery(
+        id || '',
+        queryResult?.query || '',
+        page,
+        pageSize)
+
+      setQueryResult(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
   const PageContent =
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
@@ -91,7 +111,10 @@ export function DatabasePage() {
       {queryResult != null &&
         <div>
           <GeneratedQuery query={queryResult.query} />
-          <ResultTable queryResult={queryResult} />
+          <ResultTable
+            queryResult={queryResult}
+            onPageChange={onPageChange}
+          />
         </div>
       }
     </>

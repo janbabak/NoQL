@@ -101,9 +101,15 @@ public class QueryService {
                         // TODO: query is in bad syntax
                     }
                     int indexOfCharAfterLimitValue = queryAfterLimit.indexOf(" ");
-                    if (indexOfCharAfterLimitValue == -1) {
-                        // space after limit value was not found, there might be a semicolon
-                        indexOfCharAfterLimitValue = queryAfterLimit.indexOf(";");
+                    int indexOfCharCloserToLimitValue = queryAfterLimit.indexOf("\n");
+                    if (indexOfCharCloserToLimitValue != -1 && indexOfCharCloserToLimitValue < indexOfCharAfterLimitValue) {
+                        // new line character is closer than space
+                        indexOfCharAfterLimitValue = indexOfCharCloserToLimitValue;
+                    }
+                    indexOfCharCloserToLimitValue = queryAfterLimit.indexOf(";");
+                    if (indexOfCharCloserToLimitValue != -1 && indexOfCharCloserToLimitValue < indexOfCharAfterLimitValue) {
+                        // semicolon character is closer than space
+                        indexOfCharAfterLimitValue = indexOfCharCloserToLimitValue;
                     }
                     if (indexOfCharAfterLimitValue == -1) {
                         indexOfCharAfterLimitValue = queryAfterLimit.length();

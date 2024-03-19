@@ -127,6 +127,18 @@ class QueryServiceTest {
                         SELECT name FROM product LIMIT 250
                         OFFSET 0;"""
                 },
+                {
+                        """
+                        SELECT * FROM public.user
+                        LIMIT 10
+                        OFFSET 0;""",
+                        null,
+                        null,
+                        """
+                        SELECT * FROM public.user
+                        LIMIT 10
+                        OFFSET 0;"""
+                }
         };
     }
 }

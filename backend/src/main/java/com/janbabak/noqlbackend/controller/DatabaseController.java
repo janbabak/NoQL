@@ -127,8 +127,12 @@ public class DatabaseController {
      */
     @PostMapping("/{id}/query/query-language")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeQueryLanguageQuery(@PathVariable UUID id, @RequestBody String query)
-            throws Exception {
-        return queryService.executeQuery(id, query, false, 0, 0); // TODO pagination
+    public QueryResponse executeQueryLanguageQuery(
+            @PathVariable UUID id,
+            @RequestBody String query,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize
+    ) throws Exception {
+        return queryService.executeQuery(id, query, false, page, pageSize);
     }
 }

@@ -16,7 +16,39 @@ const databaseApi = {
   },
 
   queryNaturalLanguage(id: string, query: string): Promise<AxiosResponse<QueryResponse>> {
-    return this.API.post(this.DOMAIN + '/' + id + '/query/natural-language', query)
+    return this.API.post(
+      this.DOMAIN + '/' + id + '/query/natural-language',
+      query, [
+        {
+          name: 'page',
+          value: 0
+        },
+        {
+          name: 'pageSize',
+          value: 10 // TODO: set default value
+        }
+      ])
+  },
+
+  queryQueryLanguageQuery(
+    id: string,
+    query: string,
+    page: number = 0,
+    pageSize: number = 10): Promise<AxiosResponse<QueryResponse>> {
+
+    return this.API.post(
+      this.DOMAIN + '/' + id + '/query/natural-language',
+      query,
+      [
+        {
+          name: 'page',
+          value: page
+        },
+        {
+          name: 'pageSize',
+          value: pageSize
+        }
+      ])
   }
 }
 
