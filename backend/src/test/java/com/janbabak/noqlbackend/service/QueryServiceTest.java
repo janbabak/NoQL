@@ -1,7 +1,9 @@
 package com.janbabak.noqlbackend.service;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,8 +42,8 @@ class QueryServiceTest {
             Boolean setOffset,
             Boolean overrideLimit,
             String expectedQuery
-    ) throws Exception {
-        String actualValue = queryService.setPagination(
+    ) throws BadRequestException, DatabaseExecutionException {
+        String actualValue = queryService.setPaginationInSqlQuery(
                 query, page, pageSize, postgresDatabase, setOffset, overrideLimit);
         assertEquals(expectedQuery, actualValue);
     }

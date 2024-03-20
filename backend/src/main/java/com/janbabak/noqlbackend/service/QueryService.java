@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
@@ -65,7 +66,7 @@ public class QueryService {
     }
 
     /**
-     * Set pagination in query.
+     * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
      *
      * @param query         database language query
      * @param page          number of pages (first page has index 0), if null, default value is 0
@@ -74,15 +75,17 @@ public class QueryService {
      * @param setOffset     if true set the offset value, otherwise ignore offset
      * @param overrideLimit if true override the extracted limit value from the query no matter what by value
      * @return database language query with pagination
+     * @throws BadRequestException        value is greater than maximum allowed value
+     * @throws DatabaseExecutionException SQL query is in bad syntax
      */
-    public String setPagination(
+    public String setPaginationInSqlQuery(
             String query,
             Integer page,
             Integer pageSize,
             Database database,
             Boolean setOffset,
             Boolean overrideLimit
-    ) throws Exception {
+    ) throws BadRequestException, DatabaseExecutionException {
         // defaults
         if (page == null) {
             page = 0;
@@ -92,14 +95,14 @@ public class QueryService {
         }
         if (pageSize > 250) {
             log.error("Page size={} greater than maximal allowed value={}", pageSize, 250);
-            throw new Exception("page size more than allowed");
+            throw new BadRequestException("Page size is greater than maximum allowed value");
         }
 
         query = query.trim();
 
         return switch (database.getEngine()) {
             case POSTGRES, MYSQL -> {
-                query = setValueOfProperty(
+                query = setValueOfPropertyInSqlQuery(
                         query,
                         "LIMIT",
                         pageSize,
@@ -107,7 +110,7 @@ public class QueryService {
                         overrideLimit
                 );
                 if (setOffset) {
-                    query = setValueOfProperty(
+                    query = setValueOfPropertyInSqlQuery(
                             query,
                             "OFFSET",
                             pageSize * page,
@@ -120,23 +123,25 @@ public class QueryService {
     }
 
     /**
-     * Set value of property in the query
+     * Set value of property in the SQL query.
      *
      * @param query               SQL query
-     * @param property            e.g. "LIMIT", "OFFSET"
+     * @param property            e.g. {@code LIMIT}, {@code OFFSET}
      * @param value               value of the property
-     * @param maximumAllowedValue if value is greater than maximum allowed value, maximum allowed value is used
+     * @param maximumAllowedValue if value is greater than maximum allowed value, maximum allowed value is used instead
      * @param replaceEveryTime    if true value of the property is replaced in the query every time, if false value
      *                            extracted from the query (if present) is replaced by value only if the value is lower
+     *                            than the extracted one.
      * @return modified query
+     * @throws DatabaseExecutionException query execution failed (syntax error - property has no value)
      */
-    private String setValueOfProperty(
+    private String setValueOfPropertyInSqlQuery(
             String query,
             String property,
             Integer value,
             Integer maximumAllowedValue,
             Boolean replaceEveryTime
-    ) {
+    ) throws DatabaseExecutionException {
         if (maximumAllowedValue != null && value > maximumAllowedValue) {
             log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
             value = maximumAllowedValue;
@@ -157,7 +162,8 @@ public class QueryService {
         String queryAfterProperty = query.substring(propertyIndex + (property + " ").length());
 
         if (queryAfterProperty.isEmpty()) {
-            // TODO: query is in bad syntax
+            log.error("Property={} has no value, query={}", property, query);
+            throw new DatabaseExecutionException("Property has no value");
         }
 
         int indexOfCharAfterPropertyValue = queryAfterProperty.indexOf(" ");
@@ -203,17 +209,16 @@ public class QueryService {
     }
 
     /**
-     * Get total number of rows that selectQuery returns
+     * Get total number of rows that SQL select query returns.
      *
      * @param selectQuery     select statement
      * @param databaseService service that can handle the query
      * @return total number of rows
-     * @throws DatabaseConnectionException
-     * @throws DatabaseExecutionException
-     * @throws SQLException
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     private Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
-            throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
+            throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = selectQuery.trim();
         // remove trailing semicolon if it is present
@@ -225,12 +230,16 @@ public class QueryService {
 
         ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
 
-        return resultSet.next() ? resultSet.getLong(1) : null;
+        try {
+            return resultSet.next() ? resultSet.getLong(1) : null;
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException("Cannot parse total count value from query");
+        }
     }
 
     /**
      * Execute (natural/query language) select query - translate it via LLM to the database specific query language if
-     * needed and execute it. Select query is read only and it returns a result that is automatically paginated.
+     * needed and execute it. Select query is read only, and it returns a result that is automatically paginated.
      *
      * @param id                       database id
      * @param query                    in natural query or database query language
@@ -244,6 +253,7 @@ public class QueryService {
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
     public QueryResponse executeSelectQuery(
             UUID id,
@@ -252,7 +262,8 @@ public class QueryService {
             Integer page,
             Integer pageSize,
             Boolean overrideLimit
-    ) throws Exception {
+    ) throws EntityNotFoundException, DatabaseConnectionException,
+            DatabaseExecutionException, BadRequestException, LLMException {
 
         log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
 
@@ -268,7 +279,7 @@ public class QueryService {
             query = queryApi.queryModel(LLMQuery);
         }
 
-        String paginatedQuery = setPagination(
+        String paginatedQuery = setPaginationInSqlQuery(
                 query, page, pageSize, database, !translateToQueryLanguage, overrideLimit);
 
         try {

@@ -7,14 +7,27 @@ const databaseApi = {
   API: Api.getInstance(),
   DOMAIN: '/database',
 
+  /**
+   * Get all databases.
+   */
   getAll(): Promise<AxiosResponse<Database[]>> {
     return this.API.get(this.DOMAIN)
   },
 
+  /**
+   * Get database by id.
+   * @param id database identifier
+   */
   getById(id: string): Promise<AxiosResponse<Database>> {
     return this.API.get(this.DOMAIN + '/' + id)
   },
 
+  /**
+   * Query the user's database using natural language, result is automatically paginated.
+   * Params:
+   * @param id database id
+   * @param query natural language query
+   */
   queryNaturalLanguage(id: string, query: string): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/natural-language',
@@ -30,6 +43,15 @@ const databaseApi = {
       ])
   },
 
+  /**
+   * Query the user's database using database query language, result is automatically paginated.
+   * @param id database id
+   * @param query database query in corresponding database query language
+   * @param page page number (first pages is 0)
+   * @param pageSize number of items in one page
+   * @param overrideLimit if true override the limit value no matter what (used when number of items per pages is
+   * changed)
+   */
   queryQueryLanguageQuery(
     id: string,
     query: string,

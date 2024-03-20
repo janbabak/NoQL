@@ -74,7 +74,7 @@ export function DatabasePage() {
 
   // get next page
   async function onPageChange(page: number, pageSize: number) {
-    console.log("new page is: " + page) // TODO: remove
+    console.log('new page is: ' + page) // TODO: remove
 
     setQueryLoading(true)
     try {

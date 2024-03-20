@@ -65,6 +65,7 @@ export function ResultTable({ queryResult, totalCount, onPageChange }: {
 
           </Table>
         </TableContainer>
+
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
