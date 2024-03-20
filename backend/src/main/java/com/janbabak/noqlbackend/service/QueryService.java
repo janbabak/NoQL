@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.UUID;
@@ -66,11 +67,12 @@ public class QueryService {
     /**
      * Set pagination in query.
      *
-     * @param query     database language query
-     * @param page      number of pages (first page has index 0), if null, default value is 0
-     * @param pageSize  number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
-     * @param database  database object
-     * @param setOffset if true set the offset value, otherwise ignore offset
+     * @param query         database language query
+     * @param page          number of pages (first page has index 0), if null, default value is 0
+     * @param pageSize      number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param database      database object
+     * @param setOffset     if true set the offset value, otherwise ignore offset
+     * @param overrideLimit if true override the extracted limit value from the query no matter what by value
      * @return database language query with pagination
      */
     public String setPagination(
@@ -78,7 +80,8 @@ public class QueryService {
             Integer page,
             Integer pageSize,
             Database database,
-            Boolean setOffset
+            Boolean setOffset,
+            Boolean overrideLimit
     ) throws Exception {
         // defaults
         if (page == null) {
@@ -101,7 +104,7 @@ public class QueryService {
                         "LIMIT",
                         pageSize,
                         250,
-                        false
+                        overrideLimit
                 );
                 if (setOffset) {
                     query = setValueOfProperty(
@@ -200,8 +203,34 @@ public class QueryService {
     }
 
     /**
-     * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
-     * and execute it. Automatically set pagination.
+     * Get total number of rows that selectQuery returns
+     *
+     * @param selectQuery     select statement
+     * @param databaseService service that can handle the query
+     * @return total number of rows
+     * @throws DatabaseConnectionException
+     * @throws DatabaseExecutionException
+     * @throws SQLException
+     */
+    private Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
+            throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
+
+        selectQuery = selectQuery.trim();
+        // remove trailing semicolon if it is present
+        if (selectQuery.charAt(selectQuery.length() - 1) == ';') {
+            selectQuery = selectQuery.substring(0, selectQuery.length() - 1);
+        }
+
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
+
+        ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
+
+        return resultSet.next() ? resultSet.getLong(1) : null;
+    }
+
+    /**
+     * Execute (natural/query language) select query - translate it via LLM to the database specific query language if
+     * needed and execute it. Select query is read only and it returns a result that is automatically paginated.
      *
      * @param id                       database id
      * @param query                    in natural query or database query language
@@ -209,18 +238,20 @@ public class QueryService {
      *                                 otherwise it will be executed like it is.
      * @param page                     page number (fist page starts by 0), if null, default value is 0
      * @param pageSize                 number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param overrideLimit            if true overrides the limit value from the query to the pageSize
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public QueryResponse executeQuery(
+    public QueryResponse executeSelectQuery(
             UUID id,
             String query,
             Boolean translateToQueryLanguage,
             Integer page,
-            Integer pageSize
+            Integer pageSize,
+            Boolean overrideLimit
     ) throws Exception {
 
         log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
@@ -237,11 +268,14 @@ public class QueryService {
             query = queryApi.queryModel(LLMQuery);
         }
 
-        query = setPagination(query, page, pageSize, database, !translateToQueryLanguage);
+        String paginatedQuery = setPagination(
+                query, page, pageSize, database, !translateToQueryLanguage, overrideLimit);
 
         try {
-            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));
-            return new QueryResponse(queryResult, query);
+            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+            Long totalCount = getTotalCount(query, specificDatabaseService);
+
+            return new QueryResponse(queryResult, paginatedQuery, totalCount);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         }

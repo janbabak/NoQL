@@ -34,7 +34,8 @@ const databaseApi = {
     id: string,
     query: string,
     page: number = 0,
-    pageSize: number = 10): Promise<AxiosResponse<QueryResponse>> {
+    pageSize: number = 10,
+    overrideLimit: boolean = false): Promise<AxiosResponse<QueryResponse>> {
 
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/query-language',
@@ -47,6 +48,10 @@ const databaseApi = {
         {
           name: 'pageSize',
           value: pageSize
+        },
+        {
+          name: 'overrideLimit',
+          value: overrideLimit
         }
       ])
   }

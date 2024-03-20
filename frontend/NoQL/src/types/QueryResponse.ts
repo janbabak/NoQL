@@ -6,6 +6,7 @@ interface QueryResult {
 interface QueryResponse {
   query: string
   result: QueryResult
+  totalCount: number
 }
 
 export type { QueryResponse, QueryResult }

@@ -111,7 +111,8 @@ public class DatabaseController {
             @RequestParam Integer page,
             @RequestParam Integer pageSize
     ) throws Exception {
-        return queryService.executeQuery(id, query, true, page, pageSize);
+        return queryService.executeSelectQuery(
+                id, query, true, page, pageSize, false);
     }
 
     /**
@@ -131,8 +132,9 @@ public class DatabaseController {
             @PathVariable UUID id,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Boolean overrideLimit
     ) throws Exception {
-        return queryService.executeQuery(id, query, false, page, pageSize);
+        return queryService.executeSelectQuery(id, query, false, page, pageSize, overrideLimit);
     }
 }

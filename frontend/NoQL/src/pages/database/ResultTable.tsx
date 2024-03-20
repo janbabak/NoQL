@@ -1,10 +1,11 @@
 import { QueryResponse } from '../../types/QueryResponse.ts'
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
-export function ResultTable({ queryResult, onPageChange }: {
+export function ResultTable({ queryResult, totalCount, onPageChange }: {
   queryResult?: QueryResponse,
-  onPageChange: (page: number, pageSize: number) => void
+  totalCount: number
+  onPageChange: (page: number, pageSize: number) => void,
 }) {
 
   const [
@@ -17,16 +18,16 @@ export function ResultTable({ queryResult, onPageChange }: {
     setPageSize
   ] = useState<number>(10)
 
-  function changePage(_event: unknown, newPage: number) {
+  function changePage(_event: unknown, newPage: number): void {
     setPage(newPage)
     onPageChange(newPage, pageSize) // does not use pate because state updates on new render
   }
 
-  function onRowsPerPageChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function onRowsPerPageChange(event: React.ChangeEvent<HTMLInputElement>): void {
     const newPageSize = parseInt(event.target.value, 10)
+    onPageChange(0, newPageSize)
     setPageSize(newPageSize)
     setPage(0)
-    onPageChange(0, newPageSize) // does not use page, pageSize because state updates on next render
   }
 
   // https://mui.com/material-ui/react-table/#data-table
@@ -53,7 +54,7 @@ export function ResultTable({ queryResult, onPageChange }: {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={50}
+          count={totalCount}
           rowsPerPage={pageSize}
           page={page}
           onPageChange={changePage}

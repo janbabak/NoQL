@@ -38,9 +38,11 @@ class QueryServiceTest {
             Integer page,
             Integer pageSize,
             Boolean setOffset,
+            Boolean overrideLimit,
             String expectedQuery
     ) throws Exception {
-        String actualValue = queryService.setPagination(query, page, pageSize, postgresDatabase, setOffset);
+        String actualValue = queryService.setPagination(
+                query, page, pageSize, postgresDatabase, setOffset, overrideLimit);
         assertEquals(expectedQuery, actualValue);
     }
 
@@ -52,6 +54,7 @@ class QueryServiceTest {
                         null,
                         15,
                         false,
+                        false,
                         """
                         SELECT name FROM product WHERE price < 1000
                         LIMIT 15;"""
@@ -62,6 +65,7 @@ class QueryServiceTest {
                         8,
                         15,
                         true,
+                        false,
                         """
                         SELECT name FROM product WHERE price < 1000
                         LIMIT 15
@@ -73,6 +77,7 @@ class QueryServiceTest {
                         8,
                         15,
                         true,
+                        false,
                         """
                         SELECT name FROM product WHERE price < 1000 OFFSET 120
                         LIMIT 15;""",
@@ -86,6 +91,7 @@ class QueryServiceTest {
                         8,
                         15,
                         true,
+                        false,
                         """
                         SELECT name FROM product
                         WHERE price < 1000
@@ -102,6 +108,7 @@ class QueryServiceTest {
                         3,
                         10,
                         true,
+                        false,
                         """
                         SELECT *
                         FROM public.user
@@ -109,12 +116,31 @@ class QueryServiceTest {
                         LIMIT 1
                         OFFSET 30;""",
                 },
+                // limit already used - override it, override offset
+                {
+                        """
+                        SELECT *
+                        FROM public.user
+                        ORDER BY created_at ASC
+                        LIMIT 1;""",
+                        0,
+                        10,
+                        true,
+                        true,
+                        """
+                        SELECT *
+                        FROM public.user
+                        ORDER BY created_at ASC
+                        LIMIT 10
+                        OFFSET 0;""",
+                },
                 // limit already used - not override it, override offset, no new lines
                 {
                         "SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1;",
                         3,
                         10,
                         true,
+                        false,
                         """
                         SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1
                         OFFSET 30;""",
@@ -129,6 +155,7 @@ class QueryServiceTest {
                         3,
                         10,
                         true,
+                        false,
                         """
                         SELECT *
                         FROM public.user
@@ -142,6 +169,7 @@ class QueryServiceTest {
                         7,
                         19,
                         true,
+                        false,
                         "SELECT name FROM product LIMIT 19 OFFSET 133;"
                 },
                 // limit and offset already used, offset before limit, override them all
@@ -150,6 +178,7 @@ class QueryServiceTest {
                         7,
                         19,
                         true,
+                        false,
                         "SELECT name FROM product OFFSET 133 LIMIT 19;"
                 },
                 // limit already used with value greater than allowed limit
@@ -157,6 +186,7 @@ class QueryServiceTest {
                         "SELECT name FROM product LIMIT 260",
                         null,
                         250,
+                        false,
                         false,
                         "SELECT name FROM product LIMIT 250;"
                 }
