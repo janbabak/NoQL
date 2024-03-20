@@ -33,44 +33,66 @@ class QueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("paginationTestMethodSource")
-    void setPaginationTest(String query, Integer page, Integer pageSize, String expectedQuery) throws Exception {
-        String actualValue = queryService.setPagination(query, page, pageSize, postgresDatabase);
-
+    void setPaginationTestInSqlDatabase(
+            String query,
+            Integer page,
+            Integer pageSize,
+            Boolean setOffset,
+            String expectedQuery
+    ) throws Exception {
+        String actualValue = queryService.setPagination(query, page, pageSize, postgresDatabase, setOffset);
         assertEquals(expectedQuery, actualValue);
     }
 
     private static Object[][] paginationTestMethodSource() {
         return new Object[][]{
-                // fist page
+                // fist page, no offset
                 {
                         "SELECT name FROM product WHERE price < 1000;",
-                        0,
+                        null,
                         15,
+                        false,
                         """
                         SELECT name FROM product WHERE price < 1000
-                        LIMIT 15
-                        OFFSET 0;"""
+                        LIMIT 15;"""
                 },
-                // n-th page
+                // n-th page, set offset ond limit
                 {
                         "SELECT name FROM product WHERE price < 1000;",
                         8,
                         15,
+                        true,
                         """
                         SELECT name FROM product WHERE price < 1000
                         LIMIT 15
                         OFFSET 120;"""
                 },
-                // offset already used
+                // override offset, add limit
                 {
                         "SELECT name FROM product WHERE price < 1000 OFFSET 4;",
                         8,
                         15,
+                        true,
                         """
                         SELECT name FROM product WHERE price < 1000 OFFSET 120
-                        LIMIT 15;"""
+                        LIMIT 15;""",
                 },
-                // limit already used
+                // override offset, add limit, offset on new line
+                {
+                        """
+                        SELECT name FROM product
+                        WHERE price < 1000
+                        OFFSET 4;""",
+                        8,
+                        15,
+                        true,
+                        """
+                        SELECT name FROM product
+                        WHERE price < 1000
+                        OFFSET 120
+                        LIMIT 15;""",
+                },
+                // limit already used - not override it, override offset
                 {
                         """
                         SELECT *
@@ -79,6 +101,7 @@ class QueryServiceTest {
                         LIMIT 1;""",
                         3,
                         10,
+                        true,
                         """
                         SELECT *
                         FROM public.user
@@ -86,7 +109,17 @@ class QueryServiceTest {
                         LIMIT 1
                         OFFSET 30;""",
                 },
-                // limit already used, no semicolon
+                // limit already used - not override it, override offset, no new lines
+                {
+                        "SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1;",
+                        3,
+                        10,
+                        true,
+                        """
+                        SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1
+                        OFFSET 30;""",
+                },
+                // limit already used - override it, no semicolon, override offset
                 {
                         """
                         SELECT *
@@ -95,6 +128,7 @@ class QueryServiceTest {
                         LIMIT 19""",
                         3,
                         10,
+                        true,
                         """
                         SELECT *
                         FROM public.user
@@ -102,42 +136,29 @@ class QueryServiceTest {
                         LIMIT 10
                         OFFSET 30;""",
                 },
-                // limit and offset already used
+                // limit and offset already used, override them both
                 {
                         "SELECT name FROM product LIMIT 50 OFFSET 4;",
                         7,
                         19,
-                        """
-                        SELECT name FROM product LIMIT 19 OFFSET 133;"""
+                        true,
+                        "SELECT name FROM product LIMIT 19 OFFSET 133;"
                 },
-                // limit and offset already used, offset before limit
+                // limit and offset already used, offset before limit, override them all
                 {
                         "SELECT name FROM product OFFSET 4 LIMIT 50;",
                         7,
                         19,
-                        """
-                        SELECT name FROM product OFFSET 133 LIMIT 19;"""
+                        true,
+                        "SELECT name FROM product OFFSET 133 LIMIT 19;"
                 },
                 // limit already used with value greater than allowed limit
                 {
                         "SELECT name FROM product LIMIT 260",
                         null,
                         250,
-                        """
-                        SELECT name FROM product LIMIT 250
-                        OFFSET 0;"""
-                },
-                {
-                        """
-                        SELECT * FROM public.user
-                        LIMIT 10
-                        OFFSET 0;""",
-                        null,
-                        10,
-                        """
-                        SELECT * FROM public.user
-                        LIMIT 10
-                        OFFSET 0;"""
+                        false,
+                        "SELECT name FROM product LIMIT 250;"
                 }
         };
     }

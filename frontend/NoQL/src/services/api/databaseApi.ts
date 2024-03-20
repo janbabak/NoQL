@@ -37,7 +37,7 @@ const databaseApi = {
     pageSize: number = 10): Promise<AxiosResponse<QueryResponse>> {
 
     return this.API.post(
-      this.DOMAIN + '/' + id + '/query/natural-language',
+      this.DOMAIN + '/' + id + '/query/query-language',
       query,
       [
         {

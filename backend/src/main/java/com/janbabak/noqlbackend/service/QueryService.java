@@ -66,13 +66,20 @@ public class QueryService {
     /**
      * Set pagination in query.
      *
-     * @param query    database language query
-     * @param page     number of pages (first page has index 0)
-     * @param pageSize number of items in one page
-     * @param database database object
+     * @param query     database language query
+     * @param page      number of pages (first page has index 0), if null, default value is 0
+     * @param pageSize  number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param database  database object
+     * @param setOffset if true set the offset value, otherwise ignore offset
      * @return database language query with pagination
      */
-    public String setPagination(String query, Integer page, Integer pageSize, Database database) throws Exception {
+    public String setPagination(
+            String query,
+            Integer page,
+            Integer pageSize,
+            Database database,
+            Boolean setOffset
+    ) throws Exception {
         // defaults
         if (page == null) {
             page = 0;
@@ -81,8 +88,7 @@ public class QueryService {
             pageSize = 50; // TODO: load default page size from env
         }
         if (pageSize > 250) {
-            log.error("Page size={} greater than maximal allowed value={}",
-                    pageSize, 250);
+            log.error("Page size={} greater than maximal allowed value={}", pageSize, 250);
             throw new Exception("page size more than allowed");
         }
 
@@ -90,96 +96,119 @@ public class QueryService {
 
         return switch (database.getEngine()) {
             case POSTGRES, MYSQL -> {
-                // removes trailing semicolon if it is present
-                if (query.charAt(query.length() - 1) == ';') {
-                    query = query.substring(0, query.length() - 1);
+                query = setValueOfProperty(
+                        query,
+                        "LIMIT",
+                        pageSize,
+                        250,
+                        false
+                );
+                if (setOffset) {
+                    query = setValueOfProperty(
+                            query,
+                            "OFFSET",
+                            pageSize * page,
+                            null,
+                            true);
                 }
-
-                // add limit if is not present
-                if (!query.contains("LIMIT")) {
-                    query = "%s\nLIMIT %d".formatted(query, pageSize);
-                }
-                // add limit if the pageSize is lower than limit generated from the query
-                else {
-                    // verify that the limit is not too big
-                    int limitIndex = query.indexOf("LIMIT");
-                    String queryAfterLimit = query.substring(limitIndex + "LIMIT ".length());
-                    if (queryAfterLimit.isEmpty()) {
-                        // TODO: query is in bad syntax
-                    }
-                    int indexOfCharAfterLimitValue = queryAfterLimit.indexOf(" ");
-                    int indexOfCharCloserToLimitValue = queryAfterLimit.indexOf("\n");
-                    if (indexOfCharCloserToLimitValue != -1 && indexOfCharCloserToLimitValue < indexOfCharAfterLimitValue) {
-                        // new line character is closer than space
-                        indexOfCharAfterLimitValue = indexOfCharCloserToLimitValue;
-                    }
-                    indexOfCharCloserToLimitValue = queryAfterLimit.indexOf(";");
-                    if (indexOfCharCloserToLimitValue != -1 && indexOfCharCloserToLimitValue < indexOfCharAfterLimitValue) {
-                        // semicolon character is closer than space
-                        indexOfCharAfterLimitValue = indexOfCharCloserToLimitValue;
-                    }
-                    if (indexOfCharAfterLimitValue == -1) {
-                        indexOfCharAfterLimitValue = queryAfterLimit.length();
-                    }
-
-                    String limitValueString = queryAfterLimit.substring(0, indexOfCharAfterLimitValue);
-                    int limitValue = Integer.parseInt(limitValueString);
-
-                    if (limitValue > pageSize) {
-                        String queryBeforeLimitValue = query.substring(0, limitIndex + "LIMIT ".length());
-                        String queryAfterLimitValue = queryAfterLimit.substring(indexOfCharAfterLimitValue);
-                        query = queryBeforeLimitValue + pageSize + queryAfterLimitValue;
-                    }
-                }
-
-                // add offset only if it is not present
-                if (!query.contains("OFFSET")) {
-                    query = "%s\nOFFSET %d".formatted(query, page * pageSize);
-                }
-                // replace offset if it is present
-                else {
-                    int offsetIndex = query.indexOf("OFFSET");
-                    String queryAfterOffset = query.substring(offsetIndex + "OFFSET ".length());
-                    if (queryAfterOffset.isEmpty()) {
-                        // TODO: query is in bad syntax
-                    }
-                    int indexOfCharAfterOffsetValue = queryAfterOffset.indexOf(" ");
-                    int indexOfCharCloserToOffsetValue = queryAfterOffset.indexOf("\n");
-                    if (indexOfCharCloserToOffsetValue != -1 && indexOfCharCloserToOffsetValue < indexOfCharAfterOffsetValue) {
-                        // new line character is closer than space
-                        indexOfCharAfterOffsetValue = indexOfCharCloserToOffsetValue;
-                    }
-                    indexOfCharCloserToOffsetValue = queryAfterOffset.indexOf(";");
-                    if (indexOfCharCloserToOffsetValue != -1 && indexOfCharCloserToOffsetValue < indexOfCharAfterOffsetValue) {
-                        // semicolon character is closer than space
-                        indexOfCharAfterOffsetValue = indexOfCharCloserToOffsetValue;
-                    }
-                    if (indexOfCharAfterOffsetValue == -1) {
-                        indexOfCharAfterOffsetValue = queryAfterOffset.length();
-                    }
-
-                    String offsetValueString = queryAfterOffset.substring(0, indexOfCharAfterOffsetValue);
-                    int offsetValue = Integer.parseInt(offsetValueString);
-
-                    String queryBeforeOffsetValue = query.substring(0, offsetIndex + "OFFSET ".length());
-                    String queryAfterLimitValue = queryAfterOffset.substring(indexOfCharAfterOffsetValue);
-                    int offset = page * pageSize;
-                    query = queryBeforeOffsetValue + offset + queryAfterLimitValue;
-                }
-
-                yield query + ";";
+                yield query;
             }
         };
     }
 
     /**
+     * Set value of property in the query
+     *
+     * @param query               SQL query
+     * @param property            e.g. "LIMIT", "OFFSET"
+     * @param value               value of the property
+     * @param maximumAllowedValue if value is greater than maximum allowed value, maximum allowed value is used
+     * @param replaceEveryTime    if true value of the property is replaced in the query every time, if false value
+     *                            extracted from the query (if present) is replaced by value only if the value is lower
+     * @return modified query
+     */
+    private String setValueOfProperty(
+            String query,
+            String property,
+            Integer value,
+            Integer maximumAllowedValue,
+            Boolean replaceEveryTime
+    ) {
+        if (maximumAllowedValue != null && value > maximumAllowedValue) {
+            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
+            value = maximumAllowedValue;
+        }
+
+        // removes trailing semicolon if it is present
+        if (query.charAt(query.length() - 1) == ';') {
+            query = query.substring(0, query.length() - 1);
+        }
+
+        // add limit if is not present
+        if (!query.contains(property)) {
+            return "%s\n%s %d;".formatted(query, property, value);
+        }
+
+        int propertyIndex = query.indexOf(property);
+
+        String queryAfterProperty = query.substring(propertyIndex + (property + " ").length());
+
+        if (queryAfterProperty.isEmpty()) {
+            // TODO: query is in bad syntax
+        }
+
+        int indexOfCharAfterPropertyValue = queryAfterProperty.indexOf(" ");
+        int indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf("\n");
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        } else if (indexOfCharCloserToPropertyValue != -1
+                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
+            // new line character is closer than space
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        }
+
+        indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf(";");
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        } else if (indexOfCharCloserToPropertyValue != -1
+                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
+            // semicolon character is closer than space
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        }
+
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = queryAfterProperty.length();
+        }
+
+        String propertyValueString = queryAfterProperty.substring(0, indexOfCharAfterPropertyValue);
+        int extractedPropertyValue = Integer.parseInt(propertyValueString);
+
+        // replace the value only if it is lower than extracted value
+        if (!replaceEveryTime && extractedPropertyValue < value) {
+            value = extractedPropertyValue;
+        }
+
+        if (maximumAllowedValue != null && value > maximumAllowedValue) {
+            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
+            value = maximumAllowedValue;
+        }
+
+        String queryBeforePropertyValue = query.substring(0, propertyIndex + (property + " ").length());
+        String queryAfterPropertyValue = queryAfterProperty.substring(indexOfCharAfterPropertyValue);
+
+        return queryBeforePropertyValue + value + queryAfterPropertyValue + ";";
+    }
+
+    /**
      * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
-     * and execute it.
+     * and execute it. Automatically set pagination.
      *
      * @param id                       database id
      * @param query                    in natural query or database query language
      * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
      *                                 otherwise it will be executed like it is.
+     * @param page                     page number (fist page starts by 0), if null, default value is 0
+     * @param pageSize                 number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
@@ -208,7 +237,7 @@ public class QueryService {
             query = queryApi.queryModel(LLMQuery);
         }
 
-        query = setPagination(query, page, pageSize, database);
+        query = setPagination(query, page, pageSize, database, !translateToQueryLanguage);
 
         try {
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));
