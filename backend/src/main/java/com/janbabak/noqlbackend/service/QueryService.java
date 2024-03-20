@@ -72,13 +72,18 @@ public class QueryService {
      * @param database database object
      * @return database language query with pagination
      */
-    public String setPagination(String query, Integer page, Integer pageSize, Database database) {
+    public String setPagination(String query, Integer page, Integer pageSize, Database database) throws Exception {
         // defaults
         if (page == null) {
             page = 0;
         }
         if (pageSize == null) {
             pageSize = 50; // TODO: load default page size from env
+        }
+        if (pageSize > 250) {
+            log.error("Page size={} greater than maximal allowed value={}",
+                    pageSize, 250);
+            throw new Exception("page size more than allowed");
         }
 
         query = query.trim();
@@ -90,10 +95,12 @@ public class QueryService {
                     query = query.substring(0, query.length() - 1);
                 }
 
-                // add limit only if it is not present
+                // add limit if is not present
                 if (!query.contains("LIMIT")) {
                     query = "%s\nLIMIT %d".formatted(query, pageSize);
-                } else {
+                }
+                // add limit if the pageSize is lower than limit generated from the query
+                else {
                     // verify that the limit is not too big
                     int limitIndex = query.indexOf("LIMIT");
                     String queryAfterLimit = query.substring(limitIndex + "LIMIT ".length());
@@ -117,20 +124,47 @@ public class QueryService {
 
                     String limitValueString = queryAfterLimit.substring(0, indexOfCharAfterLimitValue);
                     int limitValue = Integer.parseInt(limitValueString);
-                    int maxAllowedPageSize = 250; // TODO: load from environment variable
-                    if (limitValue > maxAllowedPageSize) {
-                        log.error("Page size={} greater than maximal allowed value={}",
-                                pageSize, maxAllowedPageSize);
+
+                    if (limitValue > pageSize) {
                         String queryBeforeLimitValue = query.substring(0, limitIndex + "LIMIT ".length());
                         String queryAfterLimitValue = queryAfterLimit.substring(indexOfCharAfterLimitValue);
-                        query = queryBeforeLimitValue + maxAllowedPageSize + queryAfterLimitValue;
+                        query = queryBeforeLimitValue + pageSize + queryAfterLimitValue;
                     }
-
                 }
 
                 // add offset only if it is not present
                 if (!query.contains("OFFSET")) {
                     query = "%s\nOFFSET %d".formatted(query, page * pageSize);
+                }
+                // replace offset if it is present
+                else {
+                    int offsetIndex = query.indexOf("OFFSET");
+                    String queryAfterOffset = query.substring(offsetIndex + "OFFSET ".length());
+                    if (queryAfterOffset.isEmpty()) {
+                        // TODO: query is in bad syntax
+                    }
+                    int indexOfCharAfterOffsetValue = queryAfterOffset.indexOf(" ");
+                    int indexOfCharCloserToOffsetValue = queryAfterOffset.indexOf("\n");
+                    if (indexOfCharCloserToOffsetValue != -1 && indexOfCharCloserToOffsetValue < indexOfCharAfterOffsetValue) {
+                        // new line character is closer than space
+                        indexOfCharAfterOffsetValue = indexOfCharCloserToOffsetValue;
+                    }
+                    indexOfCharCloserToOffsetValue = queryAfterOffset.indexOf(";");
+                    if (indexOfCharCloserToOffsetValue != -1 && indexOfCharCloserToOffsetValue < indexOfCharAfterOffsetValue) {
+                        // semicolon character is closer than space
+                        indexOfCharAfterOffsetValue = indexOfCharCloserToOffsetValue;
+                    }
+                    if (indexOfCharAfterOffsetValue == -1) {
+                        indexOfCharAfterOffsetValue = queryAfterOffset.length();
+                    }
+
+                    String offsetValueString = queryAfterOffset.substring(0, indexOfCharAfterOffsetValue);
+                    int offsetValue = Integer.parseInt(offsetValueString);
+
+                    String queryBeforeOffsetValue = query.substring(0, offsetIndex + "OFFSET ".length());
+                    String queryAfterLimitValue = queryAfterOffset.substring(indexOfCharAfterOffsetValue);
+                    int offset = page * pageSize;
+                    query = queryBeforeOffsetValue + offset + queryAfterLimitValue;
                 }
 
                 yield query + ";";

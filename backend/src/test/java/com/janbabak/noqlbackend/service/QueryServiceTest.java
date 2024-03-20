@@ -33,7 +33,7 @@ class QueryServiceTest {
 
     @ParameterizedTest
     @MethodSource("paginationTestMethodSource")
-    void setPaginationTest(String query, Integer page, Integer pageSize, String expectedQuery) {
+    void setPaginationTest(String query, Integer page, Integer pageSize, String expectedQuery) throws Exception {
         String actualValue = queryService.setPagination(query, page, pageSize, postgresDatabase);
 
         assertEquals(expectedQuery, actualValue);
@@ -67,7 +67,7 @@ class QueryServiceTest {
                         8,
                         15,
                         """
-                        SELECT name FROM product WHERE price < 1000 OFFSET 4
+                        SELECT name FROM product WHERE price < 1000 OFFSET 120
                         LIMIT 15;"""
                 },
                 // limit already used
@@ -99,7 +99,7 @@ class QueryServiceTest {
                         SELECT *
                         FROM public.user
                         ORDER BY created_at ASC
-                        LIMIT 19
+                        LIMIT 10
                         OFFSET 30;""",
                 },
                 // limit and offset already used
@@ -108,7 +108,7 @@ class QueryServiceTest {
                         7,
                         19,
                         """
-                        SELECT name FROM product LIMIT 50 OFFSET 4;"""
+                        SELECT name FROM product LIMIT 19 OFFSET 133;"""
                 },
                 // limit and offset already used, offset before limit
                 {
@@ -116,13 +116,13 @@ class QueryServiceTest {
                         7,
                         19,
                         """
-                        SELECT name FROM product OFFSET 4 LIMIT 50;"""
+                        SELECT name FROM product OFFSET 133 LIMIT 19;"""
                 },
                 // limit already used with value greater than allowed limit
                 {
                         "SELECT name FROM product LIMIT 260",
                         null,
-                        null,
+                        250,
                         """
                         SELECT name FROM product LIMIT 250
                         OFFSET 0;"""
@@ -133,7 +133,7 @@ class QueryServiceTest {
                         LIMIT 10
                         OFFSET 0;""",
                         null,
-                        null,
+                        10,
                         """
                         SELECT * FROM public.user
                         LIMIT 10
