@@ -12,6 +12,7 @@ import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class DatabaseController {
     /**
      * Get database by id.
      *
-     * @param id identifier
+     * @param id database identifier
      * @return database
      * @throws EntityNotFoundException database of specified id not found.
      */
@@ -93,15 +94,18 @@ public class DatabaseController {
     }
 
     /**
-     * Query the user's database using natural language.
+     * Query the user's database using natural language, result is automatically paginated.
      *
-     * @param id    database id
-     * @param query natural language query
+     * @param id       database id
+     * @param query    natural language query
+     * @param page     page number (first pages is 0)
+     * @param pageSize number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
     @PostMapping("/{id}/query/natural-language")
     @ResponseStatus(HttpStatus.OK)
@@ -110,25 +114,38 @@ public class DatabaseController {
             @RequestBody String query,
             @RequestParam Integer page,
             @RequestParam Integer pageSize
-    ) throws Exception {
-        return queryService.executeQuery(id, query, true, page, pageSize);
+    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            BadRequestException, LLMException, EntityNotFoundException {
+        return queryService.executeSelectQuery(
+                id, query, true, page, pageSize, false);
     }
 
     /**
-     * Query the user's database using database query language.
+     * Query the user's database using database query language, result is automatically paginated.
      *
-     * @param id    database id
-     * @param query database query in corresponding database query language
+     * @param id            database id
+     * @param query         database query in corresponding database query language
+     * @param page          page number (first pages is 0)
+     * @param pageSize      number of items in one page
+     * @param overrideLimit if true override the limit value no matter what (used when number of items per pages
+     *                      is changed)
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
     @PostMapping("/{id}/query/query-language")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeQueryLanguageQuery(@PathVariable UUID id, @RequestBody String query)
-            throws Exception {
-        return queryService.executeQuery(id, query, false, 0, 0); // TODO pagination
+    public QueryResponse executeQueryLanguageQuery(
+            @PathVariable UUID id,
+            @RequestBody String query,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Boolean overrideLimit
+    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            BadRequestException, LLMException, EntityNotFoundException {
+        return queryService.executeSelectQuery(id, query, false, page, pageSize, overrideLimit);
     }
 }

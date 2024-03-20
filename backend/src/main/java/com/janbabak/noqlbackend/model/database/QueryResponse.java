@@ -17,6 +17,7 @@ import java.util.List;
 public class QueryResponse {
     private QueryResult result;
     private String query; // query used for retrieving the result above
+    private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
 
     @Data
     public static class QueryResult {

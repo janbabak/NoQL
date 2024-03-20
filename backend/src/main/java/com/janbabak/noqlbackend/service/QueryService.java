@@ -15,8 +15,10 @@ import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.UUID;
@@ -64,15 +66,26 @@ public class QueryService {
     }
 
     /**
-     * Set pagination in query.
+     * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
      *
-     * @param query    database language query
-     * @param page     number of pages (first page has index 0)
-     * @param pageSize number of items in one page
-     * @param database database object
+     * @param query         database language query
+     * @param page          number of pages (first page has index 0), if null, default value is 0
+     * @param pageSize      number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param database      database object
+     * @param setOffset     if true set the offset value, otherwise ignore offset
+     * @param overrideLimit if true override the extracted limit value from the query no matter what by value
      * @return database language query with pagination
+     * @throws BadRequestException        value is greater than maximum allowed value
+     * @throws DatabaseExecutionException SQL query is in bad syntax
      */
-    public String setPagination(String query, Integer page, Integer pageSize, Database database) {
+    public String setPaginationInSqlQuery(
+            String query,
+            Integer page,
+            Integer pageSize,
+            Database database,
+            Boolean setOffset,
+            Boolean overrideLimit
+    ) throws BadRequestException, DatabaseExecutionException {
         // defaults
         if (page == null) {
             page = 0;
@@ -80,79 +93,177 @@ public class QueryService {
         if (pageSize == null) {
             pageSize = 50; // TODO: load default page size from env
         }
+        if (pageSize > 250) {
+            log.error("Page size={} greater than maximal allowed value={}", pageSize, 250);
+            throw new BadRequestException("Page size is greater than maximum allowed value");
+        }
 
         query = query.trim();
 
         return switch (database.getEngine()) {
             case POSTGRES, MYSQL -> {
-                // removes trailing semicolon if it is present
-                if (query.charAt(query.length() - 1) == ';') {
-                    query = query.substring(0, query.length() - 1);
+                query = setValueOfPropertyInSqlQuery(
+                        query,
+                        "LIMIT",
+                        pageSize,
+                        250,
+                        overrideLimit
+                );
+                if (setOffset) {
+                    query = setValueOfPropertyInSqlQuery(
+                            query,
+                            "OFFSET",
+                            pageSize * page,
+                            null,
+                            true);
                 }
-
-                // add limit only if it is not present
-                if (!query.contains("LIMIT")) {
-                    query = "%s\nLIMIT %d".formatted(query, pageSize);
-                } else {
-                    // verify that the limit is not too big
-                    int limitIndex = query.indexOf("LIMIT");
-                    String queryAfterLimit = query.substring(limitIndex + "LIMIT ".length());
-                    if (queryAfterLimit.isEmpty()) {
-                        // TODO: query is in bad syntax
-                    }
-                    int indexOfCharAfterLimitValue = queryAfterLimit.indexOf(" ");
-                    if (indexOfCharAfterLimitValue == -1) {
-                        // space after limit value was not found, there might be a semicolon
-                        indexOfCharAfterLimitValue = queryAfterLimit.indexOf(";");
-                    }
-                    if (indexOfCharAfterLimitValue == -1) {
-                        indexOfCharAfterLimitValue = queryAfterLimit.length();
-                    }
-
-                    String limitValueString = queryAfterLimit.substring(0, indexOfCharAfterLimitValue);
-                    int limitValue = Integer.parseInt(limitValueString);
-                    int maxAllowedPageSize = 250; // TODO: load from environment variable
-                    if (limitValue > maxAllowedPageSize) {
-                        log.error("Page size={} greater than maximal allowed value={}",
-                                pageSize, maxAllowedPageSize);
-                        String queryBeforeLimitValue = query.substring(0, limitIndex + "LIMIT ".length());
-                        String queryAfterLimitValue = queryAfterLimit.substring(indexOfCharAfterLimitValue);
-                        query = queryBeforeLimitValue + maxAllowedPageSize + queryAfterLimitValue;
-                    }
-
-                }
-
-                // add offset only if it is not present
-                if (!query.contains("OFFSET")) {
-                    query = "%s\nOFFSET %d".formatted(query, page * pageSize);
-                }
-
-                yield query + ";";
+                yield query;
             }
         };
     }
 
     /**
-     * Execute (natural/query language) query - translate it via LLM to the database specific query language if needed
-     * and execute it.
+     * Set value of property in the SQL query.
+     *
+     * @param query               SQL query
+     * @param property            e.g. {@code LIMIT}, {@code OFFSET}
+     * @param value               value of the property
+     * @param maximumAllowedValue if value is greater than maximum allowed value, maximum allowed value is used instead
+     * @param replaceEveryTime    if true value of the property is replaced in the query every time, if false value
+     *                            extracted from the query (if present) is replaced by value only if the value is lower
+     *                            than the extracted one.
+     * @return modified query
+     * @throws DatabaseExecutionException query execution failed (syntax error - property has no value)
+     */
+    private String setValueOfPropertyInSqlQuery(
+            String query,
+            String property,
+            Integer value,
+            Integer maximumAllowedValue,
+            Boolean replaceEveryTime
+    ) throws DatabaseExecutionException {
+        if (maximumAllowedValue != null && value > maximumAllowedValue) {
+            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
+            value = maximumAllowedValue;
+        }
+
+        // removes trailing semicolon if it is present
+        if (query.charAt(query.length() - 1) == ';') {
+            query = query.substring(0, query.length() - 1);
+        }
+
+        // add limit if is not present
+        if (!query.contains(property)) {
+            return "%s\n%s %d;".formatted(query, property, value);
+        }
+
+        int propertyIndex = query.indexOf(property);
+
+        String queryAfterProperty = query.substring(propertyIndex + (property + " ").length());
+
+        if (queryAfterProperty.isEmpty()) {
+            log.error("Property={} has no value, query={}", property, query);
+            throw new DatabaseExecutionException("Property has no value");
+        }
+
+        int indexOfCharAfterPropertyValue = queryAfterProperty.indexOf(" ");
+        int indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf("\n");
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        } else if (indexOfCharCloserToPropertyValue != -1
+                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
+            // new line character is closer than space
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        }
+
+        indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf(";");
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        } else if (indexOfCharCloserToPropertyValue != -1
+                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
+            // semicolon character is closer than space
+            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
+        }
+
+        if (indexOfCharAfterPropertyValue == -1) {
+            indexOfCharAfterPropertyValue = queryAfterProperty.length();
+        }
+
+        String propertyValueString = queryAfterProperty.substring(0, indexOfCharAfterPropertyValue);
+        int extractedPropertyValue = Integer.parseInt(propertyValueString);
+
+        // replace the value only if it is lower than extracted value
+        if (!replaceEveryTime && extractedPropertyValue < value) {
+            value = extractedPropertyValue;
+        }
+
+        if (maximumAllowedValue != null && value > maximumAllowedValue) {
+            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
+            value = maximumAllowedValue;
+        }
+
+        String queryBeforePropertyValue = query.substring(0, propertyIndex + (property + " ").length());
+        String queryAfterPropertyValue = queryAfterProperty.substring(indexOfCharAfterPropertyValue);
+
+        return queryBeforePropertyValue + value + queryAfterPropertyValue + ";";
+    }
+
+    /**
+     * Get total number of rows that SQL select query returns.
+     *
+     * @param selectQuery     select statement
+     * @param databaseService service that can handle the query
+     * @return total number of rows
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
+    private Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
+            throws DatabaseConnectionException, DatabaseExecutionException {
+
+        selectQuery = selectQuery.trim();
+        // remove trailing semicolon if it is present
+        if (selectQuery.charAt(selectQuery.length() - 1) == ';') {
+            selectQuery = selectQuery.substring(0, selectQuery.length() - 1);
+        }
+
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
+
+        ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
+
+        try {
+            return resultSet.next() ? resultSet.getLong(1) : null;
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException("Cannot parse total count value from query");
+        }
+    }
+
+    /**
+     * Execute (natural/query language) select query - translate it via LLM to the database specific query language if
+     * needed and execute it. Select query is read only, and it returns a result that is automatically paginated.
      *
      * @param id                       database id
      * @param query                    in natural query or database query language
      * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
      *                                 otherwise it will be executed like it is.
+     * @param page                     page number (fist page starts by 0), if null, default value is 0
+     * @param pageSize                 number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param overrideLimit            if true overrides the limit value from the query to the pageSize
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
-    public QueryResponse executeQuery(
+    public QueryResponse executeSelectQuery(
             UUID id,
             String query,
             Boolean translateToQueryLanguage,
             Integer page,
-            Integer pageSize
-    ) throws Exception {
+            Integer pageSize,
+            Boolean overrideLimit
+    ) throws EntityNotFoundException, DatabaseConnectionException,
+            DatabaseExecutionException, BadRequestException, LLMException {
 
         log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
 
@@ -168,11 +279,14 @@ public class QueryService {
             query = queryApi.queryModel(LLMQuery);
         }
 
-        query = setPagination(query, page, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(
+                query, page, pageSize, database, !translateToQueryLanguage, overrideLimit);
 
         try {
-            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(query));
-            return new QueryResponse(queryResult, query);
+            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+            Long totalCount = getTotalCount(query, specificDatabaseService);
+
+            return new QueryResponse(queryResult, paginatedQuery, totalCount);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         }

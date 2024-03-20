@@ -27,6 +27,11 @@ export function DatabasePage() {
   ] = useState<QueryResponse | null>(null)
 
   const [
+    totalCount,
+    setTotalCount
+  ] = useState<number>(0)
+
+  const [
     queryLoading,
     setQueryLoading
   ] = useState<boolean>(false)
@@ -58,6 +63,28 @@ export function DatabasePage() {
     try {
       const response =
         await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value)
+      setQueryResult(response.data)
+      setTotalCount(response.data.totalCount)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
+  // get next page
+  async function onPageChange(page: number, pageSize: number) {
+    console.log('new page is: ' + page) // TODO: remove
+
+    setQueryLoading(true)
+    try {
+      const response = await databaseApi.queryQueryLanguageQuery(
+        id || '',
+        queryResult?.query || '',
+        page,
+        pageSize,
+        true)
+
       setQueryResult(response.data)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
@@ -91,7 +118,11 @@ export function DatabasePage() {
       {queryResult != null &&
         <div>
           <GeneratedQuery query={queryResult.query} />
-          <ResultTable queryResult={queryResult} />
+          <ResultTable
+            queryResult={queryResult}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
         </div>
       }
     </>
