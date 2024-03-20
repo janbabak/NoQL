@@ -1,5 +1,15 @@
 import { QueryResponse } from '../../types/QueryResponse.ts'
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow } from '@mui/material'
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow
+} from '@mui/material'
 import React, { useState } from 'react'
 
 export function ResultTable({ queryResult, totalCount, onPageChange }: {
@@ -32,25 +42,29 @@ export function ResultTable({ queryResult, totalCount, onPageChange }: {
 
   // https://mui.com/material-ui/react-table/#data-table
   return (
-    <TableContainer component={Paper} elevation={2}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <Box sx={{ width: '100%' }}>
+      <Paper sx={{ width: '100%', mb: 2 }}>
+        <TableContainer>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
 
-        <TableHead>
-          <TableRow>
-            {queryResult?.result.columnNames.map((columnName, columnNameIndex: number) =>
-              <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
-          </TableRow>
-        </TableHead>
+            <TableHead>
+              <TableRow>
+                {queryResult?.result.columnNames.map((columnName, columnNameIndex: number) =>
+                  <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
+              </TableRow>
+            </TableHead>
 
-        <TableBody>
-          {queryResult?.result.rows.map((row, rowIndex: number) =>
-            <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-              {row.map((cell, cellIndex: number) =>
-                <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}
-            </TableRow>
-          )}
-        </TableBody>
+            <TableBody>
+              {queryResult?.result.rows.map((row, rowIndex: number) =>
+                <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  {row.map((cell, cellIndex: number) =>
+                    <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}
+                </TableRow>
+              )}
+            </TableBody>
 
+          </Table>
+        </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -60,7 +74,7 @@ export function ResultTable({ queryResult, totalCount, onPageChange }: {
           onPageChange={changePage}
           onRowsPerPageChange={onRowsPerPageChange}
         />
-      </Table>
-    </TableContainer>
+      </Paper>
+    </Box>
   )
 }
