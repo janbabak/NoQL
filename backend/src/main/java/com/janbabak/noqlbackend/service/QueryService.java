@@ -5,6 +5,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.database.QueryResponse;
@@ -16,6 +17,7 @@ import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
@@ -31,6 +33,9 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
+
+    @Autowired
+    private Settings settings;
 
     /**
      * Create query content for the LLM.
@@ -70,7 +75,9 @@ public class QueryService {
      *
      * @param query         database language query
      * @param page          number of pages (first page has index 0), if null, default value is 0
-     * @param pageSize      number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param pageSize      number of items in one page,<br />
+     *                      if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                      max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param database      database object
      * @param setOffset     if true set the offset value, otherwise ignore offset
      * @param overrideLimit if true override the extracted limit value from the query no matter what by value
@@ -91,11 +98,11 @@ public class QueryService {
             page = 0;
         }
         if (pageSize == null) {
-            pageSize = 50; // TODO: load default page size from env
+            pageSize = settings.defaultPageSize;
         }
-        if (pageSize > 250) {
-            log.error("Page size={} greater than maximal allowed value={}", pageSize, 250);
-            throw new BadRequestException("Page size is greater than maximum allowed value");
+        if (pageSize > settings.maxPageSize) {
+            log.error("Page size={} greater than maximal allowed value={}", pageSize, settings.maxPageSize);
+            throw new BadRequestException("Page size is greater than maximum allowed value.");
         }
 
         query = query.trim();
@@ -106,7 +113,7 @@ public class QueryService {
                         query,
                         "LIMIT",
                         pageSize,
-                        250,
+                        settings.maxPageSize,
                         overrideLimit
                 );
                 if (setOffset) {
@@ -246,7 +253,9 @@ public class QueryService {
      * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
      *                                 otherwise it will be executed like it is.
      * @param page                     page number (fist page starts by 0), if null, default value is 0
-     * @param pageSize                 number of items in one page, if null default value is 50, max allowed size is 250 TODO: load from env
+     * @param pageSize                 number of items in one page,<br />
+     *                                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param overrideLimit            if true overrides the limit value from the query to the pageSize
      * @return query result
      * @throws EntityNotFoundException     queried database not found.

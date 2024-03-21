@@ -12,4 +12,8 @@ public class Settings {
     /** Maximum page size of automatically paginated query result. */
     @Value("${app.settings.pagination.maxPageSize}")
     public Integer maxPageSize;
+
+    /** Default page size of automatically paginated query result. */
+    @Value("${app.settings.pagination.defaultPageSize}")
+    public Integer defaultPageSize;
 }
