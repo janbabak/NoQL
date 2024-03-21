@@ -9,3 +9,9 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+
+app:
+  settings:
+    pagination:
+      maxPageSize: "${PAGINATION_MAX_PAGE_SIZE:50}"
+      defaultPageSize: "${PAGINATION_DEFAULT_PAGE_SIZE:10}"
