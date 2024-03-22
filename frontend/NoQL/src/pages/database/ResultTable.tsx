@@ -36,7 +36,6 @@ export function ResultTable(
     onPageSizeChange(parseInt(event.target.value, 10))
   }
 
-  // https://mui.com/material-ui/react-table/#data-table
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
