@@ -27,8 +27,9 @@ const databaseApi = {
    * Params:
    * @param id database id
    * @param query natural language query
+   * @param pageSize size of a page of automatically paginated response
    */
-  queryNaturalLanguage(id: string, query: string): Promise<AxiosResponse<QueryResponse>> {
+  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/natural-language',
       query, [
@@ -38,7 +39,7 @@ const databaseApi = {
         },
         {
           name: 'pageSize',
-          value: 10 // TODO: set default value
+          value: pageSize
         }
       ])
   },

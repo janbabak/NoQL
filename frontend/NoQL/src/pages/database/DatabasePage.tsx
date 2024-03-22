@@ -27,14 +27,24 @@ export function DatabasePage() {
   ] = useState<QueryResponse | null>(null)
 
   const [
-    totalCount,
-    setTotalCount
-  ] = useState<number>(0)
-
-  const [
     queryLoading,
     setQueryLoading
   ] = useState<boolean>(false)
+
+  const [
+    page,
+    setPage
+  ] = useState<number>(0)
+
+  const [
+    pageSize,
+    setPageSize
+  ] = useState<number>(10)
+
+  const [
+    totalCount,
+    setTotalCount
+  ] = useState<number>(0)
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const usersQuery = useRef<any>('')
@@ -59,10 +69,11 @@ export function DatabasePage() {
 
   // get query result
   async function queryDatabase() {
+    setPage(0)
     setQueryLoading(true)
     try {
       const response =
-        await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value)
+        await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -75,6 +86,8 @@ export function DatabasePage() {
   // get next page
   async function onPageChange(page: number, pageSize: number) {
     console.log('new page is: ' + page) // TODO: remove
+    setPageSize(pageSize)
+    setPage(page)
 
     setQueryLoading(true)
     try {
@@ -91,6 +104,11 @@ export function DatabasePage() {
     } finally {
       setQueryLoading(false)
     }
+  }
+
+  async function onPageSizeChange(newPageSize: number) {
+    setPageSize(0)
+    onPageChange(0, newPageSize)
   }
 
   const PageContent =
@@ -120,8 +138,11 @@ export function DatabasePage() {
           <GeneratedQuery query={queryResult.query} />
           <ResultTable
             queryResult={queryResult}
+            page={page}
+            pageSize={pageSize}
             totalCount={totalCount}
             onPageChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
           />
         </div>
       }
