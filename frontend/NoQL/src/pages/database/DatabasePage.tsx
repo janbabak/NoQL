@@ -2,16 +2,12 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, CircularProgress, Fab, TextField, Typography } from '@mui/material'
+import { Alert, Box, Tab, Tabs, TextField, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { Editor } from '@monaco-editor/react'
-import { green } from '@mui/material/colors'
-import ChangeHistoryRoundedIcon from '@mui/icons-material/ChangeHistoryRounded'
-import CheckIcon from '@mui/icons-material/Check'
-
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -51,22 +47,20 @@ export function DatabasePage() {
     setTotalCount
   ] = useState<number | null>(0)
 
-  const buttonSx = {
-    ...(queryLoading && {
-      bgcolor: green[500],
-      '&:hover': {
-        bgcolor: green[700]
-      }
-    })
-  }
-
-  const queryLanguageQuery = useRef<any>('')
-  function handleEditorDidMount(editor, monaco) {
-    queryLanguageQuery.current = editor;
-  }
+  const [
+    tab,
+    setTab
+  ] = useState<number>(0)
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const naturalLanguageQuery = useRef<any>('')
+
+  const queryLanguageQuery = useRef<any>('')
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function handleEditorDidMount(editor: string, _monaco: unknown): void {
+    queryLanguageQuery.current = editor
+  }
 
   useEffect(() => {
     void loadDatabase()
@@ -87,13 +81,16 @@ export function DatabasePage() {
   }
 
   // get query result
-  async function queryDatabase(naturalLanguage: boolean) {
+  async function queryDatabase() {
     setPage(0)
     setQueryLoading(true)
     try {
+      const naturalLanguage = tab == 0
       const response = naturalLanguage
-        ? await databaseApi.queryNaturalLanguage(id || '', naturalLanguageQuery.current.value, pageSize)
-        : await databaseApi.queryQueryLanguageQuery(id || '', queryLanguageQuery.current.getValue(), 0, pageSize)
+        ? await databaseApi.queryNaturalLanguage(
+          id || '', naturalLanguageQuery.current.value, pageSize)
+        : await databaseApi.queryQueryLanguageQuery(
+          id || '', queryLanguageQuery.current.getValue(), 0, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -131,6 +128,10 @@ export function DatabasePage() {
     onPageChange(0, newPageSize)
   }
 
+  function handleTabChange(_event: React.SyntheticEvent, newValue: number) {
+    setTab(newValue)
+  }
+
   const QueryResultElement =
     <>
       {queryResult != null &&
@@ -160,7 +161,19 @@ export function DatabasePage() {
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
 
-      <div className={styles.queryInput}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider'}}>
+        <Tabs
+          value={tab}
+          aria-label="basic tabs example"
+          onChange={handleTabChange}
+          sx={{borderRadius: '0.25rem', marginTop: '1.5rem'}}
+        >
+          <Tab label="Natural language" sx={{borderRadius: '0.25rem'}} />
+          <Tab label="Query language" sx={{borderRadius: '0.25rem'}} />
+        </Tabs>
+      </Box>
+
+      <div className={styles.queryInput} role="tabpanel" hidden={tab != 0}>
         <TextField
           id="query"
           label="Query"
@@ -170,50 +183,31 @@ export function DatabasePage() {
         />
       </div>
 
-      <Editor
-        height="100px"
-        language="sql"
-        theme="vs-dark"
-        onMount={handleEditorDidMount}
-        options={{
-          inlineSuggest: true,
-          fontSize: '16px',
-          formatOnType: true,
-          autoClosingBrackets: true,
-          minimap: { enabled: false }
-        }}
-      />
-
-      <div style={{ position: 'relative' }}>
-
-        <Fab
-          aria-label="save"
-          color="primary"
-          sx={buttonSx}
-          onClick={() => queryDatabase(false)}
-        >
-          {queryLoading ? <CheckIcon /> :
-            <ChangeHistoryRoundedIcon style={{ transform: 'rotate(0.25turn) translateY(-2px)' }} />}
-        </Fab>
-        {queryLoading && (
-          <CircularProgress
-            size={68}
-            sx={{
-              color: green[500],
-              position: 'absolute',
-              top: -6,
-              left: -6,
-              zIndex: 1
-            }}
-          />
-        )}
+      <div role="tabpanel" hidden={tab != 1} className={styles.queryEditor}>
+        {/*https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html*/}
+        <Editor
+          height="200px"
+          language="sql"
+          theme="vs-dark"
+          onMount={handleEditorDidMount}
+          options={{
+            inlineSuggest: true,
+            fontSize: 16,
+            fontFamily: 'monospace',
+            lineHeight: 24,
+            formatOnType: true,
+            autoClosingBrackets: true,
+            minimap: { enabled: false },
+            padding: { top: 20 }
+          }}
+        />
       </div>
 
       <LoadingButton
         loading={queryLoading}
         fullWidth
         variant="contained"
-        onClick={() => queryDatabase(true)}
+        onClick={queryDatabase}
         className={styles.queryButton}
       >Query</LoadingButton>
 

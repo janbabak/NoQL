@@ -15,3 +15,8 @@
 #root h1 {
     margin-bottom: 1rem;
 }
+
+div.monaco-editor,
+div.monaco-editor .overflow-guard {
+    border-radius: 0.25rem !important;
+}

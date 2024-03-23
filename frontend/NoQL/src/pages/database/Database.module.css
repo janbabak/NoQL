@@ -1,5 +1,6 @@
-.queryInput {
-    margin: 2rem 0 .5rem 0;
+.queryInput,
+.queryEditor {
+    margin: 1rem 0 .5rem 0;
 }
 
 button.queryButton {
