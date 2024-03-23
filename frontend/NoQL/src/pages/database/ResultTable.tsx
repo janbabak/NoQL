@@ -44,13 +44,13 @@ export function ResultTable(
 
             <TableHead>
               <TableRow>
-                {queryResult?.result.columnNames.map((columnName, columnNameIndex: number) =>
+                {queryResult?.result?.columnNames.map((columnName, columnNameIndex: number) =>
                   <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {queryResult?.result.rows.map((row, rowIndex: number) =>
+              {queryResult?.result?.rows.map((row, rowIndex: number) =>
                 <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   {row.map((cell, cellIndex: number) =>
                     <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}

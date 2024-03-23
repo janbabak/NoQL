@@ -4,9 +4,10 @@ interface QueryResult {
 }
 
 interface QueryResponse {
+  result: QueryResult | null
   query: string
-  result: QueryResult
-  totalCount: number // total count of rows (response is paginated, so it does not contain all of them)
+  totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
+  errorMessage: string | null
 }
 
 export type { QueryResponse, QueryResult }
