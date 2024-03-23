@@ -34,10 +34,6 @@ const databaseApi = {
       this.DOMAIN + '/' + id + '/query/natural-language',
       query, [
         {
-          name: 'page',
-          value: 0
-        },
-        {
           name: 'pageSize',
           value: pageSize
         }

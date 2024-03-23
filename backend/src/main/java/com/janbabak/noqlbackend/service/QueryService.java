@@ -310,6 +310,7 @@ public class QueryService {
         // executes the query with retires - if it fails translate it via LLM and trie again
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             query = queryApi.queryModel(LLMQuery);
+            // TODO: remove after testing
 //            query = """
 //                    ```
 //                    select * from user;

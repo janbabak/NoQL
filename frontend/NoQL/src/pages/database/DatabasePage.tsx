@@ -2,7 +2,7 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { TextField, Typography } from '@mui/material'
+import { Alert, TextField, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
@@ -44,7 +44,7 @@ export function DatabasePage() {
   const [
     totalCount,
     setTotalCount
-  ] = useState<number>(0)
+  ] = useState<number | null>(0)
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const usersQuery = useRef<any>('')
@@ -111,6 +111,31 @@ export function DatabasePage() {
     onPageChange(0, newPageSize)
   }
 
+  const QueryResultElement =
+    <>
+      {queryResult != null &&
+        <div>
+          <GeneratedQuery query={queryResult.query} />
+
+
+          {queryResult.errorMessage != null &&
+            <Alert severity="error">{queryResult.errorMessage}</Alert>
+          }
+
+          {totalCount != null &&
+            <ResultTable
+              queryResult={queryResult}
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={onPageChange}
+              onPageSizeChange={onPageSizeChange}
+            />
+          }
+        </div>
+      }
+    </>
+
   const PageContent =
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
@@ -133,19 +158,7 @@ export function DatabasePage() {
         className={styles.queryButton}
       >Query</LoadingButton>
 
-      {queryResult != null &&
-        <div>
-          <GeneratedQuery query={queryResult.query} />
-          <ResultTable
-            queryResult={queryResult}
-            page={page}
-            pageSize={pageSize}
-            totalCount={totalCount}
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
-          />
-        </div>
-      }
+      {QueryResultElement}
     </>
 
   return (
