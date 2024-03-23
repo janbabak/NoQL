@@ -98,7 +98,6 @@ public class DatabaseController {
      *
      * @param id       database id
      * @param query    natural language query
-     * @param page     page number (first pages is 0)
      * @param pageSize number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
@@ -112,12 +111,10 @@ public class DatabaseController {
     public QueryResponse executeNaturalLanguageQuery(
             @PathVariable UUID id,
             @RequestBody String query,
-            @RequestParam Integer page,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             BadRequestException, LLMException, EntityNotFoundException {
-        return queryService.executeSelectQuery(
-                id, query, true, page, pageSize, false);
+        return queryService.executeSelectNaturalQuery(id, query, pageSize);
     }
 
     /**
@@ -131,9 +128,7 @@ public class DatabaseController {
      *                      is changed)
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
-     * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
      * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
     @PostMapping("/{id}/query/query-language")
@@ -144,8 +139,7 @@ public class DatabaseController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(required = false) Boolean overrideLimit
-    ) throws DatabaseConnectionException, DatabaseExecutionException,
-            BadRequestException, LLMException, EntityNotFoundException {
-        return queryService.executeSelectQuery(id, query, false, page, pageSize, overrideLimit);
+    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+        return queryService.executeQueryLanguageSelectQuery(id, query, page, pageSize, overrideLimit);
     }
 }

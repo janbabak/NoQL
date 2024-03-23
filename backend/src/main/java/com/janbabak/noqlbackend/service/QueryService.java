@@ -110,19 +110,12 @@ public class QueryService {
         return switch (database.getEngine()) {
             case POSTGRES, MYSQL -> {
                 query = setValueOfPropertyInSqlQuery(
-                        query,
-                        "LIMIT",
-                        pageSize,
-                        settings.maxPageSize,
-                        overrideLimit
-                );
+                        query, "LIMIT", pageSize, settings.maxPageSize, overrideLimit);
+
                 if (setOffset) {
+                    int offsetValue = pageSize * page;
                     query = setValueOfPropertyInSqlQuery(
-                            query,
-                            "OFFSET",
-                            pageSize * page,
-                            null,
-                            true);
+                            query, "OFFSET", offsetValue, null, true);
                 }
                 yield query;
             }
@@ -245,59 +238,97 @@ public class QueryService {
     }
 
     /**
-     * Execute (natural/query language) select query - translate it via LLM to the database specific query language if
-     * needed and execute it. Select query is read only, and it returns a result that is automatically paginated.
+     * Execute query language select query.
+     * Select query is read only, and it returns a result that is automatically paginated.
      *
      * @param id                       database id
      * @param query                    in natural query or database query language
-     * @param translateToQueryLanguage if true query in the request will be translated via LLM to query language,
-     *                                 otherwise it will be executed like it is.
      * @param page                     page number (fist page starts by 0), if null, default value is 0
      * @param pageSize                 number of items in one page,<br />
-     *                                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param overrideLimit            if true overrides the limit value from the query to the pageSize
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
-     * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
      * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
-    public QueryResponse executeSelectQuery(
+    public QueryResponse executeQueryLanguageSelectQuery(
             UUID id,
             String query,
-            Boolean translateToQueryLanguage,
             Integer page,
             Integer pageSize,
             Boolean overrideLimit
-    ) throws EntityNotFoundException, DatabaseConnectionException,
-            DatabaseExecutionException, BadRequestException, LLMException {
+    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
-        log.info("Execute query: query={}, database_id={}, naturalQuery={}.", query, id, translateToQueryLanguage);
+        log.info("Execute query language query: query={}, database_id={}.", query, id);
 
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
-        // if query is in natural language, it needs to be translated to query language
-        if (translateToQueryLanguage) {
-            DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-            String LLMQuery = createQuery(query, databaseStructure.generateCreateScript(), database);
-            query = queryApi.queryModel(LLMQuery);
-        }
-
-        String paginatedQuery = setPaginationInSqlQuery(
-                query, page, pageSize, database, !translateToQueryLanguage, overrideLimit);
-
         try {
+            String paginatedQuery = setPaginationInSqlQuery(
+                    query, page, pageSize, database, true, overrideLimit);
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
             Long totalCount = getTotalCount(query, specificDatabaseService);
 
-            return new QueryResponse(queryResult, paginatedQuery, totalCount);
-        } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            return QueryResponse.successfulResponse(queryResult, paginatedQuery, totalCount);
+        } catch (DatabaseExecutionException | SQLException e) {
+            return QueryResponse.failedResponse(query, e.getMessage());
         }
+    }
+
+    /**
+     * Execute natural language select query. The query is translated to specific dialect via LLM and then executed.
+     * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
+     *
+     * @param id                       database id
+     * @param query                    in natural query or database query language
+     * @param pageSize                 number of items in one page,<br />
+     *                                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @return query result
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     */
+    public QueryResponse executeSelectNaturalQuery(UUID id, String query, Integer pageSize)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            BadRequestException, LLMException {
+
+        log.info("Execute natural language query: query={}, database_id={}", query, id);
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
+        String LLMQuery = createQuery(query, databaseStructure.generateCreateScript(), database);
+
+        // executes the query with retires - if it fails translate it via LLM and trie again
+        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
+            query = queryApi.queryModel(LLMQuery);
+//            query = """
+//                    ```
+//                    select * from user;
+//                    ```""";
+            String paginatedQuery = setPaginationInSqlQuery(
+                    query, 0, pageSize, database, false, false);
+            try {
+                QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+                Long totalCount = getTotalCount(query, specificDatabaseService);
+
+                return QueryResponse.successfulResponse(queryResult, paginatedQuery, totalCount);
+            } catch (DatabaseExecutionException | SQLException e) {
+                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
+                        attempt, paginatedQuery);
+                if (attempt == settings.translationRetries) {
+                    return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
+                }
+            }
+        }
+        return null;
     }
 }

@@ -16,4 +16,8 @@ public class Settings {
     /** Default page size of automatically paginated query result. */
     @Value("${app.settings.pagination.defaultPageSize}")
     public Integer defaultPageSize;
+
+    /** Number of retries when translated query fails due to a syntax error */
+    @Value("${app.settings.translationRetries}")
+    public Integer translationRetries;
 }

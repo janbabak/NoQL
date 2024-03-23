@@ -18,6 +18,15 @@ public class QueryResponse {
     private QueryResult result;
     private String query; // query used for retrieving the result above
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
+    private String errorMessage; // error message when the query execution failed due to syntax error
+
+    public static QueryResponse successfulResponse(QueryResult result, String query, Long totalCount) {
+        return new QueryResponse(result, query, totalCount, null);
+    }
+
+    public static QueryResponse failedResponse(String query, String errorMessage) {
+        return new QueryResponse(null, query, null, errorMessage);
+    }
 
     @Data
     public static class QueryResult {
