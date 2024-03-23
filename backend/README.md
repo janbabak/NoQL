@@ -17,3 +17,4 @@
 - `NOQL_DB_PASSWORD` - (required) Database password.
 
 **Other**
+- `TRANSLATION_RETRIES` - (required) Number of retries when translated query fails due to a syntax error
