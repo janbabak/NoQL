@@ -2,11 +2,16 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, TextField, Typography } from '@mui/material'
+import { Alert, CircularProgress, Fab, TextField, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
+import { Editor } from '@monaco-editor/react'
+import { green } from '@mui/material/colors'
+import ChangeHistoryRoundedIcon from '@mui/icons-material/ChangeHistoryRounded'
+import CheckIcon from '@mui/icons-material/Check'
+
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -46,8 +51,22 @@ export function DatabasePage() {
     setTotalCount
   ] = useState<number | null>(0)
 
+  const buttonSx = {
+    ...(queryLoading && {
+      bgcolor: green[500],
+      '&:hover': {
+        bgcolor: green[700]
+      }
+    })
+  }
+
+  const queryLanguageQuery = useRef<any>('')
+  function handleEditorDidMount(editor, monaco) {
+    queryLanguageQuery.current = editor;
+  }
+
   /* eslint-disable  @typescript-eslint/no-explicit-any */
-  const usersQuery = useRef<any>('')
+  const naturalLanguageQuery = useRef<any>('')
 
   useEffect(() => {
     void loadDatabase()
@@ -68,12 +87,13 @@ export function DatabasePage() {
   }
 
   // get query result
-  async function queryDatabase() {
+  async function queryDatabase(naturalLanguage: boolean) {
     setPage(0)
     setQueryLoading(true)
     try {
-      const response =
-        await databaseApi.queryNaturalLanguage(id || '', usersQuery.current.value, pageSize)
+      const response = naturalLanguage
+        ? await databaseApi.queryNaturalLanguage(id || '', naturalLanguageQuery.current.value, pageSize)
+        : await databaseApi.queryQueryLanguageQuery(id || '', queryLanguageQuery.current.getValue(), 0, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -145,16 +165,55 @@ export function DatabasePage() {
           id="query"
           label="Query"
           variant="outlined"
-          inputRef={usersQuery}
+          inputRef={naturalLanguageQuery}
           fullWidth
         />
+      </div>
+
+      <Editor
+        height="100px"
+        language="sql"
+        theme="vs-dark"
+        onMount={handleEditorDidMount}
+        options={{
+          inlineSuggest: true,
+          fontSize: '16px',
+          formatOnType: true,
+          autoClosingBrackets: true,
+          minimap: { enabled: false }
+        }}
+      />
+
+      <div style={{ position: 'relative' }}>
+
+        <Fab
+          aria-label="save"
+          color="primary"
+          sx={buttonSx}
+          onClick={() => queryDatabase(false)}
+        >
+          {queryLoading ? <CheckIcon /> :
+            <ChangeHistoryRoundedIcon style={{ transform: 'rotate(0.25turn) translateY(-2px)' }} />}
+        </Fab>
+        {queryLoading && (
+          <CircularProgress
+            size={68}
+            sx={{
+              color: green[500],
+              position: 'absolute',
+              top: -6,
+              left: -6,
+              zIndex: 1
+            }}
+          />
+        )}
       </div>
 
       <LoadingButton
         loading={queryLoading}
         fullWidth
         variant="contained"
-        onClick={queryDatabase}
+        onClick={() => queryDatabase(true)}
         className={styles.queryButton}
       >Query</LoadingButton>
 
