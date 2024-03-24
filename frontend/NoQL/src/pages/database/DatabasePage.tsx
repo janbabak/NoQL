@@ -2,12 +2,13 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, Box, Button, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Alert, Button, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
-import { QueryEditor } from './QueryEditor.tsx'
+import { QueryInputTabs } from './QueryInputTabs.tsx'
+import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -36,6 +37,16 @@ export function DatabasePage() {
     showGeneratedQuery,
     setShowGeneratedQuery
   ] = useState<boolean>(true)
+
+  const [
+    tab,
+    setTab
+  ] = useState<number>(NATURAL_LANGUAGE_TAB)
+
+  const [
+    queryLanguageQuery,
+    setQueryLanguageQuery
+  ] = useState<string>('')
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const naturalLanguageQuery = useRef<any>(null)
@@ -124,24 +135,6 @@ export function DatabasePage() {
     onPageChange(0, newPageSize)
   }
 
-  // tabs-------------------------------------------------------------------------------------------
-
-  const [
-    tab,
-    setTab
-  ] = useState<number>(0)
-
-  const [
-    queryLanguageQuery,
-    setQueryLanguageQuery
-  ] = useState<string>('')
-
-  // const queryLanguageQuery = useRef<string>('')
-
-  function handleTabChange(_event: React.SyntheticEvent, newValue: number) {
-    setTab(newValue)
-  }
-
   function editQueryInEditor(query: string) {
     setQueryLanguageQuery(query)
     setTab(1)
@@ -193,31 +186,13 @@ export function DatabasePage() {
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tab}
-          aria-label="basic tabs example"
-          onChange={handleTabChange}
-          sx={{ borderRadius: '0.25rem', marginTop: '1.5rem' }}
-        >
-          <Tab label="Natural language" sx={{ borderRadius: '0.25rem' }} />
-          <Tab label="Query language" sx={{ borderRadius: '0.25rem' }} />
-        </Tabs>
-      </Box>
-
-      <div className={styles.queryInput} role="tabpanel" hidden={tab != 0}>
-        <TextField
-          id="query"
-          label="Query"
-          variant="outlined"
-          inputRef={naturalLanguageQuery}
-          fullWidth
-        />
-      </div>
-
-      <div role="tabpanel" hidden={tab != 1} className={styles.queryEditor}>
-        <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
-      </div>
+      <QueryInputTabs
+        tab={tab}
+        setTab={setTab}
+        naturalLanguageQuery={naturalLanguageQuery}
+        queryLanguageQuery={queryLanguageQuery}
+        setQueryLanguageQuery={setQueryLanguageQuery}
+      />
 
       <LoadingButton
         loading={queryLoading}
