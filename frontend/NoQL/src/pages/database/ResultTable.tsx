@@ -10,6 +10,17 @@ import {
   TablePagination,
   TableRow
 } from '@mui/material'
+import React from 'react'
+
+interface Props {
+  queryResult?: QueryResponse,
+  page: number
+  pageSize: number
+  totalCount: number
+  onPageChange: (page: number, pageSize: number) => void,
+  onPageSizeChange: (newPageSize: number) => void,
+  paginationOptions?: number[],
+}
 
 export function ResultTable(
   {
@@ -18,15 +29,9 @@ export function ResultTable(
     pageSize,
     totalCount,
     onPageChange,
-    onPageSizeChange
-  }: {
-    queryResult?: QueryResponse,
-    page: number
-    pageSize: number
-    totalCount: number
-    onPageChange: (page: number, pageSize: number) => void,
-    onPageSizeChange: (newPageSize: number) => void
-  }) {
+    onPageSizeChange,
+    paginationOptions = [10, 25, 50]
+  }: Props) {
 
   function changePage(_event: unknown, newPage: number): void {
     onPageChange(newPage, pageSize)
@@ -62,7 +67,7 @@ export function ResultTable(
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
+          rowsPerPageOptions={paginationOptions}
           component="div"
           count={totalCount}
           rowsPerPage={pageSize}

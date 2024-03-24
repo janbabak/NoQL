@@ -4,7 +4,7 @@ import { QueryEditor } from './QueryEditor.tsx'
 import React from 'react'
 import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'
 
-interface QueryTabsProperties {
+interface Props {
   tab: number,
   setTab: React.Dispatch<React.SetStateAction<number>>,
   naturalLanguageQuery: React.MutableRefObject<string>,
@@ -12,13 +12,14 @@ interface QueryTabsProperties {
   setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function QueryInputTabs({
-                                 tab,
-                                 setTab,
-                                 naturalLanguageQuery,
-                                 queryLanguageQuery,
-                                 setQueryLanguageQuery
-                               }: QueryTabsProperties) {
+export function QueryInputTabs(
+  {
+    tab,
+    setTab,
+    naturalLanguageQuery,
+    queryLanguageQuery,
+    setQueryLanguageQuery
+  }: Props) {
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
     setTab(newValue)
