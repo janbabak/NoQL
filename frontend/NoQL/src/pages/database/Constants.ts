@@ -1,0 +1,4 @@
+const NATURAL_LANGUAGE_TAB: number = 0
+const QUERY_LANGUAGE_TAB: number = 1
+
+export { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB}
