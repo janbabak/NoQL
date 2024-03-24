@@ -7,7 +7,7 @@ import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
-import { Editor } from '@monaco-editor/react'
+import { QueryEditor } from './QueryEditor.tsx'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -68,7 +68,7 @@ export function DatabasePage() {
         ? await databaseApi.queryNaturalLanguage(
           id || '', naturalLanguageQuery.current.value, pageSize)
         : await databaseApi.queryQueryLanguageQuery(
-          id || '', editor.current.getValue(), 0, pageSize)
+          id || '', queryLanguageQuery, 0, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -131,24 +131,19 @@ export function DatabasePage() {
     setTab
   ] = useState<number>(0)
 
+  const [
+    queryLanguageQuery,
+    setQueryLanguageQuery
+  ] = useState<string>('')
+
+  // const queryLanguageQuery = useRef<string>('')
+
   function handleTabChange(_event: React.SyntheticEvent, newValue: number) {
     setTab(newValue)
   }
 
-  // editor-----------------------------------------------------------------------------------------
-
-  const editor = useRef<any>(null)
-
-  const monaco = useRef<any>(null)
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function handleEditorDidMount(editorParam: string, monacoParam: unknown): void {
-    editor.current = editorParam
-    monaco.current = monacoParam
-  }
-
   function editQueryInEditor(query: string) {
-    monaco.current?.editor.getModels()[0].setValue(query)
+    setQueryLanguageQuery(query)
     setTab(1)
     setShowGeneratedQuery(false)
   }
@@ -221,23 +216,7 @@ export function DatabasePage() {
       </div>
 
       <div role="tabpanel" hidden={tab != 1} className={styles.queryEditor}>
-        {/*https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html*/}
-        <Editor
-          height="200px"
-          language="sql"
-          theme="vs-dark"
-          onMount={handleEditorDidMount}
-          options={{
-            inlineSuggest: true,
-            fontSize: 16,
-            fontFamily: 'monospace',
-            lineHeight: 24,
-            formatOnType: true,
-            autoClosingBrackets: true,
-            minimap: { enabled: false },
-            padding: { top: 20 }
-          }}
-        />
+        <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
       </div>
 
       <LoadingButton
