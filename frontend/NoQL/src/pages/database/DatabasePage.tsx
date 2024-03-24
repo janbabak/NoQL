@@ -2,12 +2,11 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, Box, Button, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Box, Tab, Tabs, TextField, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
-import { ResultTable } from './ResultTable.tsx'
-import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { QueryEditor } from './QueryEditor.tsx'
+import { QueryResultComponent } from './QueryResultComponent.tsx'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -148,47 +147,6 @@ export function DatabasePage() {
     setShowGeneratedQuery(false)
   }
 
-  const EditQueryButttom =
-    <Button
-      onClick={() => editQueryInEditor(queryResult?.query || '')}
-      size="small"
-      color="inherit"
-    >
-      Edit query
-    </ Button>
-
-  // JSX--------------------------------------------------------------------------------------------
-
-  const QueryResultElement =
-    <>
-      {queryResult != null &&
-        <div>
-
-          {showGeneratedQuery &&
-            <GeneratedQuery query={queryResult.query} />
-          }
-
-
-          {queryResult.errorMessage != null &&
-            <Alert severity="error" action={EditQueryButttom}>
-              {queryResult.errorMessage}
-            </Alert>
-          }
-
-          {totalCount != null &&
-            <ResultTable
-              queryResult={queryResult}
-              page={page}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              onPageChange={onPageChange}
-              onPageSizeChange={onPageSizeChange}
-            />
-          }
-        </div>
-      }
-    </>
-
   const PageContent =
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
@@ -227,7 +185,16 @@ export function DatabasePage() {
         className={styles.queryButton}
       >Query</LoadingButton>
 
-      {QueryResultElement}
+      <QueryResultComponent
+        queryResponse={queryResult}
+        showGeneratedQuery={showGeneratedQuery}
+        editQueryInEditor={editQueryInEditor}
+        totalCount={totalCount}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+      />
     </>
 
   return (
