@@ -2,15 +2,17 @@ import { Editor } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
 import React, { useRef } from 'react'
 
-export function QueryEditor({ value, setValue }: {
+interface Props {
   value: string,
   setValue: React.Dispatch<React.SetStateAction<string>>
-}) {
+}
+
+export function QueryEditor({ value, setValue }: Props) {
 
   const editor = useRef<monacoEditor.editor.IStandaloneCodeEditor>()
   const monaco = useRef<typeof monacoEditor>()
 
-  function handleEditorChange(value: string) {
+  function handleEditorChange(value: string): void {
     setValue(value)
   }
 

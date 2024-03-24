@@ -48,16 +48,31 @@ export function DatabasePage() {
     setQueryLanguageQuery
   ] = useState<string>('')
 
+  const [
+    page,
+    setPage
+  ] = useState<number>(0)
+
+  const [
+    pageSize,
+    setPageSize
+  ] = useState<number>(10)
+
+  const [
+    totalCount,
+    setTotalCount
+  ] = useState<number | null>(0)
+
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const naturalLanguageQuery = useRef<any>(null)
 
-  useEffect(() => {
+  useEffect((): void => {
     void loadDatabase()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // load database from API
-  async function loadDatabase() {
+  async function loadDatabase(): Promise<void> {
     setDatabaseLoading(true)
     try {
       const response = await databaseApi.getById(id || '')
@@ -70,7 +85,7 @@ export function DatabasePage() {
   }
 
   // get query result
-  async function queryDatabase() {
+  async function queryDatabase(): Promise<void> {
     setPage(0)
     setQueryLoading(true)
     try {
@@ -90,25 +105,8 @@ export function DatabasePage() {
     }
   }
 
-  // pagination-------------------------------------------------------------------------------------
-
-  const [
-    page,
-    setPage
-  ] = useState<number>(0)
-
-  const [
-    pageSize,
-    setPageSize
-  ] = useState<number>(10)
-
-  const [
-    totalCount,
-    setTotalCount
-  ] = useState<number | null>(0)
-
   // get next page
-  async function onPageChange(page: number, pageSize: number) {
+  async function onPageChange(page: number, pageSize: number): Promise<void> {
     console.log('new page is: ' + page) // TODO: remove
     setPageSize(pageSize)
     setPage(page)
@@ -130,9 +128,9 @@ export function DatabasePage() {
     }
   }
 
-  async function onPageSizeChange(newPageSize: number) {
+  async function onPageSizeChange(newPageSize: number): Promise<void> {
     setPageSize(0)
-    onPageChange(0, newPageSize)
+    await onPageChange(0, newPageSize)
   }
 
   function editQueryInEditor(query: string) {
@@ -141,7 +139,7 @@ export function DatabasePage() {
     setShowGeneratedQuery(false)
   }
 
-  const EditQueryButttom =
+  const EditQueryButton =
     <Button
       onClick={() => editQueryInEditor(queryResult?.query || '')}
       size="small"
@@ -150,20 +148,16 @@ export function DatabasePage() {
       Edit query
     </ Button>
 
-  // JSX--------------------------------------------------------------------------------------------
-
   const QueryResultElement =
     <>
       {queryResult != null &&
         <div>
-
           {showGeneratedQuery &&
             <GeneratedQuery query={queryResult.query} />
           }
 
-
           {queryResult.errorMessage != null &&
-            <Alert severity="error" action={EditQueryButttom}>
+            <Alert severity="error" action={EditQueryButton}>
               {queryResult.errorMessage}
             </Alert>
           }
