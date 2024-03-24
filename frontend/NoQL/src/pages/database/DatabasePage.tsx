@@ -62,8 +62,7 @@ export function DatabasePage() {
     setTotalCount
   ] = useState<number | null>(0)
 
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-  const naturalLanguageQuery = useRef<any>(null)
+  const naturalLanguageQuery = useRef<string>('')
 
   useEffect((): void => {
     void loadDatabase()
@@ -91,6 +90,8 @@ export function DatabasePage() {
       const naturalLanguage = tab == 0
       const response = naturalLanguage
         ? await databaseApi.queryNaturalLanguage(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           id || '', naturalLanguageQuery.current.value, pageSize)
         : await databaseApi.queryQueryLanguageQuery(
           id || '', queryLanguageQuery, 0, pageSize)
@@ -106,7 +107,6 @@ export function DatabasePage() {
 
   // get next page
   async function onPageChange(page: number, pageSize: number): Promise<void> {
-    console.log('new page is: ' + page) // TODO: remove
     setPageSize(pageSize)
     setPage(page)
 
