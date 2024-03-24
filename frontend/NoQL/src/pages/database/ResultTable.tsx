@@ -10,23 +10,26 @@ import {
   TablePagination,
   TableRow
 } from '@mui/material'
+import React from 'react'
 
 export function ResultTable(
   {
-    queryResult,
+    queryResponse,
     page,
     pageSize,
     totalCount,
     onPageChange,
     onPageSizeChange
   }: {
-    queryResult?: QueryResponse,
+    queryResponse?: QueryResponse,
     page: number
     pageSize: number
     totalCount: number
     onPageChange: (page: number, pageSize: number) => void,
     onPageSizeChange: (newPageSize: number) => void
   }) {
+
+  const tablePaginationOptions: number[] = [10, 25, 50]
 
   function changePage(_event: unknown, newPage: number): void {
     onPageChange(newPage, pageSize)
@@ -44,13 +47,13 @@ export function ResultTable(
 
             <TableHead>
               <TableRow>
-                {queryResult?.result?.columnNames.map((columnName, columnNameIndex: number) =>
+                {queryResponse?.result?.columnNames.map((columnName, columnNameIndex: number) =>
                   <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {queryResult?.result?.rows.map((row, rowIndex: number) =>
+              {queryResponse?.result?.rows.map((row, rowIndex: number) =>
                 <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   {row.map((cell, cellIndex: number) =>
                     <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}
@@ -62,7 +65,7 @@ export function ResultTable(
         </TableContainer>
 
         <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
+          rowsPerPageOptions={tablePaginationOptions}
           component="div"
           count={totalCount}
           rowsPerPage={pageSize}

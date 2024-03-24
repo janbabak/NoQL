@@ -1,5 +1,5 @@
 import { useParams } from 'react-router'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
 import { Box, Tab, Tabs, TextField, Typography } from '@mui/material'
@@ -22,8 +22,8 @@ export function DatabasePage() {
   ] = useState<boolean>(false)
 
   const [
-    queryResult,
-    setQueryResult
+    queryResponse,
+    setQueryResponse
   ] = useState<QueryResponse | null>(null)
 
   const [
@@ -35,50 +35,6 @@ export function DatabasePage() {
     showGeneratedQuery,
     setShowGeneratedQuery
   ] = useState<boolean>(true)
-
-  /* eslint-disable  @typescript-eslint/no-explicit-any */
-  const naturalLanguageQuery = useRef<any>(null)
-
-  useEffect(() => {
-    void loadDatabase()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // load database from API
-  async function loadDatabase() {
-    setDatabaseLoading(true)
-    try {
-      const response = await databaseApi.getById(id || '')
-      setDatabase(response.data)
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-    } finally {
-      setDatabaseLoading(false)
-    }
-  }
-
-  // get query result
-  async function queryDatabase() {
-    setPage(0)
-    setQueryLoading(true)
-    try {
-      const naturalLanguage = tab == 0
-      const response = naturalLanguage
-        ? await databaseApi.queryNaturalLanguage(
-          id || '', naturalLanguageQuery.current.value, pageSize)
-        : await databaseApi.queryQueryLanguageQuery(
-          id || '', queryLanguageQuery, 0, pageSize)
-      setQueryResult(response.data)
-      setTotalCount(response.data.totalCount)
-    } catch (error: unknown) {
-      console.log(error) // TODO: handles
-    } finally {
-      setQueryLoading(false)
-      setShowGeneratedQuery(true)
-    }
-  }
-
-  // pagination-------------------------------------------------------------------------------------
 
   const [
     page,
@@ -95,36 +51,6 @@ export function DatabasePage() {
     setTotalCount
   ] = useState<number | null>(0)
 
-  // get next page
-  async function onPageChange(page: number, pageSize: number) {
-    console.log('new page is: ' + page) // TODO: remove
-    setPageSize(pageSize)
-    setPage(page)
-
-    setQueryLoading(true)
-    try {
-      const response = await databaseApi.queryQueryLanguageQuery(
-        id || '',
-        queryResult?.query || '',
-        page,
-        pageSize,
-        true)
-
-      setQueryResult(response.data)
-    } catch (error: unknown) {
-      console.log(error) // TODO: handles
-    } finally {
-      setQueryLoading(false)
-    }
-  }
-
-  async function onPageSizeChange(newPageSize: number) {
-    setPageSize(0)
-    onPageChange(0, newPageSize)
-  }
-
-  // tabs-------------------------------------------------------------------------------------------
-
   const [
     tab,
     setTab
@@ -135,9 +61,70 @@ export function DatabasePage() {
     setQueryLanguageQuery
   ] = useState<string>('')
 
-  // const queryLanguageQuery = useRef<string>('')
+  const naturalLanguageQuery = useRef<string>('')
 
-  function handleTabChange(_event: React.SyntheticEvent, newValue: number) {
+  useEffect((): void => {
+    void loadDatabase()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // load database from API
+  async function loadDatabase(): Promise<void> {
+    setDatabaseLoading(true)
+    try {
+      const response = await databaseApi.getById(id || '')
+      setDatabase(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+    } finally {
+      setDatabaseLoading(false)
+    }
+  }
+
+  // get query response
+  async function queryDatabase(): Promise<void> {
+    setPage(0)
+    setQueryLoading(true)
+    try {
+      const naturalLanguage = tab == 0
+      const response = naturalLanguage
+        ? await databaseApi.queryNaturalLanguage(
+          id || '', naturalLanguageQuery.current, pageSize)
+        : await databaseApi.queryQueryLanguageQuery(
+          id || '', queryLanguageQuery, 0, pageSize)
+      setQueryResponse(response.data)
+      setTotalCount(response.data.totalCount)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+      setShowGeneratedQuery(true)
+    }
+  }
+
+  // get next page
+  async function onPageChange(page: number, pageSize: number): Promise<void> {
+    setPageSize(pageSize)
+    setPage(page)
+    setQueryLoading(true)
+
+    try {
+      const response = await databaseApi.queryQueryLanguageQuery(
+        id || '',
+        queryResponse?.query || '',
+        page,
+        pageSize,
+        true)
+
+      setQueryResponse(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
+  function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
     setTab(newValue)
   }
 
@@ -147,10 +134,24 @@ export function DatabasePage() {
     setShowGeneratedQuery(false)
   }
 
-  const PageContent =
-    <>
-      <Typography variant="h4" component="h2">{database?.name}</Typography>
+  const NaturalLanguageTab =
+    <div className={styles.queryInput} role="tabpanel" hidden={tab != 0}>
+      <TextField
+        id="query"
+        label="Query"
+        variant="outlined"
+        inputRef={naturalLanguageQuery}
+        fullWidth
+      />
+    </div>
 
+  const QueryLanguageTab =
+    <div role="tabpanel" hidden={tab != 1} className={styles.queryEditor}>
+      <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
+    </div>
+
+  const QueryTabs =
+    <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           value={tab}
@@ -163,19 +164,15 @@ export function DatabasePage() {
         </Tabs>
       </Box>
 
-      <div className={styles.queryInput} role="tabpanel" hidden={tab != 0}>
-        <TextField
-          id="query"
-          label="Query"
-          variant="outlined"
-          inputRef={naturalLanguageQuery}
-          fullWidth
-        />
-      </div>
+      {NaturalLanguageTab}
+      {QueryLanguageTab}
+    </>
 
-      <div role="tabpanel" hidden={tab != 1} className={styles.queryEditor}>
-        <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
-      </div>
+  const PageContent =
+    <>
+      <Typography variant="h4" component="h2">{database?.name}</Typography>
+
+      {QueryTabs}
 
       <LoadingButton
         loading={queryLoading}
@@ -186,14 +183,14 @@ export function DatabasePage() {
       >Query</LoadingButton>
 
       <QueryResultComponent
-        queryResponse={queryResult}
+        queryResponse={queryResponse}
         showGeneratedQuery={showGeneratedQuery}
         editQueryInEditor={editQueryInEditor}
         totalCount={totalCount}
         page={page}
         pageSize={pageSize}
         onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
+        setPageSize={setPageSize}
       />
     </>
 
