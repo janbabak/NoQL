@@ -116,8 +116,7 @@ export function DatabasePage() {
         id || '',
         queryResult?.query || '',
         page,
-        pageSize,
-        true)
+        pageSize)
 
       setQueryResult(response.data)
     } catch (error: unknown) {

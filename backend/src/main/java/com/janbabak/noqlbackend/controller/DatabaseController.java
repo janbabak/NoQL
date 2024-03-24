@@ -120,12 +120,10 @@ public class DatabaseController {
     /**
      * Query the user's database using database query language, result is automatically paginated.
      *
-     * @param id            database id
-     * @param query         database query in corresponding database query language
-     * @param page          page number (first pages is 0)
-     * @param pageSize      number of items in one page
-     * @param overrideLimit if true override the limit value no matter what (used when number of items per pages
-     *                      is changed)
+     * @param id       database id
+     * @param query    database query in corresponding database query language
+     * @param page     page number (first pages is 0)
+     * @param pageSize number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
@@ -137,9 +135,8 @@ public class DatabaseController {
             @PathVariable UUID id,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestParam(required = false) Boolean overrideLimit
+            @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.executeQueryLanguageSelectQuery(id, query, page, pageSize, overrideLimit);
+        return queryService.executeQueryLanguageSelectQuery(id, query, page, pageSize);
     }
 }

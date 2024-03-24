@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import org.apache.coyote.BadRequestException;
@@ -39,12 +38,9 @@ class QueryServiceTest {
             String query,
             Integer page,
             Integer pageSize,
-            Boolean setOffset,
-            Boolean overrideLimit,
             String expectedQuery
-    ) throws BadRequestException, DatabaseExecutionException {
-        String actualValue = queryService.setPaginationInSqlQuery(
-                query, page, pageSize, postgresDatabase, setOffset, overrideLimit);
+    ) throws BadRequestException {
+        String actualValue = queryService.setPaginationInSqlQuery(query, page, pageSize, postgresDatabase);
         assertEquals(expectedQuery, actualValue);
     }
 
@@ -55,8 +51,6 @@ class QueryServiceTest {
                         "SELECT name FROM product WHERE price < 1000;",
                         null,
                         15,
-                        false,
-                        false,
                         """
                         SELECT name FROM product WHERE price < 1000
                         LIMIT 15;"""
@@ -66,8 +60,6 @@ class QueryServiceTest {
                         "SELECT name FROM product WHERE price < 1000;",
                         8,
                         15,
-                        true,
-                        false,
                         """
                         SELECT name FROM product WHERE price < 1000
                         LIMIT 15
@@ -78,8 +70,6 @@ class QueryServiceTest {
                         "SELECT name FROM product WHERE price < 1000 OFFSET 4;",
                         8,
                         15,
-                        true,
-                        false,
                         """
                         SELECT name FROM product WHERE price < 1000 OFFSET 120
                         LIMIT 15;""",
@@ -92,8 +82,6 @@ class QueryServiceTest {
                         OFFSET 4;""",
                         8,
                         15,
-                        true,
-                        false,
                         """
                         SELECT name FROM product
                         WHERE price < 1000
@@ -109,8 +97,6 @@ class QueryServiceTest {
                         LIMIT 1;""",
                         3,
                         10,
-                        true,
-                        false,
                         """
                         SELECT *
                         FROM public.user
@@ -127,8 +113,6 @@ class QueryServiceTest {
                         LIMIT 1;""",
                         0,
                         10,
-                        true,
-                        true,
                         """
                         SELECT *
                         FROM public.user
@@ -141,8 +125,6 @@ class QueryServiceTest {
                         "SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1;",
                         3,
                         10,
-                        true,
-                        false,
                         """
                         SELECT * FROM public.user ORDER BY created_at ASC LIMIT 1
                         OFFSET 30;""",
@@ -156,8 +138,6 @@ class QueryServiceTest {
                         LIMIT 19""",
                         3,
                         10,
-                        true,
-                        false,
                         """
                         SELECT *
                         FROM public.user
@@ -170,8 +150,6 @@ class QueryServiceTest {
                         "SELECT name FROM product LIMIT 50 OFFSET 4;",
                         7,
                         19,
-                        true,
-                        false,
                         "SELECT name FROM product LIMIT 19 OFFSET 133;"
                 },
                 // limit and offset already used, offset before limit, override them all
@@ -179,8 +157,6 @@ class QueryServiceTest {
                         "SELECT name FROM product OFFSET 4 LIMIT 50;",
                         7,
                         19,
-                        true,
-                        false,
                         "SELECT name FROM product OFFSET 133 LIMIT 19;"
                 },
                 // limit already used with value greater than allowed limit
@@ -188,8 +164,6 @@ class QueryServiceTest {
                         "SELECT name FROM product LIMIT 260",
                         null,
                         250,
-                        false,
-                        false,
                         "SELECT name FROM product LIMIT 250;"
                 }
         };

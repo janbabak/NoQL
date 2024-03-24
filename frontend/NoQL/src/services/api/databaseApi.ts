@@ -46,15 +46,10 @@ const databaseApi = {
    * @param query database query in corresponding database query language
    * @param page page number (first pages is 0)
    * @param pageSize number of items in one page
-   * @param overrideLimit if true override the limit value no matter what (used when number of items per pages is
    * changed)
    */
-  queryQueryLanguageQuery(
-    id: string,
-    query: string,
-    page: number = 0,
-    pageSize: number = 10,
-    overrideLimit: boolean = false): Promise<AxiosResponse<QueryResponse>> {
+  queryQueryLanguageQuery(id: string, query: string, page: number = 0, pageSize: number = 10)
+    : Promise<AxiosResponse<QueryResponse>> {
 
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/query-language',
@@ -67,10 +62,6 @@ const databaseApi = {
         {
           name: 'pageSize',
           value: pageSize
-        },
-        {
-          name: 'overrideLimit',
-          value: overrideLimit
         }
       ])
   }
