@@ -2,7 +2,7 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, Box, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Tab, Tabs, TextField, Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
 import { ResultTable } from './ResultTable.tsx'
@@ -33,34 +33,12 @@ export function DatabasePage() {
   ] = useState<boolean>(false)
 
   const [
-    page,
-    setPage
-  ] = useState<number>(0)
-
-  const [
-    pageSize,
-    setPageSize
-  ] = useState<number>(10)
-
-  const [
-    totalCount,
-    setTotalCount
-  ] = useState<number | null>(0)
-
-  const [
-    tab,
-    setTab
-  ] = useState<number>(0)
+    showGeneratedQuery,
+    setShowGeneratedQuery
+  ] = useState<boolean>(true)
 
   /* eslint-disable  @typescript-eslint/no-explicit-any */
-  const naturalLanguageQuery = useRef<any>('')
-
-  const queryLanguageQuery = useRef<any>('')
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function handleEditorDidMount(editor: string, _monaco: unknown): void {
-    queryLanguageQuery.current = editor
-  }
+  const naturalLanguageQuery = useRef<any>(null)
 
   useEffect(() => {
     void loadDatabase()
@@ -90,15 +68,33 @@ export function DatabasePage() {
         ? await databaseApi.queryNaturalLanguage(
           id || '', naturalLanguageQuery.current.value, pageSize)
         : await databaseApi.queryQueryLanguageQuery(
-          id || '', queryLanguageQuery.current.getValue(), 0, pageSize)
+          id || '', editor.current.getValue(), 0, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
     } finally {
       setQueryLoading(false)
+      setShowGeneratedQuery(true)
     }
   }
+
+  // pagination-------------------------------------------------------------------------------------
+
+  const [
+    page,
+    setPage
+  ] = useState<number>(0)
+
+  const [
+    pageSize,
+    setPageSize
+  ] = useState<number>(10)
+
+  const [
+    totalCount,
+    setTotalCount
+  ] = useState<number | null>(0)
 
   // get next page
   async function onPageChange(page: number, pageSize: number) {
@@ -128,19 +124,60 @@ export function DatabasePage() {
     onPageChange(0, newPageSize)
   }
 
+  // tabs-------------------------------------------------------------------------------------------
+
+  const [
+    tab,
+    setTab
+  ] = useState<number>(0)
+
   function handleTabChange(_event: React.SyntheticEvent, newValue: number) {
     setTab(newValue)
   }
+
+  // editor-----------------------------------------------------------------------------------------
+
+  const editor = useRef<any>(null)
+
+  const monaco = useRef<any>(null)
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function handleEditorDidMount(editorParam: string, monacoParam: unknown): void {
+    editor.current = editorParam
+    monaco.current = monacoParam
+  }
+
+  function editQueryInEditor(query: string) {
+    monaco.current?.editor.getModels()[0].setValue(query)
+    setTab(1)
+    setShowGeneratedQuery(false)
+  }
+
+  const EditQueryButttom =
+    <Button
+      onClick={() => editQueryInEditor(queryResult?.query || '')}
+      size="small"
+      color="inherit"
+    >
+      Edit query
+    </ Button>
+
+  // JSX--------------------------------------------------------------------------------------------
 
   const QueryResultElement =
     <>
       {queryResult != null &&
         <div>
-          <GeneratedQuery query={queryResult.query} />
+
+          {showGeneratedQuery &&
+            <GeneratedQuery query={queryResult.query} />
+          }
 
 
           {queryResult.errorMessage != null &&
-            <Alert severity="error">{queryResult.errorMessage}</Alert>
+            <Alert severity="error" action={EditQueryButttom}>
+              {queryResult.errorMessage}
+            </Alert>
           }
 
           {totalCount != null &&
@@ -161,15 +198,15 @@ export function DatabasePage() {
     <>
       <Typography variant="h4" component="h2">{database?.name}</Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider'}}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs
           value={tab}
           aria-label="basic tabs example"
           onChange={handleTabChange}
-          sx={{borderRadius: '0.25rem', marginTop: '1.5rem'}}
+          sx={{ borderRadius: '0.25rem', marginTop: '1.5rem' }}
         >
-          <Tab label="Natural language" sx={{borderRadius: '0.25rem'}} />
-          <Tab label="Query language" sx={{borderRadius: '0.25rem'}} />
+          <Tab label="Natural language" sx={{ borderRadius: '0.25rem' }} />
+          <Tab label="Query language" sx={{ borderRadius: '0.25rem' }} />
         </Tabs>
       </Box>
 
