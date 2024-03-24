@@ -2,13 +2,12 @@ import { useParams } from 'react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi, { QueryResponse } from '../../services/api/databaseApi.ts'
-import { Alert, Button, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import styles from './Database.module.css'
-import { ResultTable } from './ResultTable.tsx'
-import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { QueryInputTabs } from './QueryInputTabs.tsx'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
+import { Result } from './Result.tsx'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -128,81 +127,48 @@ export function DatabasePage() {
     }
   }
 
-  async function onPageSizeChange(newPageSize: number): Promise<void> {
-    setPageSize(0)
-    await onPageChange(0, newPageSize)
-  }
-
   function editQueryInEditor(query: string) {
     setQueryLanguageQuery(query)
     setTab(1)
     setShowGeneratedQuery(false)
   }
 
-  const EditQueryButton =
-    <Button
-      onClick={() => editQueryInEditor(queryResult?.query || '')}
-      size="small"
-      color="inherit"
-    >
-      Edit query
-    </ Button>
-
-  const QueryResultElement =
-    <>
-      {queryResult != null &&
-        <div>
-          {showGeneratedQuery &&
-            <GeneratedQuery query={queryResult.query} />
-          }
-
-          {queryResult.errorMessage != null &&
-            <Alert severity="error" action={EditQueryButton}>
-              {queryResult.errorMessage}
-            </Alert>
-          }
-
-          {totalCount != null &&
-            <ResultTable
-              queryResult={queryResult}
-              page={page}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              onPageChange={onPageChange}
-              onPageSizeChange={onPageSizeChange}
-            />
-          }
-        </div>
-      }
-    </>
-
-  const PageContent =
-    <>
-      <Typography variant="h4" component="h2">{database?.name}</Typography>
-
-      <QueryInputTabs
-        tab={tab}
-        setTab={setTab}
-        naturalLanguageQuery={naturalLanguageQuery}
-        queryLanguageQuery={queryLanguageQuery}
-        setQueryLanguageQuery={setQueryLanguageQuery}
-      />
-
-      <LoadingButton
-        loading={queryLoading}
-        fullWidth
-        variant="contained"
-        onClick={queryDatabase}
-        className={styles.queryButton}
-      >Query</LoadingButton>
-
-      {QueryResultElement}
-    </>
-
   return (
     <>
       <Typography variant="h2" component="h1">Query</Typography>
-      {!databaseLoading && PageContent}
+
+      {!databaseLoading &&
+        <>
+          <Typography variant="h4" component="h2">{database?.name}</Typography>
+
+          <QueryInputTabs
+            tab={tab}
+            setTab={setTab}
+            naturalLanguageQuery={naturalLanguageQuery}
+            queryLanguageQuery={queryLanguageQuery}
+            setQueryLanguageQuery={setQueryLanguageQuery}
+          />
+
+          <LoadingButton
+            loading={queryLoading}
+            fullWidth
+            variant="contained"
+            onClick={queryDatabase}
+            className={styles.queryButton}
+          >Query</LoadingButton>
+
+          <Result
+            queryResponse={queryResult}
+            showGeneratedQuery={showGeneratedQuery}
+            editQueryInEditor={editQueryInEditor}
+            page={page}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            totalCount={totalCount}
+            onPageChange={onPageChange}
+          />
+        </>
+      }
     </>
   )
 }
