@@ -79,20 +79,11 @@ public class QueryService {
      *                      if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                      max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param database      database object
-     * @param setOffset     if true set the offset value, otherwise ignore offset
-     * @param overrideLimit if true override the extracted limit value from the query no matter what by value
      * @return database language query with pagination
      * @throws BadRequestException        value is greater than maximum allowed value
-     * @throws DatabaseExecutionException SQL query is in bad syntax
      */
-    public String setPaginationInSqlQuery(
-            String query,
-            Integer page,
-            Integer pageSize,
-            Database database,
-            Boolean setOffset,
-            Boolean overrideLimit
-    ) throws BadRequestException, DatabaseExecutionException {
+    public String setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
+            throws BadRequestException {
         // defaults
         if (page == null) {
             page = 0;
@@ -108,104 +99,18 @@ public class QueryService {
         query = query.trim();
 
         return switch (database.getEngine()) {
-            case POSTGRES, MYSQL -> {
-                query = setValueOfPropertyInSqlQuery(
-                        query, "LIMIT", pageSize, settings.maxPageSize, overrideLimit);
-
-                if (setOffset) {
-                    int offsetValue = pageSize * page;
-                    query = setValueOfPropertyInSqlQuery(
-                            query, "OFFSET", offsetValue, null, true);
-                }
-                yield query;
-            }
+            case POSTGRES, MYSQL -> "SELECT * FROM (%s) LIMIT %d OFFSET %d;"
+                    .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
         };
     }
 
-    /**
-     * Set value of property in the SQL query.
-     *
-     * @param query               SQL query
-     * @param property            e.g. {@code LIMIT}, {@code OFFSET}
-     * @param value               value of the property
-     * @param maximumAllowedValue if value is greater than maximum allowed value, maximum allowed value is used instead
-     * @param replaceEveryTime    if true value of the property is replaced in the query every time, if false value
-     *                            extracted from the query (if present) is replaced by value only if the value is lower
-     *                            than the extracted one.
-     * @return modified query
-     * @throws DatabaseExecutionException query execution failed (syntax error - property has no value)
-     */
-    private String setValueOfPropertyInSqlQuery(
-            String query,
-            String property,
-            Integer value,
-            Integer maximumAllowedValue,
-            Boolean replaceEveryTime
-    ) throws DatabaseExecutionException {
-        if (maximumAllowedValue != null && value > maximumAllowedValue) {
-            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
-            value = maximumAllowedValue;
-        }
+    private String trimAndRemoveTrailingSemicolon(String query) {
+        query = query.trim();
 
         // removes trailing semicolon if it is present
-        if (query.charAt(query.length() - 1) == ';') {
-            query = query.substring(0, query.length() - 1);
-        }
-
-        // add limit if is not present
-        if (!query.contains(property)) {
-            return "%s\n%s %d;".formatted(query, property, value);
-        }
-
-        int propertyIndex = query.indexOf(property);
-
-        String queryAfterProperty = query.substring(propertyIndex + (property + " ").length());
-
-        if (queryAfterProperty.isEmpty()) {
-            log.error("Property={} has no value, query={}", property, query);
-            throw new DatabaseExecutionException("Property has no value");
-        }
-
-        int indexOfCharAfterPropertyValue = queryAfterProperty.indexOf(" ");
-        int indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf("\n");
-        if (indexOfCharAfterPropertyValue == -1) {
-            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
-        } else if (indexOfCharCloserToPropertyValue != -1
-                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
-            // new line character is closer than space
-            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
-        }
-
-        indexOfCharCloserToPropertyValue = queryAfterProperty.indexOf(";");
-        if (indexOfCharAfterPropertyValue == -1) {
-            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
-        } else if (indexOfCharCloserToPropertyValue != -1
-                && indexOfCharCloserToPropertyValue < indexOfCharAfterPropertyValue) {
-            // semicolon character is closer than space
-            indexOfCharAfterPropertyValue = indexOfCharCloserToPropertyValue;
-        }
-
-        if (indexOfCharAfterPropertyValue == -1) {
-            indexOfCharAfterPropertyValue = queryAfterProperty.length();
-        }
-
-        String propertyValueString = queryAfterProperty.substring(0, indexOfCharAfterPropertyValue);
-        int extractedPropertyValue = Integer.parseInt(propertyValueString);
-
-        // replace the value only if it is lower than extracted value
-        if (!replaceEveryTime && extractedPropertyValue < value) {
-            value = extractedPropertyValue;
-        }
-
-        if (maximumAllowedValue != null && value > maximumAllowedValue) {
-            log.error("Value={} is greater than maximum allowed value={}", value, maximumAllowedValue);
-            value = maximumAllowedValue;
-        }
-
-        String queryBeforePropertyValue = query.substring(0, propertyIndex + (property + " ").length());
-        String queryAfterPropertyValue = queryAfterProperty.substring(indexOfCharAfterPropertyValue);
-
-        return queryBeforePropertyValue + value + queryAfterPropertyValue + ";";
+        return query.charAt(query.length() - 1) == ';'
+            ? query.substring(0, query.length() - 1)
+            : query;
     }
 
     /**
@@ -220,14 +125,8 @@ public class QueryService {
     private Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
-        selectQuery = selectQuery.trim();
-        // remove trailing semicolon if it is present
-        if (selectQuery.charAt(selectQuery.length() - 1) == ';') {
-            selectQuery = selectQuery.substring(0, selectQuery.length() - 1);
-        }
-
+        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
         String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
-
         ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
 
         try {
@@ -247,7 +146,6 @@ public class QueryService {
      * @param pageSize                 number of items in one page,<br />
      *                                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
-     * @param overrideLimit            if true overrides the limit value from the query to the pageSize
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
@@ -257,8 +155,7 @@ public class QueryService {
             UUID id,
             String query,
             Integer page,
-            Integer pageSize,
-            Boolean overrideLimit
+            Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
         log.info("Execute query language query: query={}, database_id={}.", query, id);
@@ -268,13 +165,12 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
+        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
         try {
-            String paginatedQuery = setPaginationInSqlQuery(
-                    query, page, pageSize, database, true, overrideLimit);
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
             Long totalCount = getTotalCount(query, specificDatabaseService);
 
-            return QueryResponse.successfulResponse(queryResult, paginatedQuery, totalCount);
+            return QueryResponse.successfulResponse(queryResult, query, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(query, e.getMessage());
         }
@@ -315,13 +211,12 @@ public class QueryService {
 //                    ```
 //                    select * from user;
 //                    ```""";
-            String paginatedQuery = setPaginationInSqlQuery(
-                    query, 0, pageSize, database, false, false);
+            String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
                 Long totalCount = getTotalCount(query, specificDatabaseService);
 
-                return QueryResponse.successfulResponse(queryResult, paginatedQuery, totalCount);
+                return QueryResponse.successfulResponse(queryResult, query, totalCount);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
