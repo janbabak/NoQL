@@ -4,7 +4,7 @@ import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.DatabaseStructure;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
 import org.antlr.v4.runtime.misc.Pair;
 
 import java.sql.*;
@@ -31,8 +31,8 @@ public class PostgresService extends BaseDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    public DatabaseStructure retrieveSchema() throws DatabaseConnectionException, DatabaseExecutionException {
-        DatabaseStructure db = new DatabaseStructure();
+    public SqlDatabaseStructure retrieveSchema() throws DatabaseConnectionException, DatabaseExecutionException {
+        SqlDatabaseStructure db = new SqlDatabaseStructure();
 
         retrieveSchemasTablesColumns(db);
         retrieveForeignKeys(db);
@@ -47,7 +47,7 @@ public class PostgresService extends BaseDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private void retrieveSchemasTablesColumns(DatabaseStructure db)
+    private void retrieveSchemasTablesColumns(SqlDatabaseStructure db)
             throws DatabaseConnectionException, DatabaseExecutionException {
         ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
 
@@ -59,14 +59,14 @@ public class PostgresService extends BaseDatabaseService {
                 String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
                 Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
 
-                DatabaseStructure.Schema schema =
-                        db.getSchemas().computeIfAbsent(tableSchema, DatabaseStructure.Schema::new);
+                SqlDatabaseStructure.Schema schema =
+                        db.getSchemas().computeIfAbsent(tableSchema, SqlDatabaseStructure.Schema::new);
 
-                DatabaseStructure.Table table =
-                        schema.getTables().computeIfAbsent(tableName, DatabaseStructure.Table::new);
+                SqlDatabaseStructure.Table table =
+                        schema.getTables().computeIfAbsent(tableName, SqlDatabaseStructure.Table::new);
 
                 // columnName key definitely doesn't exist - no need of checking it out
-                table.getColumns().put(columnName, new DatabaseStructure.Column(columnName, dataType, primaryKey));
+                table.getColumns().put(columnName, new SqlDatabaseStructure.Column(columnName, dataType, primaryKey));
             }
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
@@ -80,7 +80,7 @@ public class PostgresService extends BaseDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private void retrieveForeignKeys(DatabaseStructure db)
+    private void retrieveForeignKeys(SqlDatabaseStructure db)
             throws DatabaseConnectionException, DatabaseExecutionException {
         ResultSet resultSet = databaseDAO.getForeignKeys();
 
@@ -92,20 +92,20 @@ public class PostgresService extends BaseDatabaseService {
                 ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 
                 // insert that foreign key
-                DatabaseStructure.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
+                SqlDatabaseStructure.Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
                 if (schema == null) {
                     continue;
                 }
-                DatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
+                SqlDatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
                 if (table == null) {
                     continue;
                 }
-                DatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
+                SqlDatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
                 if (column == null) {
                     continue;
                 }
                 // TODO: Do I want to verify existence of these data?
-                column.setForeignKey(new DatabaseStructure.ForeignKey(
+                column.setForeignKey(new SqlDatabaseStructure.ForeignKey(
                         foreignKeyData.referencedSchema,
                         foreignKeyData.referencedTable,
                         foreignKeyData.referencedColumn
@@ -178,7 +178,7 @@ public class PostgresService extends BaseDatabaseService {
 
         // when dot is not found, table comes from the default (public) schema
         if (dotIndex == -1) {
-            return new Pair<>(DatabaseStructure.DEFAULT_SCHEMA, data);
+            return new Pair<>(SqlDatabaseStructure.DEFAULT_SCHEMA, data);
         }
 
         // when dot is found, it usually separates the schema and table name (unless the schema name contains dot)

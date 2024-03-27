@@ -4,9 +4,7 @@ import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.DatabaseStructure;
-import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
+import com.janbabak.noqlbackend.model.database.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -112,12 +110,12 @@ public class DatabaseEntityService {
      * Get database structure by database id
      *
      * @param id identifier
-     * @return database structure
+     * @return database with structure
      * @throws EntityNotFoundException     database of specific id not found
      * @throws DatabaseConnectionException connection to the database failed
      * @throws DatabaseExecutionException  syntax error error, ...
      */
-    public DatabaseStructure getDatabaseStructureByDatabaseId(UUID id)
+    public DatabaseWithStructure getDatabaseStructureByDatabaseId(UUID id)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
         Database database = databaseRepository.findById(id)
@@ -125,6 +123,6 @@ public class DatabaseEntityService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
-        return specificDatabaseService.retrieveSchema();
+        return new DatabaseWithStructure(database, specificDatabaseService.retrieveSchema());
     }
 }
