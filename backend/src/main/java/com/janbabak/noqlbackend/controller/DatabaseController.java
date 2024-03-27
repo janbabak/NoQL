@@ -5,9 +5,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.QueryResponse;
-import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
+import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
@@ -138,5 +136,20 @@ public class DatabaseController {
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
         return queryService.executeQueryLanguageSelectQuery(id, query, page, pageSize);
+    }
+
+    /**
+     * Get database structure by database id
+     * @param id identifier
+     * @return database with structure
+     * @throws DatabaseConnectionException syntax error error, ...
+     * @throws DatabaseExecutionException connection to the database failed
+     * @throws EntityNotFoundException database of specific id not found
+     */
+    @GetMapping("/{id}/structure")
+    @ResponseStatus(HttpStatus.OK)
+    public DatabaseWithStructure getDatabaseStructure(@PathVariable UUID id)
+            throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+        return databaseService.getDatabaseStructureByDatabaseId(id);
     }
 }

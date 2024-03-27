@@ -49,4 +49,18 @@ public class Database {
 
     @NotNull
     private Boolean isSQL;
+
+    public Database(Database from) {
+        this(
+                from.id,
+                from.name,
+                from.host,
+                from.port,
+                from.database,
+                from.userName,
+                from.password,
+                from.engine,
+                from.isSQL
+        );
+    }
 }

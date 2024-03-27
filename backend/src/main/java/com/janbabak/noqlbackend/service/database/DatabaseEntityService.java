@@ -2,9 +2,9 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.database.Database;
-import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
+import com.janbabak.noqlbackend.model.database.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 /**
  * Database Entity Service handles CRUD operations and similar tasks for Database Entities, utilizing the
  * {@link DatabaseRepository} as a DAO.
- * */
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -70,7 +70,7 @@ public class DatabaseEntityService {
      * @param id   identifier of the database object to update
      * @param data new data
      * @return updated object
-     * @throws EntityNotFoundException database of specified id not found.
+     * @throws EntityNotFoundException     database of specified id not found.
      * @throws DatabaseConnectionException connection to the updated database failed.
      */
     public Database update(UUID id, UpdateDatabaseRequest data)
@@ -104,5 +104,24 @@ public class DatabaseEntityService {
         log.info("Delete database by id={}.", id);
 
         databaseRepository.deleteById(id);
+    }
+
+    /**
+     * Get database structure by database id
+     *
+     * @param id identifier
+     * @return database with structure
+     * @throws EntityNotFoundException     database of specific id not found
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException  syntax error error, ...
+     */
+    public DatabaseWithStructure getDatabaseStructureByDatabaseId(UUID id)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        return new DatabaseWithStructure(
+                database, DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto());
     }
 }
