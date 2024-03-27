@@ -73,12 +73,3 @@ docker compose up -d # TODO: create docker compose file (instead of using exampl
   java -jar backend-0.0.1-SNAPSHOT.jar > noql.log 2>&1 & # detached with logging
   ```
   
-- zacal se ucit react
-- prepsal cely frontend do reactu
-- zavedl strankovani
-- retries
-- editor pro query language qury
-- umoznuju opravit chybu
-- zrusil live verzi kvuli cene
-  
-
