@@ -1,7 +1,5 @@
 package com.janbabak.noqlbackend.model.database;
 
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a database object - contains information about schemas, tables, columns, primary keys, ...
@@ -13,5 +11,11 @@ public interface DatabaseStructure {
      *
      * @return insert script
      */
-    public String generateCreateScript();
+    String generateCreateScript();
+
+    /**
+     * Get data transfer object
+     * @return DTO
+     */
+    DatabaseStructureDto toDto();
 }

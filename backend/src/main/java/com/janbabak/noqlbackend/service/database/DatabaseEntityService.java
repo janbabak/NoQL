@@ -121,8 +121,7 @@ public class DatabaseEntityService {
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-
-        return new DatabaseWithStructure(database, specificDatabaseService.retrieveSchema());
+        return new DatabaseWithStructure(
+                database, DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto());
     }
 }

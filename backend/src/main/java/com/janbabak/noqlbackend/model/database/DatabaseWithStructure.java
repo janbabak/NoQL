@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.model.database;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,9 +10,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class DatabaseWithStructure extends Database {
 
-    private DatabaseStructure databaseStructure;
+    private DatabaseStructureDto databaseStructure;
 
-    public DatabaseWithStructure(Database database, DatabaseStructure databaseStructure) {
+    public DatabaseWithStructure(Database database, DatabaseStructureDto databaseStructure) {
         super(database);
         this.databaseStructure = databaseStructure;
     }

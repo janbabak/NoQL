@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents an SQL database object - contains information about schemas, tables, columns, primary keys, ...
+ * Represents an SQL database object - contains information about schemas, tables, columns, primary keys
  */
 @Data
 public class SqlDatabaseStructure implements DatabaseStructure {
@@ -72,6 +72,14 @@ public class SqlDatabaseStructure implements DatabaseStructure {
         }
 
         return script.toString().trim();
+    }
+
+    /**
+     * Get data transfer object
+     * @return DTO
+     */
+    public SqlDatabaseStructureDto toDto() {
+        return new SqlDatabaseStructureDto(this);
     }
 
     /**
