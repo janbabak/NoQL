@@ -1,16 +1,8 @@
 import { styled } from '@mui/material/styles'
-import { Outlet } from 'react-router-dom'
+import { DrawerHeader } from './DrawerHeader.tsx'
+import { ReactNode } from 'react'
 
 const drawerWidth = 240
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-  justifyContent: 'flex-end'
-}))
 
 const StyledMain = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
   open?: boolean;
@@ -31,7 +23,10 @@ const StyledMain = styled('main', { shouldForwardProp: (prop) => prop !== 'open'
   })
 }))
 
-export function Main({ children, open }) {
+export function Main({ children, open }: {
+  children: ReactNode,
+  open: boolean
+}) {
 
   return (
     <StyledMain open={open}>
