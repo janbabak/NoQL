@@ -1,14 +1,53 @@
 import { Outlet } from 'react-router-dom'
-import styles from './Layout.module.css'
+import * as React from 'react'
+import Box from '@mui/material/Box'
+import CssBaseline from '@mui/material/CssBaseline'
+import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
+import { Main } from './Main.tsx'
+import { PersistentDrawer } from '../navigationDrawer/PersistentDrawer.tsx'
+import { Theme, useTheme } from '@mui/material/styles'
 
 export function Layout() {
+  const drawerWidth = 240
+  const theme: Theme = useTheme()
+  const [
+    navigationDrawerOpen,
+    setNavigationDrawerOpen
+  ] = React.useState<boolean>(false)
+
+  function handleDrawerOpen(): void {
+    setNavigationDrawerOpen(true)
+  }
+
+  function handleDrawerClose(): void {
+    setNavigationDrawerOpen(false)
+  }
+
   return (
-    <>
-      <header className={styles.header}>header</header>
-      <main className={styles.main}>
+    <Box sx={{ display: 'flex' }}>
+
+      <CssBaseline />
+
+      <ApplicationBar
+        open={navigationDrawerOpen}
+        handleDrawerOpen={handleDrawerOpen}
+        drawerWidth={drawerWidth}
+        theme={theme}
+      />
+
+      <PersistentDrawer
+        open={navigationDrawerOpen}
+        handleDrawerClose={handleDrawerClose}
+        drawerWidth={drawerWidth}
+      />
+
+      <Main
+        open={navigationDrawerOpen}
+        drawerWidth={drawerWidth}
+        theme={theme}
+      >
         <Outlet />
-      </main>
-      <footer className={styles.footer}>footer</footer>
-    </>
+      </Main>
+    </Box>
   )
 }
