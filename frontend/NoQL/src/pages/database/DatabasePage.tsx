@@ -8,6 +8,11 @@ import styles from './Database.module.css'
 import { QueryInputTabs } from './QueryInputTabs.tsx'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import { Result } from './Result.tsx'
+import { SecondaryNavbarItem } from '../../components/secondaryNavigation/SecondaryNavbar.types.ts'
+import { SecondaryNavbar } from '../../components/secondaryNavigation/SecondaryNavbar.tsx'
+import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
+import BackupTableRoundedIcon from '@mui/icons-material/BackupTableRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -132,7 +137,7 @@ export function DatabasePage() {
     setShowGeneratedQuery(false)
   }
 
-  return (
+  const QuerySubpage =
     <>
       <Typography variant="h2" component="h1">Query</Typography>
 
@@ -169,5 +174,24 @@ export function DatabasePage() {
         </>
       }
     </>
-  )
+
+  const subpages: SecondaryNavbarItem[] = [
+    {
+      label: "Query",
+      component: QuerySubpage,
+      buttonIcon: <QuestionAnswerRoundedIcon />,
+    },
+    {
+      label: "Structure",
+      component: <Typography variant="h2" component="h1">Structure</Typography>,
+      buttonIcon: <BackupTableRoundedIcon />,
+    },
+    {
+      label: "Settings",
+      component: <Typography variant="h2" component="h1">Settings</Typography>,
+      buttonIcon: <SettingsRoundedIcon />
+    }
+  ]
+
+  return <SecondaryNavbar subpages={subpages} />
 }
