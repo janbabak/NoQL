@@ -10,42 +10,46 @@ import InboxIcon from '@mui/icons-material/MoveToInbox'
 import MailIcon from '@mui/icons-material/Mail'
 import ListItemText from '@mui/material/ListItemText'
 import Drawer from '@mui/material/Drawer'
-import { styled, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 import { DrawerHeader } from './DrawerHeader.tsx'
 
-const drawerWidth = 240;
+interface PersistentDrawerProps {
+  open: boolean,
+  handleDrawerClose: () => void,
+  drawerWidth: number,
+}
 
-export function PersistentDrawer({open, setOpen}) {
-  const theme = useTheme();
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+export function PersistentDrawer(
+  {
+    open,
+    handleDrawerClose,
+    drawerWidth
+  }: PersistentDrawerProps) {
+  const theme = useTheme()
 
   return (
     <Drawer
+      variant="persistent"
+      anchor="left"
+      open={open}
       sx={{
         width: drawerWidth,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: drawerWidth,
-          boxSizing: 'border-box',
-        },
+          boxSizing: 'border-box'
+        }
       }}
-      variant="persistent"
-      anchor="left"
-      open={open}
     >
       <DrawerHeader>
         <IconButton onClick={handleDrawerClose}>
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </DrawerHeader>
+
       <Divider />
+
+      {/*TODO: parameter */}
       <List>
         {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
           <ListItem key={text} disablePadding>
