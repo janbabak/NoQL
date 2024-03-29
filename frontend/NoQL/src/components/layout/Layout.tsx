@@ -2,17 +2,18 @@ import { Outlet } from 'react-router-dom'
 import * as React from 'react'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
-import { CustomAppBar } from './CusomAppBar.tsx'
+import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
 import { Main } from './Main.tsx'
-import { PersistentDrawer } from './PersistentDrawer.tsx'
+import { PersistentDrawer } from '../navigationDrawer/PersistentDrawer.tsx'
+import { Theme, useTheme } from '@mui/material/styles'
 
 export function Layout() {
+  const drawerWidth = 240
+  const theme: Theme = useTheme()
   const [
     navigationDrawerOpen,
     setNavigationDrawerOpen
   ] = React.useState<boolean>(false)
-
-  const drawerWidth = 240
 
   function handleDrawerOpen(): void {
     setNavigationDrawerOpen(true)
@@ -27,17 +28,24 @@ export function Layout() {
 
       <CssBaseline />
 
-      <CustomAppBar
-        handleDrawerOpen={handleDrawerOpen}
+      <ApplicationBar
         open={navigationDrawerOpen}
+        handleDrawerOpen={handleDrawerOpen}
+        drawerWidth={drawerWidth}
+        theme={theme}
       />
 
       <PersistentDrawer
         open={navigationDrawerOpen}
         handleDrawerClose={handleDrawerClose}
+        drawerWidth={drawerWidth}
       />
 
-      <Main open={navigationDrawerOpen}>
+      <Main
+        open={navigationDrawerOpen}
+        drawerWidth={drawerWidth}
+        theme={theme}
+      >
         <Outlet />
       </Main>
     </Box>

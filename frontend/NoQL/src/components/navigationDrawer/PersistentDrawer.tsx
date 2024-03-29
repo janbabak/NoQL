@@ -41,7 +41,7 @@ export function PersistentDrawer(
         }
       }}
     >
-      <DrawerHeader>
+      <DrawerHeader theme={theme}>
         <IconButton onClick={handleDrawerClose}>
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
