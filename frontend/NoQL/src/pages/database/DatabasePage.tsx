@@ -13,6 +13,8 @@ import { SecondaryNavbar } from '../../components/secondaryNavigation/SecondaryN
 import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
 import BackupTableRoundedIcon from '@mui/icons-material/BackupTableRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import { DatabaseSettings } from './settings/DatabaseSettings.tsx'
+import { DatabaseStructure } from './structure/DatabaseStructure.tsx'
 
 export function DatabasePage() {
   const { id } = useParams<string>()
@@ -183,12 +185,12 @@ export function DatabasePage() {
     },
     {
       label: "Structure",
-      component: <Typography variant="h2" component="h1">Structure</Typography>,
+      component: <DatabaseStructure />,
       buttonIcon: <BackupTableRoundedIcon />,
     },
     {
       label: "Settings",
-      component: <Typography variant="h2" component="h1">Settings</Typography>,
+      component: <DatabaseSettings />,
       buttonIcon: <SettingsRoundedIcon />
     }
   ]
