@@ -4,7 +4,7 @@ import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded
 import BackupTableRoundedIcon from '@mui/icons-material/BackupTableRounded'
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded'
 import { DatabaseSettings } from './settings/DatabaseSettings.tsx'
-import { DatabaseStructure } from './structure/DatabaseStructure.tsx'
+import { DatabaseStructureSubpage } from './structure/DatabaseStructureSubpage.tsx'
 import { QueryDatabase } from './query/QueryDatabase.tsx'
 import { useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
@@ -57,12 +57,17 @@ export function DatabasePage() {
     {
       label: 'Structure',
       buttonIcon: <BackupTableRoundedIcon />,
-      component: <DatabaseStructure />,
+      component:
+        <DatabaseStructureSubpage
+          databaseId={id || ''}
+          database={database}
+          databaseLoading={databaseLoading}
+        />
     },
     {
       label: 'Settings',
       buttonIcon: <SettingsRoundedIcon />,
-      component: <DatabaseSettings />,
+      component: <DatabaseSettings />
     }
   ]
 

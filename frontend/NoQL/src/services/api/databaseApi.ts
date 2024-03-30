@@ -2,6 +2,7 @@ import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
 import { QueryResponse } from '../../types/QueryResponse.ts'
+import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -20,6 +21,14 @@ const databaseApi = {
    */
   getById(id: string): Promise<AxiosResponse<Database>> {
     return this.API.get(this.DOMAIN + '/' + id)
+  },
+
+  /**
+   * Get database structure by id
+   * @param id database identifier
+   */
+  getStructure(id: string): Promise<AxiosResponse<DatabaseStructure>> {
+    return this.API.get(this.DOMAIN + '/' + id + '/structure')
   },
 
   /**
