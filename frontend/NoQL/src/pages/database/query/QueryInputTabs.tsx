@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, TextField } from '@mui/material'
-import styles from './Database.module.css'
+import styles from '../Database.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import React from 'react'
 import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'

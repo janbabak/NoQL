@@ -1,4 +1,4 @@
-import { QueryResponse } from '../../types/QueryResponse.ts'
+import { QueryResponse } from '../../../types/QueryResponse.ts'
 import {
   Box,
   Paper,
