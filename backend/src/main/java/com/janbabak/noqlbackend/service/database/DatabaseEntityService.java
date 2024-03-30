@@ -110,18 +110,17 @@ public class DatabaseEntityService {
      * Get database structure by database id
      *
      * @param id identifier
-     * @return database with structure
+     * @return database structure
      * @throws EntityNotFoundException     database of specific id not found
      * @throws DatabaseConnectionException connection to the database failed
      * @throws DatabaseExecutionException  syntax error error, ...
      */
-    public DatabaseWithStructure getDatabaseStructureByDatabaseId(UUID id)
+    public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID id)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
-        return new DatabaseWithStructure(
-                database, DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto());
+        return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
     }
 }

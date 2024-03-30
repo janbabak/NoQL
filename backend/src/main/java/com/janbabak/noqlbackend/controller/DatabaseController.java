@@ -141,14 +141,14 @@ public class DatabaseController {
     /**
      * Get database structure by database id
      * @param id identifier
-     * @return database with structure
+     * @return database structure
      * @throws DatabaseConnectionException syntax error error, ...
      * @throws DatabaseExecutionException connection to the database failed
      * @throws EntityNotFoundException database of specific id not found
      */
     @GetMapping("/{id}/structure")
     @ResponseStatus(HttpStatus.OK)
-    public DatabaseWithStructure getDatabaseStructure(@PathVariable UUID id)
+    public DatabaseStructureDto getDatabaseStructure(@PathVariable UUID id)
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
         return databaseService.getDatabaseStructureByDatabaseId(id);
     }
