@@ -1,6 +1,10 @@
-import { Editor } from '@monaco-editor/react'
-import * as monacoEditor from 'monaco-editor'
 import React, { useRef } from 'react'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { Editor } from '@monaco-editor/react'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import * as monacoEditor from 'monaco-editor'
 
 interface Props {
   value: string,
