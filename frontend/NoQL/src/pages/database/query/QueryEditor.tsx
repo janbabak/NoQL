@@ -1,9 +1,5 @@
 import React, { useRef } from 'react'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// import { Editor } from '@monaco-editor/react'
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { Editor } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
 
 interface Props {
@@ -39,18 +35,18 @@ export function QueryEditor({ value, setValue }: Props) {
     padding: { top: 20 }
   }
 
+  // TODO: solve
   return (
     <>
-      <div>TODO fix editor</div>
-      {/*<Editor*/}
-      {/*  height="200px"*/}
-      {/*  language="sql"*/}
-      {/*  theme="vs-dark"*/}
-      {/*  value={value}*/}
-      {/*  onChange={handleEditorChange}*/}
-      {/*  onMount={handleEditorDidMount}*/}
-      {/*  options={options}*/}
-      {/*/>*/}
+      <Editor
+        height="200px"
+        language="sql"
+        theme="vs-dark"
+        value={value}
+        onChange={handleEditorChange}
+        onMount={handleEditorDidMount}
+        options={options}
+      />
     </>
   )
 }

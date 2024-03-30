@@ -13,6 +13,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@fontsource/roboto": "^5.0.8",
+    "@monaco-editor/react": "^4.6.0",
     "@mui/icons-material": "^5.15.11",
     "@mui/lab": "^5.0.0-alpha.167",
     "@mui/material": "^5.15.11",
@@ -23,6 +24,7 @@
     "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-monaco-editor": "^0.55.0",
     "react-router": "^6.22.1",
     "react-router-dom": "^6.22.1",
     "react-syntax-highlighter": "^15.5.0"
