@@ -6,8 +6,13 @@ interface Database {
   database: string
   userName: string
   password: string
-  engine: string // TODO: create enum
+  engine: DatabaseEngine
   isSQL: boolean
 }
 
-export type { Database }
+enum DatabaseEngine {
+  POSTGRES,
+  MYSQL
+}
+
+export type { Database, DatabaseEngine }

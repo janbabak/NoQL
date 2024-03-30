@@ -1,6 +1,6 @@
+import React, { useRef } from 'react'
 import { Editor } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
-import React, { useRef } from 'react'
 
 interface Props {
   value: string,
@@ -35,6 +35,7 @@ export function QueryEditor({ value, setValue }: Props) {
     padding: { top: 20 }
   }
 
+  // TODO: solve
   return (
     <>
       <Editor
@@ -45,6 +46,7 @@ export function QueryEditor({ value, setValue }: Props) {
         onChange={handleEditorChange}
         onMount={handleEditorDidMount}
         options={options}
-      /></>
+      />
+    </>
   )
 }

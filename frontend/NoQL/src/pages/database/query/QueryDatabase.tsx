@@ -1,6 +1,4 @@
-import { useParams } from 'react-router'
-import { useEffect, useRef, useState } from 'react'
-import { Database } from '../../../types/Database.ts'
+import { useRef, useState } from 'react'
 import { QueryResponse } from '../../../types/QueryResponse.ts'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
@@ -9,19 +7,15 @@ import { QueryInputTabs } from './QueryInputTabs.tsx'
 import { LoadingButton } from '@mui/lab'
 import styles from '../Database.module.css'
 import { Result } from './Result.tsx'
+import { Database } from '../../../types/Database.ts'
 
-export function QueryDatabase() {
-  const { id } = useParams<string>()
+interface QueryDatabaseProps {
+  databaseId: string,
+  database: Database | null,
+  databaseLoading: boolean,
+}
 
-  const [
-    database,
-    setDatabase
-  ] = useState<Database | null>(null)
-
-  const [
-    databaseLoading,
-    setDatabaseLoading
-  ] = useState<boolean>(false)
+export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDatabaseProps) {
 
   const [
     queryResult,
@@ -65,24 +59,6 @@ export function QueryDatabase() {
 
   const naturalLanguageQuery = useRef<string>('')
 
-  useEffect((): void => {
-    void loadDatabase()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // load database from API
-  async function loadDatabase(): Promise<void> {
-    setDatabaseLoading(true)
-    try {
-      const response = await databaseApi.getById(id || '')
-      setDatabase(response.data)
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-    } finally {
-      setDatabaseLoading(false)
-    }
-  }
-
   // get query result
   async function queryDatabase(): Promise<void> {
     setPage(0)
@@ -93,9 +69,9 @@ export function QueryDatabase() {
         ? await databaseApi.queryNaturalLanguage(
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          id || '', naturalLanguageQuery.current.value, pageSize)
+          databaseId, naturalLanguageQuery.current.value, pageSize)
         : await databaseApi.queryQueryLanguageQuery(
-          id || '', queryLanguageQuery, 0, pageSize)
+          databaseId, queryLanguageQuery, 0, pageSize)
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -114,7 +90,7 @@ export function QueryDatabase() {
     setQueryLoading(true)
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
-        id || '',
+        databaseId,
         queryResult?.query || '',
         page,
         pageSize)
