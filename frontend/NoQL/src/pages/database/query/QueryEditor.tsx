@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import { Editor } from '@monaco-editor/react'
+// import { Editor } from '@monaco-editor/react'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as monacoEditor from 'monaco-editor'
@@ -41,14 +41,16 @@ export function QueryEditor({ value, setValue }: Props) {
 
   return (
     <>
-      <Editor
-        height="200px"
-        language="sql"
-        theme="vs-dark"
-        value={value}
-        onChange={handleEditorChange}
-        onMount={handleEditorDidMount}
-        options={options}
-      /></>
+      <div>TODO fix editor</div>
+      {/*<Editor*/}
+      {/*  height="200px"*/}
+      {/*  language="sql"*/}
+      {/*  theme="vs-dark"*/}
+      {/*  value={value}*/}
+      {/*  onChange={handleEditorChange}*/}
+      {/*  onMount={handleEditorDidMount}*/}
+      {/*  options={options}*/}
+      {/*/>*/}
+    </>
   )
 }

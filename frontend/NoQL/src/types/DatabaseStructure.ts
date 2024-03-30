@@ -27,4 +27,4 @@ interface ForeignKey {
   referencedColumn: string,
 }
 
-export type { DatabaseStructure, SqlDatabaseStructure }
+export type { DatabaseStructure, SqlDatabaseStructure, Schema, Table, Column, ForeignKey }

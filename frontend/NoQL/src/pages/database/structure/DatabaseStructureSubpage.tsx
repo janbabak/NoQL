@@ -55,7 +55,7 @@ export function DatabaseStructureSubpage({ databaseId, database, databaseLoading
 
       {databaseLoading && <span>loading...</span>}
       {!databaseLoading &&
-        <Typography variant="h4" component="h2">{database?.name}</Typography>
+        <Typography variant="h4" component="h2" sx={{marginBottom: '2rem'}}>{database?.name}</Typography>
       }
 
       {!databaseStructureLoading && Structure}
