@@ -6,6 +6,9 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.database.*;
+import com.janbabak.noqlbackend.model.gpt.GptResponse;
+import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
@@ -113,6 +116,16 @@ public class DatabaseController {
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             BadRequestException, LLMException, EntityNotFoundException {
         return queryService.executeSelectNaturalQuery(id, query, pageSize);
+    }
+
+    @PostMapping("/{id}/query/chat")
+    @ResponseStatus(HttpStatus.OK)
+    public GptResponse executeChat(
+            @PathVariable UUID id,
+            @RequestBody ChatRequest chatRequest,
+            @RequestParam Integer pageSize
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException, LLMException {
+        return queryService.executeChat(id, chatRequest, pageSize);
     }
 
     /**

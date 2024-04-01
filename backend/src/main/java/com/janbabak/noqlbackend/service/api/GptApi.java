@@ -3,6 +3,8 @@ package com.janbabak.noqlbackend.service.api;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.gpt.GptQuery;
 import com.janbabak.noqlbackend.model.gpt.GptResponse;
+import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.query.ChatResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -34,7 +36,7 @@ public class GptApi implements QueryApi {
      * @throws LLMException Bad request to the GPT API or error on the GPT side.
      */
     public String queryModel(String query) throws LLMException {
-        log.info("Query GPT api.");
+        log.info("Query GPT API.");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
@@ -50,6 +52,41 @@ public class GptApi implements QueryApi {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
                     ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
                     : null;
+        }
+        if (responseEntity.getStatusCode().is4xxClientError()) {
+            log.error("Bad request to the GPT model, status_code={}, response={}.",
+                    responseEntity.getStatusCode(), responseEntity.getBody());
+            throw new LLMException("Bad request to the GPT model, we are working on it.");
+        }
+        if (responseEntity.getStatusCode().is5xxServerError()) {
+            log.error("Error on GPT side, status_code={}, response={}.",
+                    responseEntity.getStatusCode(), responseEntity.getBody());
+            throw new LLMException("Error on GPT side, try it latter");
+        }
+        return null;
+    }
+
+    @Override
+    public GptResponse queryModel(ChatRequest chatRequest) throws LLMException {
+        log.info("Chat with GPT API.");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(this.token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(chatRequest, gptModel), headers);
+
+        ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
+                GPT_URL, HttpMethod.POST, request, GptResponse.class);
+
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            System.out.println(responseEntity.getBody());
+
+            return responseEntity.getBody();
+//            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
+//                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+//                    : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
             log.error("Bad request to the GPT model, status_code={}, response={}.",

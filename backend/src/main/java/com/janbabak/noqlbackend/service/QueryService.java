@@ -10,6 +10,9 @@ import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.database.QueryResponse;
 import com.janbabak.noqlbackend.model.database.QueryResponse.QueryResult;
+import com.janbabak.noqlbackend.model.gpt.GptResponse;
+import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -33,9 +37,7 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
-
-    @Autowired
-    private Settings settings;
+    private final Settings settings;
 
     /**
      * Create query content for the LLM.
@@ -176,6 +178,7 @@ public class QueryService {
         }
     }
 
+
     /**
      * Execute natural language select query. The query is translated to specific dialect via LLM and then executed.
      * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
@@ -226,5 +229,26 @@ public class QueryService {
             }
         }
         return null;
+    }
+
+    public GptResponse executeChat(UUID id, ChatRequest chatRequest, Integer pageSize)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException {
+
+        log.info("Execute chat, database_id={}", id);
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
+        String LLMQuery = createQuery(
+                chatRequest.getMessages().get(0),
+                databaseStructure.generateCreateScript(), database);
+
+        chatRequest.getMessages().set(0, LLMQuery);
+        GptResponse response = queryApi.queryModel(chatRequest);
+//        String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
+        return response;
+
     }
 }
