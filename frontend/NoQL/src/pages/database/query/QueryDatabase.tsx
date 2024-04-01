@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { QueryResponse } from '../../../types/QueryResponse.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { Typography } from '@mui/material'

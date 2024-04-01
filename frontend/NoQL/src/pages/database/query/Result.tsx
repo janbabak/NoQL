@@ -1,7 +1,7 @@
 import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { Alert, Button } from '@mui/material'
 import { ResultTable } from './ResultTable.tsx'
-import { QueryResponse } from '../../../types/QueryResponse.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 import React from 'react'
 
 interface Props {

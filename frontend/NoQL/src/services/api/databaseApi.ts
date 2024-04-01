@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
-import { QueryResponse } from '../../types/QueryResponse.ts'
+import { ChatRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 
 const databaseApi = {
@@ -38,10 +38,10 @@ const databaseApi = {
    * @param query natural language query
    * @param pageSize size of a page of automatically paginated response
    */
-  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
+  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<Query>> {
     return this.API.post(
-      this.DOMAIN + '/' + id + '/query/natural-language',
-      query, [
+      this.DOMAIN + '/' + id + '/query/chat',
+      { messages: [query] } as ChatRequest, [
         {
           name: 'pageSize',
           value: pageSize
@@ -55,7 +55,7 @@ const databaseApi = {
    * @param query database query in corresponding database query language
    * @param page page number (first pages is 0)
    * @param pageSize number of items in one page
-   * changed)
+   * changed
    */
   queryQueryLanguageQuery(id: string, query: string, page: number = 0, pageSize: number = 10)
     : Promise<AxiosResponse<QueryResponse>> {
@@ -77,4 +77,3 @@ const databaseApi = {
 }
 
 export default databaseApi
-export type { QueryResponse }
