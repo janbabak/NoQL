@@ -1,4 +1,4 @@
-import { QueryResponse } from '../../../types/QueryResponse.ts'
+import { Query } from '../../../types/Query.ts'
 import {
   Box,
   Paper,
@@ -13,7 +13,7 @@ import {
 import React from 'react'
 
 interface Props {
-  queryResult?: QueryResponse,
+  queryResult?: Query,
   page: number
   pageSize: number
   totalCount: number
