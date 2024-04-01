@@ -1,10 +1,9 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.gpt.GptQuery;
-import com.janbabak.noqlbackend.model.gpt.GptResponse;
+import com.janbabak.noqlbackend.model.query.gpt.GptQuery;
+import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
 import com.janbabak.noqlbackend.model.query.ChatRequest;
-import com.janbabak.noqlbackend.model.query.ChatResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -66,8 +65,15 @@ public class GptApi implements QueryApi {
         return null;
     }
 
+    /**
+     * Send queries in chat form the model and retrieve a response.
+     *
+     * @param chat that is sent to the model
+     * @return model's response
+     * @throws LLMException when LLM request fails.
+     */
     @Override
-    public GptResponse queryModel(ChatRequest chatRequest) throws LLMException {
+    public String queryModel(ChatRequest chat) throws LLMException {
         log.info("Chat with GPT API.");
 
         HttpHeaders headers = new HttpHeaders();
@@ -75,18 +81,15 @@ public class GptApi implements QueryApi {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(chatRequest, gptModel), headers);
+        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(chat, gptModel), headers);
 
         ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
                 GPT_URL, HttpMethod.POST, request, GptResponse.class);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            System.out.println(responseEntity.getBody());
-
-            return responseEntity.getBody();
-//            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-//                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
-//                    : null;
+            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
+                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+                    : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
             log.error("Bad request to the GPT model, status_code={}, response={}.",

@@ -6,9 +6,8 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.database.*;
-import com.janbabak.noqlbackend.model.gpt.GptResponse;
 import com.janbabak.noqlbackend.model.query.ChatRequest;
-import com.janbabak.noqlbackend.model.query.ChatResponse;
+import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
@@ -118,13 +117,27 @@ public class DatabaseController {
         return queryService.executeSelectNaturalQuery(id, query, pageSize);
     }
 
+    /**
+     * Query the user's database using natural language from in chat form, result is automatically paginated.
+     *
+     * @param id          database id
+     * @param chatRequest chat containing the natural language queries
+     * @param pageSize    number of items in one page
+     * @return query result
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws LLMException                LLM request failed.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     */
     @PostMapping("/{id}/query/chat")
     @ResponseStatus(HttpStatus.OK)
-    public GptResponse executeChat(
+    public QueryResponse executeChat(
             @PathVariable UUID id,
-            @RequestBody ChatRequest chatRequest,
+            @RequestBody @Valid ChatRequest chatRequest,
             @RequestParam Integer pageSize
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException, LLMException {
+    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            EntityNotFoundException, LLMException, BadRequestException {
         return queryService.executeChat(id, chatRequest, pageSize);
     }
 
@@ -153,11 +166,12 @@ public class DatabaseController {
 
     /**
      * Get database structure by database id
+     *
      * @param id identifier
      * @return database structure
      * @throws DatabaseConnectionException syntax error error, ...
-     * @throws DatabaseExecutionException connection to the database failed
-     * @throws EntityNotFoundException database of specific id not found
+     * @throws DatabaseExecutionException  connection to the database failed
+     * @throws EntityNotFoundException     database of specific id not found
      */
     @GetMapping("/{id}/structure")
     @ResponseStatus(HttpStatus.OK)

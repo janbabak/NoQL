@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.gpt;
+package com.janbabak.noqlbackend.model.query.gpt;
 
 import com.janbabak.noqlbackend.model.query.ChatRequest;
 import lombok.AllArgsConstructor;
