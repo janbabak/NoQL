@@ -94,30 +94,6 @@ public class DatabaseController {
     }
 
     /**
-     * Query the user's database using natural language, result is automatically paginated.
-     *
-     * @param id       database id
-     * @param query    natural language query
-     * @param pageSize number of items in one page
-     * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws LLMException                LLM request failed.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
-     */
-    @PostMapping("/{id}/query/natural-language")
-    @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeNaturalLanguageQuery(
-            @PathVariable UUID id,
-            @RequestBody String query,
-            @RequestParam Integer pageSize
-    ) throws DatabaseConnectionException, DatabaseExecutionException,
-            BadRequestException, LLMException, EntityNotFoundException {
-        return queryService.executeSelectNaturalQuery(id, query, pageSize);
-    }
-
-    /**
      * Query the user's database using natural language from in chat form, result is automatically paginated.
      *
      * @param id          database id
