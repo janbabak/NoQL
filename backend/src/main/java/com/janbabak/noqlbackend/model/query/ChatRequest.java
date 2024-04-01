@@ -13,6 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ChatRequest {
 
+    /**
+     * List of messages, where the first message is use's query, second message is LLM response to that query
+     * and so on... (even indices contain user's queries and odd indices contain LLM responses)
+     */
     @NotEmpty
     List<@NotBlank String> messages;
 }
