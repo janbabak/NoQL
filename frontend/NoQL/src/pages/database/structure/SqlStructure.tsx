@@ -3,10 +3,13 @@ import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem } from '@mui/x-tree-view/TreeItem'
 import { Schema } from '../../../types/DatabaseStructure.ts'
 import { SqlColumn } from './SqlColumn.tsx'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import StorageRoundedIcon from '@mui/icons-material/StorageRounded'
+import BackupTableRoundedIcon from '@mui/icons-material/BackupTableRounded'
+import styles from './Structure.module.css'
 
 interface SqlStructureProps {
   structure: SqlDatabaseStructure
@@ -20,6 +23,11 @@ export function SqlStructure({ structure }: SqlStructureProps) {
 
   function handleExpandedItemsChange(_event: React.SyntheticEvent, itemIds: string[]) {
     setExpandedItems(itemIds)
+  }
+
+  // collapse all items in the tree view
+  function collapseAll(): void {
+    setExpandedItems([])
   }
 
   // expand all items in the tree view
@@ -41,13 +49,8 @@ export function SqlStructure({ structure }: SqlStructureProps) {
     setExpandedItems(expanded)
   }
 
-  // collapse all items in the tree view
-  function collapseAll(): void {
-    setExpandedItems([])
-  }
-
   const ExpansionButtons =
-    <div style={{marginBottom: '1rem'}}>
+    <div className={styles.expansionButtons}>
       <Button
         startIcon={<ExpandMoreIcon />}
         onClick={expandAll}
@@ -76,14 +79,24 @@ export function SqlStructure({ structure }: SqlStructureProps) {
             return (
               <TreeItem
                 itemId={'s' + schemaIndex}
-                label={schema.name} key={schemaIndex}
+                sx={{ marginBottom: '1rem' }}
+                label={
+                  <span className={styles.treeItemLabel}>
+                  <StorageRoundedIcon />
+                    {schema.name}
+                </span>}
+                key={schemaIndex}
               >
                 {
                   schema.tables.map((table: Table, tableIndex: number) => {
                     return (
                       <TreeItem
                         itemId={'s' + schemaIndex + 't' + tableIndex}
-                        label={table.name}
+                        label={
+                          <span className={styles.treeItemLabel}>
+                          <BackupTableRoundedIcon />
+                            {table.name}
+                        </span>}
                         key={tableIndex}
                       >
                         {
