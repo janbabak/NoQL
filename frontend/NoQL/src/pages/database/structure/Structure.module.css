@@ -1,0 +1,40 @@
+.treeItemLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: bold;
+}
+
+.expansionButtons {
+    margin-bottom: 1rem;
+}
+
+.column {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.columnLabel {
+    font-weight: bold;
+}
+
+.columnDataType {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.primaryKeyIcon {
+    color: orange;
+    margin-left: 1rem
+}
+
+.foreignKeyIcon {
+    color: royalblue;
+}
+
+.foreignKeyLabel {
+    color: gray;
+}
