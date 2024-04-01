@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.gpt;
+package com.janbabak.noqlbackend.model.query.gpt;
 
 import lombok.Data;
 

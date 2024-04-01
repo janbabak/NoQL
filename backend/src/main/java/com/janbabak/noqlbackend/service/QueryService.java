@@ -8,8 +8,9 @@ import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.database.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
-import com.janbabak.noqlbackend.model.database.QueryResponse;
-import com.janbabak.noqlbackend.model.database.QueryResponse.QueryResult;
+import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;
+import com.janbabak.noqlbackend.model.query.ChatRequest;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
@@ -17,7 +18,6 @@ import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
@@ -33,9 +33,7 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
-
-    @Autowired
-    private Settings settings;
+    private final Settings settings;
 
     /**
      * Create query content for the LLM.
@@ -73,14 +71,14 @@ public class QueryService {
     /**
      * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
      *
-     * @param query         database language query
-     * @param page          number of pages (first page has index 0), if null, default value is 0
-     * @param pageSize      number of items in one page,<br />
-     *                      if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                      max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
-     * @param database      database object
+     * @param query    database language query
+     * @param page     number of pages (first page has index 0), if null, default value is 0
+     * @param pageSize number of items in one page,<br />
+     *                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @param database database object
      * @return database language query with pagination
-     * @throws BadRequestException        value is greater than maximum allowed value
+     * @throws BadRequestException value is greater than maximum allowed value
      */
     public String setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
             throws BadRequestException {
@@ -109,8 +107,8 @@ public class QueryService {
 
         // removes trailing semicolon if it is present
         return query.charAt(query.length() - 1) == ';'
-            ? query.substring(0, query.length() - 1)
-            : query;
+                ? query.substring(0, query.length() - 1)
+                : query;
     }
 
     /**
@@ -140,12 +138,12 @@ public class QueryService {
      * Execute query language select query.
      * Select query is read only, and it returns a result that is automatically paginated.
      *
-     * @param id                       database id
-     * @param query                    in natural query or database query language
-     * @param page                     page number (fist page starts by 0), if null, default value is 0
-     * @param pageSize                 number of items in one page,<br />
-     *                                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @param id       database id
+     * @param query    in natural query or database query language
+     * @param page     page number (fist page starts by 0), if null, default value is 0
+     * @param pageSize number of items in one page,<br />
+     *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
@@ -176,16 +174,19 @@ public class QueryService {
         }
     }
 
+
     /**
      * Execute natural language select query. The query is translated to specific dialect via LLM and then executed.
      * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
      *
-     * @param id                       database id
-     * @param query                    in natural query or database query language
-     * @param pageSize                 number of items in one page,<br />
-     *                                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @param id       database id
+     * @param query    in natural query or database query language
+     * @param pageSize number of items in one page,<br />
+     *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
+     * @throws LLMException large language model failure
+     * @throws BadRequestException page size is greater than maximum allowed value
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         requested page size is greater than maximum allowed value
@@ -226,5 +227,59 @@ public class QueryService {
             }
         }
         return null;
+    }
+
+    /**
+     * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
+     * and then executed.
+     * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
+     *
+     * @param id       database id
+     * @param chatRequest    in natural query or database query language
+     * @param pageSize number of items in one page,<br />
+     *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @return query result
+     * @throws LLMException large language model failure
+     * @throws BadRequestException page size is greater than maximum allowed value
+     * @throws EntityNotFoundException     queried database not found.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     */
+    public QueryResponse executeChat(UUID id, ChatRequest chatRequest, Integer pageSize)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            BadRequestException, LLMException {
+
+        log.info("Execute chat, database_id={}", id);
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
+        String LLMQuery = createQuery(
+                chatRequest.getMessages().get(0),
+                databaseStructure.generateCreateScript(), database);
+
+        chatRequest.getMessages().set(0, LLMQuery);
+
+        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
+            String query = queryApi.queryModel(chatRequest);
+            String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
+            try {
+                QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+                Long totalCount = getTotalCount(query, specificDatabaseService);
+
+                return QueryResponse.successfulResponse(queryResult, query, totalCount);
+            } catch (DatabaseExecutionException | SQLException e) {
+                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
+                        attempt, paginatedQuery);
+                if (attempt == settings.translationRetries) {
+                    return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
+                }
+            }
+        }
+        return null;
+
     }
 }
