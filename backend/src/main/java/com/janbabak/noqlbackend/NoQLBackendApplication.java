@@ -1,8 +1,5 @@
 package com.janbabak.noqlbackend;
 
-import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.service.api.GptApi;
-import com.janbabak.noqlbackend.service.api.QueryApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,17 +14,6 @@ public class NoQLBackendApplication {
     @GetMapping
     public static String healthCheck() {
         return "NoQL backend is running";
-    }
-
-    @SuppressWarnings("unused")
-    public static void testRequest(String[] args) {
-        SpringApplication.run(NoQLBackendApplication.class, args);
-        try {
-            QueryApi gptApi = new GptApi();
-            System.out.println(gptApi.queryModel("What is the most common name in the USA."));
-        } catch (LLMException e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     public static void main(String[] args) {

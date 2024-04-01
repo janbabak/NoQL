@@ -174,61 +174,6 @@ public class QueryService {
         }
     }
 
-
-    /**
-     * Execute natural language select query. The query is translated to specific dialect via LLM and then executed.
-     * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
-     *
-     * @param id       database id
-     * @param query    in natural query or database query language
-     * @param pageSize number of items in one page,<br />
-     *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
-     * @return query result
-     * @throws LLMException large language model failure
-     * @throws BadRequestException page size is greater than maximum allowed value
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
-     */
-    public QueryResponse executeSelectNaturalQuery(UUID id, String query, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            BadRequestException, LLMException {
-
-        log.info("Execute natural language query: query={}, database_id={}", query, id);
-
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
-
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String LLMQuery = createQuery(query, databaseStructure.generateCreateScript(), database);
-
-        // executes the query with retires - if it fails translate it via LLM and trie again
-        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            query = queryApi.queryModel(LLMQuery);
-            // TODO: remove after testing
-//            query = """
-//                    ```
-//                    select * from user;
-//                    ```""";
-            String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
-            try {
-                QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
-                Long totalCount = getTotalCount(query, specificDatabaseService);
-
-                return QueryResponse.successfulResponse(queryResult, query, totalCount);
-            } catch (DatabaseExecutionException | SQLException e) {
-                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
-                        attempt, paginatedQuery);
-                if (attempt == settings.translationRetries) {
-                    return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
      * and then executed.
@@ -265,6 +210,11 @@ public class QueryService {
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             String query = queryApi.queryModel(chatRequest);
+            // TODO: remove after testing
+//            query = """
+//                    ```
+//                    select * from user;
+//                    ```""";
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
