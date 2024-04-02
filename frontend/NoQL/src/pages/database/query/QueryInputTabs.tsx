@@ -3,11 +3,14 @@ import styles from '../Database.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import React from 'react'
 import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'
+import { Chat } from '../../../types/Query.ts'
+import { ChatView } from './ChatView.tsx'
 
 interface Props {
   tab: number,
   setTab: React.Dispatch<React.SetStateAction<number>>,
   naturalLanguageQuery: React.MutableRefObject<string>,
+  chat: Chat,
   queryLanguageQuery: string,
   setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>
 }
@@ -17,6 +20,7 @@ export function QueryInputTabs(
     tab,
     setTab,
     naturalLanguageQuery,
+    chat,
     queryLanguageQuery,
     setQueryLanguageQuery
   }: Props) {
@@ -31,6 +35,7 @@ export function QueryInputTabs(
       hidden={tab != NATURAL_LANGUAGE_TAB}
       className={styles.queryInput}
     >
+      <ChatView chat={chat} />
       <TextField
         id="query"
         label="Query"

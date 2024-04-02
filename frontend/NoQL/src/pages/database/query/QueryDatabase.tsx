@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { QueryResponse } from '../../../types/Query.ts'
+import { Chat, QueryResponse } from '../../../types/Query.ts'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { Typography } from '@mui/material'
@@ -21,6 +21,16 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
     queryResult,
     setQueryResult
   ] = useState<QueryResponse | null>(null)
+
+  const [
+    chat,
+    setChat
+  ] = useState<Chat>({ messages: [
+    "find me all users",
+      "SELECT * FROM public.user",
+      "and sort them by their names",
+      "SELECT * FROM public.user ORDER BY name",
+    ] })
 
   const [
     queryLoading,
@@ -60,18 +70,48 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
   const naturalLanguageQuery = useRef<string>('')
 
   // get query result
-  async function queryDatabase(): Promise<void> {
+  // async function queryDatabase(): Promise<void> {
+  //   setPage(0)
+  //   setQueryLoading(true)
+  //   try {
+  //     const naturalLanguage: boolean = tab == 0
+  //     const response = naturalLanguage
+  //       ? await databaseApi.queryNaturalLanguage(
+  //         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //         // @ts-ignore
+  //         databaseId, naturalLanguageQuery.current.value, pageSize)
+  //       : await databaseApi.queryQueryLanguageQuery(
+  //         databaseId, queryLanguageQuery, 0, pageSize)
+  //     setQueryResult(response.data)
+  //     setTotalCount(response.data.totalCount)
+  //   } catch (error: unknown) {
+  //     console.log(error) // TODO: handles
+  //   } finally {
+  //     setQueryLoading(false)
+  //     setShowGeneratedQuery(true)
+  //   }
+  // }
+
+  async function queryChat(): Promise<void> {
     setPage(0)
     setQueryLoading(true)
     try {
-      const naturalLanguage = tab == 0
-      const response = naturalLanguage
-        ? await databaseApi.queryNaturalLanguage(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          databaseId, naturalLanguageQuery.current.value, pageSize)
-        : await databaseApi.queryQueryLanguageQuery(
-          databaseId, queryLanguageQuery, 0, pageSize)
+
+      const newChat = {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+        messages: [...chat.messages, naturalLanguageQuery.current.value]
+      }
+
+      const response = await databaseApi.queryChat(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        databaseId, newChat, pageSize)
+
+      setChat({
+        messages: [...newChat.messages, response.data.query]
+      })
+
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -121,6 +161,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
             tab={tab}
             setTab={setTab}
             naturalLanguageQuery={naturalLanguageQuery}
+            chat={chat}
             queryLanguageQuery={queryLanguageQuery}
             setQueryLanguageQuery={setQueryLanguageQuery}
           />
@@ -129,7 +170,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
             loading={queryLoading}
             fullWidth
             variant="contained"
-            onClick={queryDatabase}
+            onClick={queryChat}
             className={styles.queryButton}
           >Query</LoadingButton>
 

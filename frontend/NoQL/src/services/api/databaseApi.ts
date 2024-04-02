@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
-import { ChatRequest, QueryResponse } from '../../types/Query.ts'
+import { Chat, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 
 const databaseApi = {
@@ -41,12 +41,24 @@ const databaseApi = {
   queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/chat',
-      { messages: [query] } as ChatRequest, [
+      { messages: [query] } as Chat, [
         {
           name: 'pageSize',
           value: pageSize
         }
       ])
+  },
+
+  queryChat(id: string, chat: Chat, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
+    return this.API.post(
+      this.DOMAIN + '/' + id + '/query/chat',
+      chat, [
+        {
+          name: 'pageSize',
+          value: pageSize
+        }
+      ]
+    )
   },
 
   /**
