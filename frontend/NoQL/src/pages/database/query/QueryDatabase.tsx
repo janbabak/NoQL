@@ -29,7 +29,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
     "find me all users",
       "SELECT * FROM public.user",
       "and sort them by their names",
-      "SELECT * FROM public.user ORDER BY name",
+      "SELECT * FROM public.user\nORDER BY name",
     ] })
 
   const [

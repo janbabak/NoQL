@@ -1,6 +1,6 @@
 import { Chat } from '../../../types/Query.ts'
-import { Editor } from '@monaco-editor/react'
-import { editor } from 'monaco-editor'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 
 interface ChatViewProps {
   chat: Chat
@@ -14,35 +14,24 @@ interface ModelsResponse {
   response: string
 }
 
+function ModelsResponse({ response }: ModelsResponse) {
+  return (
+    <SyntaxHighlighter
+      style={theme}
+      language="SQL"
+      customStyle={{ borderRadius: '0.25rem', margin: '0.25rem 0 1rem 0' }}
+    >
+      {response}
+    </SyntaxHighlighter>
+  )
+}
+
 function UsersQuery({ query }: UsersQueryProps) {
   return (
     <>
       <span style={{ fontWeight: 'bold' }}>You: </span>
       {query}
     </>
-  )
-}
-
-function ModelsResponse({ response }: ModelsResponse) {
-  const options: editor.IStandaloneEditorConstructionOptions = {
-    fontSize: 16,
-    fontFamily: 'monospace',
-    lineHeight: 24,
-    minimap: { enabled: false },
-    padding: { top: 20 },
-    readOnly: true,
-  }
-
-  return (
-    <div style={{height: '100%'}}>
-      <Editor
-        height="100px"
-        language="sql"
-        theme="vs-dark"
-        value={response}
-        options={options}
-      />
-    </div>
   )
 }
 
