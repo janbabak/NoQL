@@ -1,6 +1,7 @@
 import React, { useRef } from 'react'
 import { Editor } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
+import { editor } from 'monaco-editor'
 
 interface Props {
   value: string,
@@ -12,8 +13,8 @@ export function QueryEditor({ value, setValue }: Props) {
   const editor = useRef<monacoEditor.editor.IStandaloneCodeEditor>()
   const monaco = useRef<typeof monacoEditor>()
 
-  function handleEditorChange(value: string): void {
-    setValue(value)
+  function handleEditorChange(value: string | undefined, _ev: editor.IModelContentChangedEvent): void {
+    setValue(value || '')
   }
 
   function handleEditorDidMount(
@@ -24,18 +25,17 @@ export function QueryEditor({ value, setValue }: Props) {
     monaco.current = monacoParam
   }
 
-  const options = {
-    inlineSuggest: true,
+  const options: editor.IStandaloneEditorConstructionOptions = {
+    inlineSuggest: { enabled: true },
     fontSize: 16,
     fontFamily: 'monospace',
     lineHeight: 24,
     formatOnType: true,
-    autoClosingBrackets: true,
+    autoClosingBrackets: 'always',
     minimap: { enabled: false },
     padding: { top: 20 }
   }
 
-  // TODO: solve
   return (
     <>
       <Editor
