@@ -38,7 +38,7 @@ const databaseApi = {
    * @param query natural language query
    * @param pageSize size of a page of automatically paginated response
    */
-  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<Query>> {
+  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/chat',
       { messages: [query] } as ChatRequest, [
