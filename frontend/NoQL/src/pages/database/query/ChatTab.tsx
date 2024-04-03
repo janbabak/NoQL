@@ -22,7 +22,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
     setQueryResult
   ] = useState<QueryResponse | null>(null)
 
-
   const [
     queryLoading,
     setQueryLoading
@@ -72,26 +71,24 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
         messages: [...chat.messages, naturalLanguageQuery.current.value]
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      naturalLanguageQuery.current.value = ''
-
       const response = await databaseApi.queryChat(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         databaseId, newChat, pageSize)
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      naturalLanguageQuery.current.value = ''
+
       setChat({
         messages: [...newChat.messages, response.data.query]
       })
-
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
     } finally {
       setQueryLoading(false)
-      // setShowGeneratedQuery(true)
     }
   }
 
