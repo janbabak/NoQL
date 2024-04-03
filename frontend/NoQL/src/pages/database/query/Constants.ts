@@ -1,4 +1,4 @@
-const NATURAL_LANGUAGE_TAB: number = 0
-const QUERY_LANGUAGE_TAB: number = 1
+const CHAT_TAB: number = 0
+const CONSOLE_TAB: number = 1
 
-export { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB}
+export { CHAT_TAB, CONSOLE_TAB}
