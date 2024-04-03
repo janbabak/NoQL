@@ -5,6 +5,8 @@ import React from 'react'
 import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'
 import { Chat } from '../../../types/Query.ts'
 import { ChatView } from './ChatView.tsx'
+import SendRoundedIcon from '@mui/icons-material/SendRounded'
+import { LoadingButton } from '@mui/lab'
 
 interface Props {
   tab: number,
@@ -12,7 +14,9 @@ interface Props {
   naturalLanguageQuery: React.MutableRefObject<string>,
   chat: Chat,
   queryLanguageQuery: string,
-  setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>
+  setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>,
+  queryChat: () => void,
+  queryLoading: boolean
 }
 
 export function QueryInputTabs(
@@ -22,7 +26,9 @@ export function QueryInputTabs(
     naturalLanguageQuery,
     chat,
     queryLanguageQuery,
-    setQueryLanguageQuery
+    setQueryLanguageQuery,
+    queryChat,
+    queryLoading,
   }: Props) {
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
@@ -36,13 +42,24 @@ export function QueryInputTabs(
       className={styles.queryInput}
     >
       <ChatView chat={chat} />
-      <TextField
-        id="query"
-        label="Query"
-        variant="outlined"
-        inputRef={naturalLanguageQuery}
-        fullWidth
-      />
+
+      <div style={{display: 'flex', gap: '1rem', alignItems: 'flex-end'}}>
+        <TextField
+          id="query"
+          label="Query"
+          variant="standard"
+          inputRef={naturalLanguageQuery}
+          fullWidth
+        />
+
+        <LoadingButton
+          loading={queryLoading}
+          variant="contained"
+          endIcon={<SendRoundedIcon />}
+          onClick={queryChat}
+        >Query</LoadingButton>
+      </div>
+
     </div>
 
   const QueryLanguageTab =

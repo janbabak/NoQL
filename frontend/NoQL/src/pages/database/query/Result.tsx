@@ -1,4 +1,3 @@
-import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { Alert, Button } from '@mui/material'
 import { ResultTable } from './ResultTable.tsx'
 import { QueryResponse } from '../../../types/Query.ts'
@@ -18,7 +17,6 @@ interface Props {
 export function Result(
   {
     queryResponse,
-    showGeneratedQuery,
     editQueryInEditor,
     page,
     pageSize,
@@ -42,13 +40,9 @@ export function Result(
     </ Button>
 
   return (
-    <>
+    <div style={{marginTop: '3rem'}}>
       {queryResponse != null &&
         <div>
-          {showGeneratedQuery &&
-            <GeneratedQuery query={queryResponse.query} />
-          }
-
           {queryResponse.errorMessage != null &&
             <Alert severity="error" action={EditQueryButton}>
               {queryResponse.errorMessage}
@@ -67,6 +61,6 @@ export function Result(
           }
         </div>
       }
-    </>
+    </div>
   )
 }

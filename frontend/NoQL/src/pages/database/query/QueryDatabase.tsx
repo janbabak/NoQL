@@ -4,8 +4,6 @@ import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { Typography } from '@mui/material'
 import { QueryInputTabs } from './QueryInputTabs.tsx'
-import { LoadingButton } from '@mui/lab'
-import styles from '../Database.module.css'
 import { Result } from './Result.tsx'
 import { Database } from '../../../types/Database.ts'
 
@@ -103,6 +101,10 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
         messages: [...chat.messages, naturalLanguageQuery.current.value]
       }
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      naturalLanguageQuery.current.value = ''
+
       const response = await databaseApi.queryChat(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -161,18 +163,12 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
             tab={tab}
             setTab={setTab}
             naturalLanguageQuery={naturalLanguageQuery}
+            queryChat={queryChat}
             chat={chat}
             queryLanguageQuery={queryLanguageQuery}
             setQueryLanguageQuery={setQueryLanguageQuery}
+            queryLoading={queryLoading}
           />
-
-          <LoadingButton
-            loading={queryLoading}
-            fullWidth
-            variant="contained"
-            onClick={queryChat}
-            className={styles.queryButton}
-          >Query</LoadingButton>
 
           <Result
             queryResponse={queryResult}
