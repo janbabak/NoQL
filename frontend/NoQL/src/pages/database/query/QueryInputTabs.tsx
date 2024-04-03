@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, TextField } from '@mui/material'
-import styles from '../Database.module.css'
+import styles from './Query.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import React from 'react'
 import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'
@@ -39,11 +39,11 @@ export function QueryInputTabs(
     <div
       role="tabpanel"
       hidden={tab != NATURAL_LANGUAGE_TAB}
-      className={styles.queryInput}
+      className={styles.tabView}
     >
       <ChatView chat={chat} />
 
-      <div style={{display: 'flex', gap: '1rem', alignItems: 'flex-end'}}>
+      <div className={styles.chatInputContainer}>
         <TextField
           id="query"
           label="Query"
@@ -66,7 +66,7 @@ export function QueryInputTabs(
     <div
       role="tabpanel"
       hidden={tab != QUERY_LANGUAGE_TAB}
-      className={styles.queryEditor}
+      className={styles.tabView}
     >
       <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
     </div>
@@ -80,8 +80,8 @@ export function QueryInputTabs(
           onChange={handleTabChange}
           sx={{ borderRadius: '0.25rem', marginTop: '1.5rem' }}
         >
-          <Tab label="Natural language" sx={{ borderRadius: '0.25rem' }} />
-          <Tab label="Query language" sx={{ borderRadius: '0.25rem' }} />
+          <Tab label="Chat" sx={{ borderRadius: '0.25rem' }} />
+          <Tab label="Editor" sx={{ borderRadius: '0.25rem' }} />
         </Tabs>
       </Box>
 

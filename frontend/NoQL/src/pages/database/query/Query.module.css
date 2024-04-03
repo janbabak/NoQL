@@ -3,3 +3,17 @@
     overflow-x: scroll;
     scroll-behavior: smooth;
 }
+
+.chatInputContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.tabView {
+    margin: 1rem 0 .5rem 0;
+}
+
+.generatedQuery {
+    margin: 0 0 1rem 0 !important;
+}
