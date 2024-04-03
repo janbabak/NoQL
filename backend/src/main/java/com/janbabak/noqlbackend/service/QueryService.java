@@ -112,6 +112,43 @@ public class QueryService {
     }
 
     /**
+     * Sometimes the model does not return just the query itself, but puts it into a markdown and add some text. <br />
+     * Extract the executable query from the response that can look like this: <br />
+     * {@code Use the following command to retrieve all users. ```select * from public.user;```} <br />
+     * @param response model's response
+     * @return executable query
+     */
+    public String extractQueryFromMarkdownInResponse(String response) {
+        int markdownIndex = response.indexOf("```");
+
+        // markdown not detected
+        if (markdownIndex == -1) {
+            return response;
+        }
+
+        String responseAfterMarkdownStart = response.substring(markdownIndex);
+        // I cannot cut only the ``` because it usually looks like ```sql\n or something like that
+        int newLineIndex = responseAfterMarkdownStart.indexOf("\n");
+        if (newLineIndex == -1) {
+            newLineIndex = responseAfterMarkdownStart.indexOf(" ");
+        }
+        if (newLineIndex == -1 || newLineIndex + 1 > responseAfterMarkdownStart.length() - 1) {
+            return response; // unable to parse
+        }
+        String responseAfterNewLine = responseAfterMarkdownStart.substring(newLineIndex + 1);
+        markdownIndex = responseAfterNewLine.indexOf("```");
+        if (markdownIndex == -1) {
+            return response; // unable to parse
+        }
+
+        String extractedQuery = responseAfterNewLine.substring(0, markdownIndex).trim();
+
+        log.info("Extracted query={} from response={}", extractedQuery, response);
+
+        return extractedQuery;
+    }
+
+    /**
      * Get total number of rows that SQL select query returns.
      *
      * @param selectQuery     select statement
@@ -211,10 +248,12 @@ public class QueryService {
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             String query = queryApi.queryModel(chatRequest);
             // TODO: remove after testing
-//            query = """
+//            String query = """
+//                    Use the following command to retrieve all users.
 //                    ```
-//                    select * from user;
+//                    select * from public.user;
 //                    ```""";
+            query = extractQueryFromMarkdownInResponse(query);
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
