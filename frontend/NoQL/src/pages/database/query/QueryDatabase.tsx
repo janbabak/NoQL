@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Chat, QueryResponse } from '../../../types/Query.ts'
 import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
@@ -71,7 +71,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
     setTotalCount
   ] = useState<number | null>(0)
 
-  const naturalLanguageQuery = useRef<string>('')
+  const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
   // get query result
   async function executeEditorQuery(): Promise<void> {
