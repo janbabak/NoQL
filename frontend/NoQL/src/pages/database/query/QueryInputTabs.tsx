@@ -7,6 +7,7 @@ import { ChatView } from './ChatView.tsx'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { LoadingButton } from '@mui/lab'
 import { ConsoleTab } from './ConsoleTab.tsx'
+import { ChatTab } from './ChatTab.tsx'
 
 interface Props {
   databaseId: string,
@@ -30,39 +31,12 @@ export function QueryInputTabs(
     queryLanguageQuery,
     setQueryLanguageQuery,
     queryChat,
-    queryLoading,
+    queryLoading
   }: Props) {
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
     setTab(newValue)
   }
-
-  const NaturalLanguageTab =
-    <div
-      role="tabpanel"
-      hidden={tab != NATURAL_LANGUAGE_TAB}
-      className={styles.chatTab}
-    >
-      <ChatView chat={chat} />
-
-      <div className={styles.chatInputContainer}>
-        <TextField
-          id="query"
-          label="Query"
-          variant="standard"
-          inputRef={naturalLanguageQuery}
-          fullWidth
-        />
-
-        <LoadingButton
-          loading={queryLoading}
-          variant="contained"
-          endIcon={<SendRoundedIcon />}
-          onClick={queryChat}
-        >Query</LoadingButton>
-      </div>
-
-    </div>
 
   return (
     <>
@@ -78,7 +52,7 @@ export function QueryInputTabs(
         </Tabs>
       </Box>
 
-      {NaturalLanguageTab}
+      <ChatTab databaseId={databaseId} tab={tab} />
 
       <ConsoleTab
         databaseId={databaseId}

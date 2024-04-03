@@ -169,7 +169,6 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
             queryLanguageQuery={queryLanguageQuery}
             setQueryLanguageQuery={setQueryLanguageQuery}
             queryLoading={queryLoading}
-            executeQueryLanguageQuery={executeEditorQuery}
           />
 
           <Result
