@@ -10,7 +10,7 @@ interface QueryResponse {
   errorMessage: string | null
 }
 
-interface ChatRequest {
+interface Chat {
   /**
    * List of messages, where the first message is use's query, second message is LLM response to that query
    * and so on... (even indices contain user's queries and odd indices contain LLM responses)
@@ -18,4 +18,4 @@ interface ChatRequest {
   messages: string[]
 }
 
-export type { QueryResponse, QueryResult, ChatRequest }
+export type { QueryResponse, QueryResult, Chat }

@@ -21,7 +21,9 @@ export function Main({ open, drawerWidth, theme, children }: MainProps) {
     }
   )(({ theme, open }: StyledMainProps) => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
+    paddingTop: theme.spacing(3),
+    paddingLeft: theme.spacing(20),
+    paddingRight: theme.spacing(20),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen

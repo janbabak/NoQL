@@ -1,0 +1,30 @@
+.chatWindow {
+    max-height: 25rem;
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+}
+
+.chatInputContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.chatTab,
+.editorTab {
+    margin: 1rem 0 .5rem 0;
+}
+
+.editorTab {
+    position: relative !important;
+}
+
+.generatedQuery {
+    margin: 0 0 1rem 0;
+}
+
+.executeButton {
+    position: absolute !important;
+    top: 0;
+    right: 0.5rem;
+}

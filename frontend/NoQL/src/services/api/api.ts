@@ -50,7 +50,7 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  post(path: string, data: string, parameters = [] as ApiParameter[]):
+  post(path: string, data: string | number | boolean | object, parameters = [] as ApiParameter[]):
     Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
