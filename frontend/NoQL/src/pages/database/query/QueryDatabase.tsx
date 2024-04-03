@@ -25,9 +25,15 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
     setChat
   ] = useState<Chat>({ messages: [
     "find me all users",
-      "SELECT * FROM public.user",
+      "SELECT * FROM public.user;",
       "and sort them by their names",
-      "SELECT * FROM public.user\nORDER BY name",
+      "SELECT * FROM public.user\nORDER BY name;",
+      "in descending order",
+      "SELECT * FROM public.user\nORDER BY name DESC;",
+      "show only name, age, email and sex columns",
+      "SELECT name, age, email, sex FROM public.user\nORDER BY name DESC;",
+      "make the name uppercase",
+      "SELECT UPPER(name) AS name, age, email, sex\nFROM public.user\nORDER BY name DESC;"
     ] })
 
   const [

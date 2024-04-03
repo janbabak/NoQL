@@ -1,0 +1,5 @@
+.chatWindow {
+    max-height: 25rem;
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+}
