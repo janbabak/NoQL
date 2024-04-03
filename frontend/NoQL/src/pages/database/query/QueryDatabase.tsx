@@ -160,6 +160,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
           <Typography variant="h4" component="h2">{database?.name}</Typography>
 
           <QueryInputTabs
+            databaseId={databaseId}
             tab={tab}
             setTab={setTab}
             naturalLanguageQuery={naturalLanguageQuery}
@@ -173,7 +174,6 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
 
           <Result
             queryResponse={queryResult}
-            showGeneratedQuery={showGeneratedQuery}
             editQueryInEditor={editQueryInEditor}
             page={page}
             pageSize={pageSize}

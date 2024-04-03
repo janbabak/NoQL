@@ -5,7 +5,6 @@ import React from 'react'
 
 interface Props {
   queryResponse: QueryResponse | null,
-  showGeneratedQuery: boolean
   editQueryInEditor: (query: string) => void,
   page: number,
   pageSize: number,

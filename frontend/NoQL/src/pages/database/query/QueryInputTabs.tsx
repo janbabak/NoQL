@@ -1,16 +1,15 @@
 import { Box, Tab, Tabs, TextField } from '@mui/material'
 import styles from './Query.module.css'
-import { QueryEditor } from './QueryEditor.tsx'
 import React from 'react'
-import { NATURAL_LANGUAGE_TAB, QUERY_LANGUAGE_TAB } from './Constants.ts'
+import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
 import { Chat } from '../../../types/Query.ts'
 import { ChatView } from './ChatView.tsx'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { LoadingButton } from '@mui/lab'
-import IconButton from '@mui/material/IconButton'
-import PlayCircleFilledWhiteRoundedIcon from '@mui/icons-material/PlayCircleFilledWhiteRounded';
+import { ConsoleTab } from './ConsoleTab.tsx'
 
 interface Props {
+  databaseId: string,
   tab: number,
   setTab: React.Dispatch<React.SetStateAction<number>>,
   naturalLanguageQuery: React.MutableRefObject<string>,
@@ -19,11 +18,11 @@ interface Props {
   setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>,
   queryChat: () => void,
   queryLoading: boolean,
-  executeQueryLanguageQuery: () => void
 }
 
 export function QueryInputTabs(
   {
+    databaseId,
     tab,
     setTab,
     naturalLanguageQuery,
@@ -32,7 +31,6 @@ export function QueryInputTabs(
     setQueryLanguageQuery,
     queryChat,
     queryLoading,
-    executeQueryLanguageQuery,
   }: Props) {
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
@@ -66,25 +64,6 @@ export function QueryInputTabs(
 
     </div>
 
-  const QueryLanguageTab =
-    <div
-      role="tabpanel"
-      hidden={tab != QUERY_LANGUAGE_TAB}
-      className={styles.editorTab}
-    >
-      <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
-
-      <IconButton
-        className={styles.executeButton}
-        aria-label="execute query"
-        size="large"
-        color="success"
-        onClick={executeQueryLanguageQuery}
-      >
-        <PlayCircleFilledWhiteRoundedIcon fontSize="inherit" />
-      </IconButton>
-    </div>
-
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -100,7 +79,13 @@ export function QueryInputTabs(
       </Box>
 
       {NaturalLanguageTab}
-      {QueryLanguageTab}
+
+      <ConsoleTab
+        databaseId={databaseId}
+        tab={tab}
+        queryLanguageQuery={queryLanguageQuery}
+        setQueryLanguageQuery={setQueryLanguageQuery}
+      />
     </>
   )
 }
