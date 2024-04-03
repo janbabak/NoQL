@@ -7,6 +7,8 @@ import { Chat } from '../../../types/Query.ts'
 import { ChatView } from './ChatView.tsx'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { LoadingButton } from '@mui/lab'
+import IconButton from '@mui/material/IconButton'
+import PlayCircleFilledWhiteRoundedIcon from '@mui/icons-material/PlayCircleFilledWhiteRounded';
 
 interface Props {
   tab: number,
@@ -16,7 +18,8 @@ interface Props {
   queryLanguageQuery: string,
   setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>,
   queryChat: () => void,
-  queryLoading: boolean
+  queryLoading: boolean,
+  executeQueryLanguageQuery: () => void
 }
 
 export function QueryInputTabs(
@@ -29,6 +32,7 @@ export function QueryInputTabs(
     setQueryLanguageQuery,
     queryChat,
     queryLoading,
+    executeQueryLanguageQuery,
   }: Props) {
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
@@ -39,7 +43,7 @@ export function QueryInputTabs(
     <div
       role="tabpanel"
       hidden={tab != NATURAL_LANGUAGE_TAB}
-      className={styles.tabView}
+      className={styles.chatTab}
     >
       <ChatView chat={chat} />
 
@@ -66,9 +70,19 @@ export function QueryInputTabs(
     <div
       role="tabpanel"
       hidden={tab != QUERY_LANGUAGE_TAB}
-      className={styles.tabView}
+      className={styles.editorTab}
     >
       <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
+
+      <IconButton
+        className={styles.executeButton}
+        aria-label="execute query"
+        size="large"
+        color="success"
+        onClick={executeQueryLanguageQuery}
+      >
+        <PlayCircleFilledWhiteRoundedIcon fontSize="inherit" />
+      </IconButton>
     </div>
 
   return (

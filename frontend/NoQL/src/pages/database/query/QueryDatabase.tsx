@@ -74,27 +74,21 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
   const naturalLanguageQuery = useRef<string>('')
 
   // get query result
-  // async function queryDatabase(): Promise<void> {
-  //   setPage(0)
-  //   setQueryLoading(true)
-  //   try {
-  //     const naturalLanguage: boolean = tab == 0
-  //     const response = naturalLanguage
-  //       ? await databaseApi.queryNaturalLanguage(
-  //         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //         // @ts-ignore
-  //         databaseId, naturalLanguageQuery.current.value, pageSize)
-  //       : await databaseApi.queryQueryLanguageQuery(
-  //         databaseId, queryLanguageQuery, 0, pageSize)
-  //     setQueryResult(response.data)
-  //     setTotalCount(response.data.totalCount)
-  //   } catch (error: unknown) {
-  //     console.log(error) // TODO: handles
-  //   } finally {
-  //     setQueryLoading(false)
-  //     setShowGeneratedQuery(true)
-  //   }
-  // }
+  async function executeEditorQuery(): Promise<void> {
+    setPage(0)
+    setQueryLoading(true)
+    try {
+      const response = await databaseApi.queryQueryLanguageQuery(
+          databaseId, queryLanguageQuery, 0, pageSize)
+      setQueryResult(response.data)
+      setTotalCount(response.data.totalCount)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+      setShowGeneratedQuery(true)
+    }
+  }
 
   async function queryChat(): Promise<void> {
     setPage(0)
@@ -174,6 +168,7 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
             queryLanguageQuery={queryLanguageQuery}
             setQueryLanguageQuery={setQueryLanguageQuery}
             queryLoading={queryLoading}
+            executeQueryLanguageQuery={executeEditorQuery}
           />
 
           <Result
