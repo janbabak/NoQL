@@ -7,6 +7,7 @@ import React, { useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
+import { LinearProgress } from '@mui/material'
 
 interface ConsoleTabProps {
   databaseId: string
@@ -101,6 +102,7 @@ export function ConsoleTab(
       className={styles.editorTab}
     >
       <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
+      { queryLoading && <LinearProgress /> }
 
       {ExecuteButton}
 
