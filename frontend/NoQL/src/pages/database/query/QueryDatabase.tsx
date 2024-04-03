@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
+import { CHAT_TAB, CONSOLE_TAB } from './Constants.ts'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Database } from '../../../types/Database.ts'
 import { ChatTab } from './ChatTab.tsx'
@@ -16,45 +16,21 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
   const [
     tab,
     setTab
-  ] = useState<number>(NATURAL_LANGUAGE_TAB)
+  ] = useState<number>(CHAT_TAB)
 
   const [
     queryLanguageQuery,
     setQueryLanguageQuery
   ] = useState<string>('')
 
-  function editQueryInEditor(query: string) {
+  function editInConsole(query: string): void {
     setQueryLanguageQuery(query)
-    setTab(1)
+    setTab(CONSOLE_TAB)
   }
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
     setTab(newValue)
   }
-
-  const TabsView =
-    <>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tab}
-          onChange={handleTabChange}
-          sx={{ borderRadius: '0.25rem', marginTop: '1.5rem' }}
-          aria-label="Chat and Console tabs"
-        >
-          <Tab label="Chat" sx={{ borderRadius: '0.25rem' }} />
-          <Tab label="Editor" sx={{ borderRadius: '0.25rem' }} />
-        </Tabs>
-      </Box>
-
-      <ChatTab databaseId={databaseId} tab={tab} />
-
-      <ConsoleTab
-        databaseId={databaseId}
-        tab={tab}
-        queryLanguageQuery={queryLanguageQuery}
-        setQueryLanguageQuery={setQueryLanguageQuery}
-      />
-    </>
 
   return (
     <>
@@ -63,7 +39,31 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
       {!databaseLoading &&
         <>
           <Typography variant="h4" component="h2">{database?.name}</Typography>
-          {TabsView}
+
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              value={tab}
+              onChange={handleTabChange}
+              sx={{ borderRadius: '0.25rem', marginTop: '1.5rem' }}
+              aria-label="Chat and Console tabs"
+            >
+              <Tab label="Chat" sx={{ borderRadius: '0.25rem' }} />
+              <Tab label="Editor" sx={{ borderRadius: '0.25rem' }} />
+            </Tabs>
+          </Box>
+
+          <ChatTab
+            databaseId={databaseId}
+            tab={tab}
+            editQueryInConsole={editInConsole}
+          />
+
+          <ConsoleTab
+            databaseId={databaseId}
+            tab={tab}
+            queryLanguageQuery={queryLanguageQuery}
+            setQueryLanguageQuery={setQueryLanguageQuery}
+          />
         </>
       }
     </>

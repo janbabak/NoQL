@@ -5,7 +5,8 @@ import React from 'react'
 
 interface Props {
   queryResponse: QueryResponse | null,
-  editQueryInEditor: (query: string) => void,
+  showEditInConsoleButton: boolean,
+  editQueryInConsole: (query: string) => void,
   page: number,
   pageSize: number,
   setPageSize: React.Dispatch<React.SetStateAction<number>>
@@ -16,7 +17,8 @@ interface Props {
 export function Result(
   {
     queryResponse,
-    editQueryInEditor,
+    showEditInConsoleButton,
+    editQueryInConsole,
     page,
     pageSize,
     setPageSize,
@@ -31,7 +33,7 @@ export function Result(
 
   const EditQueryButton =
     <Button
-      onClick={() => editQueryInEditor(queryResponse?.query || '')}
+      onClick={() => editQueryInConsole(queryResponse?.query || '')}
       size="small"
       color="inherit"
     >
@@ -39,11 +41,14 @@ export function Result(
     </ Button>
 
   return (
-    <div style={{marginTop: '3rem'}}>
+    <div style={{ marginTop: '3rem' }}>
       {queryResponse != null &&
         <div>
           {queryResponse.errorMessage != null &&
-            <Alert severity="error" action={EditQueryButton}>
+            <Alert
+              severity="error"
+              action={showEditInConsoleButton ? EditQueryButton : null}
+            >
               {queryResponse.errorMessage}
             </Alert>
           }

@@ -1,4 +1,4 @@
-import { NATURAL_LANGUAGE_TAB } from './Constants.ts'
+import { CHAT_TAB } from './Constants.ts'
 import styles from './Query.module.css'
 import { ChatView } from './ChatView.tsx'
 import { TextField } from '@mui/material'
@@ -12,9 +12,10 @@ import { Result } from './Result.tsx'
 interface ChatTabProps {
   databaseId: string,
   tab: number,
+  editQueryInConsole: (query: string) => void,
 }
 
-export function ChatTab({ databaseId, tab }: ChatTabProps) {
+export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
 
   const [
     queryResult,
@@ -117,7 +118,7 @@ export function ChatTab({ databaseId, tab }: ChatTabProps) {
   return (
     <div
       role="tabpanel"
-      hidden={tab != NATURAL_LANGUAGE_TAB}
+      hidden={tab != CHAT_TAB}
       className={styles.chatTab}
     >
       <ChatView chat={chat} />
@@ -136,14 +137,15 @@ export function ChatTab({ databaseId, tab }: ChatTabProps) {
           variant="contained"
           endIcon={<SendRoundedIcon />}
           onClick={queryChat}
-        >Query</LoadingButton>
+        >
+          Query
+        </LoadingButton>
       </div>
 
       <Result
         queryResponse={queryResult}
-        editQueryInEditor={
-          (_: string) => console.log('not implemented')
-        }
+        editQueryInConsole={editQueryInConsole}
+        showEditInConsoleButton={true}
         page={page}
         pageSize={pageSize}
         setPageSize={setPageSize}

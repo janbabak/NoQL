@@ -1,4 +1,4 @@
-import { QUERY_LANGUAGE_TAB } from './Constants.ts'
+import { CONSOLE_TAB } from './Constants.ts'
 import styles from './Query.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import IconButton from '@mui/material/IconButton'
@@ -97,7 +97,7 @@ export function ConsoleTab(
   return (
     <div
       role="tabpanel"
-      hidden={tab != QUERY_LANGUAGE_TAB}
+      hidden={tab != CONSOLE_TAB}
       className={styles.editorTab}
     >
       <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
@@ -106,7 +106,8 @@ export function ConsoleTab(
 
       <Result
         queryResponse={queryResult}
-        editQueryInEditor={(_query: string) => console.log('implement')}
+        editQueryInConsole={(_query: string) => console.log('implement')}
+        showEditInConsoleButton={false}
         page={page}
         pageSize={pageSize}
         setPageSize={setPageSize}
