@@ -1,7 +1,10 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -9,6 +12,9 @@ import java.util.UUID;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Chat {
 
     @Id
@@ -18,10 +24,12 @@ public class Chat {
     @ManyToOne
     private Database database;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MessageWithResponse> messages;
 
     private Timestamp modificationDate;
+
+    private String name;
 
     public void addMessage(MessageWithResponse newMessage) {
         for (MessageWithResponse message: messages) {

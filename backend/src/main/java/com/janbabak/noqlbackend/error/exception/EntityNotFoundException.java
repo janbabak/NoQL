@@ -21,7 +21,8 @@ public class EntityNotFoundException extends Exception {
      * Entity that has not been found.
      */
     public enum Entity {
-        DATABASE("Database");
+        DATABASE("Database"),
+        CHAT("Chat");
 
         public final String label;
 
