@@ -240,7 +240,7 @@ public class QueryService {
 //                    ```
 //                    select * from public.user;
 //                    ```""";
-//            query = extractQueryFromMarkdownInResponse(query);
+            query = extractQueryFromMarkdownInResponse(query);
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
