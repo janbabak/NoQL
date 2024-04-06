@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -36,36 +38,23 @@ public class QueryService {
     private final Settings settings;
 
     /**
-     * Create query content for the LLM.
+     * Create system query for the LLM that specifies what should be done, database schema, ...
      *
-     * @param naturalLanguageQuery query from the user/customer
-     * @param dbStructure          structure of the database, e.g. create script (describes tables, columns, etc.)
-     * @param database             database metadata object
+     * @param dbStructure structure of the database, e.g. create script (describes tables, columns, etc.)
+     * @param database    database metadata object
      * @return generated query
      */
-    public static String createQuery(
-            String naturalLanguageQuery, String dbStructure, Database database) {
-        StringBuilder queryBuilder = new StringBuilder();
-
-        if (database.getIsSQL()) {
-            queryBuilder
-                    .append("Write an SQL query for the ")
-                    .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
-                    .append(" database, which does the following: ");
-        } else {
-            queryBuilder
-                    .append("Write a query for the ")
-                    .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
-                    .append("database.\n")
-                    .append("It should do the following: ");
-        }
-
-        queryBuilder
-                .append(naturalLanguageQuery)
+    @SuppressWarnings("all")
+    public static String createSystemQuery(String dbStructure, Database database) {
+        return new StringBuilder(
+                "You are an assistant that translates natural language queries into a database query language.\n")
+                .append(database.getIsSQL() ? "Write an SQL query for the " : "Write a query for the ")
+                .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
+                .append("The response must contain only the transalted query without any additional text and markdown syntax.\n")
                 .append("\nThis is the database structure:\n")
-                .append(dbStructure);
-
-        return queryBuilder.toString();
+                .append(dbStructure)
+                .append("Translate the user's queries.\n")
+                .toString();
     }
 
     /**
@@ -115,6 +104,7 @@ public class QueryService {
      * Sometimes the model does not return just the query itself, but puts it into a markdown and add some text. <br />
      * Extract the executable query from the response that can look like this: <br />
      * {@code Use the following command to retrieve all users. ```select * from public.user;```} <br />
+     *
      * @param response model's response
      * @return executable query
      */
@@ -161,7 +151,7 @@ public class QueryService {
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);" .formatted(selectQuery);
         ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
 
         try {
@@ -216,14 +206,14 @@ public class QueryService {
      * and then executed.
      * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
      *
-     * @param id       database id
-     * @param chatRequest    in natural query or database query language
-     * @param pageSize number of items in one page,<br />
-     *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @param id          database id
+     * @param chatRequest in natural query or database query language
+     * @param pageSize    number of items in one page,<br />
+     *                    default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                    max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
-     * @throws LLMException large language model failure
-     * @throws BadRequestException page size is greater than maximum allowed value
+     * @throws LLMException                large language model failure
+     * @throws BadRequestException         page size is greater than maximum allowed value
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         requested page size is greater than maximum allowed value
@@ -239,14 +229,11 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String LLMQuery = createQuery(
-                chatRequest.getMessages().get(0),
-                databaseStructure.generateCreateScript(), database);
-
-        chatRequest.getMessages().set(0, LLMQuery);
+        String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
+        List<String> errors = new ArrayList<>();
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String query = queryApi.queryModel(chatRequest);
+            String query = queryApi.queryModel(chatRequest, systemQuery, errors);
             // TODO: remove after testing
 //            String query = """
 //                    Use the following command to retrieve all users.
@@ -263,6 +250,9 @@ public class QueryService {
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
+                errors.add("Error occurred when during execution of your query.\n" +
+                        "This is the error: " + e.getMessage() +
+                        "This is the query: " + query);
                 if (attempt == settings.translationRetries) {
                     return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
                 }
