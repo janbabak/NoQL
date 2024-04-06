@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.MessageWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
@@ -41,8 +43,28 @@ public class ChatService {
         return chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
     }
 
+
+    /**
+     * Find all chats associated with specified database.
+     * @param databaseId database identifier
+     * @return list of chats
+     * @throws EntityNotFoundException database of specified identifier not found.
+     */
+    public List<ChatDto> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
+        Database database = databaseRepository.findById(databaseId).orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        return chatRepository.findAllByDatabase(database).stream().map((chat -> ChatDto
+                        .builder()
+                        .id(chat.getId())
+                        .name(chat.getName())
+                        .modificationDate(chat.getModificationDate())
+                        .build()))
+                .toList();
+    }
+
     /**
      * Create new chat object - persis it.
+     *
      * @param databaseId identifier of the associated db
      * @return saved object with id
      */
@@ -63,7 +85,8 @@ public class ChatService {
 
     /**
      * Add message to chat
-     * @param chatId chat identifier
+     *
+     * @param chatId  chat identifier
      * @param request message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
@@ -83,7 +106,8 @@ public class ChatService {
 
     /**
      * Rename chat.
-     * @param id chat identifier
+     *
+     * @param id   chat identifier
      * @param name new name
      * @throws EntityNotFoundException chat of specified id not found.
      */
@@ -95,6 +119,7 @@ public class ChatService {
 
     /**
      * Delete chat by id.
+     *
      * @param id chat identifier
      */
     public void deleteChatById(UUID id) {

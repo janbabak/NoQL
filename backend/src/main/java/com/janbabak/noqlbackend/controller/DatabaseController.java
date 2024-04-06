@@ -5,10 +5,12 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.ChatRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ public class DatabaseController {
 
     private final DatabaseEntityService databaseService;
     private final QueryService queryService;
+    private final ChatService chatService;
 
     /**
      * Get all databases.
@@ -155,5 +158,17 @@ public class DatabaseController {
     public DatabaseStructureDto getDatabaseStructure(@PathVariable UUID id)
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
         return databaseService.getDatabaseStructureByDatabaseId(id);
+    }
+
+    /**
+     * Get chats associated to the specified database.
+     * @param id database identifier
+     * @return list of chat DTOs
+     * @throws EntityNotFoundException database of specified id not found.
+     */
+    @GetMapping("/{id}/chats")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ChatDto> getChatOfDatabase(@PathVariable UUID id) throws EntityNotFoundException {
+        return chatService.findChatsByDatabaseId(id);
     }
 }
