@@ -23,20 +23,30 @@ public class GptQuery {
 
     /**
      * Create query
+     *
      * @param chatRequest contains user's messages with assistant's responses
      * @param systemQuery instructions from the NoQL system about task that needs to be done
-     * @param model LLM to be used for the translation
+     * @param errors      list of errors from previous executions that should help the model fix its query
+     * @param model       LLM to be used for the translation
      */
-    public GptQuery(ChatRequest chatRequest, String systemQuery, String model) {
+    public GptQuery(ChatRequest chatRequest, String systemQuery, List<String> errors, String model) {
         this.model = model;
 
         this.messages = new ArrayList<>();
+
+        // system instructions
         this.messages.add(new Message(Role.system, systemQuery));
 
+        // users chat history
         for (int i = 0; i < chatRequest.getMessages().size(); i++) {
             this.messages.add(new Message(
                     i % 2 == 0 ? Role.user : Role.assistant,
                     chatRequest.getMessages().get(i)));
+        }
+
+        // system errors
+        for (String error: errors) {
+            this.messages.add(new Message(Role.system, error));
         }
     }
 
@@ -48,11 +58,17 @@ public class GptQuery {
     }
 
     public enum Role {
-        /** user, who is asking */
+        /**
+         * user, who is asking
+         */
         user,
-        /** system developer (me) who provides additional information */
+        /**
+         * system developer (me) who provides additional information
+         */
         system,
-        /** gpt LLM */
+        /**
+         * gpt LLM
+         */
         assistant,
     }
 }

@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -228,16 +230,17 @@ public class QueryService {
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
         String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
+        List<String> errors = new ArrayList<>();
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String query = queryApi.queryModel(chatRequest, systemQuery);
+            String query = queryApi.queryModel(chatRequest, systemQuery, errors);
             // TODO: remove after testing
 //            String query = """
 //                    Use the following command to retrieve all users.
 //                    ```
 //                    select * from public.user;
 //                    ```""";
-            query = extractQueryFromMarkdownInResponse(query);
+//            query = extractQueryFromMarkdownInResponse(query);
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
@@ -247,6 +250,9 @@ public class QueryService {
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
+                errors.add("Error occurred when during execution of your query.\n" +
+                        "This is the error: " + e.getMessage() +
+                        "This is the query: " + query);
                 if (attempt == settings.translationRetries) {
                     return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
                 }
