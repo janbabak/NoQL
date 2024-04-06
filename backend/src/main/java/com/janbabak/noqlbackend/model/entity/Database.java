@@ -1,5 +1,6 @@
-package com.janbabak.noqlbackend.model.database;
+package com.janbabak.noqlbackend.model.entity;
 
+import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;

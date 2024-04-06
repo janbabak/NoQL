@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.entity.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

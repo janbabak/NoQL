@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Disabled;
