@@ -25,12 +25,13 @@ public class GptApi implements QueryApi {
     /**
      * Send queries in chat form the model and retrieve a response.
      *
-     * @param chat that is sent to the model
+     * @param chat        that is sent to the model
+     * @param systemQuery instructions from the NoQL system about task that needs to be done
      * @return model's response
      * @throws LLMException when LLM request fails.
      */
     @Override
-    public String queryModel(ChatRequest chat) throws LLMException {
+    public String queryModel(ChatRequest chat, String systemQuery) throws LLMException {
         log.info("Chat with GPT API.");
 
         HttpHeaders headers = new HttpHeaders();
@@ -38,7 +39,7 @@ public class GptApi implements QueryApi {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(chat, gptModel), headers);
+        HttpEntity<GptQuery> request = new HttpEntity<>(new GptQuery(chat, systemQuery, gptModel), headers);
 
         ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
                 GPT_URL, HttpMethod.POST, request, GptResponse.class);
