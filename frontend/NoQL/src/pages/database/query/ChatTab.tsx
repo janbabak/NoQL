@@ -8,7 +8,7 @@ import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
-import { ChatDto, ChatFromApi } from '../../../types/Chat.ts'
+import { ChatDto, ChatFromApi, MessageWithResponse } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
 import chatApi from '../../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
@@ -143,6 +143,34 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
+  async function queryChat2(): Promise<void> {
+    setPage(0)
+    setQueryLoading(true)
+    try {
+      const response = await databaseApi.queryChat(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        databaseId, newChat, pageSize)
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      naturalLanguageQuery.current.value = ''
+      setQueryResult(response.data)
+      setTotalCount(response.data.totalCount)
+      setChat({
+        ...chat,
+        messages: [...chat?.messages, {
+            message: response.data.usersQuery,
+            response: response.data.query
+          }]
+      } as ChatFromApi)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
   async function onPageChange(page: number, pageSize: number): Promise<void> {
     setPageSize(pageSize)
     setPage(page)
@@ -164,8 +192,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   }
 
   function openChat(id: string, index: number): void {
-    // console.log('open chat' + id)
-    loadChat(id)
+    void loadChat(id)
     setActiveChatIndex(index)
   }
 

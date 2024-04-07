@@ -104,9 +104,10 @@ public class ChatService {
      *
      * @param chatId  chat identifier
      * @param request message with response
+     * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public void addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
+    public MessageWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         MessageWithResponse message = MessageWithResponse.builder()
@@ -117,7 +118,7 @@ public class ChatService {
                 .build();
 
         chat.addMessage(message);
-        messageRepository.save(message);
+        return messageRepository.save(message);
     }
 
     /**

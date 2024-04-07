@@ -5,6 +5,7 @@ interface QueryResult {
 
 interface QueryResponse {
   result: QueryResult | null
+  usersQuery: string
   query: string
   totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
   errorMessage: string | null

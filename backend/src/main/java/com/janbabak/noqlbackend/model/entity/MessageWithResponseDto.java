@@ -13,4 +13,8 @@ public class MessageWithResponseDto {
     private String message;
     private String response;
     private Timestamp timestamp;
+
+    public MessageWithResponseDto(MessageWithResponse message) {
+        this(message.getId(), message.getMessage(), message.getResponse(), message.getTimestamp());
+    }
 }

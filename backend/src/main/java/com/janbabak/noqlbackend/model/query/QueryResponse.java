@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.query;
 
+import com.janbabak.noqlbackend.model.entity.MessageWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,16 +17,17 @@ import java.util.List;
 @AllArgsConstructor
 public class QueryResponse {
     private QueryResult result;
-    private String query; // query used for retrieving the result above
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
+    private MessageWithResponseDto messageWithResponse;
     private String errorMessage; // error message when the query execution failed due to syntax error
 
-    public static QueryResponse successfulResponse(QueryResult result, String query, Long totalCount) {
-        return new QueryResponse(result, query, totalCount, null);
+    public static QueryResponse successfulResponse(
+            QueryResult result, MessageWithResponseDto message, Long totalCount) {
+        return new QueryResponse(result, totalCount, message,null);
     }
 
-    public static QueryResponse failedResponse(String query, String errorMessage) {
-        return new QueryResponse(null, query, null, errorMessage);
+    public static QueryResponse failedResponse(MessageWithResponseDto message, String errorMessage) {
+        return new QueryResponse(null, null, message, errorMessage);
     }
 
     @Data

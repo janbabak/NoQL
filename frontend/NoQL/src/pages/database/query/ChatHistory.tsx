@@ -1,6 +1,6 @@
 import styles from './Query.module.css'
 import { Button } from '@mui/material'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ChatDto } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import chatApi from '../../../services/api/chatApi.ts'

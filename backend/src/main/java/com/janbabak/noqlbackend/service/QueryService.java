@@ -6,8 +6,11 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
+import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
+import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
+import com.janbabak.noqlbackend.model.entity.MessageWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;
 import com.janbabak.noqlbackend.model.query.ChatRequest;
@@ -36,6 +39,8 @@ public class QueryService {
     private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
     private final Settings settings;
+    private final ChatService chatService;
+    private final MessageWithResponseService messageWithResponseService;
 
     /**
      * Create system query for the LLM that specifies what should be done, database schema, ...
@@ -183,22 +188,23 @@ public class QueryService {
             Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
-        log.info("Execute query language query: query={}, database_id={}.", query, id);
-
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
-
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-
-        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-        try {
-            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
-            Long totalCount = getTotalCount(query, specificDatabaseService);
-
-            return QueryResponse.successfulResponse(queryResult, query, totalCount);
-        } catch (DatabaseExecutionException | SQLException e) {
-            return QueryResponse.failedResponse(query, e.getMessage());
-        }
+        return null; // TODO refactor
+//        log.info("Execute query language query: query={}, database_id={}.", query, id);
+//
+//        Database database = databaseRepository.findById(id)
+//                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+//
+//        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+//
+//        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
+//        try {
+//            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+//            Long totalCount = getTotalCount(query, specificDatabaseService);
+//
+//            return QueryResponse.successfulResponse(queryResult, query, query, totalCount);
+//        } catch (DatabaseExecutionException | SQLException e) {
+//            return QueryResponse.failedResponse(query, query, e.getMessage());
+//        }
     }
 
     /**
@@ -232,8 +238,10 @@ public class QueryService {
         String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
 
+        List<MessageWithResponse> chatHistory = messageWithResponseService.getMessagesFromChat(
+                chatRequest.getChatId());
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String query = queryApi.queryModel(chatRequest, systemQuery, errors);
+            String query = queryApi.queryModel(chatHistory, chatRequest.getMessage(), systemQuery, errors);
             // TODO: remove after testing
 //            String query = """
 //                    Use the following command to retrieve all users.
@@ -246,7 +254,10 @@ public class QueryService {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
                 Long totalCount = getTotalCount(query, specificDatabaseService);
 
-                return QueryResponse.successfulResponse(queryResult, query, totalCount);
+                MessageWithResponse message = chatService.addMessageToChat(
+                        chatRequest.getChatId(),
+                        new CreateMessageWithResponseRequest(chatRequest.getMessage(), query));
+                return QueryResponse.successfulResponse(queryResult, new MessageWithResponseDto(message), totalCount);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
@@ -254,7 +265,11 @@ public class QueryService {
                         "This is the error: " + e.getMessage() +
                         "This is the query: " + query);
                 if (attempt == settings.translationRetries) {
-                    return QueryResponse.failedResponse(query, e.getMessage()); // last try failed
+                    // last try failed
+                    MessageWithResponse message = chatService.addMessageToChat(
+                            chatRequest.getChatId(),
+                            new CreateMessageWithResponseRequest(chatRequest.getMessage(), query));
+                    return QueryResponse.failedResponse(new MessageWithResponseDto(message), e.getMessage());
                 }
             }
         }
