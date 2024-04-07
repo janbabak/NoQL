@@ -8,7 +8,7 @@ import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
-import { ChatDto, ChatFromApi, MessageWithResponse } from '../../../types/Chat.ts'
+import { ChatDto, ChatFromApi } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
 import chatApi from '../../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
@@ -147,7 +147,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.messageWithResponse.response || '',
+        chat?.messages[chat?.messages.length - 1].response || '',
         page,
         pageSize)
 

@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -188,23 +190,24 @@ public class QueryService {
             Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
-        return null; // TODO refactor
-//        log.info("Execute query language query: query={}, database_id={}.", query, id);
-//
-//        Database database = databaseRepository.findById(id)
-//                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
-//
-//        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-//
-//        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-//        try {
-//            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
-//            Long totalCount = getTotalCount(query, specificDatabaseService);
-//
-//            return QueryResponse.successfulResponse(queryResult, query, query, totalCount);
-//        } catch (DatabaseExecutionException | SQLException e) {
-//            return QueryResponse.failedResponse(query, query, e.getMessage());
-//        }
+        log.info("Execute query language query: query={}, database_id={}.", query, id);
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+
+        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
+        MessageWithResponseDto message = new MessageWithResponseDto( // TODO better solution
+                UUID.randomUUID(), query, query, Timestamp.from(Instant.now()));
+        try {
+            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+            Long totalCount = getTotalCount(query, specificDatabaseService);
+
+            return QueryResponse.successfulResponse(queryResult, message, totalCount);
+        } catch (DatabaseExecutionException | SQLException e) {
+            return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
+        }
     }
 
     /**
