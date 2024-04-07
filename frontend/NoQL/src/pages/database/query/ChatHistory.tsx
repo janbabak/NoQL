@@ -3,7 +3,8 @@ import { Button } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { ChatDto } from '../../../types/Chat.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import chatApi from '../../../services/api/chatApi.ts'
 
 interface ChatHistoryProps {
   databaseId: string,
@@ -22,6 +23,11 @@ export function ChatHistory({ databaseId, openChat }: ChatHistoryProps) {
     setChatsLoading
   ] = useState<boolean>(false)
 
+  const [
+    createNewChatLoading,
+    setCreateNewChatLoading
+  ] = useState<boolean>(false)
+
   async function loadChats(): Promise<void> {
     setChatsLoading(true)
     try {
@@ -34,21 +40,38 @@ export function ChatHistory({ databaseId, openChat }: ChatHistoryProps) {
     }
   }
 
+  async function createNewChat(): Promise<void> {
+    setCreateNewChatLoading(true)
+    try {
+      await chatApi.createNewChat(databaseId)
+      await loadChats() // TODO: is that necessary
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+    } finally {
+      setCreateNewChatLoading(false)
+    }
+  }
+
   useEffect((): void => {
     void loadChats()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const CreateNewChatButton =
+    <Button
+      onClick={createNewChat}
+      startIcon={<AddRoundedIcon />}
+      variant="outlined"
+      fullWidth
+      sx={{ marginBottom: '1rem' }}
+    >
+      New chat
+    </Button>
+
   return (
     <div className={styles.chatHistory}>
-      <Button
-        startIcon={<AddRoundedIcon />}
-        variant="outlined"
-        fullWidth
-        sx={{marginBottom: '1rem'}}
-      >
-        New chat
-      </Button>
+      {CreateNewChatButton}
+
       {chatsLoading && <div>Loading</div>}
       {!chatsLoading && <div>
         {
