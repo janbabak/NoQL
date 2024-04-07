@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatRequest {
+public class ChatRequest { // TODO: rename to query request
 
     private UUID chatId;
     private String message; // new message to be added to the chat

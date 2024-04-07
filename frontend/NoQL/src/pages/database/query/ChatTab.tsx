@@ -114,43 +114,14 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setPage(0)
     setQueryLoading(true)
     try {
-
-      const newChat = {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        messages: [...chat.messages, naturalLanguageQuery.current.value]
-      }
-
       const response = await databaseApi.queryChat(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        databaseId, newChat, pageSize)
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      naturalLanguageQuery.current.value = ''
-
-      // TODO
-      // setChat({
-      //   messages: [...newChat.messages, response.data.query]
-      // })
-      setQueryResult(response.data)
-      setTotalCount(response.data.totalCount)
-    } catch (error: unknown) {
-      console.log(error) // TODO: handles
-    } finally {
-      setQueryLoading(false)
-    }
-  }
-
-  async function queryChat2(): Promise<void> {
-    setPage(0)
-    setQueryLoading(true)
-    try {
-      const response = await databaseApi.queryChat(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        databaseId, newChat, pageSize)
+        databaseId, {
+          chatId: chatHistory[activeChatIndex].id,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          message: naturalLanguageQuery.current.value
+        },
+        pageSize)
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -159,10 +130,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       setTotalCount(response.data.totalCount)
       setChat({
         ...chat,
-        messages: [...chat?.messages, {
-            message: response.data.usersQuery,
-            response: response.data.query
-          }]
+        messages: [...chat?.messages || [] , response.data.messageWithResponse]
       } as ChatFromApi)
     } catch (error: unknown) {
       console.log(error) // TODO: handle
@@ -179,7 +147,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.query || '',
+        queryResult?.messageWithResponse.response || '',
         page,
         pageSize)
 

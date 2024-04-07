@@ -1,3 +1,10 @@
+import { MessageWithResponse } from './Chat.ts'
+
+interface QueryRequest {
+  chatId: string,
+  message: string,
+}
+
 interface QueryResult {
   columnNames: string[]
   rows: string[][]
@@ -5,9 +12,8 @@ interface QueryResult {
 
 interface QueryResponse {
   result: QueryResult | null
-  usersQuery: string
-  query: string
   totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
+  messageWithResponse: MessageWithResponse
   errorMessage: string | null
 }
 
@@ -19,4 +25,4 @@ interface Chat {
   messages: string[]
 }
 
-export type { QueryResponse, QueryResult, Chat }
+export type { QueryRequest, QueryResponse, QueryResult, Chat }

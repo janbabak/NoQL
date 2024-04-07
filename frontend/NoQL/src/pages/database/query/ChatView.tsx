@@ -53,17 +53,22 @@ export function ChatView({ chat, chatLoading }: ChatViewProps) {
   }, [chat?.messages])
 
   return (
-    <div ref={chatWindowRef} className={styles.chatWindow}>
-      {
-        chat?.messages.map((message: MessageWithResponse) => {
-          return (
-            <div key={message.id}>
-              <UsersQuery query={message.message} />
-              <ModelsResponse response={message.response} />
-            </div>
-          )
-        })
+    <>
+      {chatLoading && <div>loading</div>}
+      {!chatLoading &&
+        <div ref={chatWindowRef} className={styles.chatWindow}>
+          {
+            chat?.messages.map((message: MessageWithResponse) => {
+              return (
+                <div key={message.id}>
+                  <UsersQuery query={message.message} />
+                  <ModelsResponse response={message.response} />
+                </div>
+              )
+            })
+          }
+        </div>
       }
-    </div>
+    </>
   )
 }
