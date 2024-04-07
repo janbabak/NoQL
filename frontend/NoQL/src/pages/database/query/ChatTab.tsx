@@ -74,23 +74,29 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
   useEffect((): void => {
-    loadChatsHistory().then((response: AxiosResponse<ChatDto[], unknown>): void => {
+    loadChatsHistory()
+      .then(async (response: AxiosResponse<ChatDto[], unknown>):  Promise<AxiosResponse<ChatFromApi>> => {
       if (response.data.length > 0) {
-        void loadChat(response.data[0].id)
+        return loadChat(response.data[0].id)
       } else {
         console.log('create new chat not implemented') // TODO: implement
+        Promise.reject()
       }
+    }).then((response) => {
+      loadQueryLanguageQuer(response.data.messages[response.data.messages.length - 1].response)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function loadChat(id: string): Promise<void> {
+  async function loadChat(id: string): Promise<AxiosResponse<ChatFromApi>> {
     setChatLoading(true)
     try {
       const response = await chatApi.getById(id)
       setChat(response.data)
+      return response
     } catch (error: unknown) {
       console.log(error) // TODO: handle
+      return Promise.reject()
     } finally {
       setChatLoading(false)
     }
@@ -143,7 +149,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setPageSize(pageSize)
     setPage(page)
 
-    setQueryLoading(true)
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
@@ -159,9 +164,22 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
-  function openChat(id: string, index: number): void {
-    void loadChat(id)
+  async function loadQueryLanguageQuer(query: string): Promise<void> {
+    try {
+      const response = await databaseApi.queryQueryLanguageQuery(
+        databaseId, query, 0, pageSize)
+      setQueryResult(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
+  async function openChat(id: string, index: number): Promise<void> {
+    const response = await loadChat(id)
     setActiveChatIndex(index)
+    await loadQueryLanguageQuer(response.data.messages[response.data.messages.length - 1].response)
   }
 
   return (

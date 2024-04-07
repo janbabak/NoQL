@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
-import { Chat, QueryRequest, QueryResponse } from '../../types/Query.ts'
+import { QueryRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 import { ChatDto } from '../../types/Chat.ts'
 
