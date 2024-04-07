@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
-import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.entity.Database;
 
 public class DatabaseServiceFactory {
 

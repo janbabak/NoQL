@@ -6,7 +6,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
-import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;

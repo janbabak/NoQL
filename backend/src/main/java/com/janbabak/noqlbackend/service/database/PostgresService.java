@@ -3,7 +3,7 @@ package com.janbabak.noqlbackend.service.database;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.model.database.Database;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
 import org.antlr.v4.runtime.misc.Pair;
 
