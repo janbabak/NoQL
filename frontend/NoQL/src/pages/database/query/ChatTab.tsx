@@ -159,7 +159,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   }
 
   function openChat(id: string): void {
-    console.log('open chat' + id)
+    // console.log('open chat' + id)
+    loadChat(id)
   }
 
   return (
