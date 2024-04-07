@@ -66,6 +66,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setPageSize
   ] = useState<number>(10)
 
+  const [
+    activeChatIndex,
+    setActiveChatIndex
+  ] = useState<number>(0)
+
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
   useEffect((): void => {
@@ -158,9 +163,10 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
-  function openChat(id: string): void {
+  function openChat(id: string, index: number): void {
     // console.log('open chat' + id)
     loadChat(id)
+    setActiveChatIndex(index)
   }
 
   return (
@@ -176,6 +182,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           refreshChatHistory={loadChatsHistory}
           databaseId={databaseId}
           openChat={openChat}
+          activeChatIndex={activeChatIndex}
         />
 
         <div className={styles.chatWithInput}>

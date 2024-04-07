@@ -31,14 +31,22 @@
 .chatHistoryItem {
     white-space: nowrap;
     padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
     transition: all 0.25s ease-in-out;
+}
+
+.chatHistoryItemActive {
+    font-weight: bold;
+    background: #eee;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
 }
 
 .chatHistoryItem:hover {
     font-weight: bold;
     cursor: pointer;
     background: #eee;
-    border-radius: 0.5rem;
 }
 
 .chatWithInput {
