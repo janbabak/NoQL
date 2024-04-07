@@ -3,6 +3,7 @@ import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
 import { Chat, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
+import { ChatDto } from '../../types/Chat.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -85,6 +86,14 @@ const databaseApi = {
           value: pageSize
         }
       ])
+  },
+
+  /**
+   * Get chats associated to the specific database.
+   * @param id database identifier
+   */
+  getChatsFromDatabase(id: string): Promise<AxiosResponse<ChatDto[]>> {
+    return this.API.get(this.DOMAIN + '/' + id + '/chats')
   }
 }
 

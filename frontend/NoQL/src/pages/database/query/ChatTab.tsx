@@ -8,6 +8,7 @@ import React, { useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { Chat, QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
+import { ChatHistory } from './ChatHistory.tsx'
 
 interface ChatTabProps {
   databaseId: string,
@@ -15,7 +16,7 @@ interface ChatTabProps {
   editQueryInConsole: (query: string) => void,
 }
 
-export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
+export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   const [
     queryResult,
@@ -35,18 +36,20 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
   const [
     chat,
     setChat
-  ] = useState<Chat>({ messages: [
-      "find me all users",
-      "SELECT * FROM public.user;",
-      "and sort them by their names",
-      "SELECT * FROM public.user\nORDER BY name;",
-      "in descending order",
-      "SELECT * FROM public.user\nORDER BY name DESC;",
-      "show only name, age, email and sex columns",
-      "SELECT name, age, email, sex FROM public.user\nORDER BY name DESC;",
-      "make the name uppercase",
-      "SELECT UPPER(name) AS name, age, email, sex\nFROM public.user\nORDER BY name DESC;"
-    ] })
+  ] = useState<Chat>({
+    messages: [
+      // "find me all users",
+      // "SELECT * FROM public.user;",
+      // "and sort them by their names",
+      // "SELECT * FROM public.user\nORDER BY name;",
+      // "in descending order",
+      // "SELECT * FROM public.user\nORDER BY name DESC;",
+      // "show only name, age, email and sex columns",
+      // "SELECT name, age, email, sex FROM public.user\nORDER BY name DESC;",
+      // "make the name uppercase",
+      // "SELECT UPPER(name) AS name, age, email, sex\nFROM public.user\nORDER BY name DESC;"
+    ]
+  })
 
   const [
     page,
@@ -112,31 +115,42 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
     }
   }
 
+  function openChat(id: string): void {
+    console.log("open chat" + id)
+  }
+
   return (
     <div
       role="tabpanel"
       hidden={tab != CHAT_TAB}
       className={styles.chatTab}
     >
-      <ChatView chat={chat} />
+      <div className={styles.chatTabContainer}>
+        <ChatHistory databaseId={databaseId} openChat={openChat}/>
 
-      <div className={styles.chatInputContainer}>
-        <TextField
-          id="query"
-          label="Query"
-          variant="standard"
-          inputRef={naturalLanguageQuery}
-          fullWidth
-        />
+        <div className={styles.chatWithInput}>
 
-        <LoadingButton
-          loading={queryLoading}
-          variant="contained"
-          endIcon={<SendRoundedIcon />}
-          onClick={queryChat}
-        >
-          Query
-        </LoadingButton>
+          <ChatView chat={chat} />
+
+          <div className={styles.chatInputContainer}>
+            <TextField
+              id="query"
+              label="Query"
+              variant="standard"
+              inputRef={naturalLanguageQuery}
+              fullWidth
+            />
+
+            <LoadingButton
+              loading={queryLoading}
+              variant="contained"
+              endIcon={<SendRoundedIcon />}
+              onClick={queryChat}
+            >
+              Query
+            </LoadingButton>
+          </div>
+        </div>
       </div>
 
       <Result
