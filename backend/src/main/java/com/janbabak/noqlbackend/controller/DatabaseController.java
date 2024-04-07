@@ -5,7 +5,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
+import com.janbabak.noqlbackend.model.chat.ChatReduced;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.ChatRequest;
@@ -168,7 +168,7 @@ public class DatabaseController {
      */
     @GetMapping("/{id}/chats")
     @ResponseStatus(HttpStatus.OK)
-    public List<ChatDto> getChatOfDatabase(@PathVariable UUID id) throws EntityNotFoundException {
+    public List<ChatReduced> getChatOfDatabase(@PathVariable UUID id) throws EntityNotFoundException {
         return chatService.findChatsByDatabaseId(id);
     }
 }

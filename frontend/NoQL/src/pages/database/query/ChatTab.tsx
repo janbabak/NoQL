@@ -1,14 +1,17 @@
 import { CHAT_TAB } from './Constants.ts'
 import styles from './Query.module.css'
-import { ChatView } from './ChatView.tsx'
 import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
-import { Chat, QueryResponse } from '../../../types/Query.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
+import { ChatDto, ChatFromApi } from '../../../types/Chat.ts'
+import { ChatView } from './ChatView.tsx'
+import chatApi from '../../../services/api/chatApi.ts'
+import { AxiosResponse } from 'axios'
 
 interface ChatTabProps {
   databaseId: string,
@@ -36,20 +39,22 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const [
     chat,
     setChat
-  ] = useState<Chat>({
-    messages: [
-      // "find me all users",
-      // "SELECT * FROM public.user;",
-      // "and sort them by their names",
-      // "SELECT * FROM public.user\nORDER BY name;",
-      // "in descending order",
-      // "SELECT * FROM public.user\nORDER BY name DESC;",
-      // "show only name, age, email and sex columns",
-      // "SELECT name, age, email, sex FROM public.user\nORDER BY name DESC;",
-      // "make the name uppercase",
-      // "SELECT UPPER(name) AS name, age, email, sex\nFROM public.user\nORDER BY name DESC;"
-    ]
-  })
+  ] = useState<ChatFromApi | null>(null)
+
+  const [
+    chatLoading,
+    setChatLoading
+  ] = useState<boolean>(false)
+
+  const [
+    chatHistory,
+    setChatHistory
+  ] = useState<ChatDto[]>([])
+
+  const [
+    chatHistoryLoading,
+    setChatHistoryLoading
+  ] = useState<boolean>(false)
 
   const [
     page,
@@ -62,6 +67,43 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   ] = useState<number>(10)
 
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
+
+  useEffect((): void => {
+    loadChatsHistory().then((response: AxiosResponse<ChatDto[], unknown>): void => {
+      if (response.data.length > 0) {
+        void loadChat(response.data[0].id)
+      } else {
+        console.log('create new chat not implemented') // TODO: implement
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function loadChat(id: string): Promise<void> {
+    setChatLoading(true)
+    try {
+      const response = await chatApi.getById(id)
+      setChat(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
+  async function loadChatsHistory(): Promise<AxiosResponse<ChatDto[]>> {
+    setChatHistoryLoading(true)
+    try {
+      const response = await databaseApi.getChatsFromDatabase(databaseId)
+      setChatHistory(response.data)
+      return response
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+      return Promise.reject(error)
+    } finally {
+      setChatHistoryLoading(false)
+    }
+  }
 
   async function queryChat(): Promise<void> {
     setPage(0)
@@ -83,9 +125,10 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       // @ts-ignore
       naturalLanguageQuery.current.value = ''
 
-      setChat({
-        messages: [...newChat.messages, response.data.query]
-      })
+      // TODO
+      // setChat({
+      //   messages: [...newChat.messages, response.data.query]
+      // })
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
@@ -116,7 +159,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   }
 
   function openChat(id: string): void {
-    console.log("open chat" + id)
+    console.log('open chat' + id)
   }
 
   return (
@@ -126,11 +169,17 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       className={styles.chatTab}
     >
       <div className={styles.chatTabContainer}>
-        <ChatHistory databaseId={databaseId} openChat={openChat}/>
+        <ChatHistory
+          chatHistory={chatHistory}
+          chatHistoryLoading={chatHistoryLoading}
+          refreshChatHistory={loadChatsHistory}
+          databaseId={databaseId}
+          openChat={openChat}
+        />
 
         <div className={styles.chatWithInput}>
 
-          <ChatView chat={chat} />
+          <ChatView chat={chat} chatLoading={chatLoading} />
 
           <div className={styles.chatInputContainer}>
             <TextField

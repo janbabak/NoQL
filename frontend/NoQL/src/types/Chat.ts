@@ -1,5 +1,3 @@
-import { Database } from './Database.ts'
-
 interface ChatDto {
   id: string,
   name: string,
@@ -8,10 +6,9 @@ interface ChatDto {
 
 interface ChatFromApi { // TODO: rename to just a chat
   id: string,
-  database: Database,
+  name: string,
   messages: MessageWithResponse[],
   modificationDate: string, // TODO date
-  name: string,
 }
 
 interface MessageWithResponse {

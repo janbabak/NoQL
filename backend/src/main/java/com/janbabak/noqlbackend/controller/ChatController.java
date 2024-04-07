@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.service.ChatService;
@@ -28,7 +29,7 @@ public class ChatController {
      * @throws EntityNotFoundException chat of specified id not found.
      */
     @GetMapping("/{id}")
-    public Chat getById(@PathVariable UUID id) throws EntityNotFoundException {
+    public ChatDto getById(@PathVariable UUID id) throws EntityNotFoundException {
         return chatService.findById(id);
     }
 
