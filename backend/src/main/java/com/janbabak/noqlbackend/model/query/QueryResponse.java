@@ -18,7 +18,7 @@ import java.util.List;
 public class QueryResponse {
     private QueryResult result; // retrieved data
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
-    private ChatQueryWithResponseDto chatQueryWithResponseDto; // last chat query with LLM response
+    private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
     private String errorMessage; // error message when the query execution failed due to syntax error
 
     public static QueryResponse successfulResponse(

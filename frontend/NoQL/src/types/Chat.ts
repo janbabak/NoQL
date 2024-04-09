@@ -1,21 +1,20 @@
-interface ChatDto {
+interface ChatHistoryItem {
   id: string,
   name: string,
-  modificationData: string
 }
 
-interface ChatFromApi { // TODO: rename to just a chat
+interface Chat {
   id: string,
   name: string,
-  messages: MessageWithResponse[],
+  messages: ChatQueryWithResponse[],
   modificationDate: string, // TODO date
 }
 
-interface MessageWithResponse {
+interface ChatQueryWithResponse {
   id: string,
-  message: string,
+  query: string,
   response: string,
   timestamp: string, // TODO date
 }
 
-export type { ChatDto, ChatFromApi, MessageWithResponse }
+export type { ChatHistoryItem, Chat, ChatQueryWithResponse }

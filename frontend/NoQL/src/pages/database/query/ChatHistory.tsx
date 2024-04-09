@@ -1,15 +1,15 @@
 import styles from './Query.module.css'
 import { Button } from '@mui/material'
 import { useState } from 'react'
-import { ChatDto } from '../../../types/Chat.ts'
+import { ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import chatApi from '../../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
 
 interface ChatHistoryProps {
-  chatHistory: ChatDto[],
+  chatHistory: ChatHistoryItem[],
   chatHistoryLoading: boolean,
-  refreshChatHistory: () => Promise<AxiosResponse<ChatDto[]>>
+  refreshChatHistory: () => Promise<AxiosResponse<ChatHistoryItem[]>>
   databaseId: string,
   openChat: (id: string, index: number) => void,
   activeChatIndex: number,
@@ -62,7 +62,7 @@ export function ChatHistory(
       {chatHistoryLoading && <div>Loading</div>}
       {!chatHistoryLoading && <div>
         {
-          chatHistory.map((chat: ChatDto, index: number) => {
+          chatHistory.map((chat: ChatHistoryItem, index: number) => {
             return (
               <div
                 onClick={() => openChat(chat.id, index)}

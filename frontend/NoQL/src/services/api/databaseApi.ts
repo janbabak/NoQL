@@ -3,7 +3,7 @@ import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
 import { QueryRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
-import { ChatDto } from '../../types/Chat.ts'
+import { ChatHistoryItem } from '../../types/Chat.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -71,10 +71,11 @@ const databaseApi = {
   },
 
   /**
-   * Get chats associated to the specific database.
+   * Get chat history (chats associated to the specific database) ordered by the modification date
+   * in descending order.
    * @param id database identifier
    */
-  getChatsFromDatabase(id: string): Promise<AxiosResponse<ChatDto[]>> {
+  getChatHistoryByDatabaseId(id: string): Promise<AxiosResponse<ChatHistoryItem[]>> {
     return this.API.get(this.DOMAIN + '/' + id + '/chats')
   }
 }
