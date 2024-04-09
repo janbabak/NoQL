@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.query;
 
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,22 +11,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * API response.
+ * Response with retrieved data.
  */
 @Data
 @AllArgsConstructor
 public class QueryResponse {
-    private QueryResult result;
-    private String query; // query used for retrieving the result above
+    private QueryResult result; // retrieved data
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
+    private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
     private String errorMessage; // error message when the query execution failed due to syntax error
 
-    public static QueryResponse successfulResponse(QueryResult result, String query, Long totalCount) {
-        return new QueryResponse(result, query, totalCount, null);
+    public static QueryResponse successfulResponse(
+            QueryResult result, ChatQueryWithResponseDto message, Long totalCount) {
+        return new QueryResponse(result, totalCount, message,null);
     }
 
-    public static QueryResponse failedResponse(String query, String errorMessage) {
-        return new QueryResponse(null, query, null, errorMessage);
+    public static QueryResponse failedResponse(ChatQueryWithResponseDto message, String errorMessage) {
+        return new QueryResponse(null, null, message, errorMessage);
     }
 
     @Data

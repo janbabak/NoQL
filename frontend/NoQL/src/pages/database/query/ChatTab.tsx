@@ -1,13 +1,17 @@
 import { CHAT_TAB } from './Constants.ts'
 import styles from './Query.module.css'
-import { ChatView } from './ChatView.tsx'
 import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
-import { Chat, QueryResponse } from '../../../types/Query.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
+import { ChatHistory } from './ChatHistory.tsx'
+import { ChatHistoryItem, Chat } from '../../../types/Chat.ts'
+import { ChatView } from './ChatView.tsx'
+import chatApi from '../../../services/api/chatApi.ts'
+import { AxiosResponse } from 'axios'
 
 interface ChatTabProps {
   databaseId: string,
@@ -15,7 +19,10 @@ interface ChatTabProps {
   editQueryInConsole: (query: string) => void,
 }
 
-export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
+export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
+
+  const NEW_CHAT_NAME: string = 'New chat'
+  const CHAT_NAME_MAX_LENGTH: number = 32
 
   const [
     queryResult,
@@ -35,18 +42,22 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
   const [
     chat,
     setChat
-  ] = useState<Chat>({ messages: [
-      "find me all users",
-      "SELECT * FROM public.user;",
-      "and sort them by their names",
-      "SELECT * FROM public.user\nORDER BY name;",
-      "in descending order",
-      "SELECT * FROM public.user\nORDER BY name DESC;",
-      "show only name, age, email and sex columns",
-      "SELECT name, age, email, sex FROM public.user\nORDER BY name DESC;",
-      "make the name uppercase",
-      "SELECT UPPER(name) AS name, age, email, sex\nFROM public.user\nORDER BY name DESC;"
-    ] })
+  ] = useState<Chat | null>(null)
+
+  const [
+    chatLoading,
+    setChatLoading
+  ] = useState<boolean>(false)
+
+  const [
+    chatHistory,
+    setChatHistory
+  ] = useState<ChatHistoryItem[]>([])
+
+  const [
+    chatHistoryLoading,
+    setChatHistoryLoading
+  ] = useState<boolean>(false)
 
   const [
     page,
@@ -58,49 +69,155 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
     setPageSize
   ] = useState<number>(10)
 
+  const [
+    activeChatIndex,
+    setActiveChatIndex
+  ] = useState<number>(0)
+
+  const [
+    createNewChatLoading,
+    setCreateNewChatLoading
+  ] = useState<boolean>(false)
+
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
+  /**
+   * Creates new chat
+   */
+  async function createNewChat(): Promise<AxiosResponse<Chat>> {
+    setCreateNewChatLoading(true)
+    try {
+      const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
+      await loadChatsHistory()
+      await openChat(response.data.id, 0)
+      return response
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+      return Promise.reject()
+    } finally {
+      setCreateNewChatLoading(false)
+    }
+  }
+
+  // TODO: fix multiple calls
+  /**
+   * Load chat history, then active chat content, then query the chat for the result.
+   * Creates new chat if there isn't any.
+   */
+  useEffect((): void => {
+    loadChatsHistory()
+      .then(async (response: AxiosResponse<ChatHistoryItem[]> | undefined) => {
+        if (response && response.data.length > 0) {
+          return loadChat(response.data[0].id)
+        } else {
+          return createNewChat()
+        }
+      }).then((response: AxiosResponse<Chat> | undefined): void => {
+        // if there are some messages in the chat execute the query response from the last message
+        if (response && response.data.messages.length > 0) {
+          void loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+        }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  /**
+   * Load one chat - its messages.
+   * @param id chat it
+   */
+  async function loadChat(id: string): Promise<AxiosResponse<Chat>> {
+    setChatLoading(true)
+    try {
+      const response = await chatApi.getById(id)
+      setChat(response.data)
+      return response
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+      return Promise.reject()
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
+  /**
+   * Load history of chats.
+   */
+  async function loadChatsHistory(): Promise<AxiosResponse<ChatHistoryItem[]>> {
+    setChatHistoryLoading(true)
+    try {
+      const response: AxiosResponse<ChatHistoryItem[]> = await databaseApi.getChatHistoryByDatabaseId(databaseId)
+      setChatHistory(response.data)
+      return response
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+      return Promise.reject(error)
+    } finally {
+      setChatHistoryLoading(false)
+    }
+  }
+
+  /**
+   * Query model using the natural language chat.
+   */
   async function queryChat(): Promise<void> {
     setPage(0)
     setQueryLoading(true)
     try {
-
-      const newChat = {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        messages: [...chat.messages, naturalLanguageQuery.current.value]
-      }
-
-      const response = await databaseApi.queryChat(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        databaseId, newChat, pageSize)
+      const response: AxiosResponse<QueryResponse> = await databaseApi.queryChat(
+        databaseId, {
+          chatId: chatHistory[activeChatIndex].id,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          query: naturalLanguageQuery.current.value
+        },
+        pageSize)
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       naturalLanguageQuery.current.value = ''
-
-      setChat({
-        messages: [...newChat.messages, response.data.query]
-      })
       setQueryResult(response.data)
       setTotalCount(response.data.totalCount)
+
+      // update chat name if it's still the autogenerated name
+      if (chat?.name == NEW_CHAT_NAME) {
+        const updatedName: string = response.data.chatQueryWithResponse.query.length < CHAT_NAME_MAX_LENGTH
+          ? response.data.chatQueryWithResponse.query
+          : response.data.chatQueryWithResponse.query.substring(0, CHAT_NAME_MAX_LENGTH)
+
+        setChat({
+          ...chat,
+          messages: [...chat?.messages || [], response.data.chatQueryWithResponse],
+          name: updatedName
+        })
+        const newChatHistory: ChatHistoryItem[] = chatHistory
+        newChatHistory[0].name = updatedName
+        setChatHistory(newChatHistory)
+      } else {
+        setChat({
+          ...chat,
+          messages: [...chat?.messages || [], response.data.chatQueryWithResponse]
+        } as Chat)
+      }
     } catch (error: unknown) {
-      console.log(error) // TODO: handles
+      console.log(error) // TODO: handle
     } finally {
       setQueryLoading(false)
     }
   }
 
+  /**
+   * Load result when page is changed.
+   * @param page new page number (first page index is 0)
+   * @param pageSize number of items in the page
+   */
   async function onPageChange(page: number, pageSize: number): Promise<void> {
     setPageSize(pageSize)
     setPage(page)
 
-    setQueryLoading(true)
     try {
-      const response = await databaseApi.queryQueryLanguageQuery(
+      const response: AxiosResponse<QueryResponse> = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.query || '',
+        chat?.messages[chat?.messages.length - 1].response || '',
         page,
         pageSize)
 
@@ -112,31 +229,76 @@ export function ChatTab({ databaseId, tab, editQueryInConsole}: ChatTabProps) {
     }
   }
 
+  /**
+   * Fetch result of query language query.
+   * @param query in query language
+   */
+  async function loadQueryLanguageQuery(query: string): Promise<void> {
+    try {
+      const response: AxiosResponse<QueryResponse> = await databaseApi.queryQueryLanguageQuery(
+        databaseId, query, 0, pageSize)
+      setQueryResult(response.data)
+    } catch (error: unknown) {
+      console.log(error) // TODO: handles
+    } finally {
+      setQueryLoading(false)
+    }
+  }
+
+  /**
+   * Open chat - load it's content and query response.
+   * @param id chat id
+   * @param index index in the chat history
+   */
+  async function openChat(id: string, index: number): Promise<void> {
+    const response = await loadChat(id)
+    setActiveChatIndex(index)
+
+    // if chat contains some messages, execute them and load the result
+    if (response.data.messages.length > 0) {
+      await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+    }
+  }
+
   return (
     <div
       role="tabpanel"
       hidden={tab != CHAT_TAB}
       className={styles.chatTab}
     >
-      <ChatView chat={chat} />
-
-      <div className={styles.chatInputContainer}>
-        <TextField
-          id="query"
-          label="Query"
-          variant="standard"
-          inputRef={naturalLanguageQuery}
-          fullWidth
+      <div className={styles.chatTabContainer}>
+        <ChatHistory
+          chatHistory={chatHistory}
+          chatHistoryLoading={chatHistoryLoading}
+          createChat={createNewChat}
+          createChatLoading={createNewChatLoading}
+          openChat={openChat}
+          activeChatIndex={activeChatIndex}
         />
 
-        <LoadingButton
-          loading={queryLoading}
-          variant="contained"
-          endIcon={<SendRoundedIcon />}
-          onClick={queryChat}
-        >
-          Query
-        </LoadingButton>
+        <div className={styles.chatWithInput}>
+
+          <ChatView chat={chat} chatLoading={chatLoading} />
+
+          <div className={styles.chatInputContainer}>
+            <TextField
+              id="query"
+              label="Query"
+              variant="standard"
+              inputRef={naturalLanguageQuery}
+              fullWidth
+            />
+
+            <LoadingButton
+              loading={queryLoading}
+              variant="contained"
+              endIcon={<SendRoundedIcon />}
+              onClick={queryChat}
+            >
+              Query
+            </LoadingButton>
+          </div>
+        </div>
       </div>
 
       <Result

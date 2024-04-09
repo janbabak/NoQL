@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MessageWithResponse {
+public class ChatQueryWithResponse {
 
     @Id
     @GeneratedValue

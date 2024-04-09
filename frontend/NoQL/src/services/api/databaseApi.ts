@@ -1,8 +1,9 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { Database } from '../../types/Database.ts'
-import { Chat, QueryResponse } from '../../types/Query.ts'
+import { QueryRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
+import { ChatHistoryItem } from '../../types/Chat.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -31,28 +32,10 @@ const databaseApi = {
     return this.API.get(this.DOMAIN + '/' + id + '/structure')
   },
 
-  /**
-   * Query the user's database using natural language, result is automatically paginated.
-   * Params:
-   * @param id database id
-   * @param query natural language query
-   * @param pageSize size of a page of automatically paginated response
-   */
-  queryNaturalLanguage(id: string, query: string, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
+  queryChat(databaseId: string, request: QueryRequest, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
-      this.DOMAIN + '/' + id + '/query/chat',
-      { messages: [query] } as Chat, [
-        {
-          name: 'pageSize',
-          value: pageSize
-        }
-      ])
-  },
-
-  queryChat(id: string, chat: Chat, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
-    return this.API.post(
-      this.DOMAIN + '/' + id + '/query/chat',
-      chat, [
+      this.DOMAIN + '/' + databaseId + '/query/chat',
+      request, [
         {
           name: 'pageSize',
           value: pageSize
@@ -85,6 +68,15 @@ const databaseApi = {
           value: pageSize
         }
       ])
+  },
+
+  /**
+   * Get chat history (chats associated to the specific database) ordered by the modification date
+   * in descending order.
+   * @param id database identifier
+   */
+  getChatHistoryByDatabaseId(id: string): Promise<AxiosResponse<ChatHistoryItem[]>> {
+    return this.API.get(this.DOMAIN + '/' + id + '/chats')
   }
 }
 

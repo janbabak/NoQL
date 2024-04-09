@@ -1,11 +1,12 @@
-import { Chat } from '../../../types/Query.ts'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
+import { Chat, ChatQueryWithResponse } from '../../../types/Chat.ts'
 
 interface ChatViewProps {
-  chat: Chat
+  chat: Chat | null,
+  chatLoading: boolean,
 }
 
 interface UsersQueryProps {
@@ -37,7 +38,7 @@ function UsersQuery({ query }: UsersQueryProps) {
   )
 }
 
-export function ChatView({ chat }: ChatViewProps) {
+export function ChatView({ chat, chatLoading }: ChatViewProps) {
 
   const chatWindowRef: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null)
 
@@ -49,22 +50,25 @@ export function ChatView({ chat }: ChatViewProps) {
 
   useEffect((): void => {
     scrollChatToTheBottom()
-  }, [chat.messages])
+  }, [chat?.messages])
 
   return (
-    <div ref={chatWindowRef} className={styles.chatWindow}>
-      {
-        chat.messages.map((message: string, index: number) => {
-          return (
-            <div key={index}>
-              {index % 2 == 0
-                ? <UsersQuery query={message} />
-                : <ModelsResponse response={message} />
-              }
-            </div>
-          )
-        })
+    <>
+      {chatLoading && <div>loading</div>}
+      {!chatLoading &&
+        <div ref={chatWindowRef} className={styles.chatWindow}>
+          {
+            chat?.messages.map((message: ChatQueryWithResponse) => {
+              return (
+                <div key={message.id}>
+                  <UsersQuery query={message.query} />
+                  <ModelsResponse response={message.response} />
+                </div>
+              )
+            })
+          }
+        </div>
       }
-    </div>
+    </>
   )
 }

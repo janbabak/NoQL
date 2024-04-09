@@ -2,13 +2,15 @@ package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
-import com.janbabak.noqlbackend.dao.repository.MessageWithResponseRepository;
+import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
+import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
@@ -27,37 +30,55 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 public class ChatService {
 
     private final ChatRepository chatRepository;
-    private final MessageWithResponseRepository messageRepository;
+    private final ChatQueryWithResponseRepository messageRepository;
     private final DatabaseRepository databaseRepository;
+    private final String NEW_CHAT_NAME = "New chat";
+    private final int CHAT_NAME_MAX_LENGTH = 32;
 
     /**
-     * Find chat by chat id
+     * Find chat by chat id.
      *
      * @param id identifier
      * @return chat
      * @throws EntityNotFoundException chat of specified id not found
      */
-    public Chat findById(UUID id) throws EntityNotFoundException {
+    public ChatDto findById(UUID id) throws EntityNotFoundException {
         log.info("Get chat by id={}", id);
 
-        return chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
+
+        return new ChatDto(
+                chat.getId(),
+                chat.getName(),
+                chat.getMessages()
+                        .stream()
+                        .map(message -> new ChatQueryWithResponseDto(
+                                message.getId(),
+                                message.getMessage(),
+                                message.getResponse(),
+                                message.getTimestamp()))
+                        .toList(),
+                chat.getModificationDate());
     }
 
 
     /**
-     * Find all chats associated with specified database.
+     * Find all chats associated with specified database sorted by the modification date in descending order.
+     *
      * @param databaseId database identifier
      * @return list of chats
      * @throws EntityNotFoundException database of specified identifier not found.
      */
-    public List<ChatDto> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
-        Database database = databaseRepository.findById(databaseId).orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+    public List<ChatHistoryItem> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        return chatRepository.findAllByDatabase(database).stream().map((chat -> ChatDto
+        return chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)
+                .stream()
+                .map((chat -> ChatHistoryItem
                         .builder()
                         .id(chat.getId())
                         .name(chat.getName())
-                        .modificationDate(chat.getModificationDate())
                         .build()))
                 .toList();
     }
@@ -75,7 +96,7 @@ public class ChatService {
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         Chat chat = Chat.builder()
-                .name("New chat")
+                .name(NEW_CHAT_NAME)
                 .modificationDate(Timestamp.from(Instant.now()))
                 .database(database)
                 .build();
@@ -88,32 +109,42 @@ public class ChatService {
      *
      * @param chatId  chat identifier
      * @param request message with response
+     * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public void addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
-        Chat chat = findById(chatId);
+    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
-        MessageWithResponse message = MessageWithResponse.builder()
+        Timestamp timestamp = Timestamp.from(Instant.now());
+        ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
                 .message(request.getMessage())
                 .response(request.getResponse())
-                .timestamp(Timestamp.from(Instant.now()))
+                .timestamp(timestamp)
                 .build();
 
         chat.addMessage(message);
-        messageRepository.save(message);
+        chat.setModificationDate(timestamp);
+
+        if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
+            chat.setName(message.getMessage().length() < CHAT_NAME_MAX_LENGTH
+                    ? message.getMessage() : message.getMessage().substring(0, CHAT_NAME_MAX_LENGTH));
+        }
+        chatRepository.save(chat);
+        return messageRepository.save(message);
     }
 
     /**
-     * Rename chat.
+     * Rename chat. If the new name is longer than {@code CHAT_NAME_MAX_LENGTH},
+     * use only the first {@code CHAT_NAME_MAX_LENGTH} characters
      *
      * @param id   chat identifier
      * @param name new name
      * @throws EntityNotFoundException chat of specified id not found.
      */
     public void renameChat(UUID id, String name) throws EntityNotFoundException {
-        Chat chat = findById(id);
-        chat.setName(name);
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
+        chat.setName(name.length() < CHAT_NAME_MAX_LENGTH ? name : name.substring(0, CHAT_NAME_MAX_LENGTH));
         chatRepository.save(chat);
     }
 

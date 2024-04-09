@@ -1,3 +1,10 @@
+import { ChatQueryWithResponse } from './Chat.ts'
+
+interface QueryRequest {
+  chatId: string,
+  query: string,
+}
+
 interface QueryResult {
   columnNames: string[]
   rows: string[][]
@@ -5,17 +12,9 @@ interface QueryResult {
 
 interface QueryResponse {
   result: QueryResult | null
-  query: string
   totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
+  chatQueryWithResponse: ChatQueryWithResponse
   errorMessage: string | null
 }
 
-interface Chat {
-  /**
-   * List of messages, where the first message is use's query, second message is LLM response to that query
-   * and so on... (even indices contain user's queries and odd indices contain LLM responses)
-   */
-  messages: string[]
-}
-
-export type { QueryResponse, QueryResult, Chat }
+export type { QueryRequest, QueryResponse, QueryResult }
