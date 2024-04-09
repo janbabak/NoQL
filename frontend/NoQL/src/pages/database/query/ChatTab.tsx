@@ -75,14 +75,14 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   useEffect((): void => {
     loadChatsHistory()
-      .then(async (response: AxiosResponse<ChatDto[], unknown>):  Promise<AxiosResponse<ChatFromApi>> => {
-      if (response.data.length > 0) {
-        return loadChat(response.data[0].id)
-      } else {
-        console.log('create new chat not implemented') // TODO: implement
-        Promise.reject()
-      }
-    }).then((response) => {
+      .then(async (response: AxiosResponse<ChatDto[], unknown>): Promise<AxiosResponse<ChatFromApi>> => {
+        if (response.data.length > 0) {
+          return loadChat(response.data[0].id)
+        } else {
+          console.log('create new chat not implemented') // TODO: implement
+          Promise.reject()
+        }
+      }).then((response) => {
       loadQueryLanguageQuer(response.data.messages[response.data.messages.length - 1].response)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,7 +136,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       setTotalCount(response.data.totalCount)
       setChat({
         ...chat,
-        messages: [...chat?.messages || [] , response.data.messageWithResponse]
+        messages: [...chat?.messages || [], response.data.messageWithResponse]
       } as ChatFromApi)
     } catch (error: unknown) {
       console.log(error) // TODO: handle
@@ -179,7 +179,9 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   async function openChat(id: string, index: number): Promise<void> {
     const response = await loadChat(id)
     setActiveChatIndex(index)
-    await loadQueryLanguageQuer(response.data.messages[response.data.messages.length - 1].response)
+    if (response.data.messages.length > 0) {
+      await loadQueryLanguageQuer(response.data.messages[response.data.messages.length - 1].response)
+    }
   }
 
   return (
