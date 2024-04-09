@@ -78,7 +78,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   useEffect((): void => {
     loadChatsHistory()
-      .then(async (response: AxiosResponse<ChatDto[], unknown>): Promise<AxiosResponse<ChatFromApi>> => {
+      .then(async (response: AxiosResponse<ChatDto[], unknown>) => {
         if (response.data.length > 0) {
           return loadChat(response.data[0].id)
         } else {
@@ -87,7 +87,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         }
       }).then((response): void => {
         // if there are some messages in the chat execute the query response from the last message
-        if (response.data.messages.length > 0) {
+        if (response && response.data.messages.length > 0) {
           void loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
         }
     })

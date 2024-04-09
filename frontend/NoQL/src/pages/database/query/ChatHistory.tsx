@@ -57,6 +57,7 @@ export function ChatHistory(
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
+      { createNewChatLoading && <span>TODO: create loding button</span>}
 
       {chatHistoryLoading && <div>Loading</div>}
       {!chatHistoryLoading && <div>
