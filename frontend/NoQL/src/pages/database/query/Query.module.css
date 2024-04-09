@@ -24,8 +24,23 @@
 .chatHistory {
     width: 14rem;
     height: 100%;
+    max-height: 25rem;
     /*border: 3px solid black;*/
     overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+/* TODO: do I really wanna hide the scrollbars */
+/* Hide scrollbar for Chrome, Safari and Opera */
+.chatHistory::-webkit-scrollbar,
+.chatWindow::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.chatHistory,
+.chatWindow {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 .chatHistoryItem {

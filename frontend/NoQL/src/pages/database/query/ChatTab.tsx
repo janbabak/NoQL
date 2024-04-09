@@ -83,10 +83,13 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           return loadChat(response.data[0].id)
         } else {
           console.log('create new chat not implemented') // TODO: implement
-          Promise.reject()
+          await Promise.reject()
         }
-      }).then((response) => {
-      loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+      }).then((response): void => {
+        // if there are some messages in the chat execute the query response from the last message
+        if (response.data.messages.length > 0) {
+          void loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+        }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -199,6 +202,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   async function openChat(id: string, index: number): Promise<void> {
     const response = await loadChat(id)
     setActiveChatIndex(index)
+
+    // if chat contains some messages, execute them and load the result
     if (response.data.messages.length > 0) {
       await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
     }

@@ -35,6 +35,7 @@ export function ChatHistory(
     try {
       await chatApi.createNewChat(databaseId)
       await refreshChatHistory() // TODO: is that necessary
+      openChat(chatHistory[0].id, 0)
     } catch (error: unknown) {
       console.log(error) // TODO: handle
     } finally {
