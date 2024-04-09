@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
@@ -31,6 +32,8 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final MessageWithResponseRepository messageRepository;
     private final DatabaseRepository databaseRepository;
+    private final String NEW_CHAT_NAME = "New chat";
+    private final int CHAT_NAME_MAX_LENGTH = 32;
 
     /**
      * Find chat by chat id
@@ -91,7 +94,7 @@ public class ChatService {
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         Chat chat = Chat.builder()
-                .name("New chat")
+                .name(NEW_CHAT_NAME)
                 .modificationDate(Timestamp.from(Instant.now()))
                 .database(database)
                 .build();
@@ -120,11 +123,18 @@ public class ChatService {
 
         chat.addMessage(message);
         chat.setModificationDate(timestamp);
+
+        if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
+            chat.setName(message.getMessage().length() < CHAT_NAME_MAX_LENGTH
+                    ? message.getMessage() : message.getMessage().substring(0, CHAT_NAME_MAX_LENGTH));
+        }
+        chatRepository.save(chat);
         return messageRepository.save(message);
     }
 
     /**
-     * Rename chat.
+     * Rename chat. If the new name is longer than {@code CHAT_NAME_MAX_LENGTH},
+     * use only the first {@code CHAT_NAME_MAX_LENGTH} characters
      *
      * @param id   chat identifier
      * @param name new name
@@ -132,7 +142,7 @@ public class ChatService {
      */
     public void renameChat(UUID id, String name) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
-        chat.setName(name);
+        chat.setName(name.length() < CHAT_NAME_MAX_LENGTH ? name : name.substring(0, CHAT_NAME_MAX_LENGTH));
         chatRepository.save(chat);
     }
 
