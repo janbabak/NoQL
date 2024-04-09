@@ -69,7 +69,7 @@ public class ChatService {
     public List<ChatReduced> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
         Database database = databaseRepository.findById(databaseId).orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        return chatRepository.findAllByDatabase(database).stream().map((chat -> ChatReduced
+        return chatRepository.findAllByDatabaseOrderByModificationDateDesc(database).stream().map((chat -> ChatReduced
                         .builder()
                         .id(chat.getId())
                         .name(chat.getName())
@@ -110,14 +110,16 @@ public class ChatService {
     public MessageWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
+        Timestamp timestamp = Timestamp.from(Instant.now());
         MessageWithResponse message = MessageWithResponse.builder()
                 .chat(chat)
                 .message(request.getMessage())
                 .response(request.getResponse())
-                .timestamp(Timestamp.from(Instant.now()))
+                .timestamp(timestamp)
                 .build();
 
         chat.addMessage(message);
+        chat.setModificationDate(timestamp);
         return messageRepository.save(message);
     }
 

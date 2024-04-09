@@ -19,5 +19,5 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
      * @param database database object
      * @return list of chats associated with specified database.
      */
-    List<Chat> findAllByDatabase(Database database);
+    List<Chat> findAllByDatabaseOrderByModificationDateDesc(Database database);
 }
