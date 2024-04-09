@@ -74,10 +74,35 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setActiveChatIndex
   ] = useState<number>(0)
 
+  const [
+    createNewChatLoading,
+    setCreateNewChatLoading
+  ] = useState<boolean>(false)
+
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
   /**
+   * Creates new chat
+   */
+  async function createNewChat(): Promise<AxiosResponse<Chat>> {
+    setCreateNewChatLoading(true)
+    try {
+      const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
+      await loadChatsHistory()
+      await openChat(response.data.id, 0)
+      return response
+    } catch (error: unknown) {
+      console.log(error) // TODO: handle
+      return Promise.reject()
+    } finally {
+      setCreateNewChatLoading(false)
+    }
+  }
+
+  // TODO: fix multiple calls
+  /**
    * Load chat history, then active chat content, then query the chat for the result.
+   * Creates new chat if there isn't any.
    */
   useEffect((): void => {
     loadChatsHistory()
@@ -85,8 +110,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         if (response && response.data.length > 0) {
           return loadChat(response.data[0].id)
         } else {
-          console.log('create new chat not implemented') // TODO: implement
-          await Promise.reject()
+          return createNewChat()
         }
       }).then((response: AxiosResponse<Chat> | undefined): void => {
         // if there are some messages in the chat execute the query response from the last message
@@ -246,8 +270,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         <ChatHistory
           chatHistory={chatHistory}
           chatHistoryLoading={chatHistoryLoading}
-          refreshChatHistory={loadChatsHistory}
-          databaseId={databaseId}
+          createChat={createNewChat}
+          createChatLoading={createNewChatLoading}
           openChat={openChat}
           activeChatIndex={activeChatIndex}
         />
