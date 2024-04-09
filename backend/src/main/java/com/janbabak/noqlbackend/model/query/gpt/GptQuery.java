@@ -1,8 +1,6 @@
 package com.janbabak.noqlbackend.model.query.gpt;
 
-import com.janbabak.noqlbackend.model.entity.Chat;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
-import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -27,13 +25,13 @@ public class GptQuery {
      * Create query
      *
      * @param chatHistory chat history
-     * @param query       new query
+     * @param query       new natural language query
      * @param systemQuery instructions from the NoQL system about task that needs to be done
      * @param errors      list of errors from previous executions that should help the model fix its query
      * @param model       LLM to be used for the translation
      */
     public GptQuery(
-            List<MessageWithResponse> chatHistory,
+            List<ChatQueryWithResponse> chatHistory,
             String query,
             String systemQuery,
             List<String> errors,
@@ -45,15 +43,9 @@ public class GptQuery {
         // system instructions
         this.messages.add(new Message(Role.system, systemQuery));
 
-        // users chat history
-//        for (int i = 0; i < chatRequest.getMessages().size(); i++) {
-//            this.messages.add(new Message(
-//                    i % 2 == 0 ? Role.user : Role.assistant,
-//                    chatRequest.getMessages().get(i)));
-//        }
-        for (MessageWithResponse messageWithResponse : chatHistory) {
-            this.messages.add(new Message(Role.user, messageWithResponse.getMessage()));
-            this.messages.add(new Message(Role.assistant, messageWithResponse.getResponse()));
+        for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
+            this.messages.add(new Message(Role.user, chatQueryWithResponse.getMessage()));
+            this.messages.add(new Message(Role.assistant, chatQueryWithResponse.getResponse()));
         }
 
         this.messages.add(new Message(Role.user, query));

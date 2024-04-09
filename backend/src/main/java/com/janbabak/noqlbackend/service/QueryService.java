@@ -9,11 +9,11 @@ import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponseDto;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;
-import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
@@ -42,7 +42,7 @@ public class QueryService {
     private final DatabaseRepository databaseRepository;
     private final Settings settings;
     private final ChatService chatService;
-    private final MessageWithResponseService messageWithResponseService;
+    private final ChatQueryWithResponseService chatQueryWithResponseService;
 
     /**
      * Create system query for the LLM that specifies what should be done, database schema, ...
@@ -198,7 +198,7 @@ public class QueryService {
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-        MessageWithResponseDto message = new MessageWithResponseDto( // TODO better solution
+        ChatQueryWithResponseDto message = new ChatQueryWithResponseDto( // TODO better solution
                 UUID.randomUUID(), query, query, Timestamp.from(Instant.now()));
         try {
             QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
@@ -216,7 +216,7 @@ public class QueryService {
      * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
      *
      * @param id          database id
-     * @param chatRequest in natural query or database query language
+     * @param queryRequest in natural query or database query language
      * @param pageSize    number of items in one page,<br />
      *                    default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                    max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
@@ -227,7 +227,7 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         requested page size is greater than maximum allowed value
      */
-    public QueryResponse executeChat(UUID id, ChatRequest chatRequest, Integer pageSize)
+    public QueryResponse executeChat(UUID id, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
             BadRequestException, LLMException {
 
@@ -241,10 +241,10 @@ public class QueryService {
         String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
 
-        List<MessageWithResponse> chatHistory = messageWithResponseService.getMessagesFromChat(
-                chatRequest.getChatId());
+        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(
+                queryRequest.getChatId());
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String query = queryApi.queryModel(chatHistory, chatRequest.getMessage(), systemQuery, errors);
+            String query = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
             // TODO: remove after testing
 //            String query = """
 //                    Use the following command to retrieve all users.
@@ -253,26 +253,31 @@ public class QueryService {
 //                    ```""";
             query = extractQueryFromMarkdownInResponse(query);
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
+
             try {
                 QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
                 Long totalCount = getTotalCount(query, specificDatabaseService);
 
-                MessageWithResponse message = chatService.addMessageToChat(
-                        chatRequest.getChatId(),
-                        new CreateMessageWithResponseRequest(chatRequest.getMessage(), query));
-                return QueryResponse.successfulResponse(queryResult, new MessageWithResponseDto(message), totalCount);
+                ChatQueryWithResponse message = chatService.addMessageToChat(
+                        queryRequest.getChatId(),
+                        new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
+
+                return QueryResponse.successfulResponse(queryResult, new ChatQueryWithResponseDto(message), totalCount);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
+
                 errors.add("Error occurred when during execution of your query.\n" +
                         "This is the error: " + e.getMessage() +
                         "This is the query: " + query);
+
                 if (attempt == settings.translationRetries) {
                     // last try failed
-                    MessageWithResponse message = chatService.addMessageToChat(
-                            chatRequest.getChatId(),
-                            new CreateMessageWithResponseRequest(chatRequest.getMessage(), query));
-                    return QueryResponse.failedResponse(new MessageWithResponseDto(message), e.getMessage());
+                    ChatQueryWithResponse message = chatService.addMessageToChat(
+                            queryRequest.getChatId(),
+                            new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
+
+                    return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
                 }
             }
         }

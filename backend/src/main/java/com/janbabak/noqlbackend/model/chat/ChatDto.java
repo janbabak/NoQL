@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.model.chat;
 
-import com.janbabak.noqlbackend.model.entity.MessageWithResponseDto;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +17,6 @@ import java.util.UUID;
 public class ChatDto {
     private UUID id;
     private String name;
-    private List<MessageWithResponseDto> messages;
+    private List<ChatQueryWithResponseDto> messages;
     private Timestamp modificationDate;
 }

@@ -1,10 +1,10 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
-import com.janbabak.noqlbackend.dao.repository.MessageWithResponseRepository;
+import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.entity.Chat;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,14 +17,14 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MessageWithResponseService {
+public class ChatQueryWithResponseService {
 
-    private final MessageWithResponseRepository messageWithResponseRepository;
+    private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final ChatRepository chatRepository;
 
-    public List<MessageWithResponse> getMessagesFromChat(UUID chatId) throws EntityNotFoundException {
+    public List<ChatQueryWithResponse> getMessagesFromChat(UUID chatId) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
-        return messageWithResponseRepository.findAllByChatOrderByTimestamp(chat);
+        return chatQueryWithResponseRepository.findAllByChatOrderByTimestamp(chat);
     }
 }

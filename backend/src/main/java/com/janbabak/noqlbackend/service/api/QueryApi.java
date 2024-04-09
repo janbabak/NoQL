@@ -1,8 +1,7 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
-import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public interface QueryApi {
      * @throws LLMException when LLM request fails.
      */
     String queryModel(
-            List<MessageWithResponse> chatHistory,
+            List<ChatQueryWithResponse> chatHistory,
             String query,
             String systemQuery,
             List<String> errors

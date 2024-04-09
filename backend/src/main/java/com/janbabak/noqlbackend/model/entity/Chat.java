@@ -25,14 +25,14 @@ public class Chat {
     private Database database;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MessageWithResponse> messages;
+    private List<ChatQueryWithResponse> messages;
 
     private Timestamp modificationDate;
 
     private String name;
 
-    public void addMessage(MessageWithResponse newMessage) {
-        for (MessageWithResponse message: messages) {
+    public void addMessage(ChatQueryWithResponse newMessage) {
+        for (ChatQueryWithResponse message: messages) {
             if (message.getId() == newMessage.getId()) {
                 return;
             }

@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface ChatRepository extends JpaRepository<Chat, UUID> {
 
     /**
-     * Find all chats associated with a database.
+     * Find all chats associated with a database sorted by modification date in descending order.
      * @param database database object
      * @return list of chats associated with specified database.
      */

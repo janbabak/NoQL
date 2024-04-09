@@ -5,10 +5,10 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.chat.ChatReduced;
+import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.query.ChatRequest;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.service.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
@@ -101,7 +101,7 @@ public class DatabaseController {
      * Query the user's database using natural language from in chat form, result is automatically paginated.
      *
      * @param id          database id
-     * @param chatRequest chat containing the natural language queries
+     * @param queryRequest chat containing the natural language queries
      * @param pageSize    number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
@@ -114,11 +114,11 @@ public class DatabaseController {
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeChat(
             @PathVariable UUID id,
-            @RequestBody @Valid ChatRequest chatRequest,
+            @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, BadRequestException {
-        return queryService.executeChat(id, chatRequest, pageSize);
+        return queryService.executeChat(id, queryRequest, pageSize);
     }
 
     /**
@@ -161,14 +161,14 @@ public class DatabaseController {
     }
 
     /**
-     * Get chats associated to the specified database.
+     * Get chat history (chats associated to a specified database) sorted by the modification data in descending order.
      * @param id database identifier
      * @return list of chat DTOs
      * @throws EntityNotFoundException database of specified id not found.
      */
     @GetMapping("/{id}/chats")
     @ResponseStatus(HttpStatus.OK)
-    public List<ChatReduced> getChatOfDatabase(@PathVariable UUID id) throws EntityNotFoundException {
+    public List<ChatHistoryItem> getChatHistoryByDatabaseId(@PathVariable UUID id) throws EntityNotFoundException {
         return chatService.findChatsByDatabaseId(id);
     }
 }

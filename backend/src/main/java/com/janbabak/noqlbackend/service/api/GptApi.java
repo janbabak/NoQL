@@ -1,10 +1,9 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.error.exception.LLMException;
-import com.janbabak.noqlbackend.model.entity.MessageWithResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.gpt.GptQuery;
 import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
-import com.janbabak.noqlbackend.model.query.ChatRequest;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -36,7 +35,7 @@ public class GptApi implements QueryApi {
      */
     @Override
     public String queryModel(
-            List<MessageWithResponse> chatHistory,
+            List<ChatQueryWithResponse> chatHistory,
             String query,
             String systemQuery,
             List<String> errors) throws LLMException {
