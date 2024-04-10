@@ -235,6 +235,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * @param query in query language
    */
   async function loadQueryLanguageQuery(query: string): Promise<void> {
+    setQueryLoading(true)
     try {
       const response: AxiosResponse<QueryResponse> = await databaseApi.queryQueryLanguageQuery(
         databaseId, query, 0, pageSize)
@@ -252,12 +253,14 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * @param index index in the chat history
    */
   async function openChat(id: string, index: number): Promise<void> {
-    const response = await loadChat(id)
+    const response: AxiosResponse<Chat> = await loadChat(id)
     setActiveChatIndex(index)
 
     // if chat contains some messages, execute them and load the result
     if (response.data.messages.length > 0) {
       await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+    } else {
+      setQueryResult(null)
     }
   }
 
