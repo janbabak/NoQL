@@ -17,7 +17,11 @@ const chatApi = {
         value: databaseId
       }
     ])
-  }
+  },
+
+  deleteChat(chatId: string): Promise<AxiosResponse> {
+    return this.API.delete(this.DOMAIN + '/' + chatId)
+  },
 }
 
 export default chatApi

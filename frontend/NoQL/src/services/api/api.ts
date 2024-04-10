@@ -7,16 +7,16 @@ interface ApiParameter {
 }
 
 class Api {
-  axiosInstance = axios.create({
+  axiosInstance: AxiosInstance = axios.create({
     baseURL: 'http://localhost:8080', // TODO: get from env
     timeout: 10_000
-  }) as AxiosInstance
+  })
 
   /** forbid constructor, because api is a singleton */
   private constructor() {
   }
 
-  static instance = null as null | Api
+  static instance: Api | null = null
 
   /**
    * @return singleton instance
@@ -35,7 +35,7 @@ class Api {
    * @param path in url
    * @param parameters query parameters
    */
-  get(path: string, parameters = [] as ApiParameter[]): Promise<AxiosResponse> {
+  get(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
       method: 'GET'
@@ -50,7 +50,7 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  post(path: string, data: string | number | boolean | object | null, parameters = [] as ApiParameter[]):
+  post(path: string, data: string | number | boolean | object | null, parameters: ApiParameter[] = []):
     Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
@@ -67,7 +67,7 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  put(path: string, data: string, parameters = [] as ApiParameter[]):
+  put(path: string, data: string, parameters: ApiParameter[] = []):
     Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
@@ -83,7 +83,7 @@ class Api {
    * @param path in url
    * @param parameters query parameters
    */
-  delete(path: string, parameters = [] as ApiParameter[]): Promise<AxiosResponse> {
+  delete(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
     const requestConfig = {
       url: this.createUrl(path, parameters),
       method: 'DELETE'
@@ -97,7 +97,7 @@ class Api {
    * @param path path in url
    * @param parameters query parameters
    */
-  createUrl(path: string, parameters = [] as ApiParameter[]): string {
+  createUrl(path: string, parameters: ApiParameter[] = []): string {
     let delimiter = '?'
     for (const parameter of parameters) {
       path = path + delimiter + parameter.name + '=' + parameter.value

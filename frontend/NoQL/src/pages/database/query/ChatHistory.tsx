@@ -6,7 +6,8 @@ import { LoadingButton } from '@mui/lab'
 import { CircularProgress, Menu, MenuItem } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import { useState } from 'react'
+import React, { useState } from 'react'
+import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -14,6 +15,7 @@ interface ChatHistoryProps {
   createChat: () => Promise<AxiosResponse<Chat>>,
   createChatLoading: boolean
   openChat: (id: string, index: number) => void,
+  reallyDeleteChat: (chatId: string) => Promise<void>,
   activeChatIndex: number,
 }
 
@@ -24,28 +26,53 @@ export function ChatHistory(
     createChat,
     createChatLoading,
     openChat,
-    activeChatIndex
+    reallyDeleteChat,
+    activeChatIndex,
   }: ChatHistoryProps) {
-
-  const [
-    menuOpened,
-    setMenuOpened
-  ] = useState<boolean>(false)
 
   const [
     anchorEl,
     setAnchorEl
   ] = useState<null | HTMLElement>(null)
 
-  const open = Boolean(anchorEl)
+  const open: boolean = Boolean(anchorEl)
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+  const [
+    confirmDialogOpen,
+    setConfirmDialogOpen
+  ] = useState<boolean>(false)
+
+  const [
+    confirmDeleteChatTitle,
+    setConfirmDeleteChatTitle
+  ] = useState<string>('')
+
+  const [
+    chatToDelete,
+    setChatToDelete
+  ] = useState<ChatHistoryItem | null>(null)
+
+  function openMenuClick(event: React.MouseEvent<HTMLElement>, chat: ChatHistoryItem): void {
     event.stopPropagation()
-    setMenuOpened(true)
+    setConfirmDeleteChatTitle('Delete chat: "' + chat.name + '"')
+    setChatToDelete(chat)
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = () => {
+  function deleteChat(): void {
+    console.log('delete')
+    setConfirmDialogOpen(true)
+    closeMenu()
+  }
+
+  function confirmDeleteChat(): void {
+    console.log('chat to delete ' + chatToDelete)
+    if (chatToDelete) {
+      void reallyDeleteChat(chatToDelete.id)
+    }
+  }
+
+  const closeMenu = (): void => {
     setAnchorEl(null)
   }
 
@@ -66,6 +93,20 @@ export function ChatHistory(
       <CircularProgress />
     </div>
 
+  const ChatMenu =
+    <Menu
+      id="fade-menu"
+      MenuListProps={{
+        'aria-labelledby': 'fade-button'
+      }}
+      anchorEl={anchorEl}
+      open={open}
+      onClose={closeMenu}
+    >
+      <MenuItem onClick={deleteChat}>Delete</MenuItem>
+      <MenuItem onClick={() => console.log('rename item')}>Rename</MenuItem>
+    </Menu>
+
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
@@ -73,41 +114,40 @@ export function ChatHistory(
       <div className={styles.chatHistoryList}>
         {chatHistoryLoading && ChatHistoryLoading}
 
-        {!chatHistoryLoading && <div>
-          {
-            chatHistory.map((chat: ChatHistoryItem, index: number) => {
-              return (
-                <div
-                  onClick={() => openChat(chat.id, index)}
-                  key={chat.id}
-                  className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
-                >
-                  <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
-                  <IconButton
-                    onClick={handleClick}
-                    className={styles.chatHistoryItemIcon}
-                    size="small"
+        {!chatHistoryLoading &&
+          <div>
+            {
+              chatHistory.map((chat: ChatHistoryItem, index: number) => {
+                return (
+                  <div
+                    onClick={() => openChat(chat.id, index)}
+                    key={chat.id}
+                    className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
                   >
-                    <MoreHorizRoundedIcon fontSize="inherit" />
-                  </IconButton>
-                </div>
-              )
-            })
-          }
-          <Menu
-            id="fade-menu"
-            MenuListProps={{
-              'aria-labelledby': 'fade-button'
-            }}
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={() => console.log('delete item')}>Delete</MenuItem>
-            <MenuItem onClick={() => console.log('rename item')}>Rename</MenuItem>
-          </Menu>
-        </div>
+                    <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
+                    <IconButton
+                      onClick={(event) => openMenuClick(event, chat)}
+                      className={styles.chatHistoryItemIcon}
+                      size="small"
+                    >
+                      <MoreHorizRoundedIcon fontSize="inherit" />
+                    </IconButton>
+                  </div>
+                )
+              })
+            }
+
+            {ChatMenu}
+          </div>
         }
+
+        <ConfirmDialog
+          title={confirmDeleteChatTitle}
+          open={confirmDialogOpen}
+          content={''}
+          setOpen={setConfirmDialogOpen}
+          confirm={confirmDeleteChat}
+        />
       </div>
     </div>
   )

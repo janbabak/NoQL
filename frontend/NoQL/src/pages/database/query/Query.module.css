@@ -50,17 +50,17 @@
 }
 
 /* TODO: do I really wanna hide the scrollbars */
-/* Hide scrollbar for Chrome, Safari and Opera */
-/*.chatHistory::-webkit-scrollbar,*/
-/*.chatWindow::-webkit-scrollbar {*/
-/*    display: none;*/
-/*}*/
-/* Hide scrollbar for IE, Edge and Firefox */
-/*.chatHistory,*/
-/*.chatWindow {*/
-/*    -ms-overflow-style: none;  !* IE and Edge *!*/
-/*    scrollbar-width: none;  !* Firefox *!*/
-/*}*/
+/* Hide scrollbar for Chrome, Safari and Opera*/
+.chatHistoryList::-webkit-scrollbar,
+.chatWindow::-webkit-scrollbar {
+    display: none;
+}
+ Hide scrollbar for IE, Edge and Firefox,
+.chatHistoryList,
+.chatWindow {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
 
 /* TODO extract common from chatHistoryItem, chatHistoryItemActive to shared class */
 .chatHistoryItem {
