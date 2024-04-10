@@ -28,7 +28,6 @@ export function ChatHistory(
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      sx={{ marginBottom: '1rem' }}
       loading={createChatLoading}
       disabled={createChatLoading}
       fullWidth
@@ -40,23 +39,25 @@ export function ChatHistory(
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
 
-      {chatHistoryLoading && <div>Loading</div>}
-      {!chatHistoryLoading && <div>
-        {
-          chatHistory.map((chat: ChatHistoryItem, index: number) => {
-            return (
-              <div
-                onClick={() => openChat(chat.id, index)}
-                key={chat.id}
-                className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
-              >
-                {chat.name}
-              </div>
-            )
-          })
+      <div className={styles.chatHistoryList}>
+        {chatHistoryLoading && <div>Loading</div>}
+        {!chatHistoryLoading && <div>
+          {
+            chatHistory.map((chat: ChatHistoryItem, index: number) => {
+              return (
+                <div
+                  onClick={() => openChat(chat.id, index)}
+                  key={chat.id}
+                  className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
+                >
+                  {chat.name}
+                </div>
+              )
+            })
+          }
+        </div>
         }
       </div>
-      }
     </div>
   )
 }
