@@ -89,8 +89,16 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     try {
       const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
       setCreateNewChatLoading(false)
-      await loadChatsHistory()
-      await openChat(response.data.id, 0)
+
+      // insert newly created chat at the fist place
+      setChatHistory([
+        { id: response.data.id, name: response.data.name },
+        ...chatHistory
+      ])
+      // open newly created chat
+      setChat(response.data)
+      setActiveChatIndex(0)
+      setQueryResult(null)
       return response
     } catch (error: unknown) {
       console.log(error) // TODO: handle
