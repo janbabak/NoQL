@@ -1,8 +1,8 @@
 import styles from './Query.module.css'
-import { Button } from '@mui/material'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
+import { LoadingButton } from '@mui/lab'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -20,24 +20,25 @@ export function ChatHistory(
     createChat,
     createChatLoading,
     openChat,
-    activeChatIndex,
+    activeChatIndex
   }: ChatHistoryProps) {
 
   const CreateNewChatButton =
-    <Button
+    <LoadingButton
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      fullWidth
       sx={{ marginBottom: '1rem' }}
+      loading={createChatLoading}
+      disabled={createChatLoading}
+      fullWidth
     >
       New chat
-    </Button>
+    </LoadingButton>
 
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
-      { createChatLoading && <span>TODO: create loading button</span>}
 
       {chatHistoryLoading && <div>Loading</div>}
       {!chatHistoryLoading && <div>
