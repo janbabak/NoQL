@@ -3,9 +3,10 @@ import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress } from '@mui/material'
+import { CircularProgress, Menu, MenuItem } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
+import { useState } from 'react'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -25,6 +26,28 @@ export function ChatHistory(
     openChat,
     activeChatIndex
   }: ChatHistoryProps) {
+
+  const [
+    menuOpened,
+    setMenuOpened
+  ] = useState<boolean>(false)
+
+  const [
+    anchorEl,
+    setAnchorEl
+  ] = useState<null | HTMLElement>(null)
+
+  const open = Boolean(anchorEl)
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+    event.stopPropagation()
+    setMenuOpened(true)
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
 
   const CreateNewChatButton =
     <LoadingButton
@@ -61,10 +84,7 @@ export function ChatHistory(
                 >
                   <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
                   <IconButton
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      console.log("menu clicked")}
-                    }
+                    onClick={handleClick}
                     className={styles.chatHistoryItemIcon}
                     size="small"
                   >
@@ -74,6 +94,18 @@ export function ChatHistory(
               )
             })
           }
+          <Menu
+            id="fade-menu"
+            MenuListProps={{
+              'aria-labelledby': 'fade-button'
+            }}
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={() => console.log('delete item')}>Delete</MenuItem>
+            <MenuItem onClick={() => console.log('rename item')}>Rename</MenuItem>
+          </Menu>
         </div>
         }
       </div>
