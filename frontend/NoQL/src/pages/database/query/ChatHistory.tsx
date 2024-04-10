@@ -3,6 +3,7 @@ import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
+import { CircularProgress } from '@mui/material'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -35,12 +36,18 @@ export function ChatHistory(
       New chat
     </LoadingButton>
 
+  const ChatHistoryLoading =
+    <div className={styles.chatHistoryLoading}>
+      <CircularProgress />
+    </div>
+
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
 
       <div className={styles.chatHistoryList}>
-        {chatHistoryLoading && <div>Loading</div>}
+        {chatHistoryLoading && ChatHistoryLoading}
+
         {!chatHistoryLoading && <div>
           {
             chatHistory.map((chat: ChatHistoryItem, index: number) => {

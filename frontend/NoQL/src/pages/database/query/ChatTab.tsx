@@ -88,6 +88,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setCreateNewChatLoading(true)
     try {
       const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
+      setCreateNewChatLoading(false)
       await loadChatsHistory()
       await openChat(response.data.id, 0)
       return response

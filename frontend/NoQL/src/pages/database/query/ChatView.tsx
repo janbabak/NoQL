@@ -3,6 +3,7 @@ import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse } from '../../../types/Chat.ts'
+import { CircularProgress } from '@mui/material'
 
 interface ChatViewProps {
   chat: Chat | null,
@@ -52,9 +53,15 @@ export function ChatView({ chat, chatLoading }: ChatViewProps) {
     scrollChatToTheBottom()
   }, [chat?.messages])
 
+  const ChatLoading =
+    <div className={styles.chatWindowLoading}>
+      <CircularProgress />
+    </div>
+
   return (
     <>
-      {chatLoading && <div>loading</div>}
+      {chatLoading && ChatLoading}
+
       {!chatLoading &&
         <div ref={chatWindowRef} className={styles.chatWindow}>
           {
