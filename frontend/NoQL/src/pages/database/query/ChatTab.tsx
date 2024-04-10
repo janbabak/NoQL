@@ -322,6 +322,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         setPageSize={setPageSize}
         totalCount={totalCount}
         onPageChange={onPageChange}
+        loading={queryLoading}
       />
 
     </div>

@@ -1,6 +1,6 @@
 import { QueryResponse } from '../../../types/Query.ts'
 import {
-  Box,
+  Box, LinearProgress,
   Paper,
   Table,
   TableBody,
@@ -20,6 +20,7 @@ interface Props {
   onPageChange: (page: number, pageSize: number) => void,
   onPageSizeChange: (newPageSize: number) => void,
   paginationOptions?: number[],
+  loading: boolean,
 }
 
 export function ResultTable(
@@ -30,7 +31,8 @@ export function ResultTable(
     totalCount,
     onPageChange,
     onPageSizeChange,
-    paginationOptions = [10, 25, 50]
+    paginationOptions = [10, 25, 50],
+    loading
   }: Props) {
 
   function changePage(_event: unknown, newPage: number): void {
@@ -41,28 +43,38 @@ export function ResultTable(
     onPageSizeChange(parseInt(event.target.value, 10))
   }
 
+  const TableHeadElement =
+    <TableHead>
+      <TableRow>
+        {queryResult?.result?.columnNames.map((columnName, columnNameIndex: number) =>
+          <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
+      </TableRow>
+
+      {loading &&
+        <TableRow>
+          <td colSpan={queryResult?.result?.columnNames.length}>
+            <LinearProgress />
+          </td>
+        </TableRow>}
+    </TableHead>
+
+  const TableBodyElement =
+    <TableBody>
+      {queryResult?.result?.rows.map((row, rowIndex: number) =>
+        <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+          {row.map((cell, cellIndex: number) =>
+            <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}
+        </TableRow>
+      )}
+    </TableBody>
+
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <TableContainer>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
-
-            <TableHead>
-              <TableRow>
-                {queryResult?.result?.columnNames.map((columnName, columnNameIndex: number) =>
-                  <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {queryResult?.result?.rows.map((row, rowIndex: number) =>
-                <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  {row.map((cell, cellIndex: number) =>
-                    <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}
-                </TableRow>
-              )}
-            </TableBody>
-
+            {TableHeadElement}
+            {TableBodyElement}
           </Table>
         </TableContainer>
 

@@ -72,7 +72,7 @@ export function ConsoleTab(
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.query || '',
+        queryResult?.chatQueryWithResponse.query || '',
         page,
         pageSize)
 
@@ -115,6 +115,7 @@ export function ConsoleTab(
         setPageSize={setPageSize}
         totalCount={totalCount}
         onPageChange={onPageChange}
+        loading={queryLoading}
       />
     </div>
   )
