@@ -40,11 +40,6 @@ export function ConsoleTab(
   ] = useState<number>(0)
 
   const [
-    totalCount,
-    setTotalCount
-  ] = useState<number | null>(0)
-
-  const [
     pageSize,
     setPageSize
   ] = useState<number>(10)
@@ -56,7 +51,6 @@ export function ConsoleTab(
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId, queryLanguageQuery, 0, pageSize)
       setQueryResult(response.data)
-      setTotalCount(response.data.totalCount)
     } catch (error: unknown) {
       console.log(error) // TODO: handles
     } finally {
@@ -113,7 +107,7 @@ export function ConsoleTab(
         page={page}
         pageSize={pageSize}
         setPageSize={setPageSize}
-        totalCount={totalCount}
+        totalCount={queryResult?.totalCount || 1}
         onPageChange={onPageChange}
         loading={queryLoading}
       />
