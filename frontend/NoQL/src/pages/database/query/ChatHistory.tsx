@@ -4,6 +4,8 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
 import { CircularProgress } from '@mui/material'
+import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
+import IconButton from '@mui/material/IconButton'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -57,7 +59,17 @@ export function ChatHistory(
                   key={chat.id}
                   className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
                 >
-                  {chat.name}
+                  <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
+                  <IconButton
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      console.log("menu clicked")}
+                    }
+                    className={styles.chatHistoryItemIcon}
+                    size="small"
+                  >
+                    <MoreHorizRoundedIcon fontSize="inherit" />
+                  </IconButton>
                 </div>
               )
             })
