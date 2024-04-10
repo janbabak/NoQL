@@ -3,7 +3,6 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
-import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.service.ChatService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -52,7 +51,7 @@ public class ChatController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Chat create(@RequestParam UUID databaseId) throws EntityNotFoundException {
+    public ChatDto create(@RequestParam UUID databaseId) throws EntityNotFoundException {
         return chatService.create(databaseId);
     }
 

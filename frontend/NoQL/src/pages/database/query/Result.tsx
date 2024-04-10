@@ -11,7 +11,8 @@ interface Props {
   pageSize: number,
   setPageSize: React.Dispatch<React.SetStateAction<number>>
   totalCount: number | null,
-  onPageChange: (page: number, pageSize: number) => Promise<void>
+  onPageChange: (page: number, pageSize: number) => Promise<void>,
+  loading: boolean,
 }
 
 export function Result(
@@ -23,7 +24,8 @@ export function Result(
     pageSize,
     setPageSize,
     totalCount,
-    onPageChange
+    onPageChange,
+    loading,
   }: Props) {
 
   async function onPageSizeChange(newPageSize: number): Promise<void> {
@@ -33,7 +35,7 @@ export function Result(
 
   const EditQueryButton =
     <Button
-      onClick={() => editQueryInConsole(queryResponse?.query || '')}
+      onClick={() => editQueryInConsole(queryResponse?.chatQueryWithResponse.query || '')}
       size="small"
       color="inherit"
     >
@@ -61,6 +63,7 @@ export function Result(
               totalCount={totalCount}
               onPageChange={onPageChange}
               onPageSizeChange={onPageSizeChange}
+              loading={loading}
             />
           }
         </div>

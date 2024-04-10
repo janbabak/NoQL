@@ -89,7 +89,7 @@ public class ChatService {
      * @param databaseId identifier of the associated db
      * @return saved object with id
      */
-    public Chat create(UUID databaseId) throws EntityNotFoundException {
+    public ChatDto create(UUID databaseId) throws EntityNotFoundException {
         log.info("Create new chat.");
 
         Database database = databaseRepository.findById(databaseId)
@@ -101,7 +101,9 @@ public class ChatService {
                 .database(database)
                 .build();
 
-        return chatRepository.save(chat);
+        chat = chatRepository.save(chat);
+
+        return new ChatDto(chat.getId(), chat.getName(), List.of(), chat.getModificationDate());
     }
 
     /**
