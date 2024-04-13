@@ -99,13 +99,27 @@ export function ChatHistory(
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {
     if (renameInputRef && renameInputRef.current) {
+      const chatToRename: ChatHistoryItem | undefined = chatHistory.find((c: ChatHistoryItem): boolean => {
+        return chatToRenameId ? c.id === chatToRenameId : false
+      })
+      setNewName(chatToRename ? chatToRename.name : '') // set the old name
       renameInputRef.current.focus()
     }
-  }, [chatToRenameId])
+  }, [chatToRenameId, chatHistory])
 
   function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
-    if (chatToRenameId && event.target.value) {
-      void renameChat(chatToRenameId, event.target.value)
+    reallyRenameChat(event.target.value)
+  }
+
+  function renameChatOnEnterPress(event: React.KeyboardEvent<HTMLDivElement>): void {
+    if (event.key === 'Enter') {
+      reallyRenameChat(newName)
+    }
+  }
+
+  function reallyRenameChat(newName: string): void {
+    if (chatToRenameId && newName) {
+      void renameChat(chatToRenameId, newName)
     }
     setChatToRenameId(null)
   }
@@ -183,15 +197,17 @@ export function ChatHistory(
                   >
                     {
                       chatToRenameId === chat.id
-                        ? <TextField
+                        ? // rename input field
+                        <TextField
                           onChange={(event) => setNewName(event.target.value)}
                           onBlur={renameChatOnBlur}
                           value={newName}
                           variant="standard"
                           size="small"
                           inputRef={renameInputRef}
+                          onKeyDown={renameChatOnEnterPress}
                         />
-                        :
+                        : // name
                         <>
                           <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
                           <IconButton
