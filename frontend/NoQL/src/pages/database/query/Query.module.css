@@ -55,7 +55,7 @@
 .chatWindow::-webkit-scrollbar {
     display: none;
 }
- Hide scrollbar for IE, Edge and Firefox,
+ /*Hide scrollbar for IE, Edge and Firefox,*/
 .chatHistoryList,
 .chatWindow {
     -ms-overflow-style: none;  /* IE and Edge */
@@ -100,7 +100,8 @@
     visibility: hidden;
 }
 
-.chatHistoryItem:hover .chatHistoryItemIcon {
+.chatHistoryItem:hover .chatHistoryItemIcon,
+.chatHistoryItemActive:hover .chatHistoryItemIcon  {
     visibility: visible;
 }
 
