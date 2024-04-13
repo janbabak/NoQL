@@ -8,6 +8,10 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
 import React, { useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
+import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -137,8 +141,19 @@ export function ChatHistory(
       open={menuOpened}
       onClose={closeMenu}
     >
-      <MenuItem onClick={deleteChat}>Delete</MenuItem>
-      <MenuItem onClick={renameChatClick}>Rename</MenuItem>
+      <MenuItem onClick={deleteChat}>
+        <ListItemIcon>
+          <DeleteRoundedIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Delete</ListItemText>
+      </MenuItem>
+
+      <MenuItem onClick={renameChatClick}>
+        <ListItemIcon>
+          <EditRoundedIcon fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>Rename</ListItemText>
+      </MenuItem>
     </Menu>
 
   const ConfirmDeleteDialog =
