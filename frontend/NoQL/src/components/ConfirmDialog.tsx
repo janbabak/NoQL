@@ -1,10 +1,9 @@
 import { TransitionProps } from '@mui/material/transitions'
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogTitle, Slide } from '@mui/material'
 import React from 'react'
 
 interface ConfirmDialogProps {
   title: string,
-  content: string | undefined,
   open: boolean,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>,
   confirm: () => void,
@@ -12,20 +11,19 @@ interface ConfirmDialogProps {
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
-    children: React.ReactElement<any, any>;
+    children: React.ReactElement;
   },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />
+  return <Slide direction="up" ref={ref} {...props}>{props.children}</Slide>
 })
 
 export function ConfirmDialog(
   {
     title,
-    content,
     open,
     setOpen,
-    confirm,
+    confirm
   }: ConfirmDialogProps
 ) {
 
@@ -43,16 +41,14 @@ export function ConfirmDialog(
     >
       <DialogTitle>{title}</DialogTitle>
 
-      <DialogContent>
-        {content && <DialogContentText>{content}</DialogContentText>}
-      </DialogContent>
-
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
         <Button onClick={(): void => {
           confirm()
           handleClose()
-        }}>Delete</Button>
+        }}>
+          Delete
+        </Button>
       </DialogActions>
     </Dialog>
   )

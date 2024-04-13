@@ -26,8 +26,8 @@ export function ChatHistory(
     createChat,
     createChatLoading,
     openChat,
-    reallyDeleteChat,
-    activeChatIndex,
+    reallyDeleteChat, // when user confirms deletion
+    activeChatIndex
   }: ChatHistoryProps) {
 
   const [
@@ -35,7 +35,7 @@ export function ChatHistory(
     setAnchorEl
   ] = useState<null | HTMLElement>(null)
 
-  const open: boolean = Boolean(anchorEl)
+  const menuOpened: boolean = Boolean(anchorEl)
 
   const [
     confirmDialogOpen,
@@ -52,6 +52,7 @@ export function ChatHistory(
     setChatToDelete
   ] = useState<ChatHistoryItem | null>(null)
 
+  // opens delete/rename menu
   function openMenuClick(event: React.MouseEvent<HTMLElement>, chat: ChatHistoryItem): void {
     event.stopPropagation()
     setConfirmDeleteChatTitle('Delete chat: "' + chat.name + '"')
@@ -60,13 +61,11 @@ export function ChatHistory(
   }
 
   function deleteChat(): void {
-    console.log('delete')
     setConfirmDialogOpen(true)
     closeMenu()
   }
 
   function confirmDeleteChat(): void {
-    console.log('chat to delete ' + chatToDelete)
     if (chatToDelete) {
       void reallyDeleteChat(chatToDelete.id)
     }
@@ -100,12 +99,20 @@ export function ChatHistory(
         'aria-labelledby': 'fade-button'
       }}
       anchorEl={anchorEl}
-      open={open}
+      open={menuOpened}
       onClose={closeMenu}
     >
       <MenuItem onClick={deleteChat}>Delete</MenuItem>
       <MenuItem onClick={() => console.log('rename item')}>Rename</MenuItem>
     </Menu>
+
+  const ConfirmDeleteDialog =
+    <ConfirmDialog
+      title={confirmDeleteChatTitle}
+      open={confirmDialogOpen}
+      setOpen={setConfirmDialogOpen}
+      confirm={confirmDeleteChat}
+    />
 
   return (
     <div className={styles.chatHistory}>
@@ -141,13 +148,7 @@ export function ChatHistory(
           </div>
         }
 
-        <ConfirmDialog
-          title={confirmDeleteChatTitle}
-          open={confirmDialogOpen}
-          content={''}
-          setOpen={setConfirmDialogOpen}
-          confirm={confirmDeleteChat}
-        />
+        {ConfirmDeleteDialog}
       </div>
     </div>
   )
