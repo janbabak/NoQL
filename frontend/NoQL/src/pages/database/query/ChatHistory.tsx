@@ -3,10 +3,10 @@ import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress, Menu, MenuItem } from '@mui/material'
+import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 
 interface ChatHistoryProps {
@@ -16,6 +16,7 @@ interface ChatHistoryProps {
   createChatLoading: boolean
   openChat: (id: string, index: number) => void,
   reallyDeleteChat: (chatId: string) => Promise<void>,
+  renameChat: (chatId: string, newName: string) => Promise<void>,
   activeChatIndex: number,
 }
 
@@ -27,6 +28,7 @@ export function ChatHistory(
     createChatLoading,
     openChat,
     reallyDeleteChat, // when user confirms deletion
+    renameChat,
     activeChatIndex
   }: ChatHistoryProps) {
 
@@ -52,6 +54,18 @@ export function ChatHistory(
     setChatToDelete
   ] = useState<ChatHistoryItem | null>(null)
 
+  const [
+    newName,
+    setNewName
+  ] = useState<string>('')
+
+  const [
+    chatToRenameId,
+    setChatToRenameId
+  ] = useState<string | null>(null)
+
+  const renameInputRef: React.MutableRefObject<HTMLInputElement | undefined> = useRef()
+
   // opens delete/rename menu
   function openMenuClick(event: React.MouseEvent<HTMLElement>, chat: ChatHistoryItem): void {
     event.stopPropagation()
@@ -71,7 +85,28 @@ export function ChatHistory(
     }
   }
 
-  const closeMenu = (): void => {
+  function renameChatClick(): void {
+    closeMenu()
+    if (chatToDelete) {
+      setChatToRenameId(chatToDelete.id)
+    }
+  }
+
+  // focus input element that is rendered when chatToRenameId changes
+  useEffect((): void => {
+    if (renameInputRef && renameInputRef.current) {
+      renameInputRef.current.focus()
+    }
+  }, [chatToRenameId])
+
+  function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
+    if (chatToRenameId && event.target.value) {
+      void renameChat(chatToRenameId, event.target.value)
+    }
+    setChatToRenameId(null)
+  }
+
+  function closeMenu(): void {
     setAnchorEl(null)
   }
 
@@ -103,7 +138,7 @@ export function ChatHistory(
       onClose={closeMenu}
     >
       <MenuItem onClick={deleteChat}>Delete</MenuItem>
-      <MenuItem onClick={() => console.log('rename item')}>Rename</MenuItem>
+      <MenuItem onClick={renameChatClick}>Rename</MenuItem>
     </Menu>
 
   const ConfirmDeleteDialog =
@@ -131,14 +166,28 @@ export function ChatHistory(
                     key={chat.id}
                     className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
                   >
-                    <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
-                    <IconButton
-                      onClick={(event) => openMenuClick(event, chat)}
-                      className={styles.chatHistoryItemIcon}
-                      size="small"
-                    >
-                      <MoreHorizRoundedIcon fontSize="inherit" />
-                    </IconButton>
+                    {
+                      chatToRenameId === chat.id
+                        ? <TextField
+                          onChange={(event) => setNewName(event.target.value)}
+                          onBlur={renameChatOnBlur}
+                          value={newName}
+                          variant="standard"
+                          size="small"
+                          inputRef={renameInputRef}
+                        />
+                        :
+                        <>
+                          <span className={styles.chatHistoryItemLabel}>{chat.name}</span>
+                          <IconButton
+                            onClick={(event) => openMenuClick(event, chat)}
+                            className={styles.chatHistoryItemIcon}
+                            size="small"
+                          >
+                            <MoreHorizRoundedIcon fontSize="inherit" />
+                          </IconButton>
+                        </>
+                    }
                   </div>
                 )
               })

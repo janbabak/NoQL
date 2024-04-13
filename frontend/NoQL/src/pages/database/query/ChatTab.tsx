@@ -117,6 +117,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     await loadChatsHistory()
   }
 
+  async function renameChat(chatId: string, newName: string): Promise<void> {
+    await chatApi.renameChat(chatId, newName)
+    await loadChatsHistory()
+  }
+
   // TODO: fix multiple calls
   /**
    * Load chat history, then active chat content, then query the chat for the result.
@@ -296,6 +301,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           createChatLoading={createNewChatLoading}
           openChat={openChat}
           reallyDeleteChat={deleteChat}
+          renameChat={renameChat}
           activeChatIndex={activeChatIndex}
         />
 
