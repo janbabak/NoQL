@@ -35,7 +35,7 @@ export function Result(
 
   const EditQueryButton =
     <Button
-      onClick={() => editQueryInConsole(queryResponse?.chatQueryWithResponse.query || '')}
+      onClick={() => editQueryInConsole(queryResponse?.chatQueryWithResponse.response || '')}
       size="small"
       color="inherit"
     >
