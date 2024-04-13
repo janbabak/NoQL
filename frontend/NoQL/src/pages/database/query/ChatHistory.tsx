@@ -37,11 +37,11 @@ export function ChatHistory(
   }: ChatHistoryProps) {
 
   const [
-    anchorEl,
-    setAnchorEl
+    menuAnchorEl,
+    setMenuAnchorEl
   ] = useState<null | HTMLElement>(null)
 
-  const menuOpened: boolean = Boolean(anchorEl)
+  const menuOpened: boolean = Boolean(menuAnchorEl)
 
   const [
     confirmDialogOpen,
@@ -54,8 +54,8 @@ export function ChatHistory(
   ] = useState<string>('')
 
   const [
-    chatToDelete,
-    setChatToDelete
+    chatToEdit,
+    setChatToEdit
   ] = useState<ChatHistoryItem | null>(null)
 
   const [
@@ -63,6 +63,7 @@ export function ChatHistory(
     setNewName
   ] = useState<string>('')
 
+  // don't use chatToEdit because there is an useEffect hook, that focuses name input when this value changes
   const [
     chatToRenameId,
     setChatToRenameId
@@ -74,25 +75,25 @@ export function ChatHistory(
   function openMenuClick(event: React.MouseEvent<HTMLElement>, chat: ChatHistoryItem): void {
     event.stopPropagation()
     setConfirmDeleteChatTitle('Delete chat: "' + chat.name + '"')
-    setChatToDelete(chat)
-    setAnchorEl(event.currentTarget)
+    setChatToEdit(chat)
+    setMenuAnchorEl(event.currentTarget)
   }
 
-  function deleteChat(): void {
+  function deleteChatMenuClick(): void {
     setConfirmDialogOpen(true)
     closeMenu()
   }
 
   function confirmDeleteChat(): void {
-    if (chatToDelete) {
-      void reallyDeleteChat(chatToDelete.id)
+    if (chatToEdit) {
+      void reallyDeleteChat(chatToEdit.id)
     }
   }
 
-  function renameChatClick(): void {
+  function renameChatMenuClick(): void {
     closeMenu()
-    if (chatToDelete) {
-      setChatToRenameId(chatToDelete.id)
+    if (chatToEdit) {
+      setChatToRenameId(chatToEdit.id)
     }
   }
 
@@ -125,7 +126,7 @@ export function ChatHistory(
   }
 
   function closeMenu(): void {
-    setAnchorEl(null)
+    setMenuAnchorEl(null)
   }
 
   const CreateNewChatButton =
@@ -151,18 +152,18 @@ export function ChatHistory(
       MenuListProps={{
         'aria-labelledby': 'fade-button'
       }}
-      anchorEl={anchorEl}
+      anchorEl={menuAnchorEl}
       open={menuOpened}
       onClose={closeMenu}
     >
-      <MenuItem onClick={deleteChat}>
+      <MenuItem onClick={deleteChatMenuClick}>
         <ListItemIcon>
           <DeleteRoundedIcon fontSize="small" />
         </ListItemIcon>
         <ListItemText>Delete</ListItemText>
       </MenuItem>
 
-      <MenuItem onClick={renameChatClick}>
+      <MenuItem onClick={renameChatMenuClick}>
         <ListItemIcon>
           <EditRoundedIcon fontSize="small" />
         </ListItemIcon>
