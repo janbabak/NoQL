@@ -22,6 +22,15 @@ const chatApi = {
   deleteChat(chatId: string): Promise<AxiosResponse> {
     return this.API.delete(this.DOMAIN + '/' + chatId)
   },
+
+  renameChat(chatId: string, newName: string): Promise<AxiosResponse> {
+    return this.API.put(this.DOMAIN + '/' + chatId + '/name', null, [
+      {
+        name: 'name',
+        value: newName
+      }
+    ])
+  }
 }
 
 export default chatApi
