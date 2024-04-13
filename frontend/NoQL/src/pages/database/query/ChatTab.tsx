@@ -108,6 +108,15 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
+  /**
+   * Delete chat and refresh chat history
+   * @param chatId identifier
+   */
+  async function deleteChat(chatId: string): Promise<void> {
+    await chatApi.deleteChat(chatId)
+    await loadChatsHistory()
+  }
+
   // TODO: fix multiple calls
   /**
    * Load chat history, then active chat content, then query the chat for the result.
@@ -286,6 +295,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           createChat={createNewChat}
           createChatLoading={createNewChatLoading}
           openChat={openChat}
+          reallyDeleteChat={deleteChat}
           activeChatIndex={activeChatIndex}
         />
 

@@ -36,7 +36,6 @@
 
 .chatHistoryList {
     margin-top: 1rem;
-    overflow-x: hidden;
     overflow-y: scroll;
     max-height: 25rem;
     height: 100%;
@@ -51,37 +50,59 @@
 }
 
 /* TODO: do I really wanna hide the scrollbars */
-/* Hide scrollbar for Chrome, Safari and Opera */
-/*.chatHistory::-webkit-scrollbar,*/
-/*.chatWindow::-webkit-scrollbar {*/
-/*    display: none;*/
-/*}*/
-/* Hide scrollbar for IE, Edge and Firefox */
-/*.chatHistory,*/
-/*.chatWindow {*/
-/*    -ms-overflow-style: none;  !* IE and Edge *!*/
-/*    scrollbar-width: none;  !* Firefox *!*/
-/*}*/
-
-.chatHistoryItem {
-    white-space: nowrap;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    transition: all 0.25s ease-in-out;
+/* Hide scrollbar for Chrome, Safari and Opera*/
+.chatHistoryList::-webkit-scrollbar,
+.chatWindow::-webkit-scrollbar {
+    display: none;
+}
+ /*Hide scrollbar for IE, Edge and Firefox,*/
+.chatHistoryList,
+.chatWindow {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-.chatHistoryItemActive {
-    font-weight: bold;
-    background: #eee;
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    white-space: nowrap;
+/* TODO extract common from chatHistoryItem, chatHistoryItemActive to shared class */
+.chatHistoryItem {
+    /*white-space: nowrap;*/
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.25s ease-in-out;
 }
 
 .chatHistoryItem:hover {
     font-weight: bold;
     cursor: pointer;
     background: #eee;
+}
+
+.chatHistoryItemActive {
+    /*white-space: nowrap;*/
+    font-weight: bold;
+    background: #eee;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chatHistoryItemLabel {
+    white-space: nowrap;
+    width: 10rem;
+    overflow-x: hidden;
+}
+
+.chatHistoryItemIcon {
+    visibility: hidden;
+}
+
+.chatHistoryItem:hover .chatHistoryItemIcon,
+.chatHistoryItemActive:hover .chatHistoryItemIcon  {
+    visibility: visible;
 }
 
 .chatWithInput {
