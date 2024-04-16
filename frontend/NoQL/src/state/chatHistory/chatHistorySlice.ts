@@ -6,7 +6,7 @@ import { AxiosResponse } from 'axios'
 interface ChatHistoryState {
   chatHistory: ChatHistoryItem[]
   loading: boolean,
-  error: unknown,
+  error: string |undefined,
 }
 
 const initialState: ChatHistoryState = {
@@ -31,8 +31,8 @@ const chatHistorySlice = createSlice({
   extraReducers: (builder: ActionReducerMapBuilder<ChatHistoryState>): void => {
     builder
       .addCase(fetchChatHistory.fulfilled,
-        (state: ChatHistoryState, action: PayloadAction<AxiosResponse<ChatHistoryItem[]>>): void => {
-          state.chatHistory = action.payload.data
+        (state: ChatHistoryState, action: PayloadAction<ChatHistoryItem[]>): void => {
+          state.chatHistory = action.payload
           state.loading = false
           state.error = undefined
         })
@@ -49,8 +49,10 @@ const chatHistorySlice = createSlice({
 
 export const fetchChatHistory
   = createAsyncThunk('chatHistory/fetchChatHistory',
-  async (databaseId: string): Promise<AxiosResponse<ChatHistoryItem[]>> => {
+  async (databaseId: string): Promise<ChatHistoryItem[]> => {
     return databaseApi.getChatHistoryByDatabaseId(databaseId)
+      .then((response: AxiosResponse<ChatHistoryItem[]>) => response.data)
+      .catch((error) => error)
   }
 )
 
