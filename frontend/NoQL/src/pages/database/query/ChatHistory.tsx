@@ -3,7 +3,7 @@ import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
+import { Button, CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
 import React, { useEffect, useRef, useState } from 'react'
@@ -12,6 +12,9 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../../state/store.ts'
+import { addElement } from '../../../state/chatHistory/chatHistorySlice.ts'
 
 interface ChatHistoryProps {
   chatHistory: ChatHistoryItem[],
@@ -35,6 +38,11 @@ export function ChatHistory(
     renameChat,
     activeChatIndex
   }: ChatHistoryProps) {
+
+  const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.chatHistory
+  })
+  const dispatch = useDispatch()
 
   const [
     menuAnchorEl,
@@ -182,6 +190,11 @@ export function ChatHistory(
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
+      <Button onClick={() => {
+        dispatch(addElement())
+        console.log("state")
+        console.log(chatHistoryRedux)
+      }}>print chat</Button>
 
       <div className={styles.chatHistoryList}>
         {chatHistoryLoading && ChatHistoryLoading}

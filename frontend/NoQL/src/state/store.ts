@@ -1,7 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
+import chatHistoryReducer from './chatHistory/chatHistorySlice.ts'
 
 export const store = configureStore({
-  reducer: {}
+  reducer: {
+    chatHistoryReducer
+  }
 })
 
 export type RootState = ReturnType<typeof store.getState>
