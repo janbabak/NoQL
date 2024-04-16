@@ -6,13 +6,13 @@ import { AxiosResponse } from 'axios'
 interface ChatHistoryState {
   chatHistory: ChatHistoryItem[]
   loading: boolean,
-  error: string |undefined,
+  error: string | undefined,
 }
 
 const initialState: ChatHistoryState = {
   chatHistory: [],
   loading: false,
-  error: undefined,
+  error: undefined
 }
 
 const chatHistorySlice = createSlice({
@@ -43,14 +43,14 @@ const chatHistorySlice = createSlice({
         (state: ChatHistoryState, action): void => {
           state.loading = false
           state.error = action.error.message
-        })
+      })
   }
 })
 
 export const fetchChatHistory
   = createAsyncThunk('chatHistory/fetchChatHistory',
   async (databaseId: string): Promise<ChatHistoryItem[]> => {
-    return databaseApi.getChatHistoryByDatabaseId(databaseId)
+    return await databaseApi.getChatHistoryByDatabaseId(databaseId)
       .then((response: AxiosResponse<ChatHistoryItem[]>) => response.data)
       .catch((error) => error)
   }

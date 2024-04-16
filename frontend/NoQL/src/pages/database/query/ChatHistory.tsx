@@ -15,14 +15,12 @@ import ListItemText from '@mui/material/ListItemText'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
 import { addElement, fetchChatHistory } from '../../../state/chatHistory/chatHistorySlice.ts'
+import chatApi from '../../../services/api/chatApi.ts'
 
 interface ChatHistoryProps {
-  chatHistory: ChatHistoryItem[],
-  chatHistoryLoading: boolean,
   createChat: () => Promise<AxiosResponse<Chat>>,
   createChatLoading: boolean
   openChat: (id: string, index: number) => void,
-  reallyDeleteChat: (chatId: string) => Promise<void>,
   renameChat: (chatId: string, newName: string) => Promise<void>,
   activeChatIndex: number,
   databaseId: string,
@@ -30,12 +28,9 @@ interface ChatHistoryProps {
 
 export function ChatHistory(
   {
-    chatHistory,
-    chatHistoryLoading,
     createChat,
     createChatLoading,
     openChat,
-    reallyDeleteChat, // when user confirms deletion
     renameChat,
     activeChatIndex,
     databaseId,
@@ -43,6 +38,9 @@ export function ChatHistory(
 
   const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
     return state.chatHistoryReducer.chatHistory
+  })
+  const chatHistoryLoadingRedux: boolean = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.loading
   })
   const dispatch = useDispatch()
 
@@ -94,9 +92,12 @@ export function ChatHistory(
     closeMenu()
   }
 
-  function confirmDeleteChat(): void {
+  async function confirmDeleteChat(): Promise<void> {
     if (chatToEdit) {
-      void reallyDeleteChat(chatToEdit.id)
+      await chatApi.deleteChat(chatToEdit.id)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      dispatch(fetchChatHistory(databaseId))
     }
   }
 
@@ -116,13 +117,13 @@ export function ChatHistory(
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {
     if (renameInputRef && renameInputRef.current) {
-      const chatToRename: ChatHistoryItem | undefined = chatHistory.find((c: ChatHistoryItem): boolean => {
+      const chatToRename: ChatHistoryItem | undefined = chatHistoryRedux.find((c: ChatHistoryItem): boolean => {
         return chatToRenameId ? c.id === chatToRenameId : false
       })
       setNewName(chatToRename ? chatToRename.name : '') // set the old name
       renameInputRef.current.focus()
     }
-  }, [chatToRenameId, chatHistory])
+  }, [chatToRenameId, chatHistoryRedux])
 
   function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
     reallyRenameChat(event.target.value)
@@ -205,9 +206,9 @@ export function ChatHistory(
       }}>print chat</Button>
 
       <div className={styles.chatHistoryList}>
-        {chatHistoryLoading && ChatHistoryLoading}
+        {chatHistoryLoadingRedux && ChatHistoryLoading}
 
-        {!chatHistoryLoading &&
+        {!chatHistoryLoadingRedux &&
           <div>
             {
               chatHistoryRedux.map((chat: ChatHistoryItem, index: number) => {

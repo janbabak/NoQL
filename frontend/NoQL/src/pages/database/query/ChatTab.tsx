@@ -55,11 +55,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   ] = useState<ChatHistoryItem[]>([])
 
   const [
-    chatHistoryLoading,
-    setChatHistoryLoading
-  ] = useState<boolean>(false)
-
-  const [
     page,
     setPage
   ] = useState<number>(0)
@@ -106,15 +101,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     } finally {
       setCreateNewChatLoading(false)
     }
-  }
-
-  /**
-   * Delete chat and refresh chat history
-   * @param chatId identifier
-   */
-  async function deleteChat(chatId: string): Promise<void> {
-    await chatApi.deleteChat(chatId)
-    await loadChatsHistory()
   }
 
   async function renameChat(chatId: string, newName: string): Promise<void> {
@@ -166,7 +152,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Load history of chats.
    */
   async function loadChatsHistory(): Promise<AxiosResponse<ChatHistoryItem[]>> {
-    setChatHistoryLoading(true)
     try {
       const response: AxiosResponse<ChatHistoryItem[]> = await databaseApi.getChatHistoryByDatabaseId(databaseId)
       setChatHistory(response.data)
@@ -174,8 +159,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     } catch (error: unknown) {
       console.log(error) // TODO: handle
       return Promise.reject(error)
-    } finally {
-      setChatHistoryLoading(false)
     }
   }
 
@@ -295,12 +278,9 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     >
       <div className={styles.chatTabContainer}>
         <ChatHistory
-          chatHistory={chatHistory}
-          chatHistoryLoading={chatHistoryLoading}
           createChat={createNewChat}
           createChatLoading={createNewChatLoading}
           openChat={openChat}
-          reallyDeleteChat={deleteChat}
           renameChat={renameChat}
           activeChatIndex={activeChatIndex}
           databaseId={databaseId}
