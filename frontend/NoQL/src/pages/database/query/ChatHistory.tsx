@@ -21,7 +21,6 @@ interface ChatHistoryProps {
   createChat: () => Promise<AxiosResponse<Chat>>,
   createChatLoading: boolean
   openChat: (id: string, index: number) => void,
-  renameChat: (chatId: string, newName: string) => Promise<void>,
   activeChatIndex: number,
   databaseId: string,
 }
@@ -31,7 +30,6 @@ export function ChatHistory(
     createChat,
     createChatLoading,
     openChat,
-    renameChat,
     activeChatIndex,
     databaseId,
   }: ChatHistoryProps) {
@@ -135,9 +133,12 @@ export function ChatHistory(
     }
   }
 
-  function reallyRenameChat(newName: string): void {
+  async function reallyRenameChat(newName: string): Promise<void> {
     if (chatToRenameId && newName) {
-      void renameChat(chatToRenameId, newName)
+      await chatApi.renameChat(chatToRenameId, newName)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      dispatch(fetchChatHistory(databaseId))
     }
     setChatToRenameId(null)
   }
