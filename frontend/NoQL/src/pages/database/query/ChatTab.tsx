@@ -303,6 +303,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           reallyDeleteChat={deleteChat}
           renameChat={renameChat}
           activeChatIndex={activeChatIndex}
+          databaseId={databaseId}
         />
 
         <div className={styles.chatWithInput}>

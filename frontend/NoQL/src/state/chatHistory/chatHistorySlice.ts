@@ -1,17 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ChatHistoryItem } from '../../types/Chat.ts'
+import databaseApi from '../../services/api/databaseApi.ts'
+import { AxiosResponse } from 'axios'
 
 interface ChatHistoryState {
   chatHistory: ChatHistoryItem[]
+  loading: boolean,
+  error: unknown,
 }
 
 const initialState: ChatHistoryState = {
-  chatHistory: [
-    {
-      id: 'test',
-      name: 'test'
-    }
-  ]
+  chatHistory: [],
+  loading: false,
+  error: undefined,
 }
 
 const chatHistorySlice = createSlice({
@@ -19,22 +20,40 @@ const chatHistorySlice = createSlice({
   initialState,
   reducers: {
     // example reducer
-    sort: (state): void => {
-      state.chatHistory.sort()
-      console.log(state.chatHistory)
-    },
-    addElement: (state): void => {
+    addElement: (state: ChatHistoryState, action: PayloadAction<ChatHistoryItem>): void => {
       state.chatHistory = [
-        {
-          id: 'added',
-          name: 'added'
-        }
+        ...state.chatHistory,
+        action.payload
       ]
       console.log(state)
     }
+  },
+  extraReducers: (builder: ActionReducerMapBuilder<ChatHistoryState>): void => {
+    builder
+      .addCase(fetchChatHistory.fulfilled,
+        (state: ChatHistoryState, action: PayloadAction<AxiosResponse<ChatHistoryItem[]>>): void => {
+          state.chatHistory = action.payload.data
+          state.loading = false
+          state.error = undefined
+        })
+      .addCase(fetchChatHistory.pending, (state: ChatHistoryState): void => {
+        state.loading = true
+      })
+      .addCase(fetchChatHistory.rejected,
+        (state: ChatHistoryState, action): void => {
+          state.loading = false
+          state.error = action.error.message
+        })
   }
 })
 
-export const { sort, addElement } = chatHistorySlice.actions;
+export const fetchChatHistory
+  = createAsyncThunk('chatHistory/fetchChatHistory',
+  async (databaseId: string): Promise<AxiosResponse<ChatHistoryItem[]>> => {
+    return databaseApi.getChatHistoryByDatabaseId(databaseId)
+  }
+)
 
-export default chatHistorySlice.reducer;
+export const { addElement } = chatHistorySlice.actions
+
+export default chatHistorySlice.reducer
