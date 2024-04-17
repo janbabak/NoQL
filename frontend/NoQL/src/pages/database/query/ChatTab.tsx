@@ -199,13 +199,18 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * @param chatId chat id
    */
   async function loadChatResult(chatId: string): Promise<void> {
-    // const response: AxiosResponse<Chat> = await loadChat(chatId)
-    // if chat contains some messages, execute them and load the result
-    // if (response.data.messages.length > 0) {
-    //   await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
-    // } else {
-    //   setQueryResult(null)
-    // }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (result.payload.messages.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      await loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+    } else {
+      setQueryResult(null)
+    }
   }
 
   return (
