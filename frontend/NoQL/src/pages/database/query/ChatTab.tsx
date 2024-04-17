@@ -12,7 +12,7 @@ import { ChatHistoryItem, Chat } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../../../state/store.ts'
+import { AppDispatch, RootState } from '../../../state/store.ts'
 import { addMessage, addMessageAndChangeName, fetchChat } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
 
@@ -27,7 +27,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const NEW_CHAT_NAME: string = 'New chat'
   const CHAT_NAME_MAX_LENGTH: number = 32
 
-  const dispatch = useDispatch()
+  const dispatch: AppDispatch = useDispatch()
 
   const activeChatIndexRedux: number = useSelector((state: RootState) => {
     return state.chatHistoryReducer.activeChatIndex
@@ -79,8 +79,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    */
   useEffect((): void => {
     const asyncCallsChain = async (): Promise<void> => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+
       let result = await dispatch(fetchChatHistory(databaseId))
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
@@ -199,8 +198,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * @param chatId chat id
    */
   async function loadChatResult(chatId: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
