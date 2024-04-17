@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-import chatHistoryReducer from './chatHistory/chatHistorySlice.ts'
+import chatHistoryReducer from '././chat/chatHistorySlice.ts'
+import chatReducer from './chat/chatSlice.ts'
 
 export const store = configureStore({
   reducer: {
-    chatHistoryReducer
+    chatHistoryReducer,
+    chatReducer
   }
 })
 

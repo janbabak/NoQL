@@ -13,7 +13,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
-import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/chatHistory/chatHistorySlice.ts'
+import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
 import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 
@@ -33,15 +33,19 @@ export function ChatHistory(
   const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
     return state.chatHistoryReducer.chatHistory
   })
+
   const chatHistoryLoadingRedux: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.loading
   })
+
   const createChatLoadingRedux: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.createNewChatLoading
   })
+
   const activeChatIndexRedux: number = useSelector((state: RootState) => {
     return state.chatHistoryReducer.activeChatIndex
   })
+
   const dispatch = useDispatch()
 
   const [
@@ -120,11 +124,11 @@ export function ChatHistory(
     setQueryResult(null)
   }
 
-  useEffect((): void => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    dispatch(fetchChatHistory(databaseId))
-  }, [databaseId, dispatch])
+  // useEffect((): void => {
+  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //   // @ts-expect-error
+  //   dispatch(fetchChatHistory(databaseId))
+  // }, [databaseId, dispatch])
 
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {

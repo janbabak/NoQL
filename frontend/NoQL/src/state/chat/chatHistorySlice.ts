@@ -5,7 +5,7 @@ import { AxiosResponse } from 'axios'
 import chatApi from '../../services/api/chatApi.ts'
 
 interface ChatHistoryState {
-  chatHistory: ChatHistoryItem[]
+  chatHistory: ChatHistoryItem[],
   loading: boolean,
   error: string | undefined,
   createNewChatLoading: boolean,
@@ -20,12 +20,23 @@ const initialState: ChatHistoryState = {
   activeChatIndex: 0
 }
 
+interface ChatNameAndIndexPayload {
+  name: string,
+  index: number,
+}
+
 const chatHistorySlice = createSlice({
   name: 'chatHistory',
   initialState,
   reducers: {
     setActiveChatIndex: (state: ChatHistoryState, action: PayloadAction<number>): void => {
       state.activeChatIndex = action.payload
+    },
+    renameChat: (state: ChatHistoryState, action: PayloadAction<ChatNameAndIndexPayload>): void => {
+      if (action.payload.index > state.chatHistory.length - 1 || action.payload.index < 0) {
+        return
+      }
+      state.chatHistory[action.payload.index].name = action.payload.name
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatHistoryState>): void => {
@@ -84,6 +95,6 @@ export const createNewChat
   }
 )
 
-export const { setActiveChatIndex } = chatHistorySlice.actions
+export const { setActiveChatIndex, renameChat } = chatHistorySlice.actions
 
 export default chatHistorySlice.reducer
