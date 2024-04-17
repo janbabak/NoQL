@@ -1,12 +1,11 @@
 import styles from './Query.module.css'
-import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
+import { ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
-import { Button, CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
+import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
@@ -14,24 +13,21 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
-import { addElement, fetchChatHistory } from '../../../state/chatHistory/chatHistorySlice.ts'
+import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/chatHistory/chatHistorySlice.ts'
 import chatApi from '../../../services/api/chatApi.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 
 interface ChatHistoryProps {
-  createChat: () => Promise<AxiosResponse<Chat>>,
-  createChatLoading: boolean
-  openChat: (id: string, index: number) => void,
-  activeChatIndex: number,
+  loadChatResult: (chatId: string) => Promise<void>,
   databaseId: string,
+  setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
 
 export function ChatHistory(
   {
-    createChat,
-    createChatLoading,
-    openChat,
-    activeChatIndex,
+    loadChatResult,
     databaseId,
+    setQueryResult
   }: ChatHistoryProps) {
 
   const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
@@ -39,6 +35,12 @@ export function ChatHistory(
   })
   const chatHistoryLoadingRedux: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.loading
+  })
+  const createChatLoadingRedux: boolean = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.createNewChatLoading
+  })
+  const activeChatIndexRedux: number = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.activeChatIndex
   })
   const dispatch = useDispatch()
 
@@ -106,6 +108,18 @@ export function ChatHistory(
     }
   }
 
+  function openChat(id: string, index: number): void {
+    dispatch(setActiveChatIndex(index))
+    void loadChatResult(id)
+  }
+
+  async function createChat(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    dispatch(createNewChat(databaseId))
+    setQueryResult(null)
+  }
+
   useEffect((): void => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
@@ -124,12 +138,12 @@ export function ChatHistory(
   }, [chatToRenameId, chatHistoryRedux])
 
   function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
-    reallyRenameChat(event.target.value)
+    void reallyRenameChat(event.target.value)
   }
 
   function renameChatOnEnterPress(event: React.KeyboardEvent<HTMLDivElement>): void {
     if (event.key === 'Enter') {
-      reallyRenameChat(newName)
+      void reallyRenameChat(newName)
     }
   }
 
@@ -152,8 +166,8 @@ export function ChatHistory(
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      loading={createChatLoading}
-      disabled={createChatLoading}
+      loading={createChatLoadingRedux}
+      disabled={createChatLoadingRedux}
       fullWidth
     >
       New chat
@@ -200,11 +214,6 @@ export function ChatHistory(
   return (
     <div className={styles.chatHistory}>
       {CreateNewChatButton}
-      <Button onClick={() => {
-        dispatch(addElement({id: 'added', name: 'added'}))
-        console.log("state")
-        console.log(chatHistoryRedux)
-      }}>print chat</Button>
 
       <div className={styles.chatHistoryList}>
         {chatHistoryLoadingRedux && ChatHistoryLoading}
@@ -217,7 +226,7 @@ export function ChatHistory(
                   <div
                     onClick={() => openChat(chat.id, index)}
                     key={chat.id}
-                    className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
+                    className={index == activeChatIndexRedux ? styles.chatHistoryItemActive : styles.chatHistoryItem}
                   >
                     {
                       chatToRenameId === chat.id

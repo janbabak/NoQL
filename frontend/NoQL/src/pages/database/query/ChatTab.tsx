@@ -12,6 +12,8 @@ import { ChatHistoryItem, Chat } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
 import chatApi from '../../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../state/store.ts'
 
 interface ChatTabProps {
   databaseId: string,
@@ -23,6 +25,10 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   const NEW_CHAT_NAME: string = 'New chat'
   const CHAT_NAME_MAX_LENGTH: number = 32
+
+  const activeChatIndexRedux: number = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.activeChatIndex
+  })
 
   const [
     queryResult,
@@ -64,44 +70,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setPageSize
   ] = useState<number>(10)
 
-  const [
-    activeChatIndex,
-    setActiveChatIndex
-  ] = useState<number>(0)
-
-  const [
-    createNewChatLoading,
-    setCreateNewChatLoading
-  ] = useState<boolean>(false)
-
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
-
-  /**
-   * Creates new chat
-   */
-  async function createNewChat(): Promise<AxiosResponse<Chat>> {
-    setCreateNewChatLoading(true)
-    try {
-      const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
-      setCreateNewChatLoading(false)
-
-      // insert newly created chat at the fist place
-      setChatHistory([
-        { id: response.data.id, name: response.data.name },
-        ...chatHistory
-      ])
-      // open newly created chat
-      setChat(response.data)
-      setActiveChatIndex(0)
-      setQueryResult(null)
-      return response
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-      return Promise.reject()
-    } finally {
-      setCreateNewChatLoading(false)
-    }
-  }
 
   // TODO: fix multiple calls
   /**
@@ -114,7 +83,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         if (response && response.data.length > 0) {
           return loadChat(response.data[0].id)
         } else {
-          return createNewChat()
+          // return createNewChat() // TODO: create new chat
         }
       }).then((response: AxiosResponse<Chat> | undefined): void => {
         // if there are some messages in the chat execute the query response from the last message
@@ -166,7 +135,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     try {
       const response: AxiosResponse<QueryResponse> = await databaseApi.queryChat(
         databaseId, {
-          chatId: chatHistory[activeChatIndex].id,
+          chatId: chatHistory[activeChatIndexRedux].id,
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           query: naturalLanguageQuery.current.value
@@ -249,14 +218,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   }
 
   /**
-   * Open chat - load it's content and query response.
-   * @param id chat id
-   * @param index index in the chat history
+   * Load query result of a chat - load it's content and query response.
+   * @param chatId chat id
    */
-  async function openChat(id: string, index: number): Promise<void> {
-    const response: AxiosResponse<Chat> = await loadChat(id)
-    setActiveChatIndex(index)
-
+  async function loadChatResult(chatId: string): Promise<void> {
+    const response: AxiosResponse<Chat> = await loadChat(chatId)
     // if chat contains some messages, execute them and load the result
     if (response.data.messages.length > 0) {
       await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
@@ -273,11 +239,9 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     >
       <div className={styles.chatTabContainer}>
         <ChatHistory
-          createChat={createNewChat}
-          createChatLoading={createNewChatLoading}
-          openChat={openChat}
-          activeChatIndex={activeChatIndex}
+          loadChatResult={loadChatResult}
           databaseId={databaseId}
+          setQueryResult={setQueryResult}
         />
 
         <div className={styles.chatWithInput}>

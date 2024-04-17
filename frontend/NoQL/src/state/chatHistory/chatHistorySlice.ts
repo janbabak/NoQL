@@ -1,35 +1,36 @@
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { ChatHistoryItem } from '../../types/Chat.ts'
+import { Chat, ChatHistoryItem } from '../../types/Chat.ts'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { AxiosResponse } from 'axios'
+import chatApi from '../../services/api/chatApi.ts'
 
 interface ChatHistoryState {
   chatHistory: ChatHistoryItem[]
   loading: boolean,
   error: string | undefined,
+  createNewChatLoading: boolean,
+  activeChatIndex: number,
 }
 
 const initialState: ChatHistoryState = {
   chatHistory: [],
   loading: false,
-  error: undefined
+  error: undefined,
+  createNewChatLoading: false,
+  activeChatIndex: 0
 }
 
 const chatHistorySlice = createSlice({
   name: 'chatHistory',
   initialState,
   reducers: {
-    // example reducer
-    addElement: (state: ChatHistoryState, action: PayloadAction<ChatHistoryItem>): void => {
-      state.chatHistory = [
-        ...state.chatHistory,
-        action.payload
-      ]
-      console.log(state)
+    setActiveChatIndex: (state: ChatHistoryState, action: PayloadAction<number>): void => {
+      state.activeChatIndex = action.payload
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatHistoryState>): void => {
     builder
+      // fetch chat history
       .addCase(fetchChatHistory.fulfilled,
         (state: ChatHistoryState, action: PayloadAction<ChatHistoryItem[]>): void => {
           state.chatHistory = action.payload
@@ -43,7 +44,25 @@ const chatHistorySlice = createSlice({
         (state: ChatHistoryState, action): void => {
           state.loading = false
           state.error = action.error.message
+        })
+      // create new chat
+      .addCase(createNewChat.fulfilled,
+        (state: ChatHistoryState, action: PayloadAction<Chat>): void => {
+          state.chatHistory = [
+            { id: action.payload.id, name: action.payload.name },
+            ...state.chatHistory
+          ]
+          state.createNewChatLoading = false
+          state.activeChatIndex = 0
+        })
+      .addCase(createNewChat.pending, (state: ChatHistoryState): void => {
+        state.createNewChatLoading = true
       })
+      .addCase(createNewChat.rejected,
+        (state: ChatHistoryState, action): void => {
+          state.createNewChatLoading = false
+          state.error = action.error.message
+        })
   }
 })
 
@@ -56,6 +75,15 @@ export const fetchChatHistory
   }
 )
 
-export const { addElement } = chatHistorySlice.actions
+export const createNewChat
+  = createAsyncThunk('chatHistory/createNewChat',
+  async (databaseId: string): Promise<Chat> => {
+    return await chatApi.createNewChat(databaseId)
+      .then((response: AxiosResponse<Chat>) => response.data)
+      .catch((error) => error)
+  }
+)
+
+export const { setActiveChatIndex } = chatHistorySlice.actions
 
 export default chatHistorySlice.reducer
