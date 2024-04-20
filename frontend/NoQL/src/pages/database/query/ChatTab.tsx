@@ -97,6 +97,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     if (result.payload.messages.length > 0) {
       // @ts-ignore
       void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+    } else {
+      setQueryResult(null)
     }
   }
 

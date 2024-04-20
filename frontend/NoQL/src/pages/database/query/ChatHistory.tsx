@@ -12,7 +12,7 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '../../../state/store.ts'
+import { AppDispatch, RootState } from '../../../state/store.ts'
 import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
 import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
@@ -48,7 +48,7 @@ export function ChatHistory(
     return state.chatHistoryReducer.activeChatIndex
   })
 
-  const dispatch = useDispatch()
+  const dispatch: AppDispatch = useDispatch()
 
   const [
     menuAnchorEl,
@@ -118,17 +118,9 @@ export function ChatHistory(
   }
 
   async function createChat(): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     dispatch(createNewChat(databaseId))
     setQueryResult(null)
   }
-
-  // useEffect((): void => {
-  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //   // @ts-expect-error
-  //   dispatch(fetchChatHistory(databaseId))
-  // }, [databaseId, dispatch])
 
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {
@@ -154,8 +146,6 @@ export function ChatHistory(
   async function reallyRenameChat(newName: string): Promise<void> {
     if (chatToRenameId && newName) {
       await chatApi.renameChat(chatToRenameId, newName)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       dispatch(fetchChatHistory(databaseId))
     }
     setChatToRenameId(null)
