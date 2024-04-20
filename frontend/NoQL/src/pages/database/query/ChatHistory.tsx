@@ -1,5 +1,5 @@
 import styles from './Query.module.css'
-import { ChatHistoryItem } from '../../../types/Chat.ts'
+import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'
 import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
@@ -16,6 +16,7 @@ import { AppDispatch, RootState } from '../../../state/store.ts'
 import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
 import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
+import { setChat } from '../../../state/chat/chatSlice.ts'
 
 interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
@@ -124,7 +125,8 @@ export function ChatHistory(
   }
 
   async function createChat(): Promise<void> {
-    dispatch(createNewChat(databaseId))
+    const result = await dispatch(createNewChat(databaseId))
+    dispatch(setChat(result.payload as Chat))
     setQueryResult(null)
   }
 

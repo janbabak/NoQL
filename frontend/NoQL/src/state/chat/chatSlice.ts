@@ -48,6 +48,9 @@ const chatSlice = createSlice({
     },
     setChatToNull: (state: ChatState): void => {
       state.chat = null
+    },
+    setChat: (state: ChatState, action: PayloadAction<Chat>): void => {
+      state.chat = action.payload
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatState>): void => {
@@ -81,6 +84,7 @@ export const fetchChat = createAsyncThunk('chat/fetchChat',
 export const {
   addMessage,
   addMessageAndChangeName,
-  setChatToNull} = chatSlice.actions
+  setChatToNull,
+  setChat} = chatSlice.actions
 
 export default chatSlice.reducer
