@@ -101,7 +101,13 @@ export function ChatHistory(
   async function confirmDeleteChat(): Promise<void> {
     if (chatToEdit) {
       await chatApi.deleteChat(chatToEdit.id)
-      await loadChatHistoryAndChatAndResult(activeChatIndex)
+      // when last item is deleted
+      let newActiveChatIndex = activeChatIndex
+      if (activeChatIndex === chatHistoryRedux.length - 1) {
+        newActiveChatIndex = activeChatIndex - 1
+        dispatch(setActiveChatIndex(newActiveChatIndex))
+      }
+      await loadChatHistoryAndChatAndResult(newActiveChatIndex)
     }
   }
 
