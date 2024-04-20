@@ -95,6 +95,9 @@ export const createNewChat
   }
 )
 
-export const { setActiveChatIndex, renameChat } = chatHistorySlice.actions
+export const {
+  setActiveChatIndex,
+  renameChat
+} = chatHistorySlice.actions
 
 export default chatHistorySlice.reducer

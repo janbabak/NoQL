@@ -4,11 +4,8 @@ import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse } from '../../../types/Chat.ts'
 import { CircularProgress } from '@mui/material'
-
-interface ChatViewProps {
-  chat: Chat | null,
-  chatLoading: boolean,
-}
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../state/store.ts'
 
 interface UsersQueryProps {
   query: string
@@ -39,7 +36,15 @@ function UsersQuery({ query }: UsersQueryProps) {
   )
 }
 
-export function ChatView({ chat, chatLoading }: ChatViewProps) {
+export function ChatView() {
+
+  const chat: Chat | null = useSelector((state: RootState) => {
+    return state.chatReducer.chat
+  })
+
+  const chatLoading: boolean = useSelector((state: RootState) => {
+    return state.chatReducer.loading
+  })
 
   const chatWindowRef: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null)
 
@@ -65,14 +70,16 @@ export function ChatView({ chat, chatLoading }: ChatViewProps) {
       {!chatLoading &&
         <div ref={chatWindowRef} className={styles.chatWindow}>
           {
-            chat?.messages.map((message: ChatQueryWithResponse) => {
-              return (
-                <div key={message.id}>
-                  <UsersQuery query={message.query} />
-                  <ModelsResponse response={message.response} />
-                </div>
-              )
-            })
+            chat?.messages.length == 0
+              ? <div className={styles.startChatting}>Start chatting...</div>
+              : chat?.messages.map((message: ChatQueryWithResponse) => {
+                return (
+                  <div key={message.id}>
+                    <UsersQuery query={message.query} />
+                    <ModelsResponse response={message.response} />
+                  </div>
+                )
+              })
           }
         </div>
       }

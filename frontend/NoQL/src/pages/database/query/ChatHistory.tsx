@@ -33,11 +33,11 @@ export function ChatHistory(
     setQueryResult
   }: ChatHistoryProps) {
 
-  const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
+  const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
     return state.chatHistoryReducer.chatHistory
   })
 
-  const chatHistoryLoadingRedux: boolean = useSelector((state: RootState) => {
+  const chatHistoryLoading: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.loading
   })
 
@@ -104,7 +104,7 @@ export function ChatHistory(
       await chatApi.deleteChat(chatToEdit.id)
       // when last item is deleted
       let newActiveChatIndex = activeChatIndex
-      if (activeChatIndex === chatHistoryRedux.length - 1) {
+      if (activeChatIndex === chatHistory.length - 1) {
         newActiveChatIndex = activeChatIndex - 1
         dispatch(setActiveChatIndex(newActiveChatIndex))
       }
@@ -133,7 +133,7 @@ export function ChatHistory(
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {
     if (renameInputRef && renameInputRef.current) {
-      const chatToRename: ChatHistoryItem | undefined = chatHistoryRedux.find((c: ChatHistoryItem): boolean => {
+      const chatToRename: ChatHistoryItem | undefined = chatHistory.find((c: ChatHistoryItem): boolean => {
         return chatToRenameId ? c.id === chatToRenameId : false
       })
       setNewName(chatToRename ? chatToRename.name : '') // set the old name
@@ -219,12 +219,12 @@ export function ChatHistory(
       {CreateNewChatButton}
 
       <div className={styles.chatHistoryList}>
-        {chatHistoryLoadingRedux && ChatHistoryLoading}
+        {chatHistoryLoading && ChatHistoryLoading}
 
-        {!chatHistoryLoadingRedux &&
+        {!chatHistoryLoading &&
           <div>
             {
-              chatHistoryRedux.map((chat: ChatHistoryItem, index: number) => {
+              chatHistory.map((chat: ChatHistoryItem, index: number) => {
                 return (
                   <div
                     onClick={() => openChat(chat.id, index)}
