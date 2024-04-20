@@ -78,29 +78,27 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Creates new chat if there isn't any.
    */
   useEffect((): void => {
-    const asyncCallsChain = async (): Promise<void> => {
-
-      let result = await dispatch(fetchChatHistory(databaseId))
-      // @ts-ignore
-      if (result.payload.length > 0) {
-        // @ts-ignore
-        result = await dispatch(fetchChat(result.payload[0].id))
-      } else {
-      // TODO: create chat
-        console.log('create chat not implemented')
-      }
-      // @ts-ignore
-      if (result.payload.messages.length > 0) {
-        // @ts-ignore
-        void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
-      } else {
-        console.log('not load query result')
-      }
-    }
-
-    void asyncCallsChain()
+    loadChatHistoryAndChatAndResult(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  async function loadChatHistoryAndChatAndResult(chatIndex: number): Promise<void> {
+    let result = await dispatch(fetchChatHistory(databaseId))
+
+    // @ts-ignore
+    if (result.payload.length > chatIndex && chatIndex >= 0) {
+      // @ts-ignore
+      result = await dispatch(fetchChat(result.payload[chatIndex].id))
+    } else {
+      // TODO: create chat
+      console.log('create chat not implemented')
+    }
+    // @ts-ignore
+    if (result.payload.messages.length > 0) {
+      // @ts-ignore
+      void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+    }
+  }
 
   /**
    * Query model using the natural language chat.
@@ -210,6 +208,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       <div className={styles.chatTabContainer}>
         <ChatHistory
           loadChatResult={loadChatResult}
+          loadChatHistoryAndChatAndResult={loadChatHistoryAndChatAndResult}
           databaseId={databaseId}
           setQueryResult={setQueryResult}
         />

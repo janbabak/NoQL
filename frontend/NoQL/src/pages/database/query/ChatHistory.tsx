@@ -19,6 +19,7 @@ import { QueryResponse } from '../../../types/Query.ts'
 
 interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
+  loadChatHistoryAndChatAndResult: (chatIndex: number) => Promise<void>
   databaseId: string,
   setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
@@ -26,6 +27,7 @@ interface ChatHistoryProps {
 export function ChatHistory(
   {
     loadChatResult,
+    loadChatHistoryAndChatAndResult,
     databaseId,
     setQueryResult
   }: ChatHistoryProps) {
@@ -42,7 +44,7 @@ export function ChatHistory(
     return state.chatHistoryReducer.createNewChatLoading
   })
 
-  const activeChatIndexRedux: number = useSelector((state: RootState) => {
+  const activeChatIndex: number = useSelector((state: RootState) => {
     return state.chatHistoryReducer.activeChatIndex
   })
 
@@ -99,9 +101,7 @@ export function ChatHistory(
   async function confirmDeleteChat(): Promise<void> {
     if (chatToEdit) {
       await chatApi.deleteChat(chatToEdit.id)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      dispatch(fetchChatHistory(databaseId))
+      await loadChatHistoryAndChatAndResult(activeChatIndex)
     }
   }
 
@@ -230,7 +230,7 @@ export function ChatHistory(
                   <div
                     onClick={() => openChat(chat.id, index)}
                     key={chat.id}
-                    className={index == activeChatIndexRedux ? styles.chatHistoryItemActive : styles.chatHistoryItem}
+                    className={index == activeChatIndex ? styles.chatHistoryItemActive : styles.chatHistoryItem}
                   >
                     {
                       chatToRenameId === chat.id
