@@ -10,8 +10,11 @@ import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
 import { ChatHistoryItem, Chat } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
-import chatApi from '../../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../../state/store.ts'
+import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
+import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
 
 interface ChatTabProps {
   databaseId: string,
@@ -23,6 +26,24 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   const NEW_CHAT_NAME: string = 'New chat'
   const CHAT_NAME_MAX_LENGTH: number = 32
+
+  const dispatch: AppDispatch = useDispatch()
+
+  const activeChatIndexRedux: number = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.activeChatIndex
+  })
+
+  const chat: Chat | null = useSelector((state: RootState) => {
+    return state.chatReducer.chat
+  })
+
+  const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.chatHistory
+  })
+
+  const chatLoading: boolean = useSelector((state: RootState) => {
+    return state.chatReducer.loading
+  })
 
   const [
     queryResult,
@@ -40,26 +61,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   ] = useState<boolean>(false)
 
   const [
-    chat,
-    setChat
-  ] = useState<Chat | null>(null)
-
-  const [
-    chatLoading,
-    setChatLoading
-  ] = useState<boolean>(false)
-
-  const [
-    chatHistory,
-    setChatHistory
-  ] = useState<ChatHistoryItem[]>([])
-
-  const [
-    chatHistoryLoading,
-    setChatHistoryLoading
-  ] = useState<boolean>(false)
-
-  const [
     page,
     setPage
   ] = useState<number>(0)
@@ -69,113 +70,36 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     setPageSize
   ] = useState<number>(10)
 
-  const [
-    activeChatIndex,
-    setActiveChatIndex
-  ] = useState<number>(0)
-
-  const [
-    createNewChatLoading,
-    setCreateNewChatLoading
-  ] = useState<boolean>(false)
-
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
-  /**
-   * Creates new chat
-   */
-  async function createNewChat(): Promise<AxiosResponse<Chat>> {
-    setCreateNewChatLoading(true)
-    try {
-      const response: AxiosResponse<Chat> = await chatApi.createNewChat(databaseId)
-      setCreateNewChatLoading(false)
-
-      // insert newly created chat at the fist place
-      setChatHistory([
-        { id: response.data.id, name: response.data.name },
-        ...chatHistory
-      ])
-      // open newly created chat
-      setChat(response.data)
-      setActiveChatIndex(0)
-      setQueryResult(null)
-      return response
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-      return Promise.reject()
-    } finally {
-      setCreateNewChatLoading(false)
-    }
-  }
-
-  /**
-   * Delete chat and refresh chat history
-   * @param chatId identifier
-   */
-  async function deleteChat(chatId: string): Promise<void> {
-    await chatApi.deleteChat(chatId)
-    await loadChatsHistory()
-  }
-
-  async function renameChat(chatId: string, newName: string): Promise<void> {
-    await chatApi.renameChat(chatId, newName)
-    await loadChatsHistory()
-  }
-
   // TODO: fix multiple calls
-  /**
-   * Load chat history, then active chat content, then query the chat for the result.
-   * Creates new chat if there isn't any.
-   */
   useEffect((): void => {
-    loadChatsHistory()
-      .then(async (response: AxiosResponse<ChatHistoryItem[]> | undefined) => {
-        if (response && response.data.length > 0) {
-          return loadChat(response.data[0].id)
-        } else {
-          return createNewChat()
-        }
-      }).then((response: AxiosResponse<Chat> | undefined): void => {
-        // if there are some messages in the chat execute the query response from the last message
-        if (response && response.data.messages.length > 0) {
-          void loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
-        }
-    })
+    void loadChatHistoryAndChatAndResult(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   /**
-   * Load one chat - its messages.
-   * @param id chat it
+   * Load chat history, then active chat content, then query the chat for the result.
+   * Creates new chat if there isn't any. // TODO that
    */
-  async function loadChat(id: string): Promise<AxiosResponse<Chat>> {
-    setChatLoading(true)
-    try {
-      const response: AxiosResponse<Chat> = await chatApi.getById(id)
-      setChat(response.data)
-      return response
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-      return Promise.reject()
-    } finally {
-      setChatLoading(false)
-    }
-  }
+  async function loadChatHistoryAndChatAndResult(chatIndex: number): Promise<void> {
+    let result = await dispatch(fetchChatHistory(databaseId))
 
-  /**
-   * Load history of chats.
-   */
-  async function loadChatsHistory(): Promise<AxiosResponse<ChatHistoryItem[]>> {
-    setChatHistoryLoading(true)
-    try {
-      const response: AxiosResponse<ChatHistoryItem[]> = await databaseApi.getChatHistoryByDatabaseId(databaseId)
-      setChatHistory(response.data)
-      return response
-    } catch (error: unknown) {
-      console.log(error) // TODO: handle
-      return Promise.reject(error)
-    } finally {
-      setChatHistoryLoading(false)
+    // @ts-ignore
+    if (result.payload.length > chatIndex && chatIndex >= 0) {
+      // @ts-ignore
+      result = await dispatch(fetchChat(result.payload[chatIndex].id))
+    } else {
+      setQueryResult(null)
+      dispatch(setChatToNull())
+      return
+    }
+    // @ts-ignore
+    if (result.payload.messages.length > 0) {
+      // @ts-ignore
+      void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+    } else {
+      setQueryResult(null)
     }
   }
 
@@ -188,14 +112,12 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     try {
       const response: AxiosResponse<QueryResponse> = await databaseApi.queryChat(
         databaseId, {
-          chatId: chatHistory[activeChatIndex].id,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          chatId: chatHistory[activeChatIndexRedux].id,
           // @ts-ignore
           query: naturalLanguageQuery.current.value
         },
         pageSize)
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       naturalLanguageQuery.current.value = ''
       setQueryResult(response.data)
@@ -206,19 +128,16 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           ? response.data.chatQueryWithResponse.query
           : response.data.chatQueryWithResponse.query.substring(0, CHAT_NAME_MAX_LENGTH)
 
-        setChat({
-          ...chat,
-          messages: [...chat?.messages || [], response.data.chatQueryWithResponse],
+        dispatch(addMessageAndChangeName({
+          message: response.data.chatQueryWithResponse,
           name: updatedName
-        })
-        const newChatHistory: ChatHistoryItem[] = chatHistory
-        newChatHistory[0].name = updatedName
-        setChatHistory(newChatHistory)
+        }))
+        // @ts-ignore
+        dispatch(renameChat({
+          index: activeChatIndexRedux,
+          name: updatedName}))
       } else {
-        setChat({
-          ...chat,
-          messages: [...chat?.messages || [], response.data.chatQueryWithResponse]
-        } as Chat)
+        dispatch(addMessage(response.data.chatQueryWithResponse))
       }
     } catch (error: unknown) {
       console.log(error) // TODO: handle
@@ -271,17 +190,15 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   }
 
   /**
-   * Open chat - load it's content and query response.
-   * @param id chat id
-   * @param index index in the chat history
+   * Load query result of a chat - load it's content and query response.
+   * @param chatId chat id
    */
-  async function openChat(id: string, index: number): Promise<void> {
-    const response: AxiosResponse<Chat> = await loadChat(id)
-    setActiveChatIndex(index)
-
-    // if chat contains some messages, execute them and load the result
-    if (response.data.messages.length > 0) {
-      await loadQueryLanguageQuery(response.data.messages[response.data.messages.length - 1].response)
+  async function loadChatResult(chatId: string): Promise<void> {
+    const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
+    // @ts-expect-error
+    if (result.payload.messages.length > 0) {
+      // @ts-expect-error
+      await loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
     } else {
       setQueryResult(null)
     }
@@ -295,14 +212,10 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     >
       <div className={styles.chatTabContainer}>
         <ChatHistory
-          chatHistory={chatHistory}
-          chatHistoryLoading={chatHistoryLoading}
-          createChat={createNewChat}
-          createChatLoading={createNewChatLoading}
-          openChat={openChat}
-          reallyDeleteChat={deleteChat}
-          renameChat={renameChat}
-          activeChatIndex={activeChatIndex}
+          loadChatResult={loadChatResult}
+          loadChatHistoryAndChatAndResult={loadChatHistoryAndChatAndResult}
+          databaseId={databaseId}
+          setQueryResult={setQueryResult}
         />
 
         <div className={styles.chatWithInput}>

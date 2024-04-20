@@ -1,40 +1,55 @@
 import styles from './Query.module.css'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
-import { AxiosResponse } from 'axios'
 import { LoadingButton } from '@mui/lab'
 import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../../state/store.ts'
+import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
+import chatApi from '../../../services/api/chatApi.ts'
+import { QueryResponse } from '../../../types/Query.ts'
+import { setChat } from '../../../state/chat/chatSlice.ts'
 
 interface ChatHistoryProps {
-  chatHistory: ChatHistoryItem[],
-  chatHistoryLoading: boolean,
-  createChat: () => Promise<AxiosResponse<Chat>>,
-  createChatLoading: boolean
-  openChat: (id: string, index: number) => void,
-  reallyDeleteChat: (chatId: string) => Promise<void>,
-  renameChat: (chatId: string, newName: string) => Promise<void>,
-  activeChatIndex: number,
+  loadChatResult: (chatId: string) => Promise<void>,
+  loadChatHistoryAndChatAndResult: (chatIndex: number) => Promise<void>
+  databaseId: string,
+  setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
 
 export function ChatHistory(
   {
-    chatHistory,
-    chatHistoryLoading,
-    createChat,
-    createChatLoading,
-    openChat,
-    reallyDeleteChat, // when user confirms deletion
-    renameChat,
-    activeChatIndex
+    loadChatResult,
+    loadChatHistoryAndChatAndResult,
+    databaseId,
+    setQueryResult
   }: ChatHistoryProps) {
+
+  const chatHistoryRedux: ChatHistoryItem[] = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.chatHistory
+  })
+
+  const chatHistoryLoadingRedux: boolean = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.loading
+  })
+
+  const createChatLoadingRedux: boolean = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.createNewChatLoading
+  })
+
+  const activeChatIndex: number = useSelector((state: RootState) => {
+    return state.chatHistoryReducer.activeChatIndex
+  })
+
+  const dispatch: AppDispatch = useDispatch()
 
   const [
     menuAnchorEl,
@@ -84,9 +99,16 @@ export function ChatHistory(
     closeMenu()
   }
 
-  function confirmDeleteChat(): void {
+  async function confirmDeleteChat(): Promise<void> {
     if (chatToEdit) {
-      void reallyDeleteChat(chatToEdit.id)
+      await chatApi.deleteChat(chatToEdit.id)
+      // when last item is deleted
+      let newActiveChatIndex = activeChatIndex
+      if (activeChatIndex === chatHistoryRedux.length - 1) {
+        newActiveChatIndex = activeChatIndex - 1
+        dispatch(setActiveChatIndex(newActiveChatIndex))
+      }
+      await loadChatHistoryAndChatAndResult(newActiveChatIndex)
     }
   }
 
@@ -97,30 +119,43 @@ export function ChatHistory(
     }
   }
 
+  function openChat(id: string, index: number): void {
+    dispatch(setActiveChatIndex(index))
+    void loadChatResult(id)
+  }
+
+  async function createChat(): Promise<void> {
+    const result = await dispatch(createNewChat(databaseId))
+    dispatch(setChat(result.payload as Chat))
+    setQueryResult(null)
+  }
+
   // focus input element that is rendered when chatToRenameId changes
   useEffect((): void => {
     if (renameInputRef && renameInputRef.current) {
-      const chatToRename: ChatHistoryItem | undefined = chatHistory.find((c: ChatHistoryItem): boolean => {
+      const chatToRename: ChatHistoryItem | undefined = chatHistoryRedux.find((c: ChatHistoryItem): boolean => {
         return chatToRenameId ? c.id === chatToRenameId : false
       })
       setNewName(chatToRename ? chatToRename.name : '') // set the old name
       renameInputRef.current.focus()
     }
-  }, [chatToRenameId, chatHistory])
+    /* eslint-disable */
+  }, [chatToRenameId])
 
   function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
-    reallyRenameChat(event.target.value)
+    void reallyRenameChat(event.target.value)
   }
 
   function renameChatOnEnterPress(event: React.KeyboardEvent<HTMLDivElement>): void {
     if (event.key === 'Enter') {
-      reallyRenameChat(newName)
+      void reallyRenameChat(newName)
     }
   }
 
-  function reallyRenameChat(newName: string): void {
+  async function reallyRenameChat(newName: string): Promise<void> {
     if (chatToRenameId && newName) {
-      void renameChat(chatToRenameId, newName)
+      await chatApi.renameChat(chatToRenameId, newName)
+      dispatch(fetchChatHistory(databaseId))
     }
     setChatToRenameId(null)
   }
@@ -134,8 +169,8 @@ export function ChatHistory(
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      loading={createChatLoading}
-      disabled={createChatLoading}
+      loading={createChatLoadingRedux}
+      disabled={createChatLoadingRedux}
       fullWidth
     >
       New chat
@@ -184,12 +219,12 @@ export function ChatHistory(
       {CreateNewChatButton}
 
       <div className={styles.chatHistoryList}>
-        {chatHistoryLoading && ChatHistoryLoading}
+        {chatHistoryLoadingRedux && ChatHistoryLoading}
 
-        {!chatHistoryLoading &&
+        {!chatHistoryLoadingRedux &&
           <div>
             {
-              chatHistory.map((chat: ChatHistoryItem, index: number) => {
+              chatHistoryRedux.map((chat: ChatHistoryItem, index: number) => {
                 return (
                   <div
                     onClick={() => openChat(chat.id, index)}
