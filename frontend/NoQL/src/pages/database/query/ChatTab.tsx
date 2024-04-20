@@ -78,7 +78,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Creates new chat if there isn't any.
    */
   useEffect((): void => {
-    loadChatHistoryAndChatAndResult(0)
+    void loadChatHistoryAndChatAndResult(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -133,7 +133,9 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           name: updatedName
         }))
         // @ts-ignore
-        dispatch(renameChat(updatedName))
+        dispatch(renameChat({
+          index: activeChatIndexRedux,
+          name: updatedName}))
       } else {
         dispatch(addMessage(response.data.chatQueryWithResponse))
       }
