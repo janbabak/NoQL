@@ -41,10 +41,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     return state.chatHistoryReducer.chatHistory
   })
 
-  const chatLoading: boolean = useSelector((state: RootState) => {
-    return state.chatReducer.loading
-  })
-
   const [
     queryResult,
     setQueryResult
@@ -220,7 +216,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
         <div className={styles.chatWithInput}>
 
-          <ChatView chat={chat} chatLoading={chatLoading} />
+          <ChatView />
 
           <div className={styles.chatInputContainer}>
             <TextField

@@ -4,11 +4,8 @@ import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse } from '../../../types/Chat.ts'
 import { CircularProgress } from '@mui/material'
-
-interface ChatViewProps {
-  chat: Chat | null,
-  chatLoading: boolean,
-}
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../state/store.ts'
 
 interface UsersQueryProps {
   query: string
@@ -39,7 +36,15 @@ function UsersQuery({ query }: UsersQueryProps) {
   )
 }
 
-export function ChatView({ chat, chatLoading }: ChatViewProps) {
+export function ChatView() {
+
+  const chat: Chat | null = useSelector((state: RootState) => {
+    return state.chatReducer.chat
+  })
+
+  const chatLoading: boolean = useSelector((state: RootState) => {
+    return state.chatReducer.loading
+  })
 
   const chatWindowRef: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null)
 

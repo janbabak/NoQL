@@ -63,7 +63,7 @@ const chatSlice = createSlice({
           state.error = undefined
         })
       .addCase(fetchChat.pending, (state: ChatState): void => {
-        state.loading = false
+        state.loading = true
       })
       .addCase(fetchChat.rejected,
         (state: ChatState, action): void => {
