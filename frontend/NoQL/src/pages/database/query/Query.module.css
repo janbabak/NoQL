@@ -5,6 +5,15 @@
     scroll-behavior: smooth;
 }
 
+.startChatting {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: gray;
+}
+
 .chatWindowLoading {
     height: 25rem;
     display: flex;

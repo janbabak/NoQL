@@ -85,6 +85,7 @@ export const {
   addMessage,
   addMessageAndChangeName,
   setChatToNull,
-  setChat} = chatSlice.actions
+  setChat
+} = chatSlice.actions
 
 export default chatSlice.reducer
