@@ -13,7 +13,7 @@ import { ChatView } from './ChatView.tsx'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
-import { addMessage, addMessageAndChangeName, fetchChat } from '../../../state/chat/chatSlice.ts'
+import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
 
 interface ChatTabProps {
@@ -90,8 +90,9 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       // @ts-ignore
       result = await dispatch(fetchChat(result.payload[chatIndex].id))
     } else {
-      // TODO: create chat
-      console.log('create chat not implemented')
+      setQueryResult(null)
+      dispatch(setChatToNull())
+      return
     }
     // @ts-ignore
     if (result.payload.messages.length > 0) {
