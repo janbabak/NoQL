@@ -139,7 +139,8 @@ export function ChatHistory(
       setNewName(chatToRename ? chatToRename.name : '') // set the old name
       renameInputRef.current.focus()
     }
-  }, [chatToRenameId, chatHistoryRedux])
+    /* eslint-disable */
+  }, [chatToRenameId])
 
   function renameChatOnBlur(event: React.FocusEvent<HTMLInputElement>): void {
     void reallyRenameChat(event.target.value)

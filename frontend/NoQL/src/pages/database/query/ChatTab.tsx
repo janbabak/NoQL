@@ -73,15 +73,15 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const naturalLanguageQuery: React.MutableRefObject<string> = useRef<string>('')
 
   // TODO: fix multiple calls
-  /**
-   * Load chat history, then active chat content, then query the chat for the result.
-   * Creates new chat if there isn't any.
-   */
   useEffect((): void => {
     void loadChatHistoryAndChatAndResult(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /**
+   * Load chat history, then active chat content, then query the chat for the result.
+   * Creates new chat if there isn't any. // TODO that
+   */
   async function loadChatHistoryAndChatAndResult(chatIndex: number): Promise<void> {
     let result = await dispatch(fetchChatHistory(databaseId))
 
