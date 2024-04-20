@@ -81,28 +81,24 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     const asyncCallsChain = async (): Promise<void> => {
 
       let result = await dispatch(fetchChatHistory(databaseId))
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+      // @ts-ignore
       if (result.payload.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
+        // @ts-ignore
         result = await dispatch(fetchChat(result.payload[0].id))
       } else {
       // TODO: create chat
         console.log('create chat not implemented')
       }
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
+      // @ts-ignore
       if (result.payload.messages.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
+        // @ts-ignore
         void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
       } else {
         console.log('not load query result')
       }
     }
 
-    asyncCallsChain()
+    void asyncCallsChain()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -116,13 +112,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       const response: AxiosResponse<QueryResponse> = await databaseApi.queryChat(
         databaseId, {
           chatId: chatHistory[activeChatIndexRedux].id,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           query: naturalLanguageQuery.current.value
         },
         pageSize)
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       naturalLanguageQuery.current.value = ''
       setQueryResult(response.data)
@@ -137,7 +131,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           message: response.data.chatQueryWithResponse,
           name: updatedName
         }))
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         dispatch(renameChat(updatedName))
       } else {
@@ -199,10 +192,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    */
   async function loadChatResult(chatId: string): Promise<void> {
     const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     if (result.payload.messages.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       await loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
     } else {
