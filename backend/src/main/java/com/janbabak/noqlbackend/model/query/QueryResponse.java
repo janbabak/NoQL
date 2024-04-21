@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.model.query;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -18,16 +19,17 @@ import java.util.List;
 public class QueryResponse {
     private QueryResult result; // retrieved data
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
+    private ColumnTypes columnTypes; // which columns are categorical, numeric, ...
     private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
     private String errorMessage; // error message when the query execution failed due to syntax error
 
     public static QueryResponse successfulResponse(
-            QueryResult result, ChatQueryWithResponseDto message, Long totalCount) {
-        return new QueryResponse(result, totalCount, message,null);
+            QueryResult result, ChatQueryWithResponseDto message, Long totalCount, ColumnTypes columnTypes) {
+        return new QueryResponse(result, totalCount, columnTypes, message,null);
     }
 
     public static QueryResponse failedResponse(ChatQueryWithResponseDto message, String errorMessage) {
-        return new QueryResponse(null, null, message, errorMessage);
+        return new QueryResponse(null, null, null, message, errorMessage);
     }
 
     @Data
@@ -42,6 +44,7 @@ public class QueryResponse {
             columnNames = new ArrayList<>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnNames.add(rsmd.getColumnName(i));
+                System.out.println("TYPE: " + rsmd.getColumnType(i));
             }
 
             // rows
@@ -53,6 +56,20 @@ public class QueryResponse {
                 }
                 rows.add(row);
             }
+        }
+    }
+
+    @Data
+    public static class ColumnTypes {
+        private final List<String> categorical = new ArrayList<>();
+        private final List<String> numeric = new ArrayList<>();
+
+        public void addCategorical(String columnName) {
+            categorical.add(columnName);
+        }
+
+        public void addNumeric(String columnName) {
+            numeric.add(columnName);
         }
     }
 }
