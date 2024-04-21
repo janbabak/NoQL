@@ -24,15 +24,14 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
+import static java.sql.Types.*;
 
 @Slf4j
 @Service
@@ -169,6 +168,80 @@ public class QueryService {
     }
 
     /**
+     * Heuristic that decides whether a column is categorical or not. Categorical column is a column where
+     * number of unique values < number of all values / 3
+     * @param columnName examined column
+     * @param selectQuery select to retrieve entire result without pagination
+     * @param queryResultSet result of executed selectQuery
+     * @param databaseService service that can handle the query
+     * @return true if categorical, otherwise false
+     */
+    private boolean isCategorical(
+            String columnName,
+            String selectQuery,
+            ResultSet queryResultSet,
+            BaseDatabaseService databaseService)
+            throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
+        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
+
+        String selectNumberOfValues = "SELECT COUNT(DISTINCT %s) AS distinctCount, COUNT(%s) AS count FROM (%s);"
+                .formatted(columnName, columnName, selectQuery);
+
+        ResultSet resultSet = databaseService.executeQuery(selectNumberOfValues);
+
+        Long totalCount = null;
+        Long distinctCount = null;
+        try {
+            if (!resultSet.next()) {
+               return false; // shouldn't happen
+            }
+            distinctCount = resultSet.getLong(1);
+            totalCount = resultSet.getLong(2);
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException("Cannot parse counts values from query");
+        }
+
+        return switch (getColumnDataType(columnName, queryResultSet)) {
+            // categorical data are usually numbers, strings or booleans
+            case BIT, TINYINT, SMALLINT, INTEGER, BIGINT, NUMERIC, CHAR, VARCHAR,
+                    LONGVARCHAR, BOOLEAN, NCHAR, NVARCHAR, LONGNVARCHAR -> distinctCount * 3 < totalCount;
+            default -> false;
+        };
+    }
+
+    /**
+     * Decides whether a column is numerical or not.
+     * @param columnName examined column
+     * @param queryResultSet result of executed query
+     * @return true if is numerical, false otherwise
+     * @throws SQLException ... TODO
+     */
+    private boolean isNumerical(String columnName, ResultSet queryResultSet) throws SQLException {
+        return switch (getColumnDataType(columnName, queryResultSet)) {
+            case BIT, TINYINT, SMALLINT, INTEGER, BIGINT, NUMERIC -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * Get data type of column.
+     * @param columnName name of investigated column
+     * @param resultSet result set that contains columName column
+     * @return int value that represents the datatype, 0 if column not found
+     * @throws SQLException ... TODO
+     */
+    private int getColumnDataType(String columnName, ResultSet resultSet) throws SQLException {
+        ResultSetMetaData rsmd = resultSet.getMetaData();
+
+        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+            if (Objects.equals(columnName, rsmd.getColumnName(i))) {
+                return rsmd.getColumnType(i);
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Execute query language select query.
      * Select query is read only, and it returns a result that is automatically paginated.
      *
@@ -201,10 +274,20 @@ public class QueryService {
         ChatQueryWithResponseDto message = new ChatQueryWithResponseDto( // TODO better solution
                 UUID.randomUUID(), query, query, Timestamp.from(Instant.now()));
         try {
-            QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+            ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+            QueryResult queryResult = new QueryResult(resultSet);
             Long totalCount = getTotalCount(query, specificDatabaseService);
+            QueryResponse.ColumnTypes columnTypes = new QueryResponse.ColumnTypes();
+            for (String columnName: queryResult.getColumnNames()) {
+                if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
+                    columnTypes.addCategorical(columnName);
+                }
+                if (isNumerical(columnName, resultSet)) {
+                    columnTypes.addNumeric(columnName);
+                }
+            }
 
-            return QueryResponse.successfulResponse(queryResult, message, totalCount);
+            return QueryResponse.successfulResponse(queryResult, message, totalCount, columnTypes);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
         }
@@ -255,14 +338,25 @@ public class QueryService {
             String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
 
             try {
-                QueryResult queryResult = new QueryResult(specificDatabaseService.executeQuery(paginatedQuery));
+                ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+                QueryResult queryResult = new QueryResult(resultSet);
                 Long totalCount = getTotalCount(query, specificDatabaseService);
+                QueryResponse.ColumnTypes columnTypes = new QueryResponse.ColumnTypes();
+                for (String columnName: queryResult.getColumnNames()) {
+                    if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
+                        columnTypes.addCategorical(columnName);
+                    }
+                    if (isNumerical(columnName, resultSet)) {
+                        columnTypes.addNumeric(columnName);
+                    }
+                }
 
                 ChatQueryWithResponse message = chatService.addMessageToChat(
                         queryRequest.getChatId(),
                         new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
 
-                return QueryResponse.successfulResponse(queryResult, new ChatQueryWithResponseDto(message), totalCount);
+                return QueryResponse.successfulResponse(
+                        queryResult, new ChatQueryWithResponseDto(message), totalCount, columnTypes);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
