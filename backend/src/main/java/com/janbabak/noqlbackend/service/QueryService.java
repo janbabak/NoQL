@@ -189,8 +189,8 @@ public class QueryService {
 
         ResultSet resultSet = databaseService.executeQuery(selectNumberOfValues);
 
-        Long totalCount = null;
-        Long distinctCount = null;
+        long totalCount;
+        long distinctCount;
         try {
             if (!resultSet.next()) {
                return false; // shouldn't happen
