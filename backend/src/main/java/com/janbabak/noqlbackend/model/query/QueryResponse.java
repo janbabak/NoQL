@@ -3,7 +3,6 @@ package com.janbabak.noqlbackend.model.query;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -63,6 +62,7 @@ public class QueryResponse {
     public static class ColumnTypes {
         private final List<String> categorical = new ArrayList<>();
         private final List<String> numeric = new ArrayList<>();
+        private final List<String> timestamp = new ArrayList<>();
 
         public void addCategorical(String columnName) {
             categorical.add(columnName);
@@ -70,6 +70,10 @@ public class QueryResponse {
 
         public void addNumeric(String columnName) {
             numeric.add(columnName);
+        }
+
+        public void addTimestamp(String columnName) {
+            timestamp.add(columnName);
         }
     }
 }
