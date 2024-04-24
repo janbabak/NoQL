@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
+import static com.janbabak.noqlbackend.model.query.QueryResponse.ColumnTypes;
 import static java.sql.Types.*;
 
 @Slf4j
@@ -157,7 +158,7 @@ public class QueryService {
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);" .formatted(selectQuery);
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
         ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
 
         try {
@@ -170,9 +171,10 @@ public class QueryService {
     /**
      * Heuristic that decides whether a column is categorical or not. Categorical column is a column where
      * number of unique values < number of all values / 3
-     * @param columnName examined column
-     * @param selectQuery select to retrieve entire result without pagination
-     * @param queryResultSet result of executed selectQuery
+     *
+     * @param columnName      examined column
+     * @param selectQuery     select to retrieve entire result without pagination
+     * @param queryResultSet  result of executed selectQuery
      * @param databaseService service that can handle the query
      * @return true if categorical, otherwise false
      */
@@ -193,7 +195,7 @@ public class QueryService {
         long distinctCount;
         try {
             if (!resultSet.next()) {
-               return false; // shouldn't happen
+                return false; // shouldn't happen
             }
             distinctCount = resultSet.getLong(1);
             totalCount = resultSet.getLong(2);
@@ -211,7 +213,8 @@ public class QueryService {
 
     /**
      * Decides whether a column is numerical or not.
-     * @param columnName examined column
+     *
+     * @param columnName     examined column
      * @param queryResultSet result of executed query
      * @return true if is numerical, false otherwise
      * @throws SQLException ... TODO
@@ -224,9 +227,25 @@ public class QueryService {
     }
 
     /**
+     * Decides whether a column is numerical or not.
+     *
+     * @param columnName     examined column
+     * @param queryResultSet result of executed query
+     * @return true if is timestamp, false otherwise
+     * @throws SQLException ... TODO
+     */
+    private boolean isTimestamp(String columnName, ResultSet queryResultSet) throws SQLException {
+        return switch (getColumnDataType(columnName, queryResultSet)) {
+            case DATE, TIME, TIMESTAMP -> true;
+            default -> false;
+        };
+    }
+
+    /**
      * Get data type of column.
+     *
      * @param columnName name of investigated column
-     * @param resultSet result set that contains columName column
+     * @param resultSet  result set that contains columName column
      * @return int value that represents the datatype, 0 if column not found
      * @throws SQLException ... TODO
      */
@@ -239,6 +258,38 @@ public class QueryService {
             }
         }
         return 0;
+    }
+
+    /**
+     * Classify columns into column types
+     * @param resultSet query result
+     * @param query generated query without pagination
+     * @param queryResult result object
+     * @param specificDatabaseService specific database service capable of executing query
+     * @return column types
+     * @throws SQLException TODO
+     * @throws DatabaseConnectionException connection failure
+     * @throws DatabaseExecutionException execution fail
+     */
+    private ColumnTypes getColumnTypes(
+            ResultSet resultSet,
+            String query,
+            QueryResult queryResult,
+            BaseDatabaseService specificDatabaseService
+    ) throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
+        ColumnTypes columnTypes = new ColumnTypes();
+        for (String columnName : queryResult.getColumnNames()) {
+            if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
+                columnTypes.addCategorical(columnName);
+            }
+            if (isNumerical(columnName, resultSet)) {
+                columnTypes.addNumeric(columnName);
+            }
+            if (isTimestamp(columnName, resultSet)) {
+                columnTypes.addTimestamp(columnName);
+            }
+        }
+        return columnTypes;
     }
 
     /**
@@ -277,15 +328,7 @@ public class QueryService {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
             QueryResult queryResult = new QueryResult(resultSet);
             Long totalCount = getTotalCount(query, specificDatabaseService);
-            QueryResponse.ColumnTypes columnTypes = new QueryResponse.ColumnTypes();
-            for (String columnName: queryResult.getColumnNames()) {
-                if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
-                    columnTypes.addCategorical(columnName);
-                }
-                if (isNumerical(columnName, resultSet)) {
-                    columnTypes.addNumeric(columnName);
-                }
-            }
+            ColumnTypes columnTypes = getColumnTypes(resultSet, query, queryResult, specificDatabaseService);
 
             return QueryResponse.successfulResponse(queryResult, message, totalCount, columnTypes);
         } catch (DatabaseExecutionException | SQLException e) {
@@ -298,11 +341,11 @@ public class QueryService {
      * and then executed.
      * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
      *
-     * @param id          database id
+     * @param id           database id
      * @param queryRequest in natural query or database query language
-     * @param pageSize    number of items in one page,<br />
-     *                    default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                    max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
+     * @param pageSize     number of items in one page,<br />
+     *                     default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
+     *                     max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
      * @throws LLMException                large language model failure
      * @throws BadRequestException         page size is greater than maximum allowed value
@@ -341,15 +384,7 @@ public class QueryService {
                 ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
                 QueryResult queryResult = new QueryResult(resultSet);
                 Long totalCount = getTotalCount(query, specificDatabaseService);
-                QueryResponse.ColumnTypes columnTypes = new QueryResponse.ColumnTypes();
-                for (String columnName: queryResult.getColumnNames()) {
-                    if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
-                        columnTypes.addCategorical(columnName);
-                    }
-                    if (isNumerical(columnName, resultSet)) {
-                        columnTypes.addNumeric(columnName);
-                    }
-                }
+                ColumnTypes columnTypes = getColumnTypes(resultSet, query, queryResult, specificDatabaseService);
 
                 ChatQueryWithResponse message = chatService.addMessageToChat(
                         queryRequest.getChatId(),
