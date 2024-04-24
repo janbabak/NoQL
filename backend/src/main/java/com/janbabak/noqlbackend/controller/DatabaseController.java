@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
+import com.janbabak.noqlbackend.model.chat.ChatResponse;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
@@ -119,6 +120,19 @@ public class DatabaseController {
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, BadRequestException {
         return queryService.executeChat(id, queryRequest, pageSize);
+    }
+
+    /**
+     * EXPERIMENTAL
+     */
+    @PostMapping("/{id}/query/chatExperimental")
+    @ResponseStatus(HttpStatus.OK)
+    public ChatResponse executeChatExperimental(
+            @PathVariable UUID id,
+            @RequestBody @Valid QueryRequest queryRequest
+    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            EntityNotFoundException, LLMException {
+        return queryService.executeChatExperimental(id, queryRequest);
     }
 
     /**
