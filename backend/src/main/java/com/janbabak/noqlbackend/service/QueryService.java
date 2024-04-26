@@ -417,7 +417,7 @@ public class QueryService {
         return null;
     }
 
-    public ChatResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
+    public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException {
 
         log.info("Execute chat, database_id={}", id);
@@ -431,8 +431,10 @@ public class QueryService {
                 You are an assistant that helps users visualise data. You have two functions. The first function is
                 translation of natural language queries into a database language. The second function is visualising
                 retrieved data. If the user wants to show or display or find or retrieve some data, translate it into
-                an SQL query for the Postgres database. If the user wants to plot or visualize the data, find the columns
-                that will be used for the visualisation.
+                an SQL query for the Postgres database. If the user wants to plot or visualize the data, translate the
+                query the same way or use the query from the previous response. The visualisation will be handled by our
+                system, don't modify the query to the visualisation. If the user wants to plot the data, find the
+                columns that will be used for the visualisation and also include the translated query.
                                 
                 Your response must be in the JSON format and mustn't contain other text than the JSON.
                                 
@@ -453,13 +455,13 @@ public class QueryService {
         try {
             ChatResponse chatResponse = objectMapper.readValue(query, ChatResponse.class);
 
-            return chatResponse;
-//            ChatQueryWithResponse message = chatService.addMessageToChat(
-//                    queryRequest.getChatId(),
-//                    new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
-//
-//            return QueryResponse.successfulResponse(
-//                    null, new ChatQueryWithResponseDto(message), null, null);
+//            return chatResponse;
+            ChatQueryWithResponse message = chatService.addMessageToChat(
+                    queryRequest.getChatId(),
+                    new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
+
+            return QueryResponse.successfulResponse(
+                    null, new ChatQueryWithResponseDto(message), null, null);
         } catch (Exception e) {
             log.error("exception occurred " + e.getMessage());
         }

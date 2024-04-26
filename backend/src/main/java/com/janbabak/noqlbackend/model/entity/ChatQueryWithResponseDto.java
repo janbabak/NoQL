@@ -11,7 +11,8 @@ import java.util.UUID;
 public class ChatQueryWithResponseDto {
     private UUID id;
     private String query; // query from user
-    private String response; // LLM response
+//    private String response; // LLM response
+    private Object response; // LLM response
     private Timestamp timestamp;
 
     public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse) {

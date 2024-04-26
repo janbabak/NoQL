@@ -127,7 +127,7 @@ public class DatabaseController {
      */
     @PostMapping("/{id}/query/chatExperimental")
     @ResponseStatus(HttpStatus.OK)
-    public ChatResponse executeChatExperimental(
+    public QueryResponse executeChatExperimental(
             @PathVariable UUID id,
             @RequestBody @Valid QueryRequest queryRequest
     ) throws DatabaseConnectionException, DatabaseExecutionException,
