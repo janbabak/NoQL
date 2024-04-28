@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -101,9 +102,9 @@ public class DatabaseController {
     /**
      * Query the user's database using natural language from in chat form, result is automatically paginated.
      *
-     * @param id          database id
+     * @param id           database id
      * @param queryRequest chat containing the natural language queries
-     * @param pageSize    number of items in one page
+     * @param pageSize     number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws LLMException                LLM request failed.
@@ -118,7 +119,7 @@ public class DatabaseController {
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
-            EntityNotFoundException, LLMException, BadRequestException {
+            EntityNotFoundException, LLMException, BadRequestException, JsonProcessingException {
         return queryService.executeChat(id, queryRequest, pageSize);
     }
 
@@ -163,8 +164,8 @@ public class DatabaseController {
      *
      * @param id identifier
      * @return database structure
-     * @throws DatabaseConnectionException syntax error error, ...
-     * @throws DatabaseExecutionException  connection to the database failed
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException  syntax error, ...
      * @throws EntityNotFoundException     database of specific id not found
      */
     @GetMapping("/{id}/structure")
@@ -175,7 +176,23 @@ public class DatabaseController {
     }
 
     /**
+     * Get generated create script by database id
+     *
+     * @param id identifier
+     * @return create script
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException  syntax error, ...
+     * @throws EntityNotFoundException     database of specific id not found
+     */
+    @GetMapping("/{id}/createScript")
+    public String getCreateScript(@PathVariable UUID id)
+            throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+        return databaseService.getDatabaseCreateScriptByDatabaseId(id);
+    }
+
+    /**
      * Get chat history (chats associated to a specified database) sorted by the modification data in descending order.
+     *
      * @param id database identifier
      * @return list of chat DTOs
      * @throws EntityNotFoundException database of specified id not found.

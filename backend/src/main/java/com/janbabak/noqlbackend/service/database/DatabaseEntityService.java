@@ -114,7 +114,7 @@ public class DatabaseEntityService {
      * @return database structure
      * @throws EntityNotFoundException     database of specific id not found
      * @throws DatabaseConnectionException connection to the database failed
-     * @throws DatabaseExecutionException  syntax error error, ...
+     * @throws DatabaseExecutionException  syntax error, ...
      */
     public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID id)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
@@ -123,5 +123,21 @@ public class DatabaseEntityService {
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
 
         return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
+    }
+
+    /**
+     * Get generated database create script by database id
+     * @param id identifier
+     * @return create script
+     * @throws EntityNotFoundException database of specific id not found
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException syntax error, ...
+     */
+    public String getDatabaseCreateScriptByDatabaseId(UUID id) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+
+        Database database = databaseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+
+        return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
     }
 }

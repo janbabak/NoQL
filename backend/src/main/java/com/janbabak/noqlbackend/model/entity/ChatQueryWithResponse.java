@@ -28,6 +28,7 @@ public class ChatQueryWithResponse {
 
     private String message;
 
+    /** json in form of string { {@code  translatedQuery: string, plot: boolean, columnsToPlot: string[] }} */
     private String response;
 
     private Timestamp timestamp;

@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
@@ -11,6 +12,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,11 +54,17 @@ public class ChatService {
                 chat.getName(),
                 chat.getMessages()
                         .stream()
-                        .map(message -> new ChatQueryWithResponseDto(
-                                message.getId(),
-                                message.getMessage(),
-                                message.getResponse(),
-                                message.getTimestamp()))
+                        .map(message -> {
+                            try {
+                                return new ChatQueryWithResponseDto(
+                                        message.getId(),
+                                        message.getMessage(),
+                                        JsonUtils.createChatResponse(message.getResponse()),
+                                        message.getTimestamp());
+                            } catch (JsonProcessingException e) {
+                                throw new RuntimeException(e); // TODO resolve
+                            }
+                        })
                         .toList(),
                 chat.getModificationDate());
     }

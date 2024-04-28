@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -327,7 +328,7 @@ public class QueryService {
 
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
         ChatQueryWithResponseDto message = new ChatQueryWithResponseDto( // TODO better solution
-                UUID.randomUUID(), query, query, Timestamp.from(Instant.now()));
+                UUID.randomUUID(), query, null, Timestamp.from(Instant.now())); // TODO: replace null
         try {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
             QueryResult queryResult = new QueryResult(resultSet);
@@ -359,7 +360,7 @@ public class QueryService {
      */
     public QueryResponse executeChat(UUID id, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            BadRequestException, LLMException {
+            BadRequestException, LLMException, JsonProcessingException {
 
         log.info("Execute chat, database_id={}", id);
 
@@ -390,12 +391,18 @@ public class QueryService {
                 Long totalCount = getTotalCount(query, specificDatabaseService);
                 ColumnTypes columnTypes = getColumnTypes(resultSet, query, queryResult, specificDatabaseService);
 
-                ChatQueryWithResponse message = chatService.addMessageToChat(
+                ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                         queryRequest.getChatId(),
                         new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
 
-                return QueryResponse.successfulResponse(
-                        queryResult, new ChatQueryWithResponseDto(message), totalCount, columnTypes);
+                ChatQueryWithResponseDto chatQueryWithResponseDto = null;
+                try {
+                    chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse);
+                } catch (JsonProcessingException e) {
+                    errors.add("Your response cannot be parsed into JSON. Response is: "
+                            + chatQueryWithResponse.getResponse());
+                }
+                return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, columnTypes);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
@@ -410,6 +417,7 @@ public class QueryService {
                             queryRequest.getChatId(),
                             new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
 
+                    // TODO: what if the chat query with response fails
                     return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
                 }
             }
@@ -448,14 +456,13 @@ public class QueryService {
 
         List<String> errors = new ArrayList<>();
 
-        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(
-                queryRequest.getChatId());
+        List<ChatQueryWithResponse> chatHistory =
+                chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
+
         String query = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
 
         try {
-            ChatResponse chatResponse = objectMapper.readValue(query, ChatResponse.class);
 
-//            return chatResponse;
             ChatQueryWithResponse message = chatService.addMessageToChat(
                     queryRequest.getChatId(),
                     new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
