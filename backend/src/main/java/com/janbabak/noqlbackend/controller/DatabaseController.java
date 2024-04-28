@@ -129,10 +129,11 @@ public class DatabaseController {
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeChatExperimental(
             @PathVariable UUID id,
-            @RequestBody @Valid QueryRequest queryRequest
+            @RequestBody @Valid QueryRequest queryRequest,
+            @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, JsonProcessingException {
-        return queryService.executeChatExperimental(id, queryRequest);
+        return queryService.executeChatExperimental(id, queryRequest, pageSize);
     }
 
     /**

@@ -499,8 +499,9 @@ public class QueryService {
         return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, null);
     }
 
-    public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, JsonProcessingException {
+    public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest, Integer pageSize)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            LLMException, JsonProcessingException {
 
         log.info("Execute chat, database_id={}", id);
 
@@ -530,7 +531,8 @@ public class QueryService {
                     }
                 }
                 else {
-                    return showResultTable(queryRequest, chatResponse, specificDatabaseService, database, 10, errors);
+                    return showResultTable(
+                            queryRequest, chatResponse, specificDatabaseService, database, pageSize, errors);
                 }
             } catch (JsonProcessingException | BadRequestException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
