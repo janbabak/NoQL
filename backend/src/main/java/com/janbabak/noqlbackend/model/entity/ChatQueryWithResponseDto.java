@@ -17,11 +17,20 @@ public class ChatQueryWithResponseDto {
     private ChatResponse response; // LLM response
     private Timestamp timestamp;
 
+    // TODO
     public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse) throws JsonProcessingException {
         this(
                 chatQueryWithResponse.getId(),
                 chatQueryWithResponse.getMessage(),
                 JsonUtils.createChatResponse(chatQueryWithResponse.getResponse()),
+                chatQueryWithResponse.getTimestamp());
+    }
+
+    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, ChatResponse chatResponse) {
+        this(
+                chatQueryWithResponse.getId(),
+                chatQueryWithResponse.getMessage(),
+                chatResponse,
                 chatQueryWithResponse.getTimestamp());
     }
 }

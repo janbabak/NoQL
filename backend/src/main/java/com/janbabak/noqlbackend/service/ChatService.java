@@ -122,7 +122,9 @@ public class ChatService {
      * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
+    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request)
+            throws EntityNotFoundException {
+
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         Timestamp timestamp = Timestamp.from(Instant.now());

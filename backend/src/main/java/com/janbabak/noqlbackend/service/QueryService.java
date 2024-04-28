@@ -501,7 +501,7 @@ public class QueryService {
 
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException, JsonProcessingException {
+            LLMException {
 
         log.info("Execute chat, database_id={}", id);
 
@@ -519,7 +519,6 @@ public class QueryService {
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             String chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
             ChatResponse chatResponse;
-            String paginatedQuery = null;
 
             try {
                 chatResponse = JsonUtils.createChatResponse(chatResponseString);
@@ -534,21 +533,24 @@ public class QueryService {
                     return showResultTable(
                             queryRequest, chatResponse, specificDatabaseService, database, pageSize, errors);
                 }
-            } catch (JsonProcessingException | BadRequestException | SQLException e) {
-                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
-                        attempt, paginatedQuery);
+            } catch (JsonProcessingException e) {
+                errors.add("Cannot parse response JSON - bad syntax.");
+            } catch (BadRequestException | SQLException e) {
+                log.info("Executing natural language query failed, attempt={}", attempt);
 
                 errors.add("Error occurred when during execution of your query.\n" +
                         "This is the error: " + e.getMessage());
 
+                // last try failed
                 if (attempt == settings.translationRetries) {
-                    // last try failed
                     ChatQueryWithResponse message = chatService.addMessageToChat(
                             queryRequest.getChatId(),
                             new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
 
                     // TODO: what if the chat query with response fails
-                    return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
+                    return QueryResponse.failedResponse(
+                            new ChatQueryWithResponseDto(message, null),
+                            e.getMessage());
                 }
             } catch (IOException e) {
                 System.out.println(e.getMessage()); // TODO: handle
