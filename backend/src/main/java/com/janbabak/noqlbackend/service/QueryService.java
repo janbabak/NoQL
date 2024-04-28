@@ -1,14 +1,12 @@
 package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
-import com.janbabak.noqlbackend.model.chat.ChatResponse;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
@@ -46,7 +44,6 @@ public class QueryService {
     private final Settings settings;
     private final ChatService chatService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Create system query for the LLM that specifies what should be done, database schema, ...
@@ -438,20 +435,14 @@ public class QueryService {
         String systemQuery = """
                 You are an assistant that helps users visualise data. You have two functions. The first function is
                 translation of natural language queries into a database language. The second function is visualising
-                retrieved data. If the user wants to show or display or find or retrieve some data, translate it into
-                an SQL query for the Postgres database. If the user wants to plot or visualize the data, translate the
-                query the same way or use the query from the previous response. The visualisation will be handled by our
-                system, don't modify the query to the visualisation. If the user wants to plot the data, find the
-                columns that will be used for the visualisation and also include the translated query.
-                                
-                Your response must be in the JSON format and mustn't contain other text than the JSON.
-                                
-                The format is { translatedQuery: string, plot: boolean, columnsToPlot: string[] }, where translatedQuery
-                is query in the database language, plot is true if users wants to plot something or false if doesn't
-                want to plot anything and columnsToPlot is an array of columns to be plotted if the user want's to plot
-                something.
-                                
-                The database structure looks like this: 
+                data. If the user wants to show or display or find or retrieve some data, translate it into an SQL query
+                for the Postgres database. I will use this query for displaying the data in form of table. If the user
+                wants to plot, chart or visualize the data, create a Python script that will generate the chart. Save
+                the generated chart into a file called chart.png and don't show it. To connect to the database use
+                host='localhost', port=5432, user='user', password='password', database='database'. Your response must
+                be in JSON format { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
+                
+                The database structure looks like this:
                 """ + databaseStructure;
 
         List<String> errors = new ArrayList<>();
@@ -460,6 +451,8 @@ public class QueryService {
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
 
         String query = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+
+        System.out.println("query is: " + query);
 
         try {
 

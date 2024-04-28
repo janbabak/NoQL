@@ -1,9 +1,6 @@
 package com.janbabak.noqlbackend.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +25,8 @@ public class ChatQueryWithResponse {
 
     private String message;
 
-    /** json in form of string { {@code  translatedQuery: string, plot: boolean, columnsToPlot: string[] }} */
+    /** json in form of string { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string }} */
+    @Column(length = 2048)
     private String response;
 
     private Timestamp timestamp;
