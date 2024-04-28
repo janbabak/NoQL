@@ -75,17 +75,21 @@ public class QueryService {
         // TOdO: parametrize the file name
         return new StringBuilder(
                 """
-                        You are an assistant that helps users visualise data. You have two functions. The first function is
-                        translation of natural language queries into a database language. The second function is visualising
-                        data. If the user wants to show or display or find or retrieve some data, translate it into""")
+                        You are an assistant that helps users visualise data. You have two functions. The first function
+                        is translation of natural language queries into a database language. The second function is
+                        visualising data. If the user wants to show or display or find or retrieve some data, translate
+                        it into""")
                 .append(database.getIsSQL() ? "an SQL query" : "an query language query")
                 .append(" for the ")
                 .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
                 .append("""
-                        \ndatabase. I will use this query for displaying the data in form of table. If the user wants to plot,
-                        chart or visualize the data, create a Python script that will generate the chart. Save the generated
-                        chart into a file called plotService/plots/plot.png and don't show it. To connect to the database use host='localhost',
-                        port=5432, user='user', password='password', database='database'. Your response must be in JSON format
+                        \ndatabase. I will use this query for displaying the data in form of table. If the user wants to
+                        plot, chart or visualize the data, create a Python script that will select the data and
+                        visualise them in a chart. Save the generated chart into a file called
+                        plotService/plots/plot.png and don't show it. To connect to the database use host='localhost',
+                        port=5432, user='user', password='password', database='database'.
+                        
+                        Your response must be in JSON format
                         { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
                                          
                         The database structure looks like this:""")
@@ -450,6 +454,24 @@ public class QueryService {
         return null;
     }
 
+    /**
+     * Plot results of chat response
+     *
+     * @param chatResponse chat response
+     * @param errors       collection of errors
+     * @return true fi success, false otherwise
+     * @throws IOException when script cannot be executed
+     */
+    private boolean plotResult(ChatResponse chatResponse, List<String> errors) throws IOException {
+        log.info("Generate plot");
+        String output = plotService.generatePlot(chatResponse.getPythonCode());
+        if (output != null) {
+            errors.add("Error when running the script. Script output is: " + output);
+            return false;
+        }
+        return true;
+    }
+
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, JsonProcessingException {
 
@@ -476,18 +498,9 @@ public class QueryService {
 
                 // plot result
                 if (chatResponse.getGeneratePlot()) {
-                    System.out.println("generate plot");
-                    try {
-                        String output = plotService.generatePlot(chatResponse.getPythonCode());
-                        if (output != null) {
-                            System.out.println("OUTPUT IS:" + output);
-                        } else {
-                            System.out.println("generated");
-                        }
-                    } catch (IOException e) {
-                        System.out.println(e.getMessage()); // TODO: handle
+                    if (plotResult(chatResponse, errors)) {
+                        return null; // TODO: response
                     }
-                    return null;
                 }
                 // show result table
                 else {
@@ -526,6 +539,8 @@ public class QueryService {
                     // TODO: what if the chat query with response fails
                     return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
                 }
+            } catch (IOException e) {
+                System.out.println(e.getMessage()); // TODO: handle
             }
         }
         return null;
