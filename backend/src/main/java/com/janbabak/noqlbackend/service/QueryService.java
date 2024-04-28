@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -46,6 +47,7 @@ public class QueryService {
     private final Settings settings;
     private final ChatService chatService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
+    private final PlotService plotService;
 
     /**
      * Create system query for the LLM that specifies what should be done, database schema, ...
@@ -70,6 +72,7 @@ public class QueryService {
     @SuppressWarnings("all")
     public static String createSystemQueryExperimental(String dbStructure, Database database) {
         // TODO: securly insert credentials from coresponding database
+        // TOdO: parametrize the file name
         return new StringBuilder(
                 """
                         You are an assistant that helps users visualise data. You have two functions. The first function is
@@ -81,7 +84,7 @@ public class QueryService {
                 .append("""
                         \ndatabase. I will use this query for displaying the data in form of table. If the user wants to plot,
                         chart or visualize the data, create a Python script that will generate the chart. Save the generated
-                        chart into a file called chart.png and don't show it. To connect to the database use host='localhost',
+                        chart into a file called plotService/plots/plot.png and don't show it. To connect to the database use host='localhost',
                         port=5432, user='user', password='password', database='database'. Your response must be in JSON format
                         { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
                                          
@@ -474,6 +477,17 @@ public class QueryService {
                 // plot result
                 if (chatResponse.getGeneratePlot()) {
                     System.out.println("generate plot");
+                    try {
+                        String output = plotService.generatePlot(chatResponse.getPythonCode());
+                        if (output != null) {
+                            System.out.println("OUTPUT IS:" + output);
+                        } else {
+                            System.out.println("generated");
+                        }
+                    } catch (IOException e) {
+                        System.out.println(e.getMessage()); // TODO: handle
+                    }
+                    return null;
                 }
                 // show result table
                 else {
@@ -514,18 +528,6 @@ public class QueryService {
                 }
             }
         }
-
-//        try {
-//
-//            ChatQueryWithResponse message = chatService.addMessageToChat(
-//                    queryRequest.getChatId(),
-//                    new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
-//
-//            return QueryResponse.successfulResponse(
-//                    null, new ChatQueryWithResponseDto(message), null, null);
-//        } catch (Exception e) {
-//            log.error("exception occurred " + e.getMessage());
-//        }
         return null;
     }
 }
