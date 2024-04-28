@@ -472,6 +472,33 @@ public class QueryService {
         return true;
     }
 
+    private QueryResponse showResultTable(
+            QueryRequest queryRequest,
+            ChatResponse chatResponse,
+            BaseDatabaseService specificDatabaseService,
+            Database database,
+            Integer pageSize,
+            List<String> errors) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
+            SQLException, EntityNotFoundException {
+
+        String paginatedQuery = setPaginationInSqlQuery(chatResponse.getDatabaseQuery(), 0, pageSize, database);
+        ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+        QueryResult queryResult = new QueryResult(resultSet);
+        Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
+        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
+                queryRequest.getChatId(), new CreateMessageWithResponseRequest(
+                        queryRequest.getQuery(), chatResponse.getDatabaseQuery()));
+
+        ChatQueryWithResponseDto chatQueryWithResponseDto = null;
+        try {
+            chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
+        } catch (JsonProcessingException e) {
+            errors.add("Your response cannot be parsed into JSON. Response is: "
+                    + chatQueryWithResponse.getResponse());
+        }
+        return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, null);
+    }
+
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, JsonProcessingException {
 
@@ -502,26 +529,8 @@ public class QueryService {
                         return null; // TODO: response
                     }
                 }
-                // show result table
                 else {
-                    paginatedQuery = setPaginationInSqlQuery(
-                            chatResponse.getDatabaseQuery(), 0, 10, database); // TODO: add param for pageSize
-                    ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-                    QueryResult queryResult = new QueryResult(resultSet);
-                    Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
-                    ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                            queryRequest.getChatId(),
-                            new CreateMessageWithResponseRequest(
-                                    queryRequest.getQuery(), chatResponse.getDatabaseQuery()));
-
-                    ChatQueryWithResponseDto chatQueryWithResponseDto = null;
-                    try {
-                        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
-                    } catch (JsonProcessingException e) {
-                        errors.add("Your response cannot be parsed into JSON. Response is: "
-                                + chatQueryWithResponse.getResponse());
-                    }
-                    return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, null);
+                    return showResultTable(queryRequest, chatResponse, specificDatabaseService, database, 10, errors);
                 }
             } catch (JsonProcessingException | BadRequestException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
