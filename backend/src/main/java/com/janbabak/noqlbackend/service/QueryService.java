@@ -7,6 +7,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
+import com.janbabak.noqlbackend.model.chat.ChatResponse;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
@@ -19,6 +20,7 @@ import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -62,6 +64,29 @@ public class QueryService {
                 .append("\nThis is the database structure:\n")
                 .append(dbStructure)
                 .append("Translate the user's queries.\n")
+                .toString();
+    }
+
+    @SuppressWarnings("all")
+    public static String createSystemQueryExperimental(String dbStructure, Database database) {
+        // TODO: securly insert credentials from coresponding database
+        return new StringBuilder(
+                """
+                        You are an assistant that helps users visualise data. You have two functions. The first function is
+                        translation of natural language queries into a database language. The second function is visualising
+                        data. If the user wants to show or display or find or retrieve some data, translate it into""")
+                .append(database.getIsSQL() ? "an SQL query" : "an query language query")
+                .append(" for the ")
+                .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
+                .append("""
+                        \ndatabase. I will use this query for displaying the data in form of table. If the user wants to plot,
+                        chart or visualize the data, create a Python script that will generate the chart. Save the generated
+                        chart into a file called chart.png and don't show it. To connect to the database use host='localhost',
+                        port=5432, user='user', password='password', database='database'. Your response must be in JSON format
+                        { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
+                                         
+                        The database structure looks like this:""")
+                .append(dbStructure)
                 .toString();
     }
 
@@ -423,7 +448,7 @@ public class QueryService {
     }
 
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException {
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, JsonProcessingException {
 
         log.info("Execute chat, database_id={}", id);
 
@@ -432,39 +457,75 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = """
-                You are an assistant that helps users visualise data. You have two functions. The first function is
-                translation of natural language queries into a database language. The second function is visualising
-                data. If the user wants to show or display or find or retrieve some data, translate it into an SQL query
-                for the Postgres database. I will use this query for displaying the data in form of table. If the user
-                wants to plot, chart or visualize the data, create a Python script that will generate the chart. Save
-                the generated chart into a file called chart.png and don't show it. To connect to the database use
-                host='localhost', port=5432, user='user', password='password', database='database'. Your response must
-                be in JSON format { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
-                
-                The database structure looks like this:
-                """ + databaseStructure;
-
+        String systemQuery = createSystemQueryExperimental(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
 
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
 
-        String query = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
+            String chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+            ChatResponse chatResponse;
+            String paginatedQuery = null;
 
-        System.out.println("query is: " + query);
+            try {
+                chatResponse = JsonUtils.createChatResponse(chatResponseString);
 
-        try {
+                // plot result
+                if (chatResponse.getGeneratePlot()) {
+                    System.out.println("generate plot");
+                }
+                // show result table
+                else {
+                    paginatedQuery = setPaginationInSqlQuery(
+                            chatResponse.getDatabaseQuery(), 0, 10, database); // TODO: add param for pageSize
+                    ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+                    QueryResult queryResult = new QueryResult(resultSet);
+                    Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
+                    ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
+                            queryRequest.getChatId(),
+                            new CreateMessageWithResponseRequest(
+                                    queryRequest.getQuery(), chatResponse.getDatabaseQuery()));
 
-            ChatQueryWithResponse message = chatService.addMessageToChat(
-                    queryRequest.getChatId(),
-                    new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
+                    ChatQueryWithResponseDto chatQueryWithResponseDto = null;
+                    try {
+                        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
+                    } catch (JsonProcessingException e) {
+                        errors.add("Your response cannot be parsed into JSON. Response is: "
+                                + chatQueryWithResponse.getResponse());
+                    }
+                    return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, null);
+                }
+            } catch (JsonProcessingException | BadRequestException | SQLException e) {
+                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
+                        attempt, paginatedQuery);
 
-            return QueryResponse.successfulResponse(
-                    null, new ChatQueryWithResponseDto(message), null, null);
-        } catch (Exception e) {
-            log.error("exception occurred " + e.getMessage());
+                errors.add("Error occurred when during execution of your query.\n" +
+                        "This is the error: " + e.getMessage());
+
+                if (attempt == settings.translationRetries) {
+                    // last try failed
+                    ChatQueryWithResponse message = chatService.addMessageToChat(
+                            queryRequest.getChatId(),
+                            new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
+
+                    // TODO: what if the chat query with response fails
+                    return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
+                }
+            }
         }
+
+//        try {
+//
+//            ChatQueryWithResponse message = chatService.addMessageToChat(
+//                    queryRequest.getChatId(),
+//                    new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
+//
+//            return QueryResponse.successfulResponse(
+//                    null, new ChatQueryWithResponseDto(message), null, null);
+//        } catch (Exception e) {
+//            log.error("exception occurred " + e.getMessage());
+//        }
         return null;
     }
 }
