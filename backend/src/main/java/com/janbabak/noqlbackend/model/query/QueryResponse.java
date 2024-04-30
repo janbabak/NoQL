@@ -18,17 +18,16 @@ import java.util.List;
 public class QueryResponse {
     private QueryResult result; // retrieved data
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
-    private ColumnTypes columnTypes; // which columns are categorical, numeric, ...
     private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
     private String errorMessage; // error message when the query execution failed due to syntax error
 
     public static QueryResponse successfulResponse(
-            QueryResult resultData, ChatQueryWithResponseDto message, Long totalCount, ColumnTypes columnTypes) {
-        return new QueryResponse(resultData, totalCount, columnTypes, message,null);
+            QueryResult resultData, ChatQueryWithResponseDto message, Long totalCount) {
+        return new QueryResponse(resultData, totalCount, message,null);
     }
 
     public static QueryResponse failedResponse(ChatQueryWithResponseDto message, String errorMessage) {
-        return new QueryResponse(null, null, null, message, errorMessage);
+        return new QueryResponse(null, null, message, errorMessage);
     }
 
     @Data

@@ -363,9 +363,8 @@ public class QueryService {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
             QueryResult queryResult = new QueryResult(resultSet);
             Long totalCount = getTotalCount(query, specificDatabaseService);
-            ColumnTypes columnTypes = getColumnTypes(resultSet, query, queryResult, specificDatabaseService);
 
-            return QueryResponse.successfulResponse(queryResult, message, totalCount, columnTypes);
+            return QueryResponse.successfulResponse(queryResult, message, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
         }
@@ -419,7 +418,6 @@ public class QueryService {
                 ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
                 QueryResult queryResult = new QueryResult(resultSet);
                 Long totalCount = getTotalCount(query, specificDatabaseService);
-                ColumnTypes columnTypes = getColumnTypes(resultSet, query, queryResult, specificDatabaseService);
 
                 ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                         queryRequest.getChatId(),
@@ -432,7 +430,7 @@ public class QueryService {
                     errors.add("Your response cannot be parsed into JSON. Response is: "
                             + chatQueryWithResponse.getResponse());
                 }
-                return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, columnTypes);
+                return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
             } catch (DatabaseExecutionException | SQLException e) {
                 log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
                         attempt, paginatedQuery);
@@ -497,7 +495,7 @@ public class QueryService {
             errors.add("Your response cannot be parsed into JSON. Response is: "
                     + chatQueryWithResponse.getResponse());
         }
-        return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount, null);
+        return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
     }
 
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest, Integer pageSize)
@@ -534,7 +532,7 @@ public class QueryService {
                         ChatQueryWithResponseDto chatQueryWithResponseDto =
                                 new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
 
-                        return successfulResponse(null, chatQueryWithResponseDto, null, null);
+                        return successfulResponse(null, chatQueryWithResponseDto, null);
                     }
                 }
                 else {
