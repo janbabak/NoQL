@@ -23,8 +23,8 @@ public class QueryResponse {
     private String errorMessage; // error message when the query execution failed due to syntax error
 
     public static QueryResponse successfulResponse(
-            QueryResult result, ChatQueryWithResponseDto message, Long totalCount, ColumnTypes columnTypes) {
-        return new QueryResponse(result, totalCount, columnTypes, message,null);
+            QueryResult resultData, ChatQueryWithResponseDto message, Long totalCount, ColumnTypes columnTypes) {
+        return new QueryResponse(resultData, totalCount, columnTypes, message,null);
     }
 
     public static QueryResponse failedResponse(ChatQueryWithResponseDto message, String errorMessage) {

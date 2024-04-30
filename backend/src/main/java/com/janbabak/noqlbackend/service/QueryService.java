@@ -36,6 +36,7 @@ import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 import static com.janbabak.noqlbackend.model.query.QueryResponse.ColumnTypes;
+import static com.janbabak.noqlbackend.model.query.QueryResponse.successfulResponse;
 import static java.sql.Types.*;
 
 @Slf4j
@@ -526,7 +527,14 @@ public class QueryService {
                 // plot result
                 if (chatResponse.getGeneratePlot()) {
                     if (plotResult(chatResponse, errors)) {
-                        return null; // TODO: response
+                        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
+                                queryRequest.getChatId(), new CreateMessageWithResponseRequest(
+                                        queryRequest.getQuery(), chatResponseString));
+
+                        ChatQueryWithResponseDto chatQueryWithResponseDto =
+                                new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
+
+                        return successfulResponse(null, chatQueryWithResponseDto, null, null);
                     }
                 }
                 else {
