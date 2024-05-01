@@ -425,7 +425,8 @@ public class QueryService {
 
                 ChatQueryWithResponseDto chatQueryWithResponseDto = null;
                 try {
-                    chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse);
+                    chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                            chatQueryWithResponse, "/static/images/plot.png");
                 } catch (JsonProcessingException e) {
                     errors.add("Your response cannot be parsed into JSON. Response is: "
                             + chatQueryWithResponse.getResponse());
@@ -446,7 +447,8 @@ public class QueryService {
                             new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
 
                     // TODO: what if the chat query with response fails
-                    return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message), e.getMessage());
+                    return QueryResponse.failedResponse(
+                            new ChatQueryWithResponseDto(message, "/static/images/plot.png"), e.getMessage());
                 }
             }
         }
@@ -490,7 +492,7 @@ public class QueryService {
 
         ChatQueryWithResponseDto chatQueryWithResponseDto = null;
         try {
-            chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
+            chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
         } catch (JsonProcessingException e) {
             errors.add("Your response cannot be parsed into JSON. Response is: "
                     + chatQueryWithResponse.getResponse());
@@ -500,7 +502,7 @@ public class QueryService {
 
     public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException {
+            LLMException, JsonProcessingException {
 
         log.info("Execute chat, database_id={}", id);
 
@@ -530,7 +532,7 @@ public class QueryService {
                                         queryRequest.getQuery(), chatResponseString));
 
                         ChatQueryWithResponseDto chatQueryWithResponseDto =
-                                new ChatQueryWithResponseDto(chatQueryWithResponse); // TODO: redundant json parsing
+                                new ChatQueryWithResponseDto(chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
 
                         return successfulResponse(null, chatQueryWithResponseDto, null);
                     }
