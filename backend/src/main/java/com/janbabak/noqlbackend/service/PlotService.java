@@ -12,12 +12,13 @@ import java.util.function.Supplier;
 @Service
 public class PlotService {
 
+    public static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
     private static final String WORKING_DIRECTORY_PATH = "./plotService";
-    private static final String PLOT_SCRIPT_NAME = "plot.py";
     private static final String PLOTS_DIRECTORY = "plots";
-    private final Supplier<String> scriptPath = () -> WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME;
+    public static final Supplier<String> plotsDirPath = () -> WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY;
+    private static final String PLOT_SCRIPT_NAME = "plot.py";
+    private static final Supplier<String> scriptPath = () -> WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME;
     @SuppressWarnings("FieldCanBeLocal")
-    private final Supplier<String> plotsDirPath = () -> WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY;
 
     File workingDirectory;
     File plotsDirectory;
@@ -67,7 +68,9 @@ public class PlotService {
      * @throws IOException                  cannot create script file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public void generatePlot(String scriptContent) throws IOException, PlotScriptExecutionException {
+    public void generatePlot(String scriptContent)
+            throws IOException, PlotScriptExecutionException {
+
         createPlotScript(scriptContent);
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get());

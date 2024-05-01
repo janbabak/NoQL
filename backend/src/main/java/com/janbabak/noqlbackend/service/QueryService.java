@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.janbabak.noqlbackend.config.ResourceConfig;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
@@ -68,7 +69,7 @@ public class QueryService {
     }
 
     @SuppressWarnings("all")
-    public static String createSystemQueryExperimental(String dbStructure, Database database) {
+    public static String createSystemQueryExperimental(String dbStructure, Database database, UUID chatId) {
         // TODO: securly insert credentials from coresponding database
         // TOdO: parametrize the file name
         return new StringBuilder(
@@ -83,8 +84,10 @@ public class QueryService {
                 .append("""
                         \ndatabase. I will use this query for displaying the data in form of table. If the user wants to
                         plot, chart or visualize the data, create a Python script that will select the data and
-                        visualise them in a chart. Save the generated chart into a file called
-                        plotService/plots/plot.png and don't show it. To connect to the database use host='localhost',
+                        visualise them in a chart. Save the generated chart into a file called""")
+                .append(" " + PlotService.plotsDirPath.get() + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
+                .append("""
+                         and don't show it. To connect to the database use host='localhost',
                         port=5432, user='user', password='password', database='database'.
                                                 
                         Your response must be in JSON format
@@ -455,8 +458,9 @@ public class QueryService {
     /**
      * Plot results of chat response
      *
-     * @param chatResponse chat response
-     * @param errors       collection of errors
+     * @param queryRequest       api request
+     * @param chatResponse       chat response
+     * @param chatResponseString not parsed response
      * @return query response
      * @throws IOException when script cannot be executed
      */
@@ -474,8 +478,13 @@ public class QueryService {
                 queryRequest.getChatId(),
                 new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
 
+        String plotUrl =
+                ResourceConfig.IMAGES_STATIC_FOLDER
+                        + queryRequest.getChatId() // plot name is the same as chat id
+                        + PlotService.PLOT_IMAGE_FILE_EXTENSION;
+
         ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
+                chatQueryWithResponse, plotUrl); // TODO: redundant json parsing
 
         return successfulResponse(null, chatQueryWithResponseDto, null);
     }
@@ -518,7 +527,8 @@ public class QueryService {
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQueryExperimental(databaseStructure.generateCreateScript(), database);
+        String systemQuery = createSystemQueryExperimental(
+                databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
