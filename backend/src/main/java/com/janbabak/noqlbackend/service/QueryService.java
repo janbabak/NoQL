@@ -89,7 +89,7 @@ public class QueryService {
                         visualise them in a chart. Save the generated chart into a file called
                         plotService/plots/plot.png and don't show it. To connect to the database use host='localhost',
                         port=5432, user='user', password='password', database='database'.
-                        
+                                                
                         Your response must be in JSON format
                         { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
                                          
@@ -460,17 +460,33 @@ public class QueryService {
      *
      * @param chatResponse chat response
      * @param errors       collection of errors
-     * @return true fi success, false otherwise
+     * @return query response
      * @throws IOException when script cannot be executed
      */
-    private boolean plotResult(ChatResponse chatResponse, List<String> errors) throws IOException {
+    private QueryResponse plotResult(
+            QueryRequest queryRequest,
+            ChatResponse chatResponse,
+            String chatResponseString,
+            List<String> errors
+    ) throws IOException, EntityNotFoundException {
+
         log.info("Generate plot");
+
         String output = plotService.generatePlot(chatResponse.getPythonCode());
+
         if (output != null) {
             errors.add("Error when running the script. Script output is: " + output);
-            return false;
+            return null;
         }
-        return true;
+
+        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
+                queryRequest.getChatId(),
+                new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
+
+        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
+
+        return successfulResponse(null, chatQueryWithResponseDto, null);
     }
 
     private QueryResponse showResultTable(
@@ -508,36 +524,23 @@ public class QueryService {
 
         Database database = databaseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
-
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
         String systemQuery = createSystemQueryExperimental(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
-
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             String chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
-            ChatResponse chatResponse;
 
             try {
-                chatResponse = JsonUtils.createChatResponse(chatResponseString);
+                ChatResponse chatResponse = JsonUtils.createChatResponse(chatResponseString);
 
                 // plot result
                 if (chatResponse.getGeneratePlot()) {
-                    if (plotResult(chatResponse, errors)) {
-                        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                                queryRequest.getChatId(), new CreateMessageWithResponseRequest(
-                                        queryRequest.getQuery(), chatResponseString));
-
-                        ChatQueryWithResponseDto chatQueryWithResponseDto =
-                                new ChatQueryWithResponseDto(chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
-
-                        return successfulResponse(null, chatQueryWithResponseDto, null);
-                    }
-                }
-                else {
+                    return plotResult(queryRequest, chatResponse, chatResponseString, errors);
+                } else {
                     return showResultTable(
                             queryRequest, chatResponse, specificDatabaseService, database, pageSize, errors);
                 }

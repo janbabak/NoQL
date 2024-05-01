@@ -16,6 +16,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class QueryResponse {
+
     private QueryResult result; // retrieved data
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
     private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
