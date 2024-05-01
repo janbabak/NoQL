@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service;
 
+import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -63,10 +64,10 @@ public class PlotService {
      * Generate plot
      *
      * @param scriptContent content of python file responsible for plot generation (code)
-     * @return null if success, output if failure
-     * @throws IOException cannot create script file
+     * @throws IOException                  cannot create script file
+     * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public String generatePlot(String scriptContent) throws IOException {
+    public void generatePlot(String scriptContent) throws IOException, PlotScriptExecutionException {
         createPlotScript(scriptContent);
 
         ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get());
@@ -83,11 +84,10 @@ public class PlotService {
         try {
             int exitCode = process.waitFor();
             if (exitCode != 0) { // fail
-                return output.toString();
+                throw new PlotScriptExecutionException(output.toString());
             }
         } catch (InterruptedException e) {
-            return output.toString();
+            throw new PlotScriptExecutionException(output.toString());
         }
-        return null; // success
     }
 }

@@ -2,10 +2,7 @@ package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.chat.ChatResponse;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
@@ -466,18 +463,12 @@ public class QueryService {
     private QueryResponse plotResult(
             QueryRequest queryRequest,
             ChatResponse chatResponse,
-            String chatResponseString,
-            List<String> errors
-    ) throws IOException, EntityNotFoundException {
+            String chatResponseString
+    ) throws IOException, EntityNotFoundException, PlotScriptExecutionException {
 
         log.info("Generate plot");
 
-        String output = plotService.generatePlot(chatResponse.getPythonCode());
-
-        if (output != null) {
-            errors.add("Error when running the script. Script output is: " + output);
-            return null;
-        }
+        plotService.generatePlot(chatResponse.getPythonCode());
 
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(),
@@ -540,7 +531,7 @@ public class QueryService {
                 ChatResponse chatResponse = JsonUtils.createChatResponse(chatResponseString);
 
                 if (chatResponse.getGeneratePlot()) {
-                    return plotResult(queryRequest, chatResponse, chatResponseString, errors);
+                    return plotResult(queryRequest, chatResponse, chatResponseString);
                 } else {
                     return showResultTable(queryRequest, chatResponse, chatResponseString, specificDatabaseService,
                             database, pageSize, errors);
@@ -551,6 +542,8 @@ public class QueryService {
                 errors.add("Error occurred when execution your query: " + e.getMessage());
             } catch (IOException e) {
                 errors.add("Python script execution failed.");
+            } catch (PlotScriptExecutionException e) {
+                errors.add(e.getMessage());
             }
         }
 
