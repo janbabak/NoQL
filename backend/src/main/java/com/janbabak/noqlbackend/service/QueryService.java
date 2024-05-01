@@ -492,6 +492,7 @@ public class QueryService {
     private QueryResponse showResultTable(
             QueryRequest queryRequest,
             ChatResponse chatResponse,
+            String chatResponseString,
             BaseDatabaseService specificDatabaseService,
             Database database,
             Integer pageSize,
@@ -504,7 +505,7 @@ public class QueryService {
         Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(), new CreateMessageWithResponseRequest(
-                        queryRequest.getQuery(), chatResponse.getDatabaseQuery()));
+                        queryRequest.getQuery(), chatResponseString));
 
         ChatQueryWithResponseDto chatQueryWithResponseDto = null;
         try {
@@ -541,8 +542,8 @@ public class QueryService {
                 if (chatResponse.getGeneratePlot()) {
                     return plotResult(queryRequest, chatResponse, chatResponseString, errors);
                 } else {
-                    return showResultTable(
-                            queryRequest, chatResponse, specificDatabaseService, database, pageSize, errors);
+                    return showResultTable(queryRequest, chatResponse, chatResponseString, specificDatabaseService,
+                            database, pageSize, errors);
                 }
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
