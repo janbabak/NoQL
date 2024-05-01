@@ -530,14 +530,14 @@ public class QueryService {
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
+        String chatResponseString = "";
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+            chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
 
             try {
                 ChatResponse chatResponse = JsonUtils.createChatResponse(chatResponseString);
 
-                // plot result
                 if (chatResponse.getGeneratePlot()) {
                     return plotResult(queryRequest, chatResponse, chatResponseString, errors);
                 } else {
@@ -547,26 +547,19 @@ public class QueryService {
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
             } catch (BadRequestException | SQLException e) {
-                log.info("Executing natural language query failed, attempt={}", attempt);
-
-                errors.add("Error occurred when during execution of your query.\n" +
-                        "This is the error: " + e.getMessage());
-
-                // last try failed
-                if (attempt == settings.translationRetries) {
-                    ChatQueryWithResponse message = chatService.addMessageToChat(
-                            queryRequest.getChatId(),
-                            new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
-
-                    // TODO: what if the chat query with response fails
-                    return QueryResponse.failedResponse(
-                            new ChatQueryWithResponseDto(message, null),
-                            e.getMessage());
-                }
+                errors.add("Error occurred when execution your query: " + e.getMessage());
             } catch (IOException e) {
-                System.out.println(e.getMessage()); // TODO: handle
+                errors.add("Python script execution failed.");
             }
         }
-        return null;
+
+        // last try failed
+        ChatQueryWithResponse message = chatService.addMessageToChat(
+                queryRequest.getChatId(),
+                new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
+
+        String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
+        // TODO: what if the chat query with response fails
+        return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message, null), lastError);
     }
 }
