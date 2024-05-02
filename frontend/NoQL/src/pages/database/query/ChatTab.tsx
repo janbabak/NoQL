@@ -79,8 +79,10 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Creates new chat if there isn't any. // TODO that
    */
   async function loadChatHistoryAndChatAndResult(chatIndex: number): Promise<void> {
+    // chat history
     let result = await dispatch(fetchChatHistory(databaseId))
 
+    // chat
     // @ts-ignore
     if (result.payload.length > chatIndex && chatIndex >= 0) {
       // @ts-ignore
@@ -90,13 +92,17 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       dispatch(setChatToNull())
       return
     }
+
+    // chat result
     // @ts-ignore
     if (result.payload.messages.length > 0) {
       // @ts-ignore
-      void loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+      loadQueryLanguageQuery(result.payload.id)
     } else {
       setQueryResult(null)
     }
+
+    console.log()
   }
 
   /**
@@ -131,7 +137,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         // @ts-ignore
         dispatch(renameChat({
           index: activeChatIndexRedux,
-          name: updatedName}))
+          name: updatedName
+        }))
       } else {
         dispatch(addMessage(response.data.chatQueryWithResponse))
       }
@@ -153,11 +160,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
     setPageLoading(true)
     try {
-      const response: AxiosResponse<QueryResponse> = await databaseApi.queryQueryLanguageQuery(
-        databaseId,
-        chat?.messages[chat?.messages.length - 1].response || '',
-        page,
-        pageSize)
+      const response: AxiosResponse<QueryResponse> =
+        await databaseApi.loadChatResult(databaseId, chat?.id || '', page, pageSize)
 
       setQueryResult(response.data)
     } catch (error: unknown) {
@@ -169,13 +173,14 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
   /**
    * Fetch result of query language query.
-   * @param query in query language
+   * @param chatId identifier
    */
-  async function loadQueryLanguageQuery(query: string): Promise<void> {
+  async function loadQueryLanguageQuery(chatId: string): Promise<void> {
     setQueryLoading(true)
     try {
-      const response: AxiosResponse<QueryResponse> = await databaseApi.queryQueryLanguageQuery(
-        databaseId, query, 0, pageSize)
+      const response: AxiosResponse<QueryResponse> =
+        await databaseApi.loadChatResult(databaseId, chatId || '', 0, pageSize)
+
       setPage(0)
       setQueryResult(response.data)
     } catch (error: unknown) {
@@ -193,8 +198,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
     // @ts-expect-error
     if (result.payload.messages.length > 0) {
-      // @ts-expect-error
-      await loadQueryLanguageQuery(result.payload.messages[result.payload.messages.length - 1].response)
+      await loadQueryLanguageQuery(chatId)
     } else {
       setQueryResult(null)
     }

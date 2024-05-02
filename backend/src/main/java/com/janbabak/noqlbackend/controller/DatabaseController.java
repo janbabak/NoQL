@@ -136,6 +136,17 @@ public class DatabaseController {
         return queryService.executeChatExperimental(id, queryRequest, pageSize);
     }
 
+    @PostMapping("/{id}/query/load-chat-result")
+    @ResponseStatus(HttpStatus.OK)
+    public QueryResponse loadChatResult(
+            @PathVariable UUID id,
+            @RequestParam UUID chatId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize
+    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException, JsonProcessingException {
+        return queryService.loadChatResult(id, chatId, page, pageSize);
+    }
+
     /**
      * Query the user's database using database query language, result is automatically paginated.
      *

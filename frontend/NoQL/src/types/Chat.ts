@@ -13,8 +13,13 @@ interface Chat {
 interface ChatQueryWithResponse {
   id: string,
   query: string,
-  response: string,
+  chatResponseResult: ChatResponseResult,
   timestamp: string, // TODO date
 }
 
-export type { ChatHistoryItem, Chat, ChatQueryWithResponse }
+interface ChatResponseResult {
+  databaseQuery: string | null,
+  plotUrl: string | null
+}
+
+export type { ChatHistoryItem, Chat, ChatQueryWithResponse, ChatResponseResult }

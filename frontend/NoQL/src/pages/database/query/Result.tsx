@@ -1,4 +1,4 @@
-import { Alert, Button } from '@mui/material'
+import { Alert, Button, Paper } from '@mui/material'
 import { ResultTable } from './ResultTable.tsx'
 import { QueryResponse } from '../../../types/Query.ts'
 import React from 'react'
@@ -25,7 +25,7 @@ export function Result(
     setPageSize,
     totalCount,
     onPageChange,
-    loading,
+    loading
   }: Props) {
 
   async function onPageSizeChange(newPageSize: number): Promise<void> {
@@ -35,7 +35,9 @@ export function Result(
 
   const EditQueryButton =
     <Button
-      onClick={() => editQueryInConsole(queryResponse?.chatQueryWithResponse.response || '')}
+      onClick={(): void => {
+        editQueryInConsole(queryResponse?.chatQueryWithResponse.chatResponseResult.databaseQuery || '')
+      }}
       size="small"
       color="inherit"
     >
@@ -53,6 +55,14 @@ export function Result(
             >
               {queryResponse.errorMessage}
             </Alert>
+          }
+
+          {queryResponse.chatQueryWithResponse.chatResponseResult.plotUrl != null &&
+            // TODO: backend url
+            <Paper elevation={2} style={{marginBottom: '2rem', display: 'flex', justifyContent: 'center'}}>
+              <img src={'http://localhost:8080' + queryResponse.chatQueryWithResponse.chatResponseResult.plotUrl}
+                   alt="plot" />
+            </Paper>
           }
 
           {totalCount != null &&

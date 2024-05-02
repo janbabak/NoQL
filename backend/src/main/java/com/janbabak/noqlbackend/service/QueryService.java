@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.config.ResourceConfig;
+import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
@@ -43,6 +44,7 @@ import static java.sql.Types.*;
 public class QueryService {
     private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
+    private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final Settings settings;
     private final ChatService chatService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
@@ -367,6 +369,53 @@ public class QueryService {
             return QueryResponse.successfulResponse(queryResult, message, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
+        }
+    }
+
+    public  QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
+            throws EntityNotFoundException, JsonProcessingException, BadRequestException, DatabaseConnectionException {
+        log.info("Reload chat result, chatId={}", chatId);
+
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        Optional<ChatQueryWithResponse> latestMessage =
+                chatQueryWithResponseRepository.findLatestMessageFromChat(chatId);
+
+        if (latestMessage.isEmpty()) {
+            return null; // TODO: is that correct
+        }
+
+        ChatResponse chatResponse;
+        try {
+            chatResponse = JsonUtils.createChatResponse(latestMessage.get().getResponse());
+        } catch (JsonProcessingException e) {
+            return null; // should not happen;
+        }
+
+        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                latestMessage.get(),
+                chatResponse.getGeneratePlot()
+                        ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION
+                        : null);
+
+        // only plot without any select query to retrieve the data
+        if (chatResponse.getDatabaseQuery() == null) {
+            return QueryResponse.successfulResponse(null, chatQueryWithResponseDto, null);
+        }
+
+        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+
+        String paginatedQuery = setPaginationInSqlQuery(chatResponse.getDatabaseQuery(), page, pageSize, database);
+
+        try {
+            ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+            QueryResult queryResult = new QueryResult(resultSet);
+            Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
+
+            return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
+        } catch (DatabaseExecutionException | SQLException e) {
+            return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage()); // TODO: better solution
         }
     }
 
