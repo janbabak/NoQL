@@ -17,7 +17,7 @@ interface ModelsResponse {
 
 function ModelsResponse({ chatQueryResult }: ModelsResponse) {
   return (
-    chatQueryResult.databaseQuery != null
+   chatQueryResult?.databaseQuery != null
       ? <SyntaxHighlighter
         style={theme}
         language="SQL"
@@ -25,7 +25,7 @@ function ModelsResponse({ chatQueryResult }: ModelsResponse) {
       >
         {chatQueryResult.databaseQuery}
       </SyntaxHighlighter>
-      : <div>{chatQueryResult.plotUrl}</div> // TODO: what if there is no query result
+      : <div></div>
   )
 }
 

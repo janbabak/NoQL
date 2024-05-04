@@ -105,7 +105,7 @@ public class DatabaseController {
      * @param pageSize     number of items in one page
      * @return query result
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
      * @throws LLMException                LLM request failed
      */

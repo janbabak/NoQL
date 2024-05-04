@@ -137,6 +137,10 @@ public class QueryService {
     private String trimAndRemoveTrailingSemicolon(String query) {
         query = query.trim();
 
+        if (query.isEmpty()) {
+            return query;
+        }
+
         // removes trailing semicolon if it is present
         return query.charAt(query.length() - 1) == ';'
                 ? query.substring(0, query.length() - 1)
@@ -483,12 +487,11 @@ public class QueryService {
      * or both.
      * @throws EntityNotFoundException queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException generated query syntax error
+     * @throws DatabaseExecutionException retrieving database schema failure
      * @throws LLMException large language model failure
      */
     public QueryResponse executeChat(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException {
+            throws EntityNotFoundException, DatabaseConnectionException, LLMException, DatabaseExecutionException {
 
         log.info("Execute chat, database_id={}", databaseId);
 
@@ -497,43 +500,44 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQueryExperimental(
+        String systemQuery =createSystemQueryExperimental(
                 databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
-        String LLMResponseJson = "";
+        String llmResponseJson = "";
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            LLMResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+            llmResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
 
             try {
-                LLMResponse LLMResponse = JsonUtils.createLLMResponse(LLMResponseJson);
+                LLMResponse LLMResponse = JsonUtils.createLLMResponse(llmResponseJson);
 
                 if (LLMResponse.getGeneratePlot()) {
-                    return plotResult(queryRequest, LLMResponse, LLMResponseJson);
+                    return plotResult(queryRequest, LLMResponse, llmResponseJson);
                 } else {
-                    return showResultTable(queryRequest, LLMResponse, LLMResponseJson, specificDatabaseService,
-                            database, pageSize);
+                    return showResultTable(
+                            queryRequest, LLMResponse, llmResponseJson, specificDatabaseService, database, pageSize);
                 }
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
-            } catch (BadRequestException | SQLException e) {
+            } catch (SQLException e) {
                 errors.add("Error occurred when execution your query: " + e.getMessage());
             } catch (IOException e) {
-                errors.add("Python script execution failed.");
+                errors.add("Plot script execution failed.");
             } catch (PlotScriptExecutionException e) {
                 errors.add(e.getMessage());
+            } catch (DatabaseExecutionException e) {
+                errors.add("Generated query execution failed");
             }
         }
 
-        // last try failed
-        ChatQueryWithResponse message = chatService.addMessageToChat(
-                queryRequest.getChatId(),
-                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
+        // last try failed - return message that is not persisted
+        ChatQueryWithResponse message = new ChatQueryWithResponse();
+        message.setNLQuery(queryRequest.getQuery());
+        message.setLLMResponse(llmResponseJson);
 
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
-        // TODO: what if the chat query with response fails
         return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message, null), lastError);
     }
 }
