@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class ChatResponse {
+public class LLMResponse {
     private String databaseQuery;
     private Boolean generatePlot;
     private String pythonCode;

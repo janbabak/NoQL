@@ -1,12 +1,11 @@
 package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.janbabak.noqlbackend.config.ResourceConfig;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
-import com.janbabak.noqlbackend.model.chat.ChatResponse;
+import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
@@ -386,32 +385,32 @@ public class QueryService {
             return null; // TODO: is that correct
         }
 
-        ChatResponse chatResponse;
+        LLMResponse LLMResponse;
         try {
-            chatResponse = JsonUtils.createChatResponse(latestMessage.get().getResponse());
+            LLMResponse = JsonUtils.createLLMResponse(latestMessage.get().getResponse());
         } catch (JsonProcessingException e) {
             return null; // should not happen;
         }
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, chatId);
+                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, chatId);
 
         ChatQueryWithResponseDto chatQueryWithResponseDto =
                 new ChatQueryWithResponseDto(latestMessage.get(), chatResponseResult);
 
         // only plot without any select query to retrieve the data
-        if (chatResponse.getDatabaseQuery() == null) {
+        if (LLMResponse.getDatabaseQuery() == null) {
             return QueryResponse.successfulResponse(null, chatQueryWithResponseDto, null);
         }
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
 
-        String paginatedQuery = setPaginationInSqlQuery(chatResponse.getDatabaseQuery(), page, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), page, pageSize, database);
 
         try {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
             QueryResult queryResult = new QueryResult(resultSet);
-            Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
+            Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
 
             return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
@@ -423,27 +422,27 @@ public class QueryService {
      * Plot results of chat response
      *
      * @param queryRequest       api request
-     * @param chatResponse       chat response
-     * @param chatResponseString not parsed response
+     * @param LLMResponse       large language model response
+     * @param LLMResponseJson not parsed LLM response
      * @return query response
      * @throws IOException when script cannot be executed
      */
     private QueryResponse plotResult(
             QueryRequest queryRequest,
-            ChatResponse chatResponse,
-            String chatResponseString
+            LLMResponse LLMResponse,
+            String LLMResponseJson
     ) throws IOException, EntityNotFoundException, PlotScriptExecutionException {
 
         log.info("Generate plot");
 
-        plotService.generatePlot(chatResponse.getPythonCode());
+        plotService.generatePlot(LLMResponse.getPythonCode());
 
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(),
-                new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
+                new CreateMessageWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, queryRequest.getChatId());
+                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, queryRequest.getChatId());
 
         ChatQueryWithResponseDto chatQueryWithResponseDto =
                 new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
@@ -453,25 +452,25 @@ public class QueryService {
 
     private QueryResponse showResultTable(
             QueryRequest queryRequest,
-            ChatResponse chatResponse,
-            String chatResponseString,
+            LLMResponse LLMResponse,
+            String LLMResponseJson,
             BaseDatabaseService specificDatabaseService,
             Database database,
             Integer pageSize) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
             SQLException, EntityNotFoundException {
 
-        String paginatedQuery = setPaginationInSqlQuery(chatResponse.getDatabaseQuery(), 0, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), 0, pageSize, database);
         ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
         QueryResult queryResult = new QueryResult(resultSet);
-        Long totalCount = getTotalCount(chatResponse.getDatabaseQuery(), specificDatabaseService);
+        Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(), new CreateMessageWithResponseRequest(
-                        queryRequest.getQuery(), chatResponseString));
+                        queryRequest.getQuery(), LLMResponseJson));
 
         ChatQueryWithResponseDto chatQueryWithResponseDto;
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, queryRequest.getChatId());
+                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, queryRequest.getChatId());
 
         chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
 
@@ -508,18 +507,18 @@ public class QueryService {
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
-        String chatResponseString = "";
+        String LLMResponseJson = "";
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            chatResponseString = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+            LLMResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
 
             try {
-                ChatResponse chatResponse = JsonUtils.createChatResponse(chatResponseString);
+                LLMResponse LLMResponse = JsonUtils.createLLMResponse(LLMResponseJson);
 
-                if (chatResponse.getGeneratePlot()) {
-                    return plotResult(queryRequest, chatResponse, chatResponseString);
+                if (LLMResponse.getGeneratePlot()) {
+                    return plotResult(queryRequest, LLMResponse, LLMResponseJson);
                 } else {
-                    return showResultTable(queryRequest, chatResponse, chatResponseString, specificDatabaseService,
+                    return showResultTable(queryRequest, LLMResponse, LLMResponseJson, specificDatabaseService,
                             database, pageSize);
                 }
             } catch (JsonProcessingException e) {
@@ -536,7 +535,7 @@ public class QueryService {
         // last try failed
         ChatQueryWithResponse message = chatService.addMessageToChat(
                 queryRequest.getChatId(),
-                new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
+                new CreateMessageWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
         // TODO: what if the chat query with response fails

@@ -7,7 +7,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.ChatResponse;
+import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -57,13 +57,13 @@ public class ChatService {
                         .stream()
                         .map(message -> {
                             try {
-                                ChatResponse chatResponse = JsonUtils.createChatResponse(message.getResponse());
+                                LLMResponse LLMResponse = JsonUtils.createLLMResponse(message.getResponse());
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
                                         message.getMessage(),
                                         new ChatQueryWithResponseDto.ChatResponseResult(
-                                                chatResponse.getDatabaseQuery(),
+                                                LLMResponse.getDatabaseQuery(),
                                                 "/static/images/plot.png"),
                                         message.getTimestamp());
                             } catch (JsonProcessingException e) {
