@@ -1,7 +1,7 @@
 import { Alert, Button, Paper } from '@mui/material'
 import { ResultTable } from './ResultTable.tsx'
 import { QueryResponse } from '../../../types/Query.ts'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface Props {
   queryResponse: QueryResponse | null,
@@ -27,6 +27,20 @@ export function Result(
     onPageChange,
     loading
   }: Props) {
+
+  const [
+    timestamp,
+    setTimestamp
+  ] = useState<number>(Date.now());
+
+  // Function to update the timestamp, triggering a reload of the image
+  const reloadImage = (): void => {
+    setTimestamp(Date.now());
+  };
+
+  useEffect((): void => {
+    reloadImage()
+  }, [queryResponse])
 
   async function onPageSizeChange(newPageSize: number): Promise<void> {
     setPageSize(0)
@@ -60,8 +74,9 @@ export function Result(
           {queryResponse?.chatQueryWithResponse?.llmresult?.plotUrl != null &&
             // TODO: backend url
             <Paper elevation={2} style={{marginBottom: '2rem', display: 'flex', justifyContent: 'center'}}>
-              <img src={'http://localhost:8080' + queryResponse.chatQueryWithResponse.llmresult.plotUrl}
-                   alt="plot" />
+              <img src={'http://localhost:8080' + queryResponse.chatQueryWithResponse.llmresult.plotUrl + `?timestamp=${timestamp}`}
+                   alt="plot"
+              />
             </Paper>
           }
 
