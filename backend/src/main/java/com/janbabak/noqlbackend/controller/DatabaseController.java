@@ -108,6 +108,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
      * @throws LLMException                LLM request failed
+     * @throws BadRequestException         pageSize invalid value
      */
     @PostMapping("/{id}/query/chat")
     @ResponseStatus(HttpStatus.OK)
@@ -116,7 +117,7 @@ public class DatabaseController {
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
-            EntityNotFoundException, LLMException {
+            EntityNotFoundException, LLMException, BadRequestException {
         return queryService.executeChat(id, queryRequest, pageSize);
     }
 

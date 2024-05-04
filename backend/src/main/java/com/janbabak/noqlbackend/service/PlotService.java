@@ -65,32 +65,34 @@ public class PlotService {
      * Generate plot
      *
      * @param scriptContent content of python file responsible for plot generation (code)
-     * @throws IOException                  cannot create script file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
     public void generatePlot(String scriptContent)
-            throws IOException, PlotScriptExecutionException {
-
-        createPlotScript(scriptContent);
-
-        ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get());
-        Process process = processBuilder.start();
-
-        // read output and return it if failure
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        StringBuilder output = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            output.append(line);
-        }
+            throws PlotScriptExecutionException {
 
         try {
-            int exitCode = process.waitFor();
-            if (exitCode != 0) { // fail
+            createPlotScript(scriptContent);
+            ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get());
+            Process process = processBuilder.start();
+
+            // read output and return it if failure
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder output = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line);
+            }
+
+            try {
+                int exitCode = process.waitFor();
+                if (exitCode != 0) { // fail
+                    throw new PlotScriptExecutionException(output.toString());
+                }
+            } catch (InterruptedException e) {
                 throw new PlotScriptExecutionException(output.toString());
             }
-        } catch (InterruptedException e) {
-            throw new PlotScriptExecutionException(output.toString());
+        } catch (IOException e) {
+            throw new PlotScriptExecutionException(e.getMessage());
         }
     }
 }

@@ -57,7 +57,7 @@ export function Result(
             </Alert>
           }
 
-          {queryResponse.chatQueryWithResponse.llmresult.plotUrl != null &&
+          {queryResponse?.chatQueryWithResponse?.llmresult?.plotUrl != null &&
             // TODO: backend url
             <Paper elevation={2} style={{marginBottom: '2rem', display: 'flex', justifyContent: 'center'}}>
               <img src={'http://localhost:8080' + queryResponse.chatQueryWithResponse.llmresult.plotUrl}

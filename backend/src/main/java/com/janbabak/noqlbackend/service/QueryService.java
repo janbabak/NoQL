@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -305,7 +304,7 @@ public class QueryService {
      *
      * @param resultSet               query result
      * @param query                   generated query without pagination
-     * @param retrievedData             result object
+     * @param retrievedData           result object
      * @param specificDatabaseService specific database service capable of executing query
      * @return column types
      * @throws SQLException                TODO
@@ -376,7 +375,7 @@ public class QueryService {
         }
     }
 
-    public  QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
+    public QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
             throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
         log.info("Reload chat result, chatId={}", chatId);
 
@@ -422,20 +421,20 @@ public class QueryService {
         }
     }
 
+    // TODO: return also table result if the table was generated
     /**
-     * Plot results of chat response
+     * Plot result.
      *
-     * @param queryRequest       api request
-     * @param LLMResponse       large language model response
-     * @param LLMResponseJson not parsed LLM response
-     * @return query response
-     * @throws IOException when script cannot be executed
+     * @param queryRequest    query request
+     * @param LLMResponse     LLM parsed response
+     * @param LLMResponseJson LLM unparsed response
+     * @return query response with plot
+     * @throws EntityNotFoundException      chat not found
+     * @throws PlotScriptExecutionException creating plot failed - python script syntax error, script cannot be
+     * executed IO failure, ...
      */
-    private QueryResponse plotResult(
-            QueryRequest queryRequest,
-            LLMResponse LLMResponse,
-            String LLMResponseJson
-    ) throws IOException, EntityNotFoundException, PlotScriptExecutionException {
+    private QueryResponse plotResult(QueryRequest queryRequest, LLMResponse LLMResponse, String LLMResponseJson)
+            throws EntityNotFoundException, PlotScriptExecutionException {
 
         log.info("Generate plot");
 
@@ -445,33 +444,46 @@ public class QueryService {
                 queryRequest.getChatId(),
                 new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
-        LLMResult llmResult = new LLMResult(LLMResponse, queryRequest.getChatId());
-        ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(chatQueryWithResponse, llmResult);
+        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                chatQueryWithResponse, new LLMResult(LLMResponse, queryRequest.getChatId()));
 
         return successfulResponse(null, chatQueryWithResponseDto, null);
     }
 
+    /**
+     * Retrieve data requested by the user in form of table.
+     *
+     * @param queryRequest    query request
+     * @param llmResponse     LLM parsed response
+     * @param llmResponseJson LLM unparsed response
+     * @param databaseService specific database service
+     * @param database        database
+     * @param pageSize        number of rows per page
+     * @return query response with retrieved data and now plot
+     * @throws BadRequestException         pageSize has invalid value
+     * @throws DatabaseConnectionException cannot establish database connection
+     * @throws DatabaseExecutionException  query execution failed - syntax error, ...
+     * @throws SQLException                error when retrieving data
+     * @throws EntityNotFoundException     chat not found
+     */
     private QueryResponse showResultTable(
             QueryRequest queryRequest,
-            LLMResponse LLMResponse,
-            String LLMResponseJson,
-            BaseDatabaseService specificDatabaseService,
+            LLMResponse llmResponse,
+            String llmResponseJson,
+            BaseDatabaseService databaseService,
             Database database,
             Integer pageSize) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
             SQLException, EntityNotFoundException {
 
-        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), 0, pageSize, database);
-        ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+        String paginatedQuery = setPaginationInSqlQuery(llmResponse.getDatabaseQuery(), 0, pageSize, database);
+        ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
         RetrievedData retrievedData = new RetrievedData(resultSet);
-        Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
+        Long totalCount = getTotalCount(llmResponse.getDatabaseQuery(), databaseService);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                queryRequest.getChatId(), new CreateChatQueryWithResponseRequest(
-                        queryRequest.getQuery(), LLMResponseJson));
-
-        ChatQueryWithResponseDto chatQueryWithResponseDto;
-        LLMResult llmResult = new LLMResult(LLMResponse, queryRequest.getChatId());
-        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, llmResult);
+                queryRequest.getChatId(),
+                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
+        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                chatQueryWithResponse, new LLMResult(llmResponse, queryRequest.getChatId()));
 
         return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
     }
@@ -480,18 +492,19 @@ public class QueryService {
      * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
      * and executed. Select query is read only.
      *
-     * @param databaseId database id
+     * @param databaseId   database id
      * @param queryRequest query
-     * @param pageSize number of items per page
+     * @param pageSize     number of items per page
      * @return result that contains data in form of table that is automatically paginated starting by page 0 or plot
      * or both.
-     * @throws EntityNotFoundException queried database not found.
+     * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException retrieving database schema failure
-     * @throws LLMException large language model failure
+     * @throws DatabaseExecutionException  retrieving database schema failure
+     * @throws LLMException                large language model failure
      */
     public QueryResponse executeChat(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, LLMException, DatabaseExecutionException {
+            throws EntityNotFoundException, DatabaseConnectionException, LLMException,
+            DatabaseExecutionException, BadRequestException {
 
         log.info("Execute chat, database_id={}", databaseId);
 
@@ -500,7 +513,7 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery =createSystemQueryExperimental(
+        String systemQuery = createSystemQueryExperimental(
                 databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
@@ -511,20 +524,18 @@ public class QueryService {
             llmResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
 
             try {
-                LLMResponse LLMResponse = JsonUtils.createLLMResponse(llmResponseJson);
+                LLMResponse llmResponse = JsonUtils.createLLMResponse(llmResponseJson);
 
-                if (LLMResponse.getGeneratePlot()) {
-                    return plotResult(queryRequest, LLMResponse, llmResponseJson);
+                if (llmResponse.getGeneratePlot()) {
+                    return plotResult(queryRequest, llmResponse, llmResponseJson);
                 } else {
                     return showResultTable(
-                            queryRequest, LLMResponse, llmResponseJson, specificDatabaseService, database, pageSize);
+                            queryRequest, llmResponse, llmResponseJson, specificDatabaseService, database, pageSize);
                 }
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
             } catch (SQLException e) {
                 errors.add("Error occurred when execution your query: " + e.getMessage());
-            } catch (IOException e) {
-                errors.add("Plot script execution failed.");
             } catch (PlotScriptExecutionException e) {
                 errors.add(e.getMessage());
             } catch (DatabaseExecutionException e) {
