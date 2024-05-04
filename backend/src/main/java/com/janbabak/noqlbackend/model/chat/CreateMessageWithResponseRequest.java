@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.chat;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateMessageWithResponseRequest {
 
-    private String message;
-    private String response;
+    @NotBlank private String message; // users query
+    @NotBlank private String response; // LLM response JSON
 }
