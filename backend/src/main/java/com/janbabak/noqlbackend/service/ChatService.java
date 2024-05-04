@@ -8,7 +8,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
@@ -57,11 +57,11 @@ public class ChatService {
                         .stream()
                         .map(message -> {
                             try {
-                                LLMResponse LLMResponse = JsonUtils.createLLMResponse(message.getResponse());
+                                LLMResponse LLMResponse = JsonUtils.createLLMResponse(message.getLLMResponse());
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
-                                        message.getMessage(),
+                                        message.getNLQuery(),
                                         new ChatQueryWithResponseDto.ChatResponseResult(
                                                 LLMResponse.getDatabaseQuery(),
                                                 "/static/images/plot.png"),
@@ -127,7 +127,7 @@ public class ChatService {
      * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request)
+    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
@@ -135,8 +135,8 @@ public class ChatService {
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
-                .message(request.getMessage())
-                .response(request.getResponse())
+                .NLQuery(request.getNLQuery())
+                .LLMResponse(request.getLLMResponse())
                 .timestamp(timestamp)
                 .build();
 
@@ -144,8 +144,8 @@ public class ChatService {
         chat.setModificationDate(timestamp);
 
         if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
-            chat.setName(message.getMessage().length() < CHAT_NAME_MAX_LENGTH
-                    ? message.getMessage() : message.getMessage().substring(0, CHAT_NAME_MAX_LENGTH));
+            chat.setName(message.getNLQuery().length() < CHAT_NAME_MAX_LENGTH
+                    ? message.getNLQuery() : message.getNLQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
         chatRepository.save(chat);
         return messageRepository.save(message);

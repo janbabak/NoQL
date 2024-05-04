@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,11 +24,13 @@ public class ChatQueryWithResponse {
     @ManyToOne
     private Chat chat;
 
-    private String message;
+    /** natural language query */
+    @NotBlank
+    private String NLQuery;
 
-    /** json in form of string { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string }} */
+    /** JSON in form of string { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string }} */
     @Column(length = 2048)
-    private String response;
+    private String LLMResponse;
 
     private Timestamp timestamp;
 }

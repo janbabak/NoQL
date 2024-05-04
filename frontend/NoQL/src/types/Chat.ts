@@ -12,7 +12,7 @@ interface Chat {
 
 interface ChatQueryWithResponse {
   id: string,
-  query: string,
+  nlquery: string, // natural language query
   chatResponseResult: ChatResponseResult,
   timestamp: string, // TODO date
 }

@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.ChatService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -77,7 +77,7 @@ public class ChatController {
      */
     @PostMapping("/{id}/messages")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addMessage(@PathVariable UUID id, @RequestBody @Valid CreateMessageWithResponseRequest request)
+    public void addMessage(@PathVariable UUID id, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
         chatService.addMessageToChat(id, request);
     }

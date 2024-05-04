@@ -6,7 +6,7 @@ import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
@@ -387,7 +387,7 @@ public class QueryService {
 
         LLMResponse LLMResponse;
         try {
-            LLMResponse = JsonUtils.createLLMResponse(latestMessage.get().getResponse());
+            LLMResponse = JsonUtils.createLLMResponse(latestMessage.get().getLLMResponse());
         } catch (JsonProcessingException e) {
             return null; // should not happen;
         }
@@ -439,7 +439,7 @@ public class QueryService {
 
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(),
-                new CreateMessageWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
+                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
                 new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, queryRequest.getChatId());
@@ -464,7 +464,7 @@ public class QueryService {
         QueryResult queryResult = new QueryResult(resultSet);
         Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                queryRequest.getChatId(), new CreateMessageWithResponseRequest(
+                queryRequest.getChatId(), new CreateChatQueryWithResponseRequest(
                         queryRequest.getQuery(), LLMResponseJson));
 
         ChatQueryWithResponseDto chatQueryWithResponseDto;
@@ -535,7 +535,7 @@ public class QueryService {
         // last try failed
         ChatQueryWithResponse message = chatService.addMessageToChat(
                 queryRequest.getChatId(),
-                new CreateMessageWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
+                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
         // TODO: what if the chat query with response fails

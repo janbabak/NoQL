@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateMessageWithResponseRequest {
+public class CreateChatQueryWithResponseRequest {
 
-    @NotBlank private String message; // users query
-    @NotBlank private String response; // LLM response JSON
+    @NotBlank private String NLQuery; // natural language query
+    @NotBlank private String LLMResponse; // LLM response JSON
 }
