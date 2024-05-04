@@ -11,12 +11,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Automatically generated CRUD and other methods.
+ */
 @Repository
 public interface ChatQueryWithResponseRepository extends JpaRepository<ChatQueryWithResponse, UUID> {
 
+    /**
+     * Find all messages that relate to the chat ordered from the oldest to the most recent.
+     * @param chat chat
+     * @return list of messages
+     */
     List<ChatQueryWithResponse> findAllByChatOrderByTimestamp(Chat chat);
 
-    // TODO: test
+    /**
+     * Find the most recent message from chat.
+     * @param chatId chat identifier
+     * @return the most recent message if it exists
+     */
     @Query("SELECT message " +
             "FROM ChatQueryWithResponse message " +
             "WHERE message.chat.id = :chatId " +

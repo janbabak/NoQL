@@ -1,7 +1,7 @@
-package com.janbabak.noqlbackend.model.entity;
+package com.janbabak.noqlbackend.model.chat;
 
 import com.janbabak.noqlbackend.config.ResourceConfig;
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.AllArgsConstructor;
 import lombok.Data;

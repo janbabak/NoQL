@@ -10,7 +10,7 @@ import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
-import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;
 import com.janbabak.noqlbackend.model.query.QueryRequest;

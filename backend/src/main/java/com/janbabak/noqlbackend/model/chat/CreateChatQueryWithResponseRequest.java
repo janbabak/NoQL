@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateChatQueryWithResponseRequest {
 
-    @NotBlank private String NLQuery; // natural language query
-    @NotBlank private String LLMResponse; // LLM response JSON
+    @NotBlank
+    private String NLQuery; // natural language query
+
+    @NotBlank
+    private String LLMResponse; // LLM response JSON
 }

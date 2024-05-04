@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.model.query;
 
-import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

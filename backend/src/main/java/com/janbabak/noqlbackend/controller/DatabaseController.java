@@ -1,7 +1,6 @@
 package com.janbabak.noqlbackend.controller;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -109,7 +108,6 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      * @throws EntityNotFoundException     database not found
      * @throws LLMException                LLM request failed
-     * @throws JsonProcessingException     TODO: should not be throw
      */
     @PostMapping("/{id}/query/chat")
     @ResponseStatus(HttpStatus.OK)
@@ -118,7 +116,7 @@ public class DatabaseController {
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
-            EntityNotFoundException, LLMException, JsonProcessingException {
+            EntityNotFoundException, LLMException {
         return queryService.executeChat(id, queryRequest, pageSize);
     }
 
@@ -129,7 +127,7 @@ public class DatabaseController {
             @RequestParam UUID chatId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException, JsonProcessingException {
+    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
         return queryService.loadChatResult(id, chatId, page, pageSize);
     }
 
