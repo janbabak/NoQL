@@ -65,7 +65,7 @@ export function Result(
             </Paper>
           }
 
-          {totalCount != null &&
+          {totalCount != null && queryResponse.data &&
             <ResultTable
               queryResult={queryResponse}
               page={page}
