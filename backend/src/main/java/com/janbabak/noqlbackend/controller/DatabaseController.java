@@ -99,17 +99,17 @@ public class DatabaseController {
     }
 
     /**
-     * Query the user's database using natural language from in chat form, result is automatically paginated.
+     * Query the user's database using natural language from in chat form.
      *
-     * @param id           database id
-     * @param queryRequest chat containing the natural language queries
+     * @param id           database identifier
+     * @param queryRequest query
      * @param pageSize     number of items in one page
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     * @throws EntityNotFoundException     database not found
+     * @throws LLMException                LLM request failed
+     * @throws JsonProcessingException     TODO: should not be throw
      */
     @PostMapping("/{id}/query/chat")
     @ResponseStatus(HttpStatus.OK)
@@ -118,22 +118,8 @@ public class DatabaseController {
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
-            EntityNotFoundException, LLMException, BadRequestException, JsonProcessingException {
-        return queryService.executeChat(id, queryRequest, pageSize);
-    }
-
-    /**
-     * EXPERIMENTAL
-     */
-    @PostMapping("/{id}/query/chatExperimental")
-    @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeChatExperimental(
-            @PathVariable UUID id,
-            @RequestBody @Valid QueryRequest queryRequest,
-            @RequestParam Integer pageSize
-    ) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, JsonProcessingException {
-        return queryService.executeChatExperimental(id, queryRequest, pageSize);
+        return queryService.executeChat(id, queryRequest, pageSize);
     }
 
     @PostMapping("/{id}/query/load-chat-result") // TODO: get?

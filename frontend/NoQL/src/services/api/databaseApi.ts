@@ -34,7 +34,7 @@ const databaseApi = {
 
   queryChat(databaseId: string, request: QueryRequest, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
-      this.DOMAIN + '/' + databaseId + '/query/chatExperimental',
+      this.DOMAIN + '/' + databaseId + '/query/chat',
       request, [
         {
           name: 'pageSize',

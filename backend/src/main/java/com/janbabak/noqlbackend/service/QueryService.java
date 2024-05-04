@@ -420,91 +420,6 @@ public class QueryService {
     }
 
     /**
-     * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
-     * and then executed.
-     * Select query is read only, and it returns a result that is automatically paginated starting by page 0.
-     *
-     * @param id           database id
-     * @param queryRequest in natural query or database query language
-     * @param pageSize     number of items in one page,<br />
-     *                     default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                     max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
-     * @return query result
-     * @throws LLMException                large language model failure
-     * @throws BadRequestException         page size is greater than maximum allowed value
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
-     */
-    public QueryResponse executeChat(UUID id, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            BadRequestException, LLMException, JsonProcessingException {
-
-        log.info("Execute chat, database_id={}", id);
-
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
-
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
-        List<String> errors = new ArrayList<>();
-
-        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(
-                queryRequest.getChatId());
-        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            String query = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
-            // TODO: remove after testing
-//            String query = """
-//                    Use the following command to retrieve all users.
-//                    ```
-//                    select * from public.user;
-//                    ```""";
-            query = extractQueryFromMarkdownInResponse(query);
-            String paginatedQuery = setPaginationInSqlQuery(query, 0, pageSize, database);
-
-            try {
-                ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-                QueryResult queryResult = new QueryResult(resultSet);
-                Long totalCount = getTotalCount(query, specificDatabaseService);
-
-                ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                        queryRequest.getChatId(),
-                        new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
-
-                ChatQueryWithResponseDto chatQueryWithResponseDto = null;
-                try {
-                    chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                            chatQueryWithResponse, "/static/images/plot.png");
-                } catch (JsonProcessingException e) {
-                    errors.add("Your response cannot be parsed into JSON. Response is: "
-                            + chatQueryWithResponse.getResponse());
-                }
-                return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
-            } catch (DatabaseExecutionException | SQLException e) {
-                log.info("Executing natural language query failed, attempt={}, paginatedQuery={}",
-                        attempt, paginatedQuery);
-
-                errors.add("Error occurred when during execution of your query.\n" +
-                        "This is the error: " + e.getMessage() +
-                        "This is the query: " + query);
-
-                if (attempt == settings.translationRetries) {
-                    // last try failed
-                    ChatQueryWithResponse message = chatService.addMessageToChat(
-                            queryRequest.getChatId(),
-                            new CreateMessageWithResponseRequest(queryRequest.getQuery(), query));
-
-                    // TODO: what if the chat query with response fails
-                    return QueryResponse.failedResponse(
-                            new ChatQueryWithResponseDto(message, "/static/images/plot.png"), e.getMessage());
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
      * Plot results of chat response
      *
      * @param queryRequest       api request
@@ -572,7 +487,22 @@ public class QueryService {
         return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
     }
 
-    public QueryResponse executeChatExperimental(UUID id, QueryRequest queryRequest, Integer pageSize)
+    /**
+     * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
+     * and executed. Select query is read only.
+     *
+     * @param id database id
+     * @param queryRequest query
+     * @param pageSize number of items per page
+     * @return result that contains data in form of table that is automatically paginated starting by page 0 or plot
+     * or both.
+     * @throws EntityNotFoundException queried database not found.
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException generated query syntax error
+     * @throws LLMException large language model failure
+     * @throws JsonProcessingException TODO: should not happen
+     */
+    public QueryResponse executeChat(UUID id, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
             LLMException, JsonProcessingException {
 
