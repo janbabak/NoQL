@@ -108,7 +108,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
      * @throws LLMException                LLM request failed
-     * @throws BadRequestException         pageSize invalid value
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
     @PostMapping("/{id}/query/chat")
     @ResponseStatus(HttpStatus.OK)
@@ -142,7 +142,7 @@ public class DatabaseController {
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
     @PostMapping("/{id}/query/query-language")
     @ResponseStatus(HttpStatus.OK)

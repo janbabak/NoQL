@@ -50,29 +50,16 @@ public class QueryService {
     private final PlotService plotService;
 
     /**
-     * Create system query for the LLM that specifies what should be done, database schema, ...
+     * Create system query that commands the LLM with instructions
      *
-     * @param dbStructure structure of the database, e.g. create script (describes tables, columns, etc.)
-     * @param database    database metadata object
-     * @return generated query
+     * @param dbStructure structure of the database (in form of create script)
+     * @param database    database
+     * @param chatId      chat identifier
+     * @return system query
      */
     @SuppressWarnings("all")
-    public static String createSystemQuery(String dbStructure, Database database) {
-        return new StringBuilder(
-                "You are an assistant that translates natural language queries into a database query language.\n")
-                .append(database.getIsSQL() ? "Write an SQL query for the " : "Write a query for the ")
-                .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
-                .append("The response must contain only the transalted query without any additional text and markdown syntax.\n")
-                .append("\nThis is the database structure:\n")
-                .append(dbStructure)
-                .append("Translate the user's queries.\n")
-                .toString();
-    }
-
-    @SuppressWarnings("all")
-    public static String createSystemQueryExperimental(String dbStructure, Database database, UUID chatId) {
+    public static String createSystemQuery(String dbStructure, Database database, UUID chatId) {
         // TODO: securly insert credentials from coresponding database
-        // TOdO: parametrize the file name
         return new StringBuilder(
                 """
                         You are an assistant that helps users visualise data. You have two functions. The first function
@@ -109,7 +96,7 @@ public class QueryService {
      *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param database database object
      * @return database language query with pagination
-     * @throws BadRequestException value is greater than maximum allowed value
+     * @throws BadRequestException pageSize value is greater than maximum allowed value
      */
     public String setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
             throws BadRequestException {
@@ -145,6 +132,8 @@ public class QueryService {
                 ? query.substring(0, query.length() - 1)
                 : query;
     }
+
+    // TODO: remove???
 
     /**
      * Sometimes the model does not return just the query itself, but puts it into a markdown and add some text. <br />
@@ -299,6 +288,8 @@ public class QueryService {
         return 0;
     }
 
+    // TODO: remove or use
+
     /**
      * Classify columns into column types
      *
@@ -311,6 +302,7 @@ public class QueryService {
      * @throws DatabaseConnectionException connection failure
      * @throws DatabaseExecutionException  execution fail
      */
+    @SuppressWarnings("unused")
     private ColumnTypes getColumnTypes(
             ResultSet resultSet,
             String query,
@@ -345,7 +337,7 @@ public class QueryService {
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
     public QueryResponse executeQueryLanguageSelectQuery(
             UUID id,
@@ -375,6 +367,18 @@ public class QueryService {
         }
     }
 
+    /**
+     * Load result of response of last message from chat. Used when user opens an old chat.
+     *
+     * @param databaseId identifier of the database to which the selected chat belongs
+     * @param chatId     chat to load identifier
+     * @param page       page number (first pages has is 0)
+     * @param pageSize   number of items per page
+     * @return query response
+     * @throws EntityNotFoundException     database or chat not found
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws DatabaseConnectionException cannot establish connection with database
+     */
     public QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
             throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
         log.info("Reload chat result, chatId={}", chatId);
@@ -382,46 +386,44 @@ public class QueryService {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        Optional<ChatQueryWithResponse> latestMessage =
-                chatQueryWithResponseRepository.findLatestMessageFromChat(chatId);
-
-        if (latestMessage.isEmpty()) {
-            return null; // TODO: is that correct
+        ChatQueryWithResponse latestMessage =
+                chatQueryWithResponseRepository.findLatestMessageFromChat(chatId).orElse(null);
+        if (latestMessage == null) {
+            return null;
         }
 
         LLMResponse LLMResponse;
         try {
-            LLMResponse = JsonUtils.createLLMResponse(latestMessage.get().getLLMResponse());
+            LLMResponse = JsonUtils.createLLMResponse(latestMessage.getLLMResponse());
         } catch (JsonProcessingException e) {
-            return null; // should not happen;
+            return null; // should not happen since values that cannot be parsed aren't saved
         }
 
-        LLMResult llmResult = new LLMResult(LLMResponse, chatId);
-
         ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(latestMessage.get(), llmResult);
+                new ChatQueryWithResponseDto(latestMessage, new LLMResult(LLMResponse, chatId));
 
         // only plot without any select query to retrieve the data
         if (LLMResponse.getDatabaseQuery() == null) {
             return QueryResponse.successfulResponse(null, chatQueryWithResponseDto, null);
         }
 
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-
+        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), page, pageSize, database);
 
         try {
-            ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
+            ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
             RetrievedData retrievedData = new RetrievedData(resultSet);
-            Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
+            Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), databaseService);
 
             return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
-            return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage()); // TODO: better solution
+            // should not happen since not executable responses aren't saved
+            return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage());
         }
     }
 
     // TODO: return also table result if the table was generated
+
     /**
      * Plot result.
      *
@@ -431,7 +433,7 @@ public class QueryService {
      * @return query response with plot
      * @throws EntityNotFoundException      chat not found
      * @throws PlotScriptExecutionException creating plot failed - python script syntax error, script cannot be
-     * executed IO failure, ...
+     *                                      executed IO failure, ...
      */
     private QueryResponse plotResult(QueryRequest queryRequest, LLMResponse LLMResponse, String LLMResponseJson)
             throws EntityNotFoundException, PlotScriptExecutionException {
@@ -460,7 +462,7 @@ public class QueryService {
      * @param database        database
      * @param pageSize        number of rows per page
      * @return query response with retrieved data and now plot
-     * @throws BadRequestException         pageSize has invalid value
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException cannot establish database connection
      * @throws DatabaseExecutionException  query execution failed - syntax error, ...
      * @throws SQLException                error when retrieving data
@@ -513,7 +515,7 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQueryExperimental(
+        String systemQuery = createSystemQuery(
                 databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
