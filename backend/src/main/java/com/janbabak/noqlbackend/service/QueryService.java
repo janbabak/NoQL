@@ -558,7 +558,13 @@ public class QueryService {
 
         ChatQueryWithResponseDto chatQueryWithResponseDto = null;
         try {
-            chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, "/static/images/plot.png"); // TODO: redundant json parsing
+            chatQueryWithResponseDto = new ChatQueryWithResponseDto(
+                    chatQueryWithResponse,
+                    chatResponse.getGeneratePlot()
+                            ? ResourceConfig.IMAGES_STATIC_FOLDER
+                            + queryRequest.getChatId()
+                            + PlotService.PLOT_IMAGE_FILE_EXTENSION
+                            : null); // TODO: redundant json parsing
         } catch (JsonProcessingException e) {
             errors.add("Your response cannot be parsed into JSON. Response is: "
                     + chatQueryWithResponse.getResponse());
