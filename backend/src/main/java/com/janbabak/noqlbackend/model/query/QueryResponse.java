@@ -17,13 +17,13 @@ import java.util.List;
 @AllArgsConstructor
 public class QueryResponse {
 
-    private QueryResult result; // retrieved data
+    private RetrievedData data;
     private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
     private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
     private String errorMessage; // error message when the query execution failed due to syntax error
 
     public static QueryResponse successfulResponse(
-            QueryResult resultData, ChatQueryWithResponseDto message, Long totalCount) {
+            RetrievedData resultData, ChatQueryWithResponseDto message, Long totalCount) {
         return new QueryResponse(resultData, totalCount, message,null);
     }
 
@@ -32,11 +32,11 @@ public class QueryResponse {
     }
 
     @Data
-    public static class QueryResult {
+    public static class RetrievedData {
         private final List<String> columnNames;
         private final List<List<String>> rows;
 
-        public QueryResult(ResultSet resultSet) throws SQLException {
+        public RetrievedData(ResultSet resultSet) throws SQLException {
             ResultSetMetaData rsmd = resultSet.getMetaData();
 
             // columns

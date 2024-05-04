@@ -46,13 +46,13 @@ export function ResultTable(
   const TableHeadElement =
     <TableHead>
       <TableRow>
-        {queryResult?.result?.columnNames.map((columnName, columnNameIndex: number) =>
+        {queryResult?.data?.columnNames.map((columnName, columnNameIndex: number) =>
           <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
       </TableRow>
 
       {loading &&
         <TableRow>
-          <td colSpan={queryResult?.result?.columnNames.length}>
+          <td colSpan={queryResult?.data?.columnNames.length}>
             <LinearProgress />
           </td>
         </TableRow>}
@@ -60,7 +60,7 @@ export function ResultTable(
 
   const TableBodyElement =
     <TableBody>
-      {queryResult?.result?.rows.map((row, rowIndex: number) =>
+      {queryResult?.data?.rows.map((row, rowIndex: number) =>
         <TableRow key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
           {row.map((cell, cellIndex: number) =>
             <TableCell key={cellIndex} component="td" scope="row">{cell}</TableCell>)}

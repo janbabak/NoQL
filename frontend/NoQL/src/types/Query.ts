@@ -5,16 +5,16 @@ interface QueryRequest {
   query: string,
 }
 
-interface QueryResult {
+interface RetrievedData {
   columnNames: string[]
   rows: string[][]
 }
 
 interface QueryResponse {
-  result: QueryResult | null
+  data: RetrievedData | null
   totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
   chatQueryWithResponse: ChatQueryWithResponse
   errorMessage: string | null
 }
 
-export type { QueryRequest, QueryResponse, QueryResult }
+export type { QueryRequest, QueryResponse, RetrievedData }

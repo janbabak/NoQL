@@ -12,7 +12,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.QueryResponse.QueryResult;
+import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.service.api.GptApi;
 import com.janbabak.noqlbackend.service.api.QueryApi;
@@ -300,7 +300,7 @@ public class QueryService {
      *
      * @param resultSet               query result
      * @param query                   generated query without pagination
-     * @param queryResult             result object
+     * @param retrievedData             result object
      * @param specificDatabaseService specific database service capable of executing query
      * @return column types
      * @throws SQLException                TODO
@@ -310,11 +310,11 @@ public class QueryService {
     private ColumnTypes getColumnTypes(
             ResultSet resultSet,
             String query,
-            QueryResult queryResult,
+            RetrievedData retrievedData,
             BaseDatabaseService specificDatabaseService
     ) throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
         ColumnTypes columnTypes = new ColumnTypes();
-        for (String columnName : queryResult.getColumnNames()) {
+        for (String columnName : retrievedData.getColumnNames()) {
             if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
                 columnTypes.addCategorical(columnName);
             }
@@ -362,10 +362,10 @@ public class QueryService {
                 UUID.randomUUID(), query, null, Timestamp.from(Instant.now())); // TODO: replace null
         try {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-            QueryResult queryResult = new QueryResult(resultSet);
+            RetrievedData retrievedData = new RetrievedData(resultSet);
             Long totalCount = getTotalCount(query, specificDatabaseService);
 
-            return QueryResponse.successfulResponse(queryResult, message, totalCount);
+            return QueryResponse.successfulResponse(retrievedData, message, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
         }
@@ -409,10 +409,10 @@ public class QueryService {
 
         try {
             ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-            QueryResult queryResult = new QueryResult(resultSet);
+            RetrievedData retrievedData = new RetrievedData(resultSet);
             Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
 
-            return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
+            return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage()); // TODO: better solution
         }
@@ -461,7 +461,7 @@ public class QueryService {
 
         String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), 0, pageSize, database);
         ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-        QueryResult queryResult = new QueryResult(resultSet);
+        RetrievedData retrievedData = new RetrievedData(resultSet);
         Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), specificDatabaseService);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
                 queryRequest.getChatId(), new CreateChatQueryWithResponseRequest(
@@ -474,7 +474,7 @@ public class QueryService {
 
         chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
 
-        return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
+        return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
     }
 
     /**
