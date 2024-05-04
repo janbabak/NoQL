@@ -14,24 +14,27 @@ import java.util.UUID;
 public class ChatQueryWithResponseDto {
     private UUID id;
     private String NLQuery; // natural language query
-    private ChatResponseResult chatResponseResult; // generated query in query language or plot
+    private LLMResult LLMResult; // generated query in query language or plot
     private Timestamp timestamp;
 
-    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, ChatResponseResult parsedResponseResult) {
+    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, LLMResult parsedLlmResult) {
         this(
                 chatQueryWithResponse.getId(),
                 chatQueryWithResponse.getNLQuery(),
-                parsedResponseResult,
+                parsedLlmResult,
                 chatQueryWithResponse.getTimestamp());
     }
 
+    /**
+     * Large language model result that contains database query and plot url.
+     */
     @Data
     @AllArgsConstructor
-    public static class ChatResponseResult {
+    public static class LLMResult {
         private String databaseQuery; // if null, result contains just the plot without  a table
         private String plotUrl; // if null, plot wasn't generated
 
-        public ChatResponseResult(LLMResponse LLMResponse, UUID chatId) {
+        public LLMResult(LLMResponse LLMResponse, UUID chatId) {
             this.databaseQuery = LLMResponse.getDatabaseQuery();
             this.plotUrl = LLMResponse.getGeneratePlot()
                     ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION

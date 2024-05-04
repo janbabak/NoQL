@@ -2,7 +2,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
-import { Chat, ChatQueryWithResponse, ChatResponseResult } from '../../../types/Chat.ts'
+import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
 import { CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
@@ -12,7 +12,7 @@ interface UsersQueryProps {
 }
 
 interface ModelsResponse {
-  chatQueryResult: ChatResponseResult
+  chatQueryResult: LLMResult
 }
 
 function ModelsResponse({ chatQueryResult }: ModelsResponse) {
@@ -78,7 +78,7 @@ export function ChatView() {
                 return (
                   <div key={message.id}>
                     <UsersQuery query={message.nlquery} />
-                    <ModelsResponse chatQueryResult={message.chatResponseResult} />
+                    <ModelsResponse chatQueryResult={message.llmresult} />
                   </div>
                 )
               })

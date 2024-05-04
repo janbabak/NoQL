@@ -62,7 +62,7 @@ public class ChatService {
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
                                         message.getNLQuery(),
-                                        new ChatQueryWithResponseDto.ChatResponseResult(
+                                        new ChatQueryWithResponseDto.LLMResult(
                                                 LLMResponse.getDatabaseQuery(),
                                                 "/static/images/plot.png"),
                                         message.getTimestamp());

@@ -13,13 +13,13 @@ interface Chat {
 interface ChatQueryWithResponse {
   id: string,
   nlquery: string, // natural language query
-  chatResponseResult: ChatResponseResult,
+  llmresult: LLMResult, // large language model result
   timestamp: string, // TODO date
 }
 
-interface ChatResponseResult {
+interface LLMResult {
   databaseQuery: string | null,
   plotUrl: string | null
 }
 
-export type { ChatHistoryItem, Chat, ChatQueryWithResponse, ChatResponseResult }
+export type { ChatHistoryItem, Chat, ChatQueryWithResponse, LLMResult }

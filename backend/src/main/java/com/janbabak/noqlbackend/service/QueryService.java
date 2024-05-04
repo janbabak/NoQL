@@ -35,6 +35,7 @@ import java.util.*;
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 import static com.janbabak.noqlbackend.model.query.QueryResponse.ColumnTypes;
 import static com.janbabak.noqlbackend.model.query.QueryResponse.successfulResponse;
+import static com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto.LLMResult;
 import static java.sql.Types.*;
 
 @Slf4j
@@ -392,11 +393,10 @@ public class QueryService {
             return null; // should not happen;
         }
 
-        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, chatId);
+        LLMResult llmResult = new LLMResult(LLMResponse, chatId);
 
         ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(latestMessage.get(), chatResponseResult);
+                new ChatQueryWithResponseDto(latestMessage.get(), llmResult);
 
         // only plot without any select query to retrieve the data
         if (LLMResponse.getDatabaseQuery() == null) {
@@ -441,11 +441,9 @@ public class QueryService {
                 queryRequest.getChatId(),
                 new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), LLMResponseJson));
 
-        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, queryRequest.getChatId());
-
+        LLMResult llmResult = new LLMResult(LLMResponse, queryRequest.getChatId());
         ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
+                new ChatQueryWithResponseDto(chatQueryWithResponse, llmResult);
 
         return successfulResponse(null, chatQueryWithResponseDto, null);
     }
@@ -468,11 +466,8 @@ public class QueryService {
                         queryRequest.getQuery(), LLMResponseJson));
 
         ChatQueryWithResponseDto chatQueryWithResponseDto;
-
-        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(LLMResponse, queryRequest.getChatId());
-
-        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
+        LLMResult llmResult = new LLMResult(LLMResponse, queryRequest.getChatId());
+        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, llmResult);
 
         return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
     }
