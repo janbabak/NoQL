@@ -136,7 +136,7 @@ public class DatabaseController {
         return queryService.executeChatExperimental(id, queryRequest, pageSize);
     }
 
-    @PostMapping("/{id}/query/load-chat-result")
+    @PostMapping("/{id}/query/load-chat-result") // TODO: get?
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse loadChatResult(
             @PathVariable UUID id,

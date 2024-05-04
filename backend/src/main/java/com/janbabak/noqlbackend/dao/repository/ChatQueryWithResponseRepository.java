@@ -17,11 +17,11 @@ public interface ChatQueryWithResponseRepository extends JpaRepository<ChatQuery
     List<ChatQueryWithResponse> findAllByChatOrderByTimestamp(Chat chat);
 
     // TODO: test
-    @Query("select message " +
-            "from ChatQueryWithResponse message " +
-            "where message.chat.id = :chatId " +
-            "order by message.timestamp " +
-            "limit 1")
+    @Query("SELECT message " +
+            "FROM ChatQueryWithResponse message " +
+            "WHERE message.chat.id = :chatId " +
+            "ORDER BY message.timestamp DESC " +
+            "LIMIT 1")
     Optional<ChatQueryWithResponse> findLatestMessageFromChat(@Param("chatId") UUID chatId);
 
 }
