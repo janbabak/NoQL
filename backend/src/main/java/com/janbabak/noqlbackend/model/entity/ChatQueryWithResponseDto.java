@@ -1,7 +1,5 @@
 package com.janbabak.noqlbackend.model.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,25 +14,13 @@ public class ChatQueryWithResponseDto {
     private ChatResponseResult chatResponseResult; // generated query in query language or plot
     private Timestamp timestamp;
 
-    // TODO
-    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, String plotUrl)
-            throws JsonProcessingException {
+    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, ChatResponseResult parsedResponseResult) {
         this(
                 chatQueryWithResponse.getId(),
                 chatQueryWithResponse.getMessage(),
-                new ChatResponseResult(
-                        JsonUtils.createChatResponse(chatQueryWithResponse.getResponse()).getDatabaseQuery(),
-                        plotUrl),
+                parsedResponseResult,
                 chatQueryWithResponse.getTimestamp());
     }
-
-//    public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, ChatResponseResult responseResult) {
-//        this(
-//                chatQueryWithResponse.getId(),
-//                chatQueryWithResponse.getMessage(),
-//                responseResult,
-//                chatQueryWithResponse.getTimestamp());
-//    }
 
     @Data
     @AllArgsConstructor

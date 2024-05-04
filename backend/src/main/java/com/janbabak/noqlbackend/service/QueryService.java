@@ -373,7 +373,7 @@ public class QueryService {
     }
 
     public  QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
-            throws EntityNotFoundException, JsonProcessingException, BadRequestException, DatabaseConnectionException {
+            throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
         log.info("Reload chat result, chatId={}", chatId);
 
         Database database = databaseRepository.findById(databaseId)
@@ -393,11 +393,15 @@ public class QueryService {
             return null; // should not happen;
         }
 
-        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                latestMessage.get(),
-                chatResponse.getGeneratePlot()
-                        ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION
-                        : null);
+        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
+                new ChatQueryWithResponseDto.ChatResponseResult(
+                        chatResponse.getDatabaseQuery(),
+                        chatResponse.getGeneratePlot()
+                                ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION
+                                : null);
+
+        ChatQueryWithResponseDto chatQueryWithResponseDto =
+                new ChatQueryWithResponseDto(latestMessage.get(), chatResponseResult);
 
         // only plot without any select query to retrieve the data
         if (chatResponse.getDatabaseQuery() == null) {
@@ -442,13 +446,15 @@ public class QueryService {
                 queryRequest.getChatId(),
                 new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
 
-        String plotUrl =
-                ResourceConfig.IMAGES_STATIC_FOLDER
-                        + queryRequest.getChatId() // plot name is the same as chat id
-                        + PlotService.PLOT_IMAGE_FILE_EXTENSION;
+        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
+                new ChatQueryWithResponseDto.ChatResponseResult(
+                        chatResponse.getDatabaseQuery(),
+                        chatResponse.getGeneratePlot()
+                                ? ResourceConfig.IMAGES_STATIC_FOLDER + queryRequest.getChatId() + PlotService.PLOT_IMAGE_FILE_EXTENSION
+                                : null);
 
         ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                chatQueryWithResponse, plotUrl); // TODO: redundant json parsing
+                chatQueryWithResponse, chatResponseResult);
 
         return successfulResponse(null, chatQueryWithResponseDto, null);
     }
@@ -459,8 +465,7 @@ public class QueryService {
             String chatResponseString,
             BaseDatabaseService specificDatabaseService,
             Database database,
-            Integer pageSize,
-            List<String> errors) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
+            Integer pageSize) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
             SQLException, EntityNotFoundException {
 
         String paginatedQuery = setPaginationInSqlQuery(chatResponse.getDatabaseQuery(), 0, pageSize, database);
@@ -471,19 +476,18 @@ public class QueryService {
                 queryRequest.getChatId(), new CreateMessageWithResponseRequest(
                         queryRequest.getQuery(), chatResponseString));
 
-        ChatQueryWithResponseDto chatQueryWithResponseDto = null;
-        try {
-            chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                    chatQueryWithResponse,
-                    chatResponse.getGeneratePlot()
-                            ? ResourceConfig.IMAGES_STATIC_FOLDER
-                            + queryRequest.getChatId()
-                            + PlotService.PLOT_IMAGE_FILE_EXTENSION
-                            : null); // TODO: redundant json parsing
-        } catch (JsonProcessingException e) {
-            errors.add("Your response cannot be parsed into JSON. Response is: "
-                    + chatQueryWithResponse.getResponse());
-        }
+        ChatQueryWithResponseDto chatQueryWithResponseDto;
+
+        ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
+                new ChatQueryWithResponseDto.ChatResponseResult(
+                        chatResponse.getDatabaseQuery(),
+                        chatResponse.getGeneratePlot()
+                                ? ResourceConfig.IMAGES_STATIC_FOLDER + queryRequest.getChatId() +
+                                PlotService.PLOT_IMAGE_FILE_EXTENSION
+                                : null);
+
+        chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
+
         return QueryResponse.successfulResponse(queryResult, chatQueryWithResponseDto, totalCount);
     }
 
@@ -491,7 +495,7 @@ public class QueryService {
      * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
      * and executed. Select query is read only.
      *
-     * @param id database id
+     * @param databaseId database id
      * @param queryRequest query
      * @param pageSize number of items per page
      * @return result that contains data in form of table that is automatically paginated starting by page 0 or plot
@@ -500,16 +504,16 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException generated query syntax error
      * @throws LLMException large language model failure
-     * @throws JsonProcessingException TODO: should not happen
      */
-    public QueryResponse executeChat(UUID id, QueryRequest queryRequest, Integer pageSize)
+    public QueryResponse executeChat(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException, JsonProcessingException {
+            LLMException {
 
-        log.info("Execute chat, database_id={}", id);
+        log.info("Execute chat, database_id={}", databaseId);
 
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
         String systemQuery = createSystemQueryExperimental(
@@ -529,7 +533,7 @@ public class QueryService {
                     return plotResult(queryRequest, chatResponse, chatResponseString);
                 } else {
                     return showResultTable(queryRequest, chatResponse, chatResponseString, specificDatabaseService,
-                            database, pageSize, errors);
+                            database, pageSize);
                 }
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
