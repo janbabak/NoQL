@@ -394,11 +394,7 @@ public class QueryService {
         }
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(
-                        chatResponse.getDatabaseQuery(),
-                        chatResponse.getGeneratePlot()
-                                ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION
-                                : null);
+                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, chatId);
 
         ChatQueryWithResponseDto chatQueryWithResponseDto =
                 new ChatQueryWithResponseDto(latestMessage.get(), chatResponseResult);
@@ -447,14 +443,10 @@ public class QueryService {
                 new CreateMessageWithResponseRequest(queryRequest.getQuery(), chatResponseString));
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(
-                        chatResponse.getDatabaseQuery(),
-                        chatResponse.getGeneratePlot()
-                                ? ResourceConfig.IMAGES_STATIC_FOLDER + queryRequest.getChatId() + PlotService.PLOT_IMAGE_FILE_EXTENSION
-                                : null);
+                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, queryRequest.getChatId());
 
-        ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                chatQueryWithResponse, chatResponseResult);
+        ChatQueryWithResponseDto chatQueryWithResponseDto =
+                new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
 
         return successfulResponse(null, chatQueryWithResponseDto, null);
     }
@@ -479,12 +471,7 @@ public class QueryService {
         ChatQueryWithResponseDto chatQueryWithResponseDto;
 
         ChatQueryWithResponseDto.ChatResponseResult chatResponseResult =
-                new ChatQueryWithResponseDto.ChatResponseResult(
-                        chatResponse.getDatabaseQuery(),
-                        chatResponse.getGeneratePlot()
-                                ? ResourceConfig.IMAGES_STATIC_FOLDER + queryRequest.getChatId() +
-                                PlotService.PLOT_IMAGE_FILE_EXTENSION
-                                : null);
+                new ChatQueryWithResponseDto.ChatResponseResult(chatResponse, queryRequest.getChatId());
 
         chatQueryWithResponseDto = new ChatQueryWithResponseDto(chatQueryWithResponse, chatResponseResult);
 
