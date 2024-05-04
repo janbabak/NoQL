@@ -43,7 +43,6 @@ public class QueryResponse {
             columnNames = new ArrayList<>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnNames.add(rsmd.getColumnName(i));
-                System.out.println("TYPE: " + rsmd.getColumnType(i));
             }
 
             // rows

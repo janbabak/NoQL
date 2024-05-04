@@ -35,6 +35,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatQueryWithResponseRepository messageRepository;
     private final DatabaseRepository databaseRepository;
+    private final PlotService plotService;
     private final String NEW_CHAT_NAME = "New chat";
     private final int CHAT_NAME_MAX_LENGTH = 32;
 
@@ -166,11 +167,12 @@ public class ChatService {
     }
 
     /**
-     * Delete chat by id.
+     * Delete chat by id and associated graph if it exists.
      *
      * @param id chat identifier
      */
     public void deleteChatById(UUID id) {
         chatRepository.deleteById(id);
+        plotService.deletePlot(id);
     }
 }
