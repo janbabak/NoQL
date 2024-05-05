@@ -79,4 +79,14 @@ CREATE TABLE IF NOT EXISTS cvut.exam
     student INTEGER REFERENCES cvut.student (id),
     course  INTEGER REFERENCES cvut.course ("(identifier of course"),
     PRIMARY KEY (student, course)
-)
+);
+
+-- create table stock prices
+CREATE TABLE stock_prices
+(
+    id          SERIAL PRIMARY KEY,
+    ticker_name VARCHAR(20)    NOT NULL,
+    price       NUMERIC(10, 2) NOT NULL,
+    timestamp   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

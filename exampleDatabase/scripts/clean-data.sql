@@ -29,3 +29,7 @@ FROM cvut.course;
 -- Removes all entries from exam table
 DELETE
 FROM cvut.exam;
+
+-- Removes all entries from stock prices
+DELETE
+FROM stock_prices;
