@@ -17,6 +17,7 @@ ALTER TABLE cvut.exam
 DROP TABLE IF EXISTS "order";
 DROP TABLE IF EXISTS address;
 DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS stock_prices;
 DROP TABLE IF EXISTS cvut.student;
 DROP TABLE IF EXISTS cvut.specialisation;
 DROP TABLE IF EXISTS cvut.fit_wiki;
