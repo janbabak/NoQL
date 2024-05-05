@@ -1,16 +1,19 @@
 package com.janbabak.noqlbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.CreateMessageWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.LLMResponse;
+import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
-import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,7 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final ChatQueryWithResponseRepository messageRepository;
     private final DatabaseRepository databaseRepository;
+    private final PlotService plotService;
     private final String NEW_CHAT_NAME = "New chat";
     private final int CHAT_NAME_MAX_LENGTH = 32;
 
@@ -52,11 +56,21 @@ public class ChatService {
                 chat.getName(),
                 chat.getMessages()
                         .stream()
-                        .map(message -> new ChatQueryWithResponseDto(
-                                message.getId(),
-                                message.getMessage(),
-                                message.getResponse(),
-                                message.getTimestamp()))
+                        .map(message -> {
+                            try {
+                                LLMResponse llmResponse = JsonUtils.createLLMResponse(message.getLlmResponse());
+
+                                return new ChatQueryWithResponseDto(
+                                        message.getId(),
+                                        message.getNlQuery(),
+                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, chat.getId()),
+                                        message.getTimestamp());
+                            } catch (JsonProcessingException e) {
+                                // should not happen since invalid JSONs are not saved
+                                log.error("Cannot parse message JSON from database, messageId={}", message.getId());
+                                return null;
+                            }
+                        })
                         .toList(),
                 chat.getModificationDate());
     }
@@ -114,14 +128,16 @@ public class ChatService {
      * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateMessageWithResponseRequest request) throws EntityNotFoundException {
+    public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateChatQueryWithResponseRequest request)
+            throws EntityNotFoundException {
+
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
-                .message(request.getMessage())
-                .response(request.getResponse())
+                .nlQuery(request.getNlQuery())
+                .llmResponse(request.getLlmResponse())
                 .timestamp(timestamp)
                 .build();
 
@@ -129,8 +145,8 @@ public class ChatService {
         chat.setModificationDate(timestamp);
 
         if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
-            chat.setName(message.getMessage().length() < CHAT_NAME_MAX_LENGTH
-                    ? message.getMessage() : message.getMessage().substring(0, CHAT_NAME_MAX_LENGTH));
+            chat.setName(message.getNlQuery().length() < CHAT_NAME_MAX_LENGTH
+                    ? message.getNlQuery() : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
         chatRepository.save(chat);
         return messageRepository.save(message);
@@ -151,11 +167,12 @@ public class ChatService {
     }
 
     /**
-     * Delete chat by id.
+     * Delete chat by id and associated graph if it exists.
      *
      * @param id chat identifier
      */
     public void deleteChatById(UUID id) {
         chatRepository.deleteById(id);
+        plotService.deletePlot(id);
     }
 }

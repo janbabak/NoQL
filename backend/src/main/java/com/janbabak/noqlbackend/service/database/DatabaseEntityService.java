@@ -29,14 +29,15 @@ public class DatabaseEntityService {
     /**
      * Find database by id.
      *
-     * @param id identifier
+     * @param databaseId database identifier
      * @return database
      * @throws EntityNotFoundException database of specified id not found.
      */
-    public Database findById(UUID id) throws EntityNotFoundException {
-        log.info("Get database by id={}.", id);
+    public Database findById(UUID databaseId) throws EntityNotFoundException {
+        log.info("Get database by id={}.", databaseId);
 
-        return databaseRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+        return databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
     }
 
     /**
@@ -68,19 +69,19 @@ public class DatabaseEntityService {
     /**
      * Update not null parameters of database.
      *
-     * @param id   identifier of the database object to update
+     * @param databaseId identifier of the database object to update
      * @param data new data
      * @return updated object
      * @throws EntityNotFoundException     database of specified id not found.
      * @throws DatabaseConnectionException connection to the updated database failed.
      */
-    public Database update(UUID id, UpdateDatabaseRequest data)
+    public Database update(UUID databaseId, UpdateDatabaseRequest data)
             throws EntityNotFoundException, DatabaseConnectionException {
 
-        log.info("Update database of id={}.", id);
+        log.info("Update database of id={}.", databaseId);
 
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         if (data.getName() != null) database.setName(data.getName());
         if (data.getHost() != null) database.setHost(data.getHost());
@@ -99,29 +100,46 @@ public class DatabaseEntityService {
     /**
      * Delete database by id.
      *
-     * @param id identifier
+     * @param databaseId database identifier
      */
-    public void deleteById(UUID id) {
-        log.info("Delete database by id={}.", id);
+    public void deleteById(UUID databaseId) {
+        log.info("Delete database by id={}.", databaseId);
 
-        databaseRepository.deleteById(id);
+        databaseRepository.deleteById(databaseId);
     }
 
     /**
      * Get database structure by database id
      *
-     * @param id identifier
+     * @param databaseId database identifier
      * @return database structure
      * @throws EntityNotFoundException     database of specific id not found
      * @throws DatabaseConnectionException connection to the database failed
-     * @throws DatabaseExecutionException  syntax error error, ...
+     * @throws DatabaseExecutionException  syntax error, ...
      */
-    public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID id)
+    public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
+    }
+
+    /**
+     * Get generated database create script by database id.
+     * @param databaseId database identifier
+     * @return create script
+     * @throws EntityNotFoundException database of specific id not found
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException syntax error, ...
+     */
+    public String getDatabaseCreateScriptByDatabaseId(UUID databaseId)
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
     }
 }

@@ -13,5 +13,7 @@ import java.util.UUID;
 public class QueryRequest {
 
     private UUID chatId;
-    private @NotBlank String query; // new query to be added to the chat
+
+    @NotBlank
+    private String query; // new query to be added to the chat
 }

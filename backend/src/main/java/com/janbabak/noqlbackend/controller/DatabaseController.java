@@ -47,14 +47,14 @@ public class DatabaseController {
     /**
      * Get database by id.
      *
-     * @param id database identifier
+     * @param databaseId database identifier
      * @return database
      * @throws EntityNotFoundException database of specified id not found.
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{databaseId}")
     @ResponseStatus(HttpStatus.OK)
-    public Database getById(@PathVariable UUID id) throws EntityNotFoundException {
-        return databaseService.findById(id);
+    public Database getById(@PathVariable UUID databaseId) throws EntityNotFoundException {
+        return databaseService.findById(databaseId);
     }
 
     /**
@@ -73,17 +73,17 @@ public class DatabaseController {
     /**
      * Update database by id - set non-null fields.
      *
-     * @param id      database identifier
-     * @param request new data
+     * @param databaseId database identifier
+     * @param request    new data
      * @return updated database
      * @throws EntityNotFoundException     database of specified id not found.
      * @throws DatabaseConnectionException connection to the updated database failed.
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{databaseId}")
     @ResponseStatus(HttpStatus.OK)
-    public Database update(@PathVariable UUID id, @RequestBody @Valid UpdateDatabaseRequest request)
+    public Database update(@PathVariable UUID databaseId, @RequestBody @Valid UpdateDatabaseRequest request)
             throws EntityNotFoundException, DatabaseConnectionException {
-        return databaseService.update(id, request);
+        return databaseService.update(databaseId, request);
     }
 
     /**
@@ -98,70 +98,109 @@ public class DatabaseController {
     }
 
     /**
-     * Query the user's database using natural language from in chat form, result is automatically paginated.
+     * Query the user's database using natural language from in chat form.
      *
-     * @param id          database id
-     * @param queryRequest chat containing the natural language queries
-     * @param pageSize    number of items in one page
+     * @param databaseId   database identifier
+     * @param queryRequest query
+     * @param pageSize     number of items in one page
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws LLMException                LLM request failed.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     * @throws DatabaseExecutionException  retrieving database schema failure
+     * @throws EntityNotFoundException     database not found
+     * @throws LLMException                LLM request failed
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    @PostMapping("/{id}/query/chat")
+    @PostMapping("/{databaseId}/query/chat")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeChat(
-            @PathVariable UUID id,
+            @PathVariable UUID databaseId,
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, BadRequestException {
-        return queryService.executeChat(id, queryRequest, pageSize);
+        return queryService.executeChat(databaseId, queryRequest, pageSize);
+    }
+
+    /**
+     * Load chat result of existing chat.
+     *
+     * @param databaseId database identifier
+     * @param chatId     chat identifier
+     * @param page       page number (fist page is 0)
+     * @param pageSize   number of items per page
+     * @return result of the latest message from the chat
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws EntityNotFoundException     database or chat not found
+     */
+    @GetMapping("/{databaseId}/query/loadChatResult")
+    @ResponseStatus(HttpStatus.OK)
+    public QueryResponse loadChatResult(
+            @PathVariable UUID databaseId,
+            @RequestParam UUID chatId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize
+    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+        return queryService.loadChatResult(databaseId, chatId, page, pageSize);
     }
 
     /**
      * Query the user's database using database query language, result is automatically paginated.
      *
-     * @param id       database id
-     * @param query    database query in corresponding database query language
-     * @param page     page number (first pages is 0)
-     * @param pageSize number of items in one page
+     * @param databaseId database identifier
+     * @param query      database query in corresponding database query language
+     * @param page       page number (first pages is 0)
+     * @param pageSize   number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         requested page size is greater than maximum allowed value
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    @PostMapping("/{id}/query/query-language")
+    @PostMapping("/{databaseId}/query/queryLanguage")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeQueryLanguageQuery(
-            @PathVariable UUID id,
+            @PathVariable UUID databaseId,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.executeQueryLanguageSelectQuery(id, query, page, pageSize);
+        return queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
     }
 
     /**
      * Get database structure by database id
      *
-     * @param id identifier
+     * @param databaseId database identifier
      * @return database structure
-     * @throws DatabaseConnectionException syntax error error, ...
-     * @throws DatabaseExecutionException  connection to the database failed
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException  syntax error, ...
      * @throws EntityNotFoundException     database of specific id not found
      */
-    @GetMapping("/{id}/structure")
+    @GetMapping("/{databaseId}/structure")
     @ResponseStatus(HttpStatus.OK)
-    public DatabaseStructureDto getDatabaseStructure(@PathVariable UUID id)
+    public DatabaseStructureDto getDatabaseStructure(@PathVariable UUID databaseId)
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
-        return databaseService.getDatabaseStructureByDatabaseId(id);
+        return databaseService.getDatabaseStructureByDatabaseId(databaseId);
+    }
+
+    /**
+     * Get generated create script by database id
+     *
+     * @param id identifier
+     * @return create script
+     * @throws DatabaseConnectionException connection to the database failed
+     * @throws DatabaseExecutionException  syntax error, ...
+     * @throws EntityNotFoundException     database of specific id not found
+     */
+    @GetMapping("/{id}/createScript")
+    public String getCreateScript(@PathVariable UUID id)
+            throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+        return databaseService.getDatabaseCreateScriptByDatabaseId(id);
     }
 
     /**
      * Get chat history (chats associated to a specified database) sorted by the modification data in descending order.
+     *
      * @param id database identifier
      * @return list of chat DTOs
      * @throws EntityNotFoundException database of specified id not found.

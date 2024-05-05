@@ -12,9 +12,14 @@ interface Chat {
 
 interface ChatQueryWithResponse {
   id: string,
-  query: string,
-  response: string,
+  nlQuery: string, // natural language query
+  llmResult: LLMResult, // large language model result
   timestamp: string, // TODO date
 }
 
-export type { ChatHistoryItem, Chat, ChatQueryWithResponse }
+interface LLMResult {
+  databaseQuery: string | null,
+  plotUrl: string | null
+}
+
+export type { ChatHistoryItem, Chat, ChatQueryWithResponse, LLMResult }

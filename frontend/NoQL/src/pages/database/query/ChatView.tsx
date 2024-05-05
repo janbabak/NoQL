@@ -2,7 +2,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
-import { Chat, ChatQueryWithResponse } from '../../../types/Chat.ts'
+import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
 import { CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
@@ -12,18 +12,20 @@ interface UsersQueryProps {
 }
 
 interface ModelsResponse {
-  response: string
+  chatQueryResult: LLMResult
 }
 
-function ModelsResponse({ response }: ModelsResponse) {
+function ModelsResponse({ chatQueryResult }: ModelsResponse) {
   return (
-    <SyntaxHighlighter
-      style={theme}
-      language="SQL"
-      customStyle={{ borderRadius: '0.25rem', margin: '0.25rem 0 1rem 0' }}
-    >
-      {response}
-    </SyntaxHighlighter>
+   chatQueryResult?.databaseQuery != null
+      ? <SyntaxHighlighter
+        style={theme}
+        language="SQL"
+        customStyle={{ borderRadius: '0.25rem', margin: '0.25rem 0 1rem 0' }}
+      >
+        {chatQueryResult.databaseQuery}
+      </SyntaxHighlighter>
+      : <div></div>
   )
 }
 
@@ -75,8 +77,8 @@ export function ChatView() {
               : chat?.messages.map((message: ChatQueryWithResponse) => {
                 return (
                   <div key={message.id}>
-                    <UsersQuery query={message.query} />
-                    <ModelsResponse response={message.response} />
+                    <UsersQuery query={message.nlQuery} />
+                    <ModelsResponse chatQueryResult={message.llmResult} />
                   </div>
                 )
               })

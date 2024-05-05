@@ -44,6 +44,27 @@ const databaseApi = {
     )
   },
 
+  loadChatResult(databaseId: string, chatId: string, page: number, pageSize: number):
+    Promise<AxiosResponse<QueryResponse>> {
+
+    return this.API.get(this.DOMAIN + '/' + databaseId + '/query/loadChatResult',
+      [
+        {
+          name: 'chatId',
+          value: chatId
+        },
+        {
+          name: 'pageSize',
+          value: pageSize
+        },
+        {
+          name: 'page',
+          value: page
+        }
+      ]
+    )
+  },
+
   /**
    * Query the user's database using database query language, result is automatically paginated.
    * @param id database id
@@ -56,7 +77,7 @@ const databaseApi = {
     : Promise<AxiosResponse<QueryResponse>> {
 
     return this.API.post(
-      this.DOMAIN + '/' + id + '/query/query-language',
+      this.DOMAIN + '/' + id + '/query/queryLanguage',
       query,
       [
         {
