@@ -50,7 +50,7 @@ export function Result(
   const EditQueryButton =
     <Button
       onClick={(): void => {
-        editQueryInConsole(queryResponse?.chatQueryWithResponse.llmresult.databaseQuery || '')
+        editQueryInConsole(queryResponse?.chatQueryWithResponse?.llmresult?.databaseQuery || '')
       }}
       size="small"
       color="inherit"
