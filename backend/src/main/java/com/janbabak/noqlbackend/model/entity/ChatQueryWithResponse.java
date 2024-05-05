@@ -26,11 +26,11 @@ public class ChatQueryWithResponse {
 
     /** natural language query */
     @NotBlank
-    private String NLQuery;
+    private String nlQuery;
 
     /** JSON in form of string { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string }} */
     @Column(length = 2048)
-    private String LLMResponse;
+    private String llmResponse;
 
     private Timestamp timestamp;
 }

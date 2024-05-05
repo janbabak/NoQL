@@ -58,17 +58,17 @@ public class ChatService {
                         .stream()
                         .map(message -> {
                             try {
-                                LLMResponse LLMResponse = JsonUtils.createLLMResponse(message.getLLMResponse());
+                                LLMResponse llmResponse = JsonUtils.createLLMResponse(message.getLlmResponse());
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
-                                        message.getNLQuery(),
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                LLMResponse.getDatabaseQuery(),
-                                                "/static/images/plot.png"),
+                                        message.getNlQuery(),
+                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, chat.getId()),
                                         message.getTimestamp());
                             } catch (JsonProcessingException e) {
-                                throw new RuntimeException(e); // TODO resolve
+                                // should not happen since invalid JSONs are not saved
+                                log.error("Cannot parse message JSON from database, messageId={}", message.getId());
+                                return null;
                             }
                         })
                         .toList(),
@@ -136,8 +136,8 @@ public class ChatService {
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
-                .NLQuery(request.getNLQuery())
-                .LLMResponse(request.getLLMResponse())
+                .nlQuery(request.getNlQuery())
+                .llmResponse(request.getLlmResponse())
                 .timestamp(timestamp)
                 .build();
 
@@ -145,8 +145,8 @@ public class ChatService {
         chat.setModificationDate(timestamp);
 
         if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
-            chat.setName(message.getNLQuery().length() < CHAT_NAME_MAX_LENGTH
-                    ? message.getNLQuery() : message.getNLQuery().substring(0, CHAT_NAME_MAX_LENGTH));
+            chat.setName(message.getNlQuery().length() < CHAT_NAME_MAX_LENGTH
+                    ? message.getNlQuery() : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
         chatRepository.save(chat);
         return messageRepository.save(message);

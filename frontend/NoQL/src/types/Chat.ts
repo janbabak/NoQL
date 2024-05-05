@@ -12,8 +12,8 @@ interface Chat {
 
 interface ChatQueryWithResponse {
   id: string,
-  nlquery: string, // natural language query
-  llmresult: LLMResult, // large language model result
+  nlQuery: string, // natural language query
+  llmResult: LLMResult, // large language model result
   timestamp: string, // TODO date
 }
 

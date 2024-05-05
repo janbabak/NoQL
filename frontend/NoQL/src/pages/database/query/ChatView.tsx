@@ -77,8 +77,8 @@ export function ChatView() {
               : chat?.messages.map((message: ChatQueryWithResponse) => {
                 return (
                   <div key={message.id}>
-                    <UsersQuery query={message.nlquery} />
-                    <ModelsResponse chatQueryResult={message.llmresult} />
+                    <UsersQuery query={message.nlQuery} />
+                    <ModelsResponse chatQueryResult={message.llmResult} />
                   </div>
                 )
               })

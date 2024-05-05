@@ -385,7 +385,7 @@ public class QueryService {
 
         LLMResponse LLMResponse;
         try {
-            LLMResponse = JsonUtils.createLLMResponse(latestMessage.getLLMResponse());
+            LLMResponse = JsonUtils.createLLMResponse(latestMessage.getLlmResponse());
         } catch (JsonProcessingException e) {
             return null; // should not happen since values that cannot be parsed aren't saved
         }
@@ -515,8 +515,8 @@ public class QueryService {
 
         // last try failed - return message that is not persisted
         ChatQueryWithResponse message = new ChatQueryWithResponse();
-        message.setNLQuery(queryRequest.getQuery());
-        message.setLLMResponse(llmResponseJson);
+        message.setNlQuery(queryRequest.getQuery());
+        message.setLlmResponse(llmResponseJson);
 
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
         return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message, null), lastError);

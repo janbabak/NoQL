@@ -44,8 +44,8 @@ public class GptQuery {
         this.messages.add(new Message(Role.system, systemQuery));
 
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
-            this.messages.add(new Message(Role.user, chatQueryWithResponse.getNLQuery()));
-            this.messages.add(new Message(Role.assistant, chatQueryWithResponse.getLLMResponse()));
+            this.messages.add(new Message(Role.user, chatQueryWithResponse.getNlQuery()));
+            this.messages.add(new Message(Role.assistant, chatQueryWithResponse.getLlmResponse()));
         }
 
         this.messages.add(new Message(Role.user, query));

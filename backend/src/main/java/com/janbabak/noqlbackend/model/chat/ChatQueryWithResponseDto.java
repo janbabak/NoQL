@@ -13,14 +13,14 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ChatQueryWithResponseDto {
     private UUID id;
-    private String NLQuery; // natural language query
-    private LLMResult LLMResult; // generated query in query language or plot
+    private String nlQuery; // natural language query
+    private LLMResult llmResult; // generated query in query language or plot
     private Timestamp timestamp;
 
     public ChatQueryWithResponseDto(ChatQueryWithResponse chatQueryWithResponse, LLMResult parsedLlmResult) {
         this(
                 chatQueryWithResponse.getId(),
-                chatQueryWithResponse.getNLQuery(),
+                chatQueryWithResponse.getNlQuery(),
                 parsedLlmResult,
                 chatQueryWithResponse.getTimestamp());
     }

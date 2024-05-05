@@ -66,7 +66,7 @@ export function ConsoleTab(
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.chatQueryWithResponse.nlquery || '',
+        queryResult?.chatQueryWithResponse.nlQuery || '',
         page,
         pageSize)
 
