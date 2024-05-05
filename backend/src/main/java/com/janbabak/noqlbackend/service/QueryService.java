@@ -27,8 +27,6 @@ import org.springframework.stereotype.Service;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
@@ -328,8 +326,8 @@ public class QueryService {
      * Execute query language select query.
      * Select query is read only, and it returns a result that is automatically paginated.
      *
-     * @param id       database id
-     * @param query    in natural query or database query language
+     * @param databaseId       database identifier
+     * @param query    in database query language
      * @param page     page number (fist page starts by 0), if null, default value is 0
      * @param pageSize number of items in one page,<br />
      *                 default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
@@ -340,30 +338,26 @@ public class QueryService {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
     public QueryResponse executeQueryLanguageSelectQuery(
-            UUID id,
+            UUID databaseId,
             String query,
             Integer page,
             Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
-        log.info("Execute query language query: query={}, database_id={}.", query, id);
+        log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
-        Database database = databaseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, id));
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-
+        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-        ChatQueryWithResponseDto message = new ChatQueryWithResponseDto( // TODO better solution
-                UUID.randomUUID(), query, null, Timestamp.from(Instant.now())); // TODO: replace null
-        try {
-            ResultSet resultSet = specificDatabaseService.executeQuery(paginatedQuery);
-            RetrievedData retrievedData = new RetrievedData(resultSet);
-            Long totalCount = getTotalCount(query, specificDatabaseService);
 
-            return QueryResponse.successfulResponse(retrievedData, message, totalCount);
+        try {
+            ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
+            return QueryResponse.successfulResponse(
+                    new RetrievedData(resultSet), null, getTotalCount(query, databaseService));
         } catch (DatabaseExecutionException | SQLException e) {
-            return QueryResponse.failedResponse(message, e.getMessage()); // TODO: better solution
+            return QueryResponse.failedResponse(null, e.getMessage());
         }
     }
 
