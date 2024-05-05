@@ -44,8 +44,10 @@ const databaseApi = {
     )
   },
 
-  loadChatResult(databaseId: string, chatId: string, page: number, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
-    return this.API.post(this.DOMAIN + '/' + databaseId + '/query/load-chat-result', null,
+  loadChatResult(databaseId: string, chatId: string, page: number, pageSize: number):
+    Promise<AxiosResponse<QueryResponse>> {
+
+    return this.API.get(this.DOMAIN + '/' + databaseId + '/query/loadChatResult',
       [
         {
           name: 'chatId',
@@ -75,7 +77,7 @@ const databaseApi = {
     : Promise<AxiosResponse<QueryResponse>> {
 
     return this.API.post(
-      this.DOMAIN + '/' + id + '/query/query-language',
+      this.DOMAIN + '/' + id + '/query/queryLanguage',
       query,
       [
         {
