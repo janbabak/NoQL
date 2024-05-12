@@ -8,6 +8,9 @@
 # Example database
 exampleDatabase/data
 
+# Experimantal
+experimental
+
 # Example project
 exampleProject/.env
 exampleProject/node_modules
