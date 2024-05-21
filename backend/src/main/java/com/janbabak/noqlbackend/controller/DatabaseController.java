@@ -121,6 +121,17 @@ public class DatabaseController {
         return queryService.executeChat(databaseId, queryRequest, pageSize);
     }
 
+    @PostMapping("/{databaseId}/query/chatAws")
+    @ResponseStatus(HttpStatus.OK)
+    public String executeChatAws(
+            @PathVariable UUID databaseId,
+            @RequestBody @Valid QueryRequest queryRequest,
+            @RequestParam Integer pageSize
+    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            EntityNotFoundException, LLMException, BadRequestException {
+        return queryService.executeChatAws(databaseId, queryRequest, pageSize);
+    }
+
     /**
      * Load chat result of existing chat.
      *
