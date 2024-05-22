@@ -1,22 +1,22 @@
-package com.janbabak.noqlbackend.model.query.gpt;
+package com.janbabak.noqlbackend.model.query.llama;
 
+import com.janbabak.noqlbackend.model.query.LlmMessage;
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * GPT response object from the GPT API
+ * Llama response object from the Llama API
  */
 @Data
-public class GptResponse {
-    private String id;
-    private String object;
+public class LlamaResponse {
+    private int created;
     private String model;
     private Usage usage;
     private List<Choice> choices;
 
     /**
-     * Information in the response about GPT API usage
+     * Information in the response about Llama API usage
      */
     @Data
     public static class Usage {
@@ -26,12 +26,13 @@ public class GptResponse {
     }
 
     /**
-     * Choice object from the GPT response
+     * Choice object from the Llama response
      */
     @Data
     public static class Choice {
-        private GptRequest.Message message;
+        private LlmMessage message;
         private String finish_reason;
         private int index;
+
     }
 }

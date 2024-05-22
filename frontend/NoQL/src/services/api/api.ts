@@ -9,7 +9,7 @@ interface ApiParameter {
 class Api {
   axiosInstance: AxiosInstance = axios.create({
     baseURL: 'http://localhost:8080', // TODO: get from env
-    timeout: 10_000
+    timeout: 90_000 // TODO: figure out the best value
   })
 
   /** forbid constructor, because api is a singleton */

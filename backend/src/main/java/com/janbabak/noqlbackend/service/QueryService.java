@@ -14,7 +14,7 @@ import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.service.api.GptApi;
+import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
@@ -38,7 +38,6 @@ import static java.sql.Types.*;
 @Service
 @RequiredArgsConstructor
 public class QueryService {
-    private final QueryApi queryApi = new GptApi();
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final Settings settings;
@@ -284,7 +283,6 @@ public class QueryService {
     }
 
     // TODO: remove or use
-
     /**
      * Classify columns into column types
      *
@@ -496,8 +494,10 @@ public class QueryService {
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
         String llmResponseJson = "";
 
+        QueryApi queryApi = LlmApiServiceFactory.getQueryApiService(queryRequest.getModel());
+
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            llmResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
+            llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
 
             try {
                 return showResultTableAndGeneratePlot(
