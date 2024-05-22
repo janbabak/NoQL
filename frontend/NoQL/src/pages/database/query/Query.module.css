@@ -132,3 +132,8 @@
     top: 0;
     right: 0.5rem;
 }
+
+.modelSelect {
+    width: 11rem;
+    margin-bottom: 2rem;
+}

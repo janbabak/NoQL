@@ -1,6 +1,6 @@
 import { CHAT_TAB } from './Constants.ts'
 import styles from './Query.module.css'
-import { MenuItem, TextField } from '@mui/material'
+import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { useEffect, useRef, useState } from 'react'
@@ -15,7 +15,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
 import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
-import { Select, SelectChangeEvent } from '@mui/material-next'
+import { ModelSelect } from './ModelSelect.tsx'
 
 interface ChatTabProps {
   databaseId: string,
@@ -209,47 +209,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
-  function modelToLabel(model: string): string {
-    switch (model) {
-      case LlmModel.GPT_4o:
-        return 'GPT 4o'
-      case LlmModel.GPT_4:
-        return 'GPT 4'
-      case LlmModel.GPT_4_TURBO:
-        return 'GPT 4 Turbo'
-      case LlmModel.GPT_4_32K:
-        return 'GPT 4 32k'
-      case LlmModel.GPT_3_5_TURBO:
-        return 'GPT 3.5 Turbo'
-      case LlmModel.LLAMA3_70B:
-        return 'Llama3 70B'
-      case LlmModel.LLAMA3_13B_CHAT:
-        return 'Llama3 13B Chat'
-      default:
-        return ''
-    }
-  }
-
-  function selectModel(event: SelectChangeEvent<LlmModel>) {
-    setModel(event.target.value as LlmModel)
-  }
-
-  const modelSelection =
-    <Select
-      value={model}
-      label="Model"
-      onChange={selectModel}
-      style={{ marginBottom: '2rem' }}
-      size="small"
-      autoWidth={true}
-    >
-      {Object.keys(LlmModel)
-        .filter((key: string) => isNaN(Number(key)))
-        .map((model: string) => {
-          return <MenuItem key={model} value={model}>{modelToLabel(model)}</MenuItem>
-        })}
-    </Select>
-
   return (
     <div
       role="tabpanel"
@@ -266,8 +225,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
         <div className={styles.chatWithInput}>
 
-          {modelSelection}
-
+          <ModelSelect model={model} setModel={setModel} />
           <ChatView />
 
           <div className={styles.chatInputContainer}>
