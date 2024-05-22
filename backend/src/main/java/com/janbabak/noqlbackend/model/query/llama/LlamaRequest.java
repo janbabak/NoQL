@@ -10,16 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ToString
-public class LlamaQuery {
-    // available models
-    @SuppressWarnings("unused")
-    public static final String LLAMA3_70B = "llama3-70b";
-    @SuppressWarnings("unused")
-    public static final String LLAMA3_13B_CHAT = "llama-13b-chat";
-
-    public String model; // LLAMA LLM
-
-    public List<LlmMessage> messages;
+public class LlamaRequest {
+    public final String model; // LLAMA LLM
+    public final List<LlmMessage> messages;
 
     /**
      * Create query
@@ -29,7 +22,7 @@ public class LlamaQuery {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      */
-    public LlamaQuery(
+    public LlamaRequest(
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,

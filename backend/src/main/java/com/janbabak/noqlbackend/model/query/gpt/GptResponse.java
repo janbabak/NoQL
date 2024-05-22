@@ -30,7 +30,7 @@ public class GptResponse {
      */
     @Data
     public static class Choice {
-        private GptQuery.Message message;
+        private GptRequest.Message message;
         private String finish_reason;
         private int index;
     }

@@ -5,10 +5,10 @@ import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
-import { QueryResponse } from '../../../types/Query.ts'
+import { LlmModel, QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
-import { ChatHistoryItem, Chat } from '../../../types/Chat.ts'
+import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import { ChatView } from './ChatView.tsx'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
@@ -114,7 +114,8 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         databaseId, {
           chatId: chatHistory[activeChatIndexRedux].id,
           // @ts-ignore
-          query: naturalLanguageQuery.current.value
+          query: naturalLanguageQuery.current.value,
+          model: LlmModel.GPT_4 // TODO: model selection
         },
         pageSize)
 

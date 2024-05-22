@@ -3,7 +3,7 @@ package com.janbabak.noqlbackend.service.api;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.gpt.GptQuery;
+import com.janbabak.noqlbackend.model.query.gpt.GptRequest;
 import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,8 +50,8 @@ public class GptApiService implements QueryApi {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<GptQuery> request = new HttpEntity<>(
-                new GptQuery(chatHistory, queryRequest, systemQuery, errors), headers);
+        HttpEntity<GptRequest> request = new HttpEntity<>(
+                new GptRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
         ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
                 GPT_URL, HttpMethod.POST, request, GptResponse.class);

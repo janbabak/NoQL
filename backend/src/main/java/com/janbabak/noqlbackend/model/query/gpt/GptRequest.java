@@ -11,8 +11,9 @@ import java.util.List;
 /**
  * GPT query object which is sent to the GPT API.
  */
-public class GptQuery {
-    public List<Message> messages; // list of messages - can contain user, system, and assistant messages
+public class GptRequest {
+    public final String model; // GPT LLM
+    public final List<Message> messages; // list of messages - can contain user, system, and assistant messages
 
     /**
      * Create query
@@ -22,12 +23,13 @@ public class GptQuery {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      */
-    public GptQuery(
+    public GptRequest(
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
             List<String> errors) {
 
+        this.model = queryRequest.getModel().getModel();
         this.messages = new ArrayList<>();
 
         // system instructions

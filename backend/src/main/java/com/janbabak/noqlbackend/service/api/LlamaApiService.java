@@ -3,7 +3,7 @@ package com.janbabak.noqlbackend.service.api;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.llama.LlamaQuery;
+import com.janbabak.noqlbackend.model.query.llama.LlamaRequest;
 import com.janbabak.noqlbackend.model.query.llama.LlamaResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,10 +50,8 @@ public class LlamaApiService implements QueryApi {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        LlamaQuery llamaQuery = new LlamaQuery(chatHistory, queryRequest, systemQuery, errors);
-        System.out.println(llamaQuery);
-        HttpEntity<LlamaQuery> request = new HttpEntity<>(
-                llamaQuery, headers);
+        HttpEntity<LlamaRequest> request = new HttpEntity<>(
+                new LlamaRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
         ResponseEntity<LlamaResponse> responseEntity = restTemplate.exchange(
                 LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
