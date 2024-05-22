@@ -2,10 +2,12 @@ package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.llama.LlamaQuery;
 import com.janbabak.noqlbackend.model.query.llama.LlamaResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,33 +22,35 @@ public class LlamaApiService implements QueryApi {
     private final String LLAMA_API_URL = "https://api.llama-api.com/chat/completions";
     private final String token = System.getenv("LLAMA_AUTH_TOKEN");
     private final RestTemplate restTemplate = new RestTemplate();
-    public String llamaModel = LlamaQuery.LLAMA3_13B_CHAT;
 
     /**
      * Send queries in chat form the model and retrieve a response.
      *
-     * @param chatHistory chat history
-     * @param query       users query
-     * @param systemQuery instructions from the NoQL system about task that needs to be done
-     * @param errors      list of errors from previous executions that should help the model fix its query
+     * @param chatHistory  chat history
+     * @param queryRequest users query, model...
+     * @param systemQuery  instructions from the NoQL system about task that needs to be done
+     * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
      * @throws LLMException when LLM request fails.
+     * @throws BadRequestException when queryRequest is not valid
      */
     @Override
     public String queryModel(
             List<ChatQueryWithResponse> chatHistory,
-            String query,
+            QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException {
+            List<String> errors) throws LLMException, BadRequestException {
 
         log.info("Chat with Llama API");
+
+        validateRequest(queryRequest);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        LlamaQuery llamaQuery = new LlamaQuery(chatHistory, query, systemQuery, errors, llamaModel);
+        LlamaQuery llamaQuery = new LlamaQuery(chatHistory, queryRequest, systemQuery, errors);
         System.out.println(llamaQuery);
         HttpEntity<LlamaQuery> request = new HttpEntity<>(
                 llamaQuery, headers);
@@ -70,5 +74,18 @@ public class LlamaApiService implements QueryApi {
             throw new LLMException("Error on Llama side, try it latter");
         }
         return null;
+    }
+
+    /**
+     * Validate request
+     *
+     * @param queryRequest users request
+     * @throws BadRequestException unsupported model
+     */
+    private void validateRequest(QueryRequest queryRequest) throws BadRequestException {
+        if (queryRequest.getModel() == null || !queryRequest.getModel().getModel().startsWith("llama")) {
+            log.error("Unsupported model: {}", queryRequest.getModel());
+            throw new BadRequestException("Only Llama models are supported.");
+        }
     }
 }

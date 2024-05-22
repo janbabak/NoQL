@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
 import org.json.JSONObject;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
@@ -54,11 +55,10 @@ public class AwsService implements QueryApi {
         System.out.println(responseAsJson);
     }
 
-
     @Override
-    public String queryModel(List<ChatQueryWithResponse> chatHistory, String query, String systemQuery, List<String> errors) {
+    public String queryModel(List<ChatQueryWithResponse> chatHistory, QueryRequest queryRequest, String systemQuery, List<String> errors) {
         JSONObject jsonBody = new JSONObject()
-                .put("prompt", buildPrompt(chatHistory, query, systemQuery))
+                .put("prompt", buildPrompt(chatHistory, queryRequest.getQuery(), systemQuery))
                 .put("temperature", 0.5)
                 .put("top_p", 0.9)
                 .put("max_gen_len", 512);
