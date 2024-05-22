@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.query.gpt;
 
+import com.janbabak.noqlbackend.model.query.LlmMessage;
 import lombok.Data;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class GptResponse {
      */
     @Data
     public static class Choice {
-        private GptRequest.Message message;
+        private LlmMessage message;
         private String finish_reason;
         private int index;
     }
