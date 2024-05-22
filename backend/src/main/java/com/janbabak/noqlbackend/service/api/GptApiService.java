@@ -9,13 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 @NoArgsConstructor
-public class GptApi implements QueryApi {
+public class GptApiService implements QueryApi {
 
     @SuppressWarnings("all")
     private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
@@ -45,7 +44,7 @@ public class GptApi implements QueryApi {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         HttpEntity<GptQuery> request = new HttpEntity<>(
                 new GptQuery(chatHistory, query, systemQuery, errors, gptModel), headers);

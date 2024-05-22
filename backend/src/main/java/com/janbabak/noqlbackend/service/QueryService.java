@@ -14,7 +14,7 @@ import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.service.api.AwsService;
+import com.janbabak.noqlbackend.service.api.LlamaApiService;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
@@ -38,8 +38,8 @@ import static java.sql.Types.*;
 @Service
 @RequiredArgsConstructor
 public class QueryService {
-    private final QueryApi queryApi = new AwsService();
-//    private final QueryApi queryApi = new GptApi();
+    //    private final QueryApi queryApi = new GptApi();
+    private final QueryApi queryApi = new LlamaApiService();
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final Settings settings;
@@ -521,28 +521,5 @@ public class QueryService {
 
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
         return QueryResponse.failedResponse(new ChatQueryWithResponseDto(message, null), lastError);
-    }
-
-    public String executeChatAws(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, LLMException,
-            DatabaseExecutionException, BadRequestException {
-
-        log.info("Execute chat, database_id={}", databaseId);
-
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
-
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
-        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQuery(
-                databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
-        List<String> errors = new ArrayList<>();
-        List<ChatQueryWithResponse> chatHistory =
-                chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
-        String llmResponseJson = "";
-
-        llmResponseJson = queryApi.queryModel(chatHistory, queryRequest.getQuery(), systemQuery, errors);
-
-        return llmResponseJson;
     }
 }

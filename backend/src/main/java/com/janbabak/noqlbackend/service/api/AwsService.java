@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
 import java.util.List;
 
+@Deprecated // unused
+@SuppressWarnings("all")
 public class AwsService implements QueryApi {
 
     private final BedrockRuntimeClient bedrockClient = BedrockRuntimeClient.builder()
