@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
 import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
+import { ModelSelect } from './ModelSelect.tsx'
 
 interface ChatTabProps {
   databaseId: string,
@@ -50,6 +51,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     queryLoading,
     setQueryLoading
   ] = useState<boolean>(false)
+
+  const [
+    model,
+    setModel
+  ] = useState<LlmModel>(LlmModel.GPT_4)
 
   const [
     pageLoading,
@@ -115,7 +121,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
           chatId: chatHistory[activeChatIndexRedux].id,
           // @ts-ignore
           query: naturalLanguageQuery.current.value,
-          model: LlmModel.GPT_4 // TODO: model selection
+          model: model
         },
         pageSize)
 
@@ -219,6 +225,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
         <div className={styles.chatWithInput}>
 
+          <ModelSelect model={model} setModel={setModel} />
           <ChatView />
 
           <div className={styles.chatInputContainer}>
