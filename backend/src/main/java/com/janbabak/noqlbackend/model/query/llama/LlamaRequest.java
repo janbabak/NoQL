@@ -4,12 +4,10 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.LlmMessage;
 import com.janbabak.noqlbackend.model.query.LlmMessage.Role;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@ToString
 public class LlamaRequest {
     public final String model; // LLAMA LLM
     public final List<LlmMessage> messages;

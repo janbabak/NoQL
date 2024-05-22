@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * GPT query object which is sent to the GPT API.
+ * GPT request object which is sent to the GPT API.
  */
 public class GptRequest {
     public final String model; // GPT LLM

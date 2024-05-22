@@ -283,7 +283,6 @@ public class QueryService {
     }
 
     // TODO: remove or use
-
     /**
      * Classify columns into column types
      *
@@ -501,7 +500,6 @@ public class QueryService {
             llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
 
             try {
-                log.info("LLM response JSON: {}", llmResponseJson);
                 return showResultTableAndGeneratePlot(
                         queryRequest, llmResponseJson, specificDatabaseService, database, pageSize);
             } catch (JsonProcessingException e) {

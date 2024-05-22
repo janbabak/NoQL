@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
 import java.util.List;
 
-@Deprecated // unused
+@Deprecated // unused, but kept for reference, might use for some models that are hosted on AWS
 @SuppressWarnings("all")
 public class AwsService implements QueryApi {
 
