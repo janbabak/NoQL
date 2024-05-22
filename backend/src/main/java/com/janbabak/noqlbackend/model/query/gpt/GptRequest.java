@@ -1,9 +1,9 @@
 package com.janbabak.noqlbackend.model.query.gpt;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.query.LlmMessage;
+import com.janbabak.noqlbackend.model.query.LlmMessage.Role;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class GptRequest {
     public final String model; // GPT LLM
-    public final List<Message> messages; // list of messages - can contain user, system, and assistant messages
+    public final List<LlmMessage> messages; // list of messages - can contain user, system, and assistant messages
 
     /**
      * Create query
@@ -33,40 +33,18 @@ public class GptRequest {
         this.messages = new ArrayList<>();
 
         // system instructions
-        this.messages.add(new Message(Role.system, systemQuery));
+        this.messages.add(new LlmMessage(Role.system, systemQuery));
 
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
-            this.messages.add(new Message(Role.user, chatQueryWithResponse.getNlQuery()));
-            this.messages.add(new Message(Role.assistant, chatQueryWithResponse.getLlmResponse()));
+            this.messages.add(new LlmMessage(Role.user, chatQueryWithResponse.getNlQuery()));
+            this.messages.add(new LlmMessage(Role.assistant, chatQueryWithResponse.getLlmResponse()));
         }
 
-        this.messages.add(new Message(Role.user, queryRequest.getQuery()));
+        this.messages.add(new LlmMessage(Role.user, queryRequest.getQuery()));
 
         // system errors
         for (String error : errors) {
-            this.messages.add(new Message(Role.system, error));
+            this.messages.add(new LlmMessage(Role.system, error));
         }
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class Message {
-        public Role role;
-        public String content;
-    }
-
-    public enum Role {
-        /**
-         * user, who is asking
-         */
-        user,
-        /**
-         * system developer (me) who provides additional information
-         */
-        system,
-        /**
-         * gpt LLM
-         */
-        assistant,
     }
 }
