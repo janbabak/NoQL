@@ -209,6 +209,27 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     }
   }
 
+  function modelToLabel(model: string): string {
+    switch (model) {
+      case LlmModel.GPT_4o:
+        return 'GPT 4o'
+      case LlmModel.GPT_4:
+        return 'GPT 4'
+      case LlmModel.GPT_4_TURBO:
+        return 'GPT 4 Turbo'
+      case LlmModel.GPT_4_32K:
+        return 'GPT 4 32k'
+      case LlmModel.GPT_3_5_TURBO:
+        return 'GPT 3.5 Turbo'
+      case LlmModel.LLAMA3_70B:
+        return 'Llama3 70B'
+      case LlmModel.LLAMA3_13B_CHAT:
+        return 'Llama3 13B Chat'
+      default:
+        return ''
+    }
+  }
+
   function selectModel(event: SelectChangeEvent<LlmModel>) {
     setModel(event.target.value as LlmModel)
   }
@@ -225,7 +246,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       {Object.keys(LlmModel)
         .filter((key: string) => isNaN(Number(key)))
         .map((model: string) => {
-          return <MenuItem key={model} value={model}>{model}</MenuItem>
+          return <MenuItem key={model} value={model}>{modelToLabel(model)}</MenuItem>
         })}
     </Select>
 
