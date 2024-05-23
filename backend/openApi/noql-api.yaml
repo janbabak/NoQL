@@ -29,6 +29,91 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Database'
+    post:
+      tags:
+        - database
+      summary: Create a new database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDatabaseRequest'
+      responses:
+        '201':
+          description: A database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '400':
+          description: Invalid input
+  /database/{databaseId}:
+    get:
+      tags:
+        - database
+      summary: Get a database by ID
+      parameters:
+        - name: databaseId
+          in: path
+          required: true
+          description: ID of the database to get
+          schema:
+            type: string
+            example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+      responses:
+        '200':
+          description: A database of specific ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '404':
+          description: Database of specified ID not found
+    put:
+      tags:
+        - database
+      summary: Update a database by ID
+      description: Update provided non-null fields.
+      parameters:
+        - name: databaseId
+          in: path
+          required: true
+          description: ID of the database to update
+          schema:
+            type: string
+            example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDatabaseRequest'
+      responses:
+        '200':
+          description: Updated database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '404':
+            description: Database of specified ID not found
+        '400':
+          description: Invalid input
+    delete:
+      tags:
+        - database
+      summary: Delete a database by ID
+      parameters:
+        - name: databaseId
+          in: path
+          required: true
+          description: ID of the database to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content
 
 components:
   schemas:
@@ -40,6 +125,8 @@ components:
           example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
         name:
           type: string
+          minLength: 1
+          maxLength: 32
           example: "My eshop Postgres"
         host:
           type: string
@@ -62,4 +149,72 @@ components:
             - MYSQL
         isSQL:
           type: boolean
+          example: true
+    CreateDatabaseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: "My eshop Postgres"
+        host:
+          type: string
+          example: "localhost"
+        port:
+          type: integer
+          example: 5432
+        database:
+          type: string
+          example: "eshop"
+        username:
+          type: string
+          example: "admin"
+        password:
+          type: string
+          example: "admin1234"
+        engine:
+          enum:
+            - POSTGRES
+            - MYSQL
+        isSQL:
+          type: boolean
+          example: true
+    UpdateDatabaseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 32
+          example: "My eshop Postgres"
+        host:
+          type: string
+          nullable: true
+          example: "localhost"
+        port:
+          type: integer
+          nullable: true
+          example: 5432
+        database:
+          type: string
+          nullable: true
+          example: "eshop"
+        username:
+          type: string
+          nullable: true
+          example: "admin"
+        password:
+          type: string
+          nullable: true
+          example: "admin1234"
+        engine:
+          nullable: true
+          enum:
+            - POSTGRES
+            - MYSQL
+        isSQL:
+          type: boolean
+          nullable: true
           example: true
