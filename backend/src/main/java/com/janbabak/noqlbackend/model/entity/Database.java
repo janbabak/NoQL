@@ -49,7 +49,7 @@ public class Database {
     private DatabaseEngine engine;
 
     @NotNull
-    private Boolean isSQL;
+    private Boolean isSQL; // TODO: remove column, can be inferred from engine
 
     public Database(Database from) {
         this(

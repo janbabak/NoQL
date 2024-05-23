@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: NoQL API
+  version: 1.0.0
+  description: NoQL API
+  contact:
+    name: NoQL Team
+    email: babakhonza@gmail.com
+servers:
+  - url: http://localhost:8080
+    description: Development server
+tags:
+  - name: database
+    description: Everything about database
+  - name: chat
+    description: Everything about chat
+paths:
+  /database:
+    get:
+      tags:
+        - database
+      summary: Get all databases
+      responses:
+        '200':
+          description: A list of databases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Database'
+
+components:
+  schemas:
+    Database:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+        name:
+          type: string
+          example: "My eshop Postgres"
+        host:
+          type: string
+          example: "localhost"
+        port:
+          type: integer
+          example: 5432
+        database:
+          type: string
+          example: "eshop"
+        username:
+          type: string
+          example: "admin"
+        password:
+          type: string
+          example: "admin1234"
+        engine:
+          enum:
+            - POSTGRES
+            - MYSQL
+        isSQL:
+          type: boolean
+          example: true
