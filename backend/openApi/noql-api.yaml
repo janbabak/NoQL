@@ -12,9 +12,10 @@ servers:
 tags:
   - name: Database
     description: Everything about database
-  - name: chat
+  - name: Chat
     description: Everything about chat
 paths:
+
   /database:
     get:
       tags:
@@ -48,6 +49,7 @@ paths:
                 $ref: '#/components/schemas/Database'
         '400':
           description: Invalid input
+
   /database/{databaseId}:
     get:
       tags:
@@ -90,7 +92,7 @@ paths:
           description: Invalid input
     delete:
       tags:
-        - database
+        - Database
       summary: Delete a database by ID
       parameters:
         - $ref: '#/components/parameters/databaseId'
@@ -98,6 +100,58 @@ paths:
         '204':
           description: No content
 
+  /database/{databaseId}/query/chat:
+    post:
+      tags:
+        - Database
+      summary: Query a database by chat of messages
+      description: >
+        Query a database by chat of messages. The LLM translates the natural language query to a database query and
+        returns requested data and/or a plot.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/pageSize'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
+            natural language query to a database query or generate the plot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '404':
+          description: Database of specified ID not found
+        '400':
+          description: Invalid input
+
+  /database/{databaseId}/query/loadChatResult:
+    post:
+      tags:
+        - Database
+      summary: Load chat resul of existing chat
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/chatId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
+            natural language query to a database query or generate the plot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '404':
+          description: Database of chat of specified ID not found.
 components:
   schemas:
 
@@ -220,6 +274,103 @@ components:
       type: boolean
       example: true
 
+    QueryRequest:
+      type: object
+      properties:
+        chatId:
+          $ref: '#/components/schemas/UUID'
+        query:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        model:
+          $ref: '#/components/schemas/LlmModel'
+
+    LlmModel:
+      description: Language model to use for translation
+      enum:
+        - GPT_4o
+        - GPT_4
+        - GPT_4_TURBO
+        - GPT_4_32K
+        - GPT_3_5_TURBO
+        - LLAMA3_70B
+        - LLAMA3_13B_CHAT
+
+    QueryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RetrievedData'
+        totalCount:
+          $ref: '#/components/schemas/TotalCount'
+        chatQueryWithResponse:
+          $ref: '#/components/schemas/ChatQueryWithResponse'
+        errorMessage:
+          allOf:
+            - $ref: '#/components/schemas/QueryErrorMessage'
+            - example: null
+
+    RetrievedData:
+      type: object
+      properties:
+        columnNames:
+          type: array
+          items:
+            type: string
+          example: [ "sex", "count" ]
+        rows:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          example: [ [ "male", "8" ], [ "female", "2" ] ]
+
+    TotalCount:
+      type: integer
+      format: int64
+      example: 2
+
+    ChatQueryWithResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        nlQuery:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        llmResult:
+          $ref: '#/components/schemas/LLMResult'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+
+    NaturalLanguageQuery:
+      type: string
+      description: Natural language query
+      example: "Plot sex of users older than 25"
+
+    LLMResult:
+      type: object
+      properties:
+        databaseQuery:
+          type: string
+          description: Query in database specific language (SQL, ...)
+          example: "SELECT sex, COUNT(*) FROM public.user WHERE age > 25 GROUP BY sex;"
+          nullable: true
+        plotUrl:
+          type: string
+          description: URL to the plot if the users requested a plot
+          example: "http://localhost:8080/static/images/13eae4d2-6d7b-41c6-93d0-8f16e4721504.png"
+          nullable: true
+
+    QueryErrorMessage:
+      type: string
+      nullable: true
+      example: "Syntax error on position: 30. Table teachers does not exist."
+
+    Timestamp:
+      type: string
+      format: date-time
+      example: "2024-05-24T18:40:24.649+00:00"
+
   parameters:
 
     databaseId:
@@ -229,3 +380,40 @@ components:
       description: ID of the database to get
       schema:
         $ref: '#/components/schemas/UUID'
+
+    chatId:
+      name: chatId
+      in: query
+      required: true
+      description: ID of the chat to query
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    pageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: |
+        Number of items per page.
+        
+        Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.
+        
+        Maximum value is 50 and can be changed by environment variable `PAGINATION_MAX_PAGE_SIZE`.
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        minimum: 1
+        maximum: 50
+
+    page:
+      name: page
+      in: query
+      required: false
+      description: Page number. First page is 0.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+        maximum: 100

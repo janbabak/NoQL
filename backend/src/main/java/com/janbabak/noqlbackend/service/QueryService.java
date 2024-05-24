@@ -86,7 +86,7 @@ public class QueryService {
      * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
      *
      * @param query    database language query
-     * @param page     number of pages (first page has index 0), if null, default value is 0
+     * @param page     number of page (first page has index 0), if null, default value is 0
      * @param pageSize number of items in one page,<br />
      *                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
