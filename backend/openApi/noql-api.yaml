@@ -10,7 +10,7 @@ servers:
   - url: http://localhost:8080
     description: Development server
 tags:
-  - name: database
+  - name: Database
     description: Everything about database
   - name: chat
     description: Everything about chat
@@ -18,7 +18,7 @@ paths:
   /database:
     get:
       tags:
-        - database
+        - Database
       summary: Get all databases
       responses:
         '200':
@@ -31,7 +31,7 @@ paths:
                   $ref: '#/components/schemas/Database'
     post:
       tags:
-        - database
+        - Database
       summary: Create a new database
       requestBody:
         required: true
@@ -41,7 +41,7 @@ paths:
               $ref: '#/components/schemas/CreateDatabaseRequest'
       responses:
         '201':
-          description: A database
+          description: Created database
           content:
             application/json:
               schema:
@@ -51,19 +51,13 @@ paths:
   /database/{databaseId}:
     get:
       tags:
-        - database
+        - Database
       summary: Get a database by ID
       parameters:
-        - name: databaseId
-          in: path
-          required: true
-          description: ID of the database to get
-          schema:
-            type: string
-            example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+        - $ref: '#/components/parameters/databaseId'
       responses:
         '200':
-          description: A database of specific ID
+          description: A database of specified ID
           content:
             application/json:
               schema:
@@ -72,17 +66,11 @@ paths:
           description: Database of specified ID not found
     put:
       tags:
-        - database
+        - Database
       summary: Update a database by ID
       description: Update provided non-null fields.
       parameters:
-        - name: databaseId
-          in: path
-          required: true
-          description: ID of the database to update
-          schema:
-            type: string
-            example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+        - $ref: '#/components/parameters/databaseId'
       requestBody:
         required: true
         content:
@@ -97,7 +85,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Database'
         '404':
-            description: Database of specified ID not found
+          description: Database of specified ID not found
         '400':
           description: Invalid input
     delete:
@@ -105,116 +93,139 @@ paths:
         - database
       summary: Delete a database by ID
       parameters:
-        - name: databaseId
-          in: path
-          required: true
-          description: ID of the database to delete
-          schema:
-            type: string
+        - $ref: '#/components/parameters/databaseId'
       responses:
         '204':
           description: No content
 
 components:
   schemas:
+
     Database:
       type: object
       properties:
         id:
-          type: string
-          example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+          $ref: '#/components/schemas/UUID'
         name:
-          type: string
-          minLength: 1
-          maxLength: 32
-          example: "My eshop Postgres"
+          $ref: '#/components/schemas/DatabaseName'
         host:
-          type: string
-          example: "localhost"
+          $ref: '#/components/schemas/DatabaseHost'
         port:
-          type: integer
-          example: 5432
+          $ref: '#/components/schemas/DatabasePort'
         database:
-          type: string
-          example: "eshop"
+          $ref: '#/components/schemas/DatabaseDatabase'
         username:
-          type: string
-          example: "admin"
+          $ref: '#/components/schemas/DatabaseUsername'
         password:
-          type: string
-          example: "admin1234"
+          $ref: '#/components/schemas/DatabasePassword'
         engine:
-          enum:
-            - POSTGRES
-            - MYSQL
+          $ref: '#/components/schemas/DatabaseEngine'
         isSQL:
-          type: boolean
-          example: true
+          $ref: '#/components/schemas/DatabaseIsSQL'
+
     CreateDatabaseRequest:
       type: object
       properties:
         name:
-          type: string
-          minLength: 1
-          maxLength: 32
-          example: "My eshop Postgres"
+          $ref: '#/components/schemas/DatabaseName'
         host:
-          type: string
-          example: "localhost"
+          $ref: '#/components/schemas/DatabaseHost'
         port:
-          type: integer
-          example: 5432
+          $ref: '#/components/schemas/DatabasePort'
         database:
-          type: string
-          example: "eshop"
+          $ref: '#/components/schemas/DatabaseDatabase'
         username:
-          type: string
-          example: "admin"
+          $ref: '#/components/schemas/DatabaseUsername'
         password:
-          type: string
-          example: "admin1234"
+          $ref: '#/components/schemas/DatabasePassword'
         engine:
-          enum:
-            - POSTGRES
-            - MYSQL
+          $ref: '#/components/schemas/DatabaseEngine'
         isSQL:
-          type: boolean
-          example: true
+          $ref: '#/components/schemas/DatabaseIsSQL'
+
     UpdateDatabaseRequest:
       type: object
       properties:
         name:
-          type: string
-          nullable: true
-          minLength: 1
-          maxLength: 32
-          example: "My eshop Postgres"
+          allOf:
+            - $ref: '#/components/schemas/DatabaseName'
+            - nullable: true
         host:
-          type: string
-          nullable: true
-          example: "localhost"
+          allOf:
+            - $ref: '#/components/schemas/DatabaseHost'
+            - nullable: true
         port:
-          type: integer
-          nullable: true
-          example: 5432
+          allOf:
+            - $ref: '#/components/schemas/DatabasePort'
+            - nullable: true
         database:
-          type: string
-          nullable: true
-          example: "eshop"
+          allOf:
+            - $ref: '#/components/schemas/DatabaseDatabase'
+            - nullable: true
         username:
-          type: string
-          nullable: true
-          example: "admin"
+          allOf:
+            - $ref: '#/components/schemas/DatabaseUsername'
+            - nullable: true
         password:
-          type: string
-          nullable: true
-          example: "admin1234"
+          allOf:
+            - $ref: '#/components/schemas/DatabasePassword'
+            - nullable: true
         engine:
-          nullable: true
-          enum:
-            - POSTGRES
-            - MYSQL
+          allOf:
+            - $ref: '#/components/schemas/DatabaseEngine'
+            - nullable: true
         isSQL:
-          type: boolean
-          nullable: true
-          example: true
+          allOf:
+            - $ref: '#/components/schemas/DatabaseIsSQL'
+            - nullable: true
+
+    UUID:
+      type: string
+      format: uuid
+      example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+
+    DatabaseName:
+      type: string
+      minLength: 1
+      maxLength: 32
+      example: "My eshop Postgres"
+
+    DatabaseHost:
+      type: string
+      example: "localhost"
+
+    DatabasePort:
+      type: integer
+      example: 5432
+
+    DatabaseDatabase:
+      type: string
+      example: "eshop"
+
+    DatabaseUsername:
+      type: string
+      example: "admin"
+
+    DatabasePassword:
+      type: string
+      example: "admin1234"
+
+    DatabaseEngine:
+      type: string
+      enum:
+        - POSTGRES
+        - MYSQL
+
+    DatabaseIsSQL:
+      type: boolean
+      example: true
+
+  parameters:
+
+    databaseId:
+      name: databaseId
+      in: path
+      required: true
+      description: ID of the database to get
+      schema:
+        $ref: '#/components/schemas/UUID'
