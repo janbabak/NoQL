@@ -1,0 +1,789 @@
+openapi: 3.0.3
+info:
+  title: NoQL API
+  version: 1.0.0
+  description: NoQL API
+  contact:
+    name: NoQL Team
+    email: babakhonza@gmail.com
+servers:
+  - url: http://localhost:8080
+    description: Development server
+tags:
+  - name: Database
+    description: Everything about database
+  - name: Chat
+    description: Everything about chat
+  - name: Settings
+    description: Everything about settings
+paths:
+
+  /database:
+    get:
+      tags:
+        - Database
+      summary: Get all databases
+      responses:
+        '200':
+          description: A list of databases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Database'
+    post:
+      tags:
+        - Database
+      summary: Create a new database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDatabaseRequest'
+      responses:
+        '201':
+          description: Created database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '400':
+          description: Invalid input
+
+  /database/{databaseId}:
+    get:
+      tags:
+        - Database
+      summary: Get a database by ID
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: A database of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '404':
+          description: Database of specified ID not found
+    put:
+      tags:
+        - Database
+      summary: Update a database by ID
+      description: Update provided non-null fields.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDatabaseRequest'
+      responses:
+        '200':
+          description: Updated database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        '404':
+          description: Database of specified ID not found
+        '400':
+          description: Invalid input
+    delete:
+      tags:
+        - Database
+      summary: Delete a database by ID
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '204':
+          description: No content
+
+  /database/{databaseId}/query/chat:
+    post:
+      tags:
+        - Database
+      summary: Query a database by chat of messages
+      description: >
+        Query a database by chat of messages. The LLM translates the natural language query to a database query and
+        returns requested data and/or a plot.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/pageSize'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
+            natural language query to a database query or generate the plot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '404':
+          description: Database of specified ID not found
+        '400':
+          description: Invalid input
+
+  /database/{databaseId}/query/loadChatResult:
+    post:
+      tags:
+        - Database
+      summary: Load chat resul of existing chat
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/chatIdQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
+            natural language query to a database query or generate the plot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '404':
+          description: Database of chat of specified ID not found.
+
+  /database/{databaseId}/query/queryLanguage:
+    post:
+      tags:
+        - Database
+      summary: Query a database by database query language.
+      description: >
+        Query a database by database query language. Return retrieved rows of data or error message if the query is
+        invalid.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Valid database query language (SQL, ...)
+              example: "SELECT name, email from public.user ORDER BY age;"
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the query is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              example:
+                data:
+                  columnNames: [ "name", "email" ]
+                  rows: [ [ "Alice", "alice@gmail.com" ], [ "Bob", "bob@icloud.com" ], [ "Eva", "eva.hotmail.com" ] ]
+                totalCount: 3
+                chatQueryWithResponse:
+                  id: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+                  nlQuery: null
+                  llmResult:
+                    databaseQuery: "SELECT name, email from public.user ORDER BY age;"
+                    plotUrl: null
+                  timestamp: "2024-05-24T18:40:24.649+00:00"
+                  errorMessage: null
+
+        '404':
+          description: Database of specified ID not found
+        '400':
+          description: Invalid input
+
+  /database/{databaseId}/structure:
+    get:
+      tags:
+        - Database
+      summary: Get database structure
+      description: >
+        Get database structure. Return a list of schemas with tables with columns and types (if the database is SQL) or other
+        form of structure.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: >
+            Database structure with a list of tables with their columns and types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlDatabaseStructure'
+        '404':
+          description: Database of specified ID not found
+
+  /database/{databaseId}/createScript:
+    get:
+      tags:
+        - Database
+      summary: Get database creation script
+      description: >
+        Get database creation script. Return a script to create the database with all schemas, tables, and columns. This
+        script is retrieved by heuristic methods and may not be 100% accurate or syntactically correct. It is used as
+        input from LLM, not for direct execution.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: Database create script
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DatabaseCreateScript'
+        '404':
+          description: Database of specified ID not found
+
+  /database/{databaseId}/chats:
+    get:
+      tags:
+        - Database
+      summary: Get all chats of a database.
+      description: Get all chats of a database. Return a list of chats only with their names and identifiers.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: A list of chats of a database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatHistoryItem'
+        '404':
+          description: Database of specified ID not found
+
+  /chat:
+    post:
+      tags:
+        - Chat
+      summary: Create new chat
+      description: Create a new chat associated with specified database. Default chat name is "New chat".
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '201':
+          description: Created chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+              example:
+                id: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+                name: "New chat"
+                messages: [ ]
+                modificationDate: "2024-05-24T18:40:24.649+00:00"
+        '404':
+          description: Database of specified ID not found
+
+  /chat/{chatId}:
+    get:
+      tags:
+        - Chat
+      summary: Get a chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      responses:
+        '200':
+          description: A chat of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '404':
+          description: Chat of specified ID not found
+    delete:
+      tags:
+        - Chat
+      summary: Delete chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      responses:
+        '204':
+          description: No content
+
+  /chat/{chatId}/name:
+    put:
+      tags:
+        - Chat
+      summary: Rename chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+        - name: name
+          in: query
+          description: New name
+          schema:
+            $ref: '#/components/schemas/ChatName'
+      responses:
+        '204':
+          description: No content
+
+  /chat/{chatId}/messages:
+    post:
+      tags:
+        - Chat
+      summary: Add message to chat
+      description: Add message to chat. Used only for development purposes.
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatQueryWithResponseRequest'
+      responses:
+        '204':
+          description: No content
+
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get application settings
+      responses:
+        '200':
+          description: Application settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+components:
+  schemas:
+
+    Database:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          $ref: '#/components/schemas/DatabaseName'
+        host:
+          $ref: '#/components/schemas/DatabaseHost'
+        port:
+          $ref: '#/components/schemas/DatabasePort'
+        database:
+          $ref: '#/components/schemas/DatabaseDatabase'
+        username:
+          $ref: '#/components/schemas/DatabaseUsername'
+        password:
+          $ref: '#/components/schemas/DatabasePassword'
+        engine:
+          $ref: '#/components/schemas/DatabaseEngine'
+        isSQL:
+          $ref: '#/components/schemas/DatabaseIsSQL'
+
+    CreateDatabaseRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/DatabaseName'
+        host:
+          $ref: '#/components/schemas/DatabaseHost'
+        port:
+          $ref: '#/components/schemas/DatabasePort'
+        database:
+          $ref: '#/components/schemas/DatabaseDatabase'
+        username:
+          $ref: '#/components/schemas/DatabaseUsername'
+        password:
+          $ref: '#/components/schemas/DatabasePassword'
+        engine:
+          $ref: '#/components/schemas/DatabaseEngine'
+        isSQL:
+          $ref: '#/components/schemas/DatabaseIsSQL'
+
+    UpdateDatabaseRequest:
+      type: object
+      properties:
+        name:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseName'
+            - nullable: true
+        host:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseHost'
+            - nullable: true
+        port:
+          allOf:
+            - $ref: '#/components/schemas/DatabasePort'
+            - nullable: true
+        database:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseDatabase'
+            - nullable: true
+        username:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseUsername'
+            - nullable: true
+        password:
+          allOf:
+            - $ref: '#/components/schemas/DatabasePassword'
+            - nullable: true
+        engine:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseEngine'
+            - nullable: true
+        isSQL:
+          allOf:
+            - $ref: '#/components/schemas/DatabaseIsSQL'
+            - nullable: true
+
+    UUID:
+      type: string
+      format: uuid
+      example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+
+    DatabaseName:
+      description: Name of the database chosen by the user. It isn't used in the connection url.
+      type: string
+      minLength: 1
+      maxLength: 32
+      example: "My eshop Postgres"
+
+    DatabaseHost:
+      type: string
+      example: "localhost"
+
+    DatabasePort:
+      type: integer
+      example: 5432
+
+    DatabaseDatabase:
+      description: Name of the database used in the connection url.
+      type: string
+      example: "eshop"
+
+    DatabaseUsername:
+      description: Username of database user.
+      type: string
+      example: "admin"
+
+    DatabasePassword:
+      type: string
+      example: "admin1234"
+
+    DatabaseEngine:
+      type: string
+      enum:
+        - POSTGRES
+        - MYSQL
+
+    DatabaseIsSQL:
+      type: boolean
+      example: true
+
+    QueryRequest:
+      type: object
+      properties:
+        chatId:
+          $ref: '#/components/schemas/UUID'
+        query:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        model:
+          $ref: '#/components/schemas/LlmModel'
+
+    LlmModel:
+      description: Language model to use for translation
+      type: string
+      enum:
+        - GPT_4o
+        - GPT_4
+        - GPT_4_TURBO
+        - GPT_4_32K
+        - GPT_3_5_TURBO
+        - LLAMA3_70B
+        - LLAMA3_13B_CHAT
+
+    QueryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RetrievedData'
+        totalCount:
+          $ref: '#/components/schemas/TotalCount'
+        chatQueryWithResponse:
+          $ref: '#/components/schemas/ChatQueryWithResponse'
+        errorMessage:
+          allOf:
+            - $ref: '#/components/schemas/QueryErrorMessage'
+            - example: null
+
+    RetrievedData:
+      type: object
+      description: Retrieved data from the database query in form of table.
+      properties:
+        columnNames:
+          type: array
+          items:
+            type: string
+          example: [ "sex", "count" ]
+        rows:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          example: [ [ "male", "8" ], [ "female", "2" ] ]
+
+    TotalCount:
+      description: Total number of rows in the database query result (number of items in all pages).
+      type: integer
+      format: int64
+      example: 2
+
+    ChatQueryWithResponse:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        nlQuery:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        llmResult:
+          $ref: '#/components/schemas/LLMResult'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+
+    CreateChatQueryWithResponseRequest:
+      type: object
+      properties:
+        nlQuery:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        llmResult:
+          $ref: '#/components/schemas/LLMResult'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+
+    NaturalLanguageQuery:
+      type: string
+      description: Natural language query
+      example: "Plot sex of users older than 25"
+
+    LLMResult:
+      type: object
+      properties:
+        databaseQuery:
+          type: string
+          description: Query in database specific language (SQL, ...)
+          example: "SELECT sex, COUNT(*) FROM public.user WHERE age > 25 GROUP BY sex;"
+          nullable: true
+        plotUrl:
+          type: string
+          description: URL to the plot if the users requested a plot
+          example: "http://localhost:8080/static/images/13eae4d2-6d7b-41c6-93d0-8f16e4721504.png"
+          nullable: true
+
+    QueryErrorMessage:
+      type: string
+      nullable: true
+      example: "Syntax error on position: 30. Table teachers does not exist."
+
+    Timestamp:
+      type: string
+      format: date-time
+      example: "2024-05-24T18:40:24.649+00:00"
+
+    SqlDatabaseStructure:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseSchema'
+
+    SqlDatabaseSchema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "public"
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseTable'
+
+    SqlDatabaseTable:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "address"
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseColumn'
+
+    SqlDatabaseColumn:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "user_id"
+        dataType:
+          type: string
+          example: "integer"
+        isPrimaryKey:
+          type: boolean
+          example: false
+        foreignKey:
+          $ref: '#/components/schemas/SqlDatabaseForeignKey'
+
+    SqlDatabaseForeignKey:
+      type: object
+      nullable: true
+      properties:
+        referencedSchema:
+          type: string
+          example: "public"
+        referencedTable:
+          type: string
+          example: "user"
+        referencedColumn:
+          type: string
+          example: "id"
+
+    DatabaseCreateScript:
+      type: string
+      description: >
+        Database creation script that is retrieved by heuristic methods and may not be 100% accurate or syntactically
+        correct. It is used as input from LLM, not for direct execution.
+      example: >
+        CREATE SCHEMA IF NOT EXISTS "public";
+
+        CREATE TABLE IF NOT EXISTS public.stock_prices
+        (
+        	id INTEGER PRIMARY KEY,
+        	ticker_name CHARACTER VARYING
+        	price NUMERIC
+        	timestamp TIMESTAMP WITHOUT TIME ZONE
+        );
+
+        CREATE TABLE IF NOT EXISTS public.database
+        (
+        	id UUID PRIMARY KEY,
+        	database CHARACTER VARYING
+        	password CHARACTER VARYING
+        	engine SMALLINT
+        	port INTEGER
+        	user_name CHARACTER VARYING
+        	host CHARACTER VARYING
+        	name CHARACTER VARYING
+        	issql BOOLEAN
+        );
+
+    ChatHistoryItem:
+      type: object
+      description: Chat with just name and identifier. Used in list of chats.
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          $ref: '#/components/schemas/ChatName'
+
+    Chat:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          $ref: '#/components/schemas/ChatName'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatQueryWithResponse'
+        modificationDate:
+          $ref: '#/components/schemas/Timestamp'
+
+    ChatName:
+      type: string
+      example: "Find oldest student"
+
+    Settings:
+      type: object
+      properties:
+        maxPageSize:
+          description: |
+            Maximum number of items per page.<br />
+            Maximum value is 50 and can be changed by environment variable `PAGINATION_MAX_PAGE_SIZE`.
+          type: integer
+          format: int32
+          default: 50
+          example: 50
+        defaultPageSize:
+          description: |
+            Number of items per page.<br />
+            Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.
+          type: integer
+          format: int32
+          example: 10
+        translationRetries:
+          description: |
+            Number of retries for query translation by LLM.<br />
+            Default value is 3 and can be changed by environment variable `TRANSLATION_RETRIES`.
+          type: integer
+          format: int32
+          example: 3
+
+  parameters:
+
+    databaseId:
+      name: databaseId
+      in: path
+      required: true
+      description: ID of the database
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    chatIdQuery:
+      name: chatId
+      in: query
+      required: true
+      description: ID of the chat
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    chatIdPath:
+      name: chatId
+      in: path
+      required: true
+      description: ID of the chat
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    pageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: |
+        Number of items per page.<br /> 
+        Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.<br />
+        Maximum value is 50 and can be changed by environment variable `PAGINATION_MAX_PAGE_SIZE`.
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        minimum: 1
+        maximum: 50
+
+    page:
+      name: page
+      in: query
+      required: false
+      description: Page number. First page is 0.
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+        maximum: 100

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/settings", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SettingsController {
 
-    @Autowired
+    @Autowired // TODO: remove this annotation
     Settings settings;
 
     /**

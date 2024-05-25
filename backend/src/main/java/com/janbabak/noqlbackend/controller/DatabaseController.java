@@ -156,7 +156,7 @@ public class DatabaseController {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    @PostMapping("/{databaseId}/query/queryLanguage")
+    @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeQueryLanguageQuery(
             @PathVariable UUID databaseId,
@@ -192,7 +192,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  syntax error, ...
      * @throws EntityNotFoundException     database of specific id not found
      */
-    @GetMapping("/{id}/createScript")
+    @GetMapping(path = "/{id}/createScript", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getCreateScript(@PathVariable UUID id)
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
         return databaseService.getDatabaseCreateScriptByDatabaseId(id);
@@ -201,13 +201,14 @@ public class DatabaseController {
     /**
      * Get chat history (chats associated to a specified database) sorted by the modification data in descending order.
      *
-     * @param id database identifier
+     * @param databaseId database identifier
      * @return list of chat DTOs
      * @throws EntityNotFoundException database of specified id not found.
      */
-    @GetMapping("/{id}/chats")
+    @GetMapping("/{databaseId}/chats")
     @ResponseStatus(HttpStatus.OK)
-    public List<ChatHistoryItem> getChatHistoryByDatabaseId(@PathVariable UUID id) throws EntityNotFoundException {
-        return chatService.findChatsByDatabaseId(id);
+    public List<ChatHistoryItem> getChatHistoryByDatabaseId(@PathVariable UUID databaseId)
+            throws EntityNotFoundException {
+        return chatService.findChatsByDatabaseId(databaseId);
     }
 }

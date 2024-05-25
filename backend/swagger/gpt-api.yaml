@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: GPT API
+  version: 1.0.0 # don't know the real version
+  description: GPT API
+  contact:
+    name: GPT API
+    url: https://platform.openai.com/docs/api-reference/introduction
+servers:
+  - url: https://api.openai.com/v1
+    description: GPT server
+tags:
+  - name: Chat
+    description: chatbot API related endpoints
+paths:
+
+  /chat/completions:
+    post:
+      tags:
+        - Chat
+      summary: Execute chat
+      description: This endpoint is used to generate a chat response.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+
+components:
+  schemas:
+
+    ChatRequest:
+      type: object
+      properties:
+        model:
+          $ref: '#/components/schemas/Model'
+        messages:
+          type: array
+          description: The prompt(s) to generate a completion for.
+          items:
+            $ref: '#/components/schemas/Message'
+        max_tokens:
+          type: integer
+          description: The maximum number of tokens to generate.
+          example: 100
+        temperature:
+          type: number
+          description: What sampling temperature to use.
+          example: 0.7
+        top_p:
+          type: number
+          description: An alternative to "temperature", this sets the probability that the model will use for selecting the next token.
+          example: 0.8
+        n:
+          type: integer
+          description: How many completions to generate for each prompt.
+          example: 1
+        stop:
+          type: array
+          description: A sequence of tokens where the API will stop generating the completion.
+          items:
+            type: string
+          example: [ "\n" ]
+
+    ChatResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "chatcmpl-9Sh2lKPW96GZu1ebn7SJNWA1QgCBS"
+        object:
+          type: string
+          example: "chat.completion"
+        created:
+          type: integer
+          description: Unix timestamp of when the completion was created.
+          example: 1716625671
+        model:
+          $ref: '#/components/schemas/Model'
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+              description: The number of tokens in the prompt(s).
+              example: 10
+            completion_tokens:
+              type: integer
+              description: The number of tokens in the completion(s).
+              example: 100
+            total_tokens:
+              type: integer
+              description: The total number of tokens (prompt + completion).
+              example: 110
+        system_fingerprint:
+          type: string
+          description: A unique identifier for the model used by the API.
+          example: "fp_43dfabdef1"
+
+    Model:
+      type: string
+      description: >
+        The model to use for completion. List of available models
+        <a href="https://platform.openai.com/docs/models">here</a>.
+      example: "gpt-4o"
+
+    Role:
+      type: string
+      enum:
+        - "system"
+        - "user"
+        - "assistant"
+      example: "user"
+
+    Message:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+        content:
+          type: string
+          description: The message content.
+          example: "What is your the most popular programming language?"
+
+    Choice:
+      type: object
+      properties:
+        index:
+          type: integer
+          example: 0
+        message:
+          $ref: '#/components/schemas/Message'
+        logprobs:
+          type: object
+          description: Log probabilities of tokens.
+        finish_reason:
+          type: string
+          description: Reason the completion ended.
+          example: stop
+      example:
+        role: "assistant"
+        content: "Python is the most popular programming language."
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

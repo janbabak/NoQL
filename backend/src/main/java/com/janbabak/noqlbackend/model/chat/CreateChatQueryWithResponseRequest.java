@@ -14,5 +14,5 @@ public class CreateChatQueryWithResponseRequest {
     private String nlQuery; // natural language query
 
     @NotBlank
-    private String llmResponse; // LLM response JSON
+    private String llmResult; // LLM response JSON
 }
