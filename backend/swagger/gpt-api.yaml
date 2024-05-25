@@ -113,10 +113,13 @@ components:
 
     Model:
       type: string
-      description: The model to use for completion. List of available models https://platform.openai.com/docs/models
+      description: >
+        The model to use for completion. List of available models
+        <a href="https://platform.openai.com/docs/models">here</a>.
       example: "gpt-4o"
 
     Role:
+      type: string
       enum:
         - "system"
         - "user"

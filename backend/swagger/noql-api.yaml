@@ -208,7 +208,7 @@ paths:
         - Database
       summary: Get database structure
       description: >
-        Get database structure. Return a list of tables with their columns and types (if the database is SQL) or other
+        Get database structure. Return a list of schemas with tables with columns and types (if the database is SQL) or other
         form of structure.
       parameters:
         - $ref: '#/components/parameters/databaseId'
@@ -229,9 +229,9 @@ paths:
         - Database
       summary: Get database creation script
       description: >
-        Get database creation script. Return a script to create the database with all tables and columns. This script is
-        retrieved by heuristic methods and my not be 100% accurate and syntactically correct. It is used as an input
-        from LLM not for direct execution.
+        Get database creation script. Return a script to create the database with all schemas, tables, and columns. This
+        script is retrieved by heuristic methods and may not be 100% accurate or syntactically correct. It is used as
+        input from LLM, not for direct execution.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -446,6 +446,7 @@ components:
       example: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
 
     DatabaseName:
+      description: Name of the database chosen by the user. It isn't used in the connection url.
       type: string
       minLength: 1
       maxLength: 32
@@ -460,10 +461,12 @@ components:
       example: 5432
 
     DatabaseDatabase:
+      description: Name of the database used in the connection url.
       type: string
       example: "eshop"
 
     DatabaseUsername:
+      description: Username of database user.
       type: string
       example: "admin"
 
@@ -493,6 +496,7 @@ components:
 
     LlmModel:
       description: Language model to use for translation
+      type: string
       enum:
         - GPT_4o
         - GPT_4
@@ -518,6 +522,7 @@ components:
 
     RetrievedData:
       type: object
+      description: Retrieved data from the database query in form of table.
       properties:
         columnNames:
           type: array
@@ -533,6 +538,7 @@ components:
           example: [ [ "male", "8" ], [ "female", "2" ] ]
 
     TotalCount:
+      description: Total number of rows in the database query result (number of items in all pages).
       type: integer
       format: int64
       example: 2
@@ -649,6 +655,9 @@ components:
 
     DatabaseCreateScript:
       type: string
+      description: >
+        Database creation script that is retrieved by heuristic methods and may not be 100% accurate or syntactically
+        correct. It is used as input from LLM, not for direct execution.
       example: >
         CREATE SCHEMA IF NOT EXISTS "public";
 
@@ -732,7 +741,7 @@ components:
       name: databaseId
       in: path
       required: true
-      description: ID of the database to get
+      description: ID of the database
       schema:
         $ref: '#/components/schemas/UUID'
 
@@ -740,7 +749,7 @@ components:
       name: chatId
       in: query
       required: true
-      description: ID of the chat to query
+      description: ID of the chat
       schema:
         $ref: '#/components/schemas/UUID'
 
@@ -748,7 +757,7 @@ components:
       name: chatId
       in: path
       required: true
-      description: ID of the chat to query
+      description: ID of the chat
       schema:
         $ref: '#/components/schemas/UUID'
 
