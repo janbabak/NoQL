@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -164,6 +165,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
         private String referencedTable;
         private String referencedColumn;
 
+        @JsonIgnore
         public String getReferencingString() {
             return " REFERENCES "
                     + (referencedSchema.equals(DEFAULT_SCHEMA) ? "" : referencedSchema + ".")

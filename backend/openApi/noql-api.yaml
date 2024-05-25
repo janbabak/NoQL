@@ -200,6 +200,26 @@ paths:
         '400':
           description: Invalid input
 
+  /database/{databaseId}/structure:
+    get:
+      tags:
+        - Database
+      summary: Get database structure
+      description: >
+        Get database structure. Return a list of tables with their columns and types (if the database is SQL) or other form of structure.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: >
+            Database structure with a list of tables with their columns and types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlDatabaseStructure'
+        '404':
+          description: Database of specified ID not found
+
 components:
   schemas:
 
@@ -418,6 +438,65 @@ components:
       type: string
       format: date-time
       example: "2024-05-24T18:40:24.649+00:00"
+
+    SqlDatabaseStructure:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseSchema'
+
+    SqlDatabaseSchema:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "public"
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseTable'
+
+    SqlDatabaseTable:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "address"
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlDatabaseColumn'
+
+    SqlDatabaseColumn:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "user_id"
+        dataType:
+          type: string
+          example: "integer"
+        isPrimaryKey:
+          type: boolean
+          example: false
+        foreignKey:
+          $ref: '#/components/schemas/SqlDatabaseForeignKey'
+
+    SqlDatabaseForeignKey:
+      type: object
+      nullable: true
+      properties:
+        referencedSchema:
+          type: string
+          example: "public"
+        referencedTable:
+          type: string
+          example: "user"
+        referencedColumn:
+          type: string
+          example: "id"
 
   parameters:
 
