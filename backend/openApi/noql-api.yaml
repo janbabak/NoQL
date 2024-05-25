@@ -14,6 +14,8 @@ tags:
     description: Everything about database
   - name: Chat
     description: Everything about chat
+  - name: Settings
+    description: Everything about settings
 paths:
 
   /database:
@@ -206,7 +208,8 @@ paths:
         - Database
       summary: Get database structure
       description: >
-        Get database structure. Return a list of tables with their columns and types (if the database is SQL) or other form of structure.
+        Get database structure. Return a list of tables with their columns and types (if the database is SQL) or other
+        form of structure.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -279,7 +282,7 @@ paths:
               example:
                 id: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
                 name: "New chat"
-                messages: []
+                messages: [ ]
                 modificationDate: "2024-05-24T18:40:24.649+00:00"
         '404':
           description: Database of specified ID not found
@@ -344,6 +347,18 @@ paths:
         '204':
           description: No content
 
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: Get application settings
+      responses:
+        '200':
+          description: Application settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
 components:
   schemas:
 
@@ -685,6 +700,32 @@ components:
       type: string
       example: "Find oldest student"
 
+    Settings:
+      type: object
+      properties:
+        maxPageSize:
+          description: |
+            Maximum number of items per page.<br />
+            Maximum value is 50 and can be changed by environment variable `PAGINATION_MAX_PAGE_SIZE`.
+          type: integer
+          format: int32
+          default: 50
+          example: 50
+        defaultPageSize:
+          description: |
+            Number of items per page.<br />
+            Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.
+          type: integer
+          format: int32
+          example: 10
+        translationRetries:
+          description: |
+            Number of retries for query translation by LLM.<br />
+            Default value is 3 and can be changed by environment variable `TRANSLATION_RETRIES`.
+          type: integer
+          format: int32
+          example: 3
+
   parameters:
 
     databaseId:
@@ -716,10 +757,8 @@ components:
       in: query
       required: false
       description: |
-        Number of items per page.
-        
-        Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.
-        
+        Number of items per page.<br /> 
+        Default value is 10 and can be changed by environment variable `PAGINATION_DEFAULT_PAGE_SIZE`.<br />
         Maximum value is 50 and can be changed by environment variable `PAGINATION_MAX_PAGE_SIZE`.
       schema:
         type: integer
