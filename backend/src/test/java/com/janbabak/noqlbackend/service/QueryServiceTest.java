@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,7 @@ class QueryServiceTest {
                 "user",
                 "password",
                 DatabaseEngine.POSTGRES,
+                List.of(),
                 true);
     }
 

@@ -28,7 +28,9 @@ public class ChatQueryWithResponse {
     @NotBlank
     private String nlQuery;
 
-    /** JSON in form of string { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string }} */
+    /** JSON in form of string<br />
+     * { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string } }
+     */
     @Column(length = 2048)
     private String llmResponse;
 

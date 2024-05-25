@@ -24,7 +24,7 @@ public class Chat {
     @ManyToOne
     private Database database;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatQueryWithResponse> messages;
 
     private Timestamp modificationDate;

@@ -1,15 +1,14 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -48,20 +47,13 @@ public class Database {
     @NotNull
     private DatabaseEngine engine;
 
+    @OneToMany(
+            mappedBy = "database",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    private List<Chat> chats;
+
     @NotNull
     private Boolean isSQL; // TODO: remove column, can be inferred from engine
-
-    public Database(Database from) {
-        this(
-                from.id,
-                from.name,
-                from.host,
-                from.port,
-                from.database,
-                from.userName,
-                from.password,
-                from.engine,
-                from.isSQL
-        );
-    }
 }
