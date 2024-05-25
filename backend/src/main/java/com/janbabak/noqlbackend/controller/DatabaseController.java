@@ -201,13 +201,14 @@ public class DatabaseController {
     /**
      * Get chat history (chats associated to a specified database) sorted by the modification data in descending order.
      *
-     * @param id database identifier
+     * @param databaseId database identifier
      * @return list of chat DTOs
      * @throws EntityNotFoundException database of specified id not found.
      */
-    @GetMapping("/{id}/chats")
+    @GetMapping("/{databaseId}/chats")
     @ResponseStatus(HttpStatus.OK)
-    public List<ChatHistoryItem> getChatHistoryByDatabaseId(@PathVariable UUID id) throws EntityNotFoundException {
-        return chatService.findChatsByDatabaseId(id);
+    public List<ChatHistoryItem> getChatHistoryByDatabaseId(@PathVariable UUID databaseId)
+            throws EntityNotFoundException {
+        return chatService.findChatsByDatabaseId(databaseId);
     }
 }

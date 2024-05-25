@@ -236,6 +236,28 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/DatabaseCreateScript'
+        '404':
+          description: Database of specified ID not found
+
+  /database/{databaseId}/chats:
+    get:
+      tags:
+        - Database
+      summary: Get all chats of a database.
+      description: Get all chats of a database. Return a list of chats only with their names and identifiers.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: A list of chats of a database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatHistoryItem'
+        '404':
+          description: Database of specified ID not found
 
 components:
   schemas:
@@ -540,6 +562,16 @@ components:
         	name CHARACTER VARYING
         	issql BOOLEAN
         );
+
+    ChatHistoryItem:
+      type: object
+      description: Chat with just name and identifier. Used in list of chats.
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          example: "Find oldest student"
 
   parameters:
 

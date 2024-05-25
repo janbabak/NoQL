@@ -8,6 +8,6 @@ import java.util.UUID;
 @Data
 @Builder
 public class ChatHistoryItem {
-    private UUID id;
+    private UUID id; // TODO: rename to chatId?
     private String name;
 }
