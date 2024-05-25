@@ -192,7 +192,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  syntax error, ...
      * @throws EntityNotFoundException     database of specific id not found
      */
-    @GetMapping("/{id}/createScript")
+    @GetMapping(path = "/{id}/createScript", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getCreateScript(@PathVariable UUID id)
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
         return databaseService.getDatabaseCreateScriptByDatabaseId(id);

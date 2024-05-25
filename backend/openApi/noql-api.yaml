@@ -220,6 +220,23 @@ paths:
         '404':
           description: Database of specified ID not found
 
+  /database/{databaseId}/createScript:
+    get:
+      tags:
+        - Database
+      summary: Get database creation script
+      description: >
+        Get database creation script. Return a script to create the database with all tables and columns. This script is retrieved by heuristic methods and my not be 100% accurate and syntactically correct. It is used as an input from LLM not for direct execution.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '200':
+          description: Database create script
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DatabaseCreateScript'
+
 components:
   schemas:
 
@@ -497,6 +514,32 @@ components:
         referencedColumn:
           type: string
           example: "id"
+
+    DatabaseCreateScript:
+      type: string
+      example: >
+        CREATE SCHEMA IF NOT EXISTS "public";
+
+        CREATE TABLE IF NOT EXISTS public.stock_prices
+        (
+        	id INTEGER PRIMARY KEY,
+        	ticker_name CHARACTER VARYING
+        	price NUMERIC
+        	timestamp TIMESTAMP WITHOUT TIME ZONE
+        );
+
+        CREATE TABLE IF NOT EXISTS public.database
+        (
+        	id UUID PRIMARY KEY,
+        	database CHARACTER VARYING
+        	password CHARACTER VARYING
+        	engine SMALLINT
+        	port INTEGER
+        	user_name CHARACTER VARYING
+        	host CHARACTER VARYING
+        	name CHARACTER VARYING
+        	issql BOOLEAN
+        );
 
   parameters:
 
