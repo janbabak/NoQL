@@ -156,7 +156,7 @@ public class DatabaseController {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    @PostMapping("/{databaseId}/query/queryLanguage")
+    @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeQueryLanguageQuery(
             @PathVariable UUID databaseId,

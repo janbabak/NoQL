@@ -152,6 +152,54 @@ paths:
                 $ref: '#/components/schemas/QueryResponse'
         '404':
           description: Database of chat of specified ID not found.
+
+  /database/{databaseId}/query/queryLanguage:
+    post:
+      tags:
+        - Database
+      summary: Query a database by database query language.
+      description: >
+        Query a database by database query language. Return retrieved rows of data or error message if the query is
+        invalid.
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Valid database query language (SQL, ...)
+              example: "SELECT name, email from public.user ORDER BY age;"
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the query is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              example:
+                data:
+                  columnNames: [ "name", "email" ]
+                  rows: [ [ "Alice", "alice@gmail.com" ], [ "Bob", "bob@icloud.com" ], [ "Eva", "eva.hotmail.com" ] ]
+                totalCount: 3
+                chatQueryWithResponse:
+                  id: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+                  nlQuery: null
+                  llmResult:
+                    databaseQuery: "SELECT name, email from public.user ORDER BY age;"
+                    plotUrl: null
+                  timestamp: "2024-05-24T18:40:24.649+00:00"
+                  errorMessage: null
+
+        '404':
+          description: Database of specified ID not found
+        '400':
+          description: Invalid input
+
 components:
   schemas:
 
