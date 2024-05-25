@@ -42,14 +42,14 @@ public class ChatService {
     /**
      * Find chat by chat id.
      *
-     * @param id identifier
+     * @param chatId chat identifier
      * @return chat
      * @throws EntityNotFoundException chat of specified id not found
      */
-    public ChatDto findById(UUID id) throws EntityNotFoundException {
-        log.info("Get chat by id={}", id);
+    public ChatDto findById(UUID chatId) throws EntityNotFoundException {
+        log.info("Get chat by id={}", chatId);
 
-        Chat chat = chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         return new ChatDto(
                 chat.getId(),
@@ -137,7 +137,7 @@ public class ChatService {
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
                 .nlQuery(request.getNlQuery())
-                .llmResponse(request.getLlmResponse())
+                .llmResponse(request.getLlmResult())
                 .timestamp(timestamp)
                 .build();
 
@@ -156,12 +156,12 @@ public class ChatService {
      * Rename chat. If the new name is longer than {@code CHAT_NAME_MAX_LENGTH},
      * use only the first {@code CHAT_NAME_MAX_LENGTH} characters
      *
-     * @param id   chat identifier
-     * @param name new name
+     * @param chatId chat identifier
+     * @param name   new name
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    public void renameChat(UUID id, String name) throws EntityNotFoundException {
-        Chat chat = chatRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(CHAT, id));
+    public void renameChat(UUID chatId, String name) throws EntityNotFoundException {
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
         chat.setName(name.length() < CHAT_NAME_MAX_LENGTH ? name : name.substring(0, CHAT_NAME_MAX_LENGTH));
         chatRepository.save(chat);
     }
@@ -169,10 +169,10 @@ public class ChatService {
     /**
      * Delete chat by id and associated graph if it exists.
      *
-     * @param id chat identifier
+     * @param chatId chat identifier
      */
-    public void deleteChatById(UUID id) {
-        chatRepository.deleteById(id);
-        plotService.deletePlot(id);
+    public void deleteChatById(UUID chatId) {
+        chatRepository.deleteById(chatId);
+        plotService.deletePlot(chatId);
     }
 }

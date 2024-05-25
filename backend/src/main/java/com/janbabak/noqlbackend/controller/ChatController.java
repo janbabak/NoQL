@@ -8,39 +8,18 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/chat")
+@RequestMapping(value = "/chat", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
-
-    /**
-     * Get chat by id
-     *
-     * @param id chat identifier
-     * @return chat
-     * @throws EntityNotFoundException chat of specified id not found.
-     */
-    @GetMapping("/{id}")
-    public ChatDto getById(@PathVariable UUID id) throws EntityNotFoundException {
-        return chatService.findById(id);
-    }
-
-    /**
-     * Delete chat by id.
-     * @param id chat identifier
-     */
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteById(@PathVariable UUID id) {
-        chatService.deleteChatById(id);
-    }
 
     /**
      * Create new chat
@@ -56,29 +35,51 @@ public class ChatController {
     }
 
     /**
+     * Get chat by id
+     *
+     * @param chatId chat identifier
+     * @return chat
+     * @throws EntityNotFoundException chat of specified id not found.
+     */
+    @GetMapping("/{chatId}")
+    public ChatDto getById(@PathVariable UUID chatId) throws EntityNotFoundException {
+        return chatService.findById(chatId);
+    }
+
+    /**
+     * Delete chat by id.
+     * @param chatId chat identifier
+     */
+    @DeleteMapping("/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteById(@PathVariable UUID chatId) {
+        chatService.deleteChatById(chatId);
+    }
+
+    /**
      * Rename chat.
-     * @param id chat identifier
+     * @param chatId chat identifier
      * @param name new name
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    @PutMapping("/{id}/name")
-    @ResponseStatus(HttpStatus.OK)
-    public void rename(@PathVariable UUID id, @RequestParam @Valid @NotEmpty String name)
+    @PutMapping("/{chatId}/name")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rename(@PathVariable UUID chatId, @RequestParam @Valid @NotEmpty String name)
             throws EntityNotFoundException {
-        chatService.renameChat(id, name);
+        chatService.renameChat(chatId, name);
     }
 
     /**
      * Add message to a chat
      *
-     * @param id      chat identifier
+     * @param chatId      chat identifier
      * @param request message
      * @throws EntityNotFoundException chat of specified id not found.
      */
-    @PostMapping("/{id}/messages")
+    @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addMessage(@PathVariable UUID id, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
+    public void addMessage(@PathVariable UUID chatId, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
-        chatService.addMessageToChat(id, request);
+        chatService.addMessageToChat(chatId, request);
     }
 }

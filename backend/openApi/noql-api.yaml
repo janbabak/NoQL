@@ -138,7 +138,7 @@ paths:
       summary: Load chat resul of existing chat
       parameters:
         - $ref: '#/components/parameters/databaseId'
-        - $ref: '#/components/parameters/chatId'
+        - $ref: '#/components/parameters/chatIdQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       responses:
@@ -226,7 +226,9 @@ paths:
         - Database
       summary: Get database creation script
       description: >
-        Get database creation script. Return a script to create the database with all tables and columns. This script is retrieved by heuristic methods and my not be 100% accurate and syntactically correct. It is used as an input from LLM not for direct execution.
+        Get database creation script. Return a script to create the database with all tables and columns. This script is
+        retrieved by heuristic methods and my not be 100% accurate and syntactically correct. It is used as an input
+        from LLM not for direct execution.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -258,6 +260,89 @@ paths:
                   $ref: '#/components/schemas/ChatHistoryItem'
         '404':
           description: Database of specified ID not found
+
+  /chat:
+    post:
+      tags:
+        - Chat
+      summary: Create new chat
+      description: Create a new chat associated with specified database. Default chat name is "New chat".
+      parameters:
+        - $ref: '#/components/parameters/databaseId'
+      responses:
+        '201':
+          description: Created chat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+              example:
+                id: "98f2f987-da0e-4b37-afc5-839bd0e5b803"
+                name: "New chat"
+                messages: []
+                modificationDate: "2024-05-24T18:40:24.649+00:00"
+        '404':
+          description: Database of specified ID not found
+
+  /chat/{chatId}:
+    get:
+      tags:
+        - Chat
+      summary: Get a chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      responses:
+        '200':
+          description: A chat of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '404':
+          description: Chat of specified ID not found
+    delete:
+      tags:
+        - Chat
+      summary: Delete chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      responses:
+        '204':
+          description: No content
+
+  /chat/{chatId}/name:
+    put:
+      tags:
+        - Chat
+      summary: Rename chat by ID
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+        - name: name
+          in: query
+          description: New name
+          schema:
+            $ref: '#/components/schemas/ChatName'
+      responses:
+        '204':
+          description: No content
+
+  /chat/{chatId}/messages:
+    post:
+      tags:
+        - Chat
+      summary: Add message to chat
+      description: Add message to chat. Used only for development purposes.
+      parameters:
+        - $ref: '#/components/parameters/chatIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatQueryWithResponseRequest'
+      responses:
+        '204':
+          description: No content
 
 components:
   schemas:
@@ -449,6 +534,16 @@ components:
         timestamp:
           $ref: '#/components/schemas/Timestamp'
 
+    CreateChatQueryWithResponseRequest:
+      type: object
+      properties:
+        nlQuery:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        llmResult:
+          $ref: '#/components/schemas/LLMResult'
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+
     NaturalLanguageQuery:
       type: string
       description: Natural language query
@@ -570,8 +665,25 @@ components:
         id:
           $ref: '#/components/schemas/UUID'
         name:
-          type: string
-          example: "Find oldest student"
+          $ref: '#/components/schemas/ChatName'
+
+    Chat:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          $ref: '#/components/schemas/ChatName'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatQueryWithResponse'
+        modificationDate:
+          $ref: '#/components/schemas/Timestamp'
+
+    ChatName:
+      type: string
+      example: "Find oldest student"
 
   parameters:
 
@@ -583,9 +695,17 @@ components:
       schema:
         $ref: '#/components/schemas/UUID'
 
-    chatId:
+    chatIdQuery:
       name: chatId
       in: query
+      required: true
+      description: ID of the chat to query
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    chatIdPath:
+      name: chatId
+      in: path
       required: true
       description: ID of the chat to query
       schema:
