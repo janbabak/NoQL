@@ -26,6 +26,9 @@ public class Database {
     @GeneratedValue
     private UUID id;
 
+    /**
+     * User-defined name of the database.
+     */
     @NotBlank
     @Size(min = 1, max = 32)
     private String name;
@@ -36,6 +39,9 @@ public class Database {
     @Min(1)
     private Integer port;
 
+    /**
+     * Name of the database to connect to (used in the connection URL).
+     */
     @NotBlank
     private String database;
 
@@ -48,7 +54,7 @@ public class Database {
     @NotNull
     private DatabaseEngine engine;
 
-    @JsonIgnore // to avoid infinite recursion or creation of DTO object
+    @JsonIgnore // to avoid infinite recursion or the creation of a DTO object
     @OneToMany(
             mappedBy = "database",
             cascade = CascadeType.ALL,
@@ -56,6 +62,15 @@ public class Database {
             fetch = FetchType.LAZY)
     private List<Chat> chats;
 
-    @NotNull
-    private Boolean isSQL; // TODO: remove column, can be inferred from engine
+    /**
+     * @return true if database engine is SQL
+     */
+    @JsonIgnore
+    @SuppressWarnings("all") // 'default' branch is unnecessary
+    public Boolean isSQL() {
+        return switch (engine) {
+            case POSTGRES, MYSQL -> true;
+            default -> false;
+        };
+    }
 }

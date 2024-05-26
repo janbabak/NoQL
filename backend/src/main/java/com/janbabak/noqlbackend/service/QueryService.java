@@ -62,7 +62,7 @@ public class QueryService {
                         is translation of natural language queries into a database language. The second function is
                         visualising data. If the user wants to show or display or find or retrieve some data, translate
                         it into""")
-                .append(database.getIsSQL() ? "an SQL query" : "an query language query")
+                .append(database.isSQL() ? "an SQL query" : "an query language query")
                 .append(" for the ")
                 .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
                 .append("""

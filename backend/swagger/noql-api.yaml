@@ -381,8 +381,6 @@ components:
           $ref: '#/components/schemas/DatabasePassword'
         engine:
           $ref: '#/components/schemas/DatabaseEngine'
-        isSQL:
-          $ref: '#/components/schemas/DatabaseIsSQL'
 
     CreateDatabaseRequest:
       type: object
@@ -401,8 +399,6 @@ components:
           $ref: '#/components/schemas/DatabasePassword'
         engine:
           $ref: '#/components/schemas/DatabaseEngine'
-        isSQL:
-          $ref: '#/components/schemas/DatabaseIsSQL'
 
     UpdateDatabaseRequest:
       type: object
@@ -434,10 +430,6 @@ components:
         engine:
           allOf:
             - $ref: '#/components/schemas/DatabaseEngine'
-            - nullable: true
-        isSQL:
-          allOf:
-            - $ref: '#/components/schemas/DatabaseIsSQL'
             - nullable: true
 
     UUID:
@@ -479,10 +471,6 @@ components:
       enum:
         - POSTGRES
         - MYSQL
-
-    DatabaseIsSQL:
-      type: boolean
-      example: true
 
     QueryRequest:
       type: object
@@ -679,7 +667,6 @@ components:
         	user_name CHARACTER VARYING
         	host CHARACTER VARYING
         	name CHARACTER VARYING
-        	issql BOOLEAN
         );
 
     ChatHistoryItem:
