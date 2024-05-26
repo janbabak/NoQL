@@ -132,7 +132,7 @@ public class QueryService {
     /**
      * Sometimes the model does not return just the query itself, but puts it into a markdown and add some text. <br />
      * Extract the executable query from the response that can look like this: <br />
-     * {@code Use the following command to retrieve all users. ```select * from public.user;```} <br />
+     * {@code Use the following command to retrieve all users. ```json\n{ query: "...", ...}```} <br />
      *
      * @param response model's response
      * @return executable query
@@ -146,7 +146,7 @@ public class QueryService {
         }
 
         String responseAfterMarkdownStart = response.substring(markdownIndex);
-        // I cannot cut only the ``` because it usually looks like ```sql\n or something like that
+        // I cannot cut only the ``` because it usually looks like ```json\n or something like that
         int newLineIndex = responseAfterMarkdownStart.indexOf("\n");
         if (newLineIndex == -1) {
             newLineIndex = responseAfterMarkdownStart.indexOf(" ");
@@ -498,6 +498,7 @@ public class QueryService {
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
+            llmResponseJson = extractQueryFromMarkdownInResponse(llmResponseJson);
 
             try {
                 return showResultTableAndGeneratePlot(
