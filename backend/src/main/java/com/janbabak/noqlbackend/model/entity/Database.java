@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +61,7 @@ public class Database {
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private List<Chat> chats;
+    private List<Chat> chats = new ArrayList<>();
 
     /**
      * @return true if database engine is SQL
@@ -72,5 +73,14 @@ public class Database {
             case POSTGRES, MYSQL -> true;
             default -> false;
         };
+    }
+
+    public void addChat(Chat chat) {
+        for (Chat c: chats) {
+            if (c.getId().equals(chat.getId())) {
+                return;
+            }
+        }
+        chats.add(chat);
     }
 }

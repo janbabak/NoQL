@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,19 +26,20 @@ public class Chat {
     private Database database;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatQueryWithResponse> messages;
+    private List<ChatQueryWithResponse> messages = new ArrayList<>();
 
     private Timestamp modificationDate;
 
     private String name;
 
-    public void addMessage(ChatQueryWithResponse newMessage) {
+    public Chat addMessage(ChatQueryWithResponse newMessage) {
         for (ChatQueryWithResponse message: messages) {
             if (message.getId() == newMessage.getId()) {
-                return;
+                return this;
             }
         }
         messages.add(newMessage);
+        return this;
     }
 
     // TODO: user reference
