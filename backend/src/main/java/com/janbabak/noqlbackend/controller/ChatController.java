@@ -51,7 +51,7 @@ public class ChatController {
      * @param chatId chat identifier
      */
     @DeleteMapping("/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable UUID chatId) {
         chatService.deleteChatById(chatId);
     }
