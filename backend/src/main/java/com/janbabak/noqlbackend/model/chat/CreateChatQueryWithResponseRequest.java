@@ -13,6 +13,9 @@ public class CreateChatQueryWithResponseRequest {
     @NotBlank
     private String nlQuery; // natural language query
 
+    /** JSON in form of string<br />
+     * { {@code  databaseQuery: string, generatePlot: boolean, pythonCode: string } }
+     */
     @NotBlank
     private String llmResult; // LLM response JSON
 }
