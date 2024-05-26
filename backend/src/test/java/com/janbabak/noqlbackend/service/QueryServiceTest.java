@@ -31,8 +31,7 @@ class QueryServiceTest {
                 "user",
                 "password",
                 DatabaseEngine.POSTGRES,
-                List.of(),
-                true);
+                List.of());
     }
 
     @Disabled // TODO: fix
