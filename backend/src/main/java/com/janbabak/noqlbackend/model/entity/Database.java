@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -47,6 +48,7 @@ public class Database {
     @NotNull
     private DatabaseEngine engine;
 
+    @JsonIgnore // to avoid infinite recursion or creation of DTO object
     @OneToMany(
             mappedBy = "database",
             cascade = CascadeType.ALL,
