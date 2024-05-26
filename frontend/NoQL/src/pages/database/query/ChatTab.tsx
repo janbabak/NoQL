@@ -55,7 +55,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const [
     model,
     setModel
-  ] = useState<LlmModel>(LlmModel.GPT_4)
+  ] = useState<LlmModel>(LlmModel.GPT_4o)
 
   const [
     pageLoading,
