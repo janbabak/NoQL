@@ -90,7 +90,6 @@ public class DatabaseEntityService {
         if (data.getUserName() != null) database.setUserName(data.getUserName());
         if (data.getPassword() != null) database.setPassword(data.getPassword());
         if (data.getEngine() != null) database.setEngine(data.getEngine());
-        if (data.getIsSQL() != null) database.setIsSQL(data.getIsSQL());
 
         DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
 

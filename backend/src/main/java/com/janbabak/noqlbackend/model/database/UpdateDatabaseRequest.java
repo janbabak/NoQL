@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UpdateDatabaseRequest {
 
+    /**
+     * User-defined name of the database.
+     */
     @Nullable
     @Size(min = 1, max = 32)
     private String name;
@@ -24,6 +27,9 @@ public class UpdateDatabaseRequest {
     @Min(1)
     private Integer port;
 
+    /**
+     * Name of the database to connect to (used in the connection URL).
+     */
     private String database;
 
     private String userName;
@@ -31,6 +37,4 @@ public class UpdateDatabaseRequest {
     private String password;
 
     private DatabaseEngine engine;
-
-    private Boolean isSQL;
 }
