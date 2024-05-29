@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,14 +33,24 @@ public class Chat {
 
     private String name;
 
-    public Chat addMessage(ChatQueryWithResponse newMessage) {
+    public void addMessage(ChatQueryWithResponse newMessage) {
         for (ChatQueryWithResponse message: messages) {
-            if (message.getId() == newMessage.getId()) {
-                return this;
+            if (message.getId() != null && message.getId() == newMessage.getId()) {
+                return;
             }
         }
         messages.add(newMessage);
-        return this;
+        newMessage.setChat(this);
+    }
+
+    /**
+     * Add colledtion of new messages to the chat.
+     * @param newMessages new messages
+     */
+    public void addMessages(Collection<ChatQueryWithResponse> newMessages) {
+        for (ChatQueryWithResponse message: newMessages) {
+            addMessage(message);
+        }
     }
 
     // TODO: user reference

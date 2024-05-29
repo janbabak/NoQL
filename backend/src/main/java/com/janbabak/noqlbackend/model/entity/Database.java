@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -77,10 +78,21 @@ public class Database {
 
     public void addChat(Chat chat) {
         for (Chat c: chats) {
-            if (c.getId().equals(chat.getId())) {
+            if (chat.getId() != null && c.getId().equals(chat.getId())) {
                 return;
             }
         }
         chats.add(chat);
+        chat.setDatabase(this);
+    }
+
+    /**
+     * Add collection of chats
+     * @param newChats new chats
+     */
+    public void addChats(Collection<Chat> newChats) {
+        for (Chat chat: newChats) {
+            addChat(chat);
+        }
     }
 }
