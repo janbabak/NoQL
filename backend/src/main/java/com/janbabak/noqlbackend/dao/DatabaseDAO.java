@@ -95,9 +95,7 @@ public abstract class DatabaseDAO {
     protected void connect() throws DatabaseConnectionException {
         try {
             connection = DriverManager.getConnection(
-                    createConnectionUrl(),
-                    databaseMetadata.getUserName(),
-                    databaseMetadata.getPassword());
+                    createConnectionUrl(), databaseMetadata.getUserName(), databaseMetadata.getPassword());
             connection.setReadOnly(true);
         } catch (SQLException e) {
             log.error("Error while connecting to database - message={}.", e.getMessage());
