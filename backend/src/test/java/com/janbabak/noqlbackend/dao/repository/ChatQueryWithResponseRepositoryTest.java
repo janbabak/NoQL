@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,14 +22,11 @@ class ChatQueryWithResponseRepositoryTest {
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
-    private ChatRepository chatRepository;
-
-    @Autowired
     private DatabaseRepository databaseRepository;
 
     @AfterEach
     void afterEach() {
-        chatQueryWithResponseRepository.deleteAll();
+        databaseRepository.deleteAll();
     }
 
     @Test
@@ -45,46 +43,47 @@ class ChatQueryWithResponseRepositoryTest {
                 .chats(new ArrayList<>())
                 .build();
 
-        Chat chat = Chat.builder()
+        Chat chat1 = Chat.builder()
                 .name("Testing chat")
-                .database(database)
                 .modificationDate(Timestamp.valueOf("2024-05-01 10:10:10.0"))
                 .messages(new ArrayList<>())
                 .build();
-        database.addChat(chat);
+        Chat chat2 = Chat.builder()
+                .name("New chat")
+                .modificationDate(Timestamp.valueOf("2024-05-01 10:10:10.0"))
+                .messages(new ArrayList<>())
+                .build();
+        database.addChats(List.of(chat1, chat2));
 
         ChatQueryWithResponse message1 = ChatQueryWithResponse.builder()
-                .chat(chat)
+                .chat(chat1)
                 .nlQuery("SELECT * FROM table")
                 .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-26 10:10:10.0"))
                 .build();
         ChatQueryWithResponse message2 = ChatQueryWithResponse.builder()
-                .chat(chat)
                 .nlQuery("SELECT * FROM table")
                 .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:11:10.0"))
                 .build();
         ChatQueryWithResponse message3 = ChatQueryWithResponse.builder()
-                .chat(chat)
                 .nlQuery("SELECT * FROM table")
                 .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:10:10.0"))
                 .build();
-        chat
-                .addMessage(message1)
-                .addMessage(message1)
-                .addMessage(message1);
+        ChatQueryWithResponse message4 = ChatQueryWithResponse.builder()
+                .nlQuery("SELECT * FROM table")
+                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+                .timestamp(Timestamp.valueOf("2024-05-28 10:10:10.0"))
+                .build();
+        chat1.addMessages(List.of(message1, message2, message3));
+        chat2.addMessage(message4);
 
         databaseRepository.save(database);
-        chatRepository.save(chat);
-        chatQueryWithResponseRepository.save(message1);
-        chatQueryWithResponseRepository.save(message2);
-        chatQueryWithResponseRepository.save(message3);
 
         // when
         ChatQueryWithResponse latestMessage = chatQueryWithResponseRepository
-                .findLatestMessageFromChat(chat.getId())
+                .findLatestMessageFromChat(chat1.getId())
                 .orElseThrow(() -> new RuntimeException("No message found"));
 
         // then
