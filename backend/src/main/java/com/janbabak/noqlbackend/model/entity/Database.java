@@ -62,7 +62,7 @@ public class Database {
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private List<Chat> chats = new ArrayList<>();
+    private List<Chat> chats;
 
     /**
      * @return true if database engine is SQL
@@ -77,6 +77,9 @@ public class Database {
     }
 
     public void addChat(Chat chat) {
+        if (chats == null) {
+            chats = new ArrayList<>();
+        }
         for (Chat c: chats) {
             if (chat.getId() != null && c.getId().equals(chat.getId())) {
                 return;

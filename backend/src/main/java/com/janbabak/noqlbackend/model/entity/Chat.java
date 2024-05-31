@@ -27,13 +27,16 @@ public class Chat {
     private Database database;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChatQueryWithResponse> messages = new ArrayList<>();
+    private List<ChatQueryWithResponse> messages;
 
     private Timestamp modificationDate;
 
     private String name;
 
     public void addMessage(ChatQueryWithResponse newMessage) {
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
         for (ChatQueryWithResponse message: messages) {
             if (message.getId() != null && message.getId() == newMessage.getId()) {
                 return;
