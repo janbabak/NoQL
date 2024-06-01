@@ -82,6 +82,5 @@ public class ChatController {
     public void addMessage(@PathVariable UUID chatId, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
         chatService.addMessageToChat(chatId, request);
-        System.out.println("ahoj");
     }
 }
