@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.janbabak.noqlbackend.service.utils.JsonUtils.createDatabase;
-import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
+import static com.janbabak.noqlbackend.service.utils.JsonUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -124,7 +123,7 @@ class DatabaseControllerTest {
     void testCreateDatabase(String request, String response, Boolean success) throws Exception {
         // when
         if (success) {
-            when(databaseService.create(any())).thenReturn(createDatabase(response));
+            when(databaseService.create(any())).thenReturn(createFromJson(response, Database.class));
         }
 
         // then
@@ -244,7 +243,7 @@ class DatabaseControllerTest {
 
         // when
         if (success) {
-            when(databaseService.update(eq(databaseId), any())).thenReturn(createDatabase(response));
+            when(databaseService.update(eq(databaseId), any())).thenReturn(createFromJson(response, Database.class));
         }
 
         // then

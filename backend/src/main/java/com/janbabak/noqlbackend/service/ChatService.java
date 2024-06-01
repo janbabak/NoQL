@@ -13,7 +13,6 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
-import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +25,7 @@ import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
+import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 
 @Slf4j
 @Service
@@ -58,7 +58,7 @@ public class ChatService {
                         .stream()
                         .map(message -> {
                             try {
-                                LLMResponse llmResponse = JsonUtils.createLLMResponse(message.getLlmResponse());
+                                LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),

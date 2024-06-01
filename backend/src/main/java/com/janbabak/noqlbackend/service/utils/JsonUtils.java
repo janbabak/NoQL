@@ -2,25 +2,18 @@ package com.janbabak.noqlbackend.service.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.entity.Database;
 
 public class JsonUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Convert LLM response from JSON string to object.
-     *
+     * Create object from JSON string.
      * @param json JSON string
-     * @return converted object
-     * @throws JsonProcessingException syntax error
+     * @param clazz class of object
+     * @throws JsonProcessingException JSON syntax error
      */
-    public static LLMResponse createLLMResponse(String json) throws JsonProcessingException {
-        return objectMapper.readValue(json, LLMResponse.class);
-    }
-
-    public static Database createDatabase(String json) throws JsonProcessingException {
-        return objectMapper.readValue(json, Database.class);
+    public static <T> T createFromJson(String json, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(json, clazz);
     }
 
     /**
@@ -28,7 +21,7 @@ public class JsonUtils {
      *
      * @param object object to convert
      * @return JSON string
-     * @throws JsonProcessingException syntax error
+     * @throws JsonProcessingException JSON syntax error
      */
     public static String toJson(Object object) throws JsonProcessingException {
         return objectMapper.writeValueAsString(object);

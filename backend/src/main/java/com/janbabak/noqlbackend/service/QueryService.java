@@ -18,7 +18,6 @@ import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
-import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -32,6 +31,7 @@ import java.util.*;
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 import static com.janbabak.noqlbackend.model.query.QueryResponse.ColumnTypes;
 import static com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto.LLMResult;
+import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 import static java.sql.Types.*;
 
 @Slf4j
@@ -383,7 +383,7 @@ public class QueryService {
 
         LLMResponse LLMResponse;
         try {
-            LLMResponse = JsonUtils.createLLMResponse(latestMessage.getLlmResponse());
+            LLMResponse = createFromJson(latestMessage.getLlmResponse(), LLMResponse.class);
         } catch (JsonProcessingException e) {
             return null; // should not happen since values that cannot be parsed aren't saved
         }
@@ -436,7 +436,7 @@ public class QueryService {
             Integer pageSize) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
             SQLException, EntityNotFoundException, PlotScriptExecutionException, JsonProcessingException {
 
-        LLMResponse llmResponse = JsonUtils.createLLMResponse(llmResponseJson);
+        LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
 
         if (llmResponse.getGeneratePlot()) {
             log.info("Generate plot");
