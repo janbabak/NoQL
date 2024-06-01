@@ -54,8 +54,7 @@ class ChatControllerTest {
         when(chatService.create(databaseId)).thenReturn(chatDto);
 
         // then
-        mockMvc
-                .perform(post(ROOT_URL)
+        mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", databaseId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -73,8 +72,7 @@ class ChatControllerTest {
         when(chatService.create(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
-        mockMvc
-                .perform(post(ROOT_URL)
+        mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", databaseId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -95,8 +93,7 @@ class ChatControllerTest {
         when(chatService.findById(chatId)).thenReturn(chatDto);
 
         // then
-        mockMvc
-                .perform(get(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(get(ROOT_URL + "/{id}", chatId))
                 .andDo(print())
                 .andExpect(status().isOk());
 
@@ -111,8 +108,7 @@ class ChatControllerTest {
         when(chatService.findById(chatId)).thenThrow(EntityNotFoundException.class);
 
         // then
-        mockMvc
-                .perform(get(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(get(ROOT_URL + "/{id}", chatId))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -123,8 +119,7 @@ class ChatControllerTest {
         UUID chatId = UUID.randomUUID();
 
         // then
-        mockMvc
-                .perform(delete(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(delete(ROOT_URL + "/{id}", chatId))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
@@ -136,8 +131,7 @@ class ChatControllerTest {
         String name = "Find all users";
 
         // then
-        mockMvc
-                .perform(put(ROOT_URL + "/{id}/name", chatId)
+        mockMvc.perform(put(ROOT_URL + "/{id}/name", chatId)
                         .param("name", name))
                 .andDo(print())
                 .andExpect(status().isNoContent());
@@ -153,8 +147,7 @@ class ChatControllerTest {
         doThrow(EntityNotFoundException.class).when(chatService).renameChat(chatId, name);
 
         // then
-        mockMvc
-                .perform(put(ROOT_URL + "/{id}/name", chatId)
+        mockMvc.perform(put(ROOT_URL + "/{id}/name", chatId)
                         .param("name", name))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -179,8 +172,7 @@ class ChatControllerTest {
 
 
         // then
-        mockMvc
-                .perform(post(ROOT_URL + "/{chatId}/messages", chatId)
+        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request)))
                 .andDo(print())
@@ -205,8 +197,7 @@ class ChatControllerTest {
         when(chatService.addMessageToChat(chatId, request)).thenThrow(EntityNotFoundException.class);
 
         // then
-        mockMvc
-                .perform(post(ROOT_URL + "/{chatId}/messages", chatId)
+        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request)))
                 .andDo(print())
