@@ -194,7 +194,7 @@ class DatabaseControllerTest {
                         "host":"localhost",
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                        "userName":"user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user",
+                        "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
                         "password":"password password password password password password",
                         "engine":"POSTGRES"
                     }""",
@@ -334,7 +334,7 @@ class DatabaseControllerTest {
                         "host":"localhost",
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                        "userName":"user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user user",
+                        "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
                         "password":"password password password password password password",
                         "engine":"POSTGRES"
                     }""",
