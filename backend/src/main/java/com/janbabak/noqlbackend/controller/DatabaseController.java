@@ -13,11 +13,13 @@ import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.service.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
+import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,7 +68,7 @@ public class DatabaseController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@RequestBody @Valid Database request) throws DatabaseConnectionException {
+    public Database create(@Validated(ValidationSequence.class) @RequestBody Database request) throws DatabaseConnectionException {
         return databaseService.create(request);
     }
 

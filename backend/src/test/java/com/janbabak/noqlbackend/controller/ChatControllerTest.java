@@ -41,12 +41,14 @@ class ChatControllerTest {
                 .id(chatId)
                 .name("New chat")
                 .build();
-        String responseContent = """
+        String responseContent =
+                // language=JSON
+                 """
                  {
                      "id":"%s",
                      "name":"New chat",
                      "messages":null,
-                     "modificationDate":null,
+                     "modificationDate":null
                 }
                 """.formatted(chatId);
 
@@ -159,7 +161,9 @@ class ChatControllerTest {
         UUID chatId = UUID.randomUUID();
         CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
                 .nlQuery("Find all users older than 25")
-                .llmResult("""
+                .llmResult(
+                        // language=JSON
+                        """
                         {
                              "databaseQuery": "SELECT * FROM users WHERE age > 25",
                              "generatePlot": false,
@@ -185,7 +189,8 @@ class ChatControllerTest {
         UUID chatId = UUID.randomUUID();
         CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
                 .nlQuery("Find all users older than 25")
-                .llmResult("""
+                .llmResult(// language=JSON
+                        """
                         {
                              "databaseQuery": "SELECT * FROM users WHERE age > 25",
                              "generatePlot": false,

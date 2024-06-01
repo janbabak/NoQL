@@ -2,12 +2,15 @@ package com.janbabak.noqlbackend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import com.janbabak.noqlbackend.validation.FirstValidationGroup;
+import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,29 +34,34 @@ public class Database {
     /**
      * User-defined name of the database.
      */
-    @NotBlank
-    @Size(min = 1, max = 32)
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 32, groups = SecondValidationGroup.class)
     private String name;
 
-    @NotBlank
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
     private String host;
 
-    @Min(1)
+    @NotNull(groups = FirstValidationGroup.class)
+    @Min(value = 1, groups = SecondValidationGroup.class)
     private Integer port;
 
     /**
      * Name of the database to connect to (used in the connection URL).
      */
-    @NotBlank
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
     private String database;
 
-    @NotBlank
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 128, groups = SecondValidationGroup.class)
     private String userName;
 
-    @NotBlank
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 32, groups = SecondValidationGroup.class)
     private String password;
 
-    @NotNull
+    @NotNull(groups = FirstValidationGroup.class)
     private DatabaseEngine engine;
 
     @JsonIgnore // to avoid infinite recursion or the creation of a DTO object

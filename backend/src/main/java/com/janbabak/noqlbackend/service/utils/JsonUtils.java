@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
+import com.janbabak.noqlbackend.model.entity.Database;
 
 public class JsonUtils {
     public static final ObjectMapper objectMapper = new ObjectMapper();
@@ -16,6 +17,10 @@ public class JsonUtils {
      */
     public static LLMResponse createLLMResponse(String json) throws JsonProcessingException {
         return objectMapper.readValue(json, LLMResponse.class);
+    }
+
+    public static Database createDatabase(String json) throws JsonProcessingException {
+        return objectMapper.readValue(json, Database.class);
     }
 
     /**
