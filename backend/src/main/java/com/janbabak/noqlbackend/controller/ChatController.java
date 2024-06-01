@@ -56,6 +56,7 @@ public class ChatController {
         chatService.deleteChatById(chatId);
     }
 
+    // TODO: name max length
     /**
      * Rename chat.
      * @param chatId chat identifier
@@ -70,7 +71,7 @@ public class ChatController {
     }
 
     /**
-     * Add message to a chat
+     * Add message to a chat. Does not verify if the JSON is valid.
      *
      * @param chatId      chat identifier
      * @param request message
@@ -81,5 +82,6 @@ public class ChatController {
     public void addMessage(@PathVariable UUID chatId, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
         chatService.addMessageToChat(chatId, request);
+        System.out.println("ahoj");
     }
 }
