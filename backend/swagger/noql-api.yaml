@@ -333,8 +333,8 @@ paths:
     post:
       tags:
         - Chat
-      summary: Add message to chat
-      description: Add message to chat. Used only for development purposes.
+      summary: Add message to chat.
+      description: Add message to chat. Used only for development purposes. Does not verify if the message is valid.
       parameters:
         - $ref: '#/components/parameters/chatIdPath'
       requestBody:
