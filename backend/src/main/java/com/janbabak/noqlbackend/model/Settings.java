@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
  * Application settings that are loaded when the application starts and cannot be changed afterward.
  */
 @Component
+@Getter
 public class Settings {
 
     /** Maximum page size of automatically paginated query result. */
