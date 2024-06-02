@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@Service
 @NoArgsConstructor
 public class GptApiService implements QueryApi {
 
@@ -80,7 +82,7 @@ public class GptApiService implements QueryApi {
      * @param queryRequest users request
      * @throws BadRequestException unsupported model
      */
-    private void validateRequest(QueryRequest queryRequest) throws BadRequestException {
+    void validateRequest(QueryRequest queryRequest) throws BadRequestException {
         if (queryRequest.getModel() == null || !queryRequest.getModel().getModel().startsWith("gpt")) {
             log.error("Unsupported model: {}", queryRequest.getModel());
             throw new BadRequestException("Only GPT models are supported.");
