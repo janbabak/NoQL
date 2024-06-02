@@ -1,13 +1,15 @@
 package com.janbabak.noqlbackend.model.database;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.List;
 
 /**
  * SQL database structure data transfer object - contains arrays not maps as the {@link  SqlDatabaseStructure}
  */
-@Getter
+@Data
+@AllArgsConstructor
 public class SqlDatabaseStructureDto implements DatabaseStructureDto {
 
     private final List<SchemaDto> schemas;
@@ -16,7 +18,8 @@ public class SqlDatabaseStructureDto implements DatabaseStructureDto {
         schemas = sqlDatabaseStructure.getSchemas().values().stream().map(SchemaDto::new).toList();
     }
 
-    @Getter
+    @Data
+    @AllArgsConstructor
     public static class SchemaDto {
         private final String name;
         private final List<TableDto> tables;
@@ -27,7 +30,8 @@ public class SqlDatabaseStructureDto implements DatabaseStructureDto {
         }
     }
 
-    @Getter
+    @Data
+    @AllArgsConstructor
     public static class TableDto {
         private final String name;
         private final List<SqlDatabaseStructure.Column> columns;

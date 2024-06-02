@@ -1,8 +1,14 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.SchemaDto;
+import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.TableDto;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
@@ -49,7 +55,6 @@ class DatabaseControllerTest {
     private QueryService queryService;
 
     @MockBean
-    @SuppressWarnings("unused") // mock is used internally
     private ChatService chatService;
 
     private final String ROOT_URL = "/database";
@@ -100,7 +105,7 @@ class DatabaseControllerTest {
         when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
 
         // then
-        mockMvc.perform(get(ROOT_URL + "/{id}", localPostgres.getId()))
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}", localPostgres.getId()))
                 .andDo(print())
                 .andExpect(content().json(toJson(localPostgres), true))
                 .andExpect(status().isOk());
@@ -116,7 +121,7 @@ class DatabaseControllerTest {
         when(databaseService.findById(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
-        mockMvc.perform(get(ROOT_URL + "/{id}", databaseId))
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}", databaseId))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -251,7 +256,7 @@ class DatabaseControllerTest {
         }
 
         // then
-        mockMvc.perform(put(ROOT_URL + "/{id}", databaseId)
+        mockMvc.perform(put(ROOT_URL + "/{databaseId}", databaseId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -385,7 +390,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{id}", databaseId))
+        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
@@ -496,24 +501,172 @@ class DatabaseControllerTest {
                 .andExpect(content().json(toJson(response), true));
     }
 
+    @Test
+    @DisplayName("Execute query-language query")
+    void testExecuteQueryLanguageQuery() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        Integer page = 0;
+        Integer pageSize = 2;
+        // language=SQL
+        String query = """
+                SELECT u.*, a.city, a.street, a.state
+                FROM public."user" u
+                JOIN public.address a ON u.id = a.user_id;
+                """;
+        QueryResponse response = QueryResponse.builder()
+                .totalCount(10L)
+                .errorMessage(null)
+                .chatQueryWithResponse(null)
+                .data(new QueryResponse.RetrievedData(
+                        List.of("id", "name", "age", "sex", "email", "created_at", "city", "street", "state"),
+                        List.of(
+                                List.of("1", "John Doe", "25", "M", "john.doe@example.com",
+                                        "2024-05-26 07:52:41.545865", "Any town", "123 Main St", "CA"),
+                                List.of("2", "Jane Smith", "30", "F", "jane.smith@example.com",
+                                        "2024-05-26 07:52:41.545865", "Some town", "456 Oak Ave", "NY"))))
+                .build();
 
+        // when
+        when(queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize)).thenReturn(response);
 
+        // then
+        mockMvc.perform(
+                post(ROOT_URL + "/{databaseId}/query/queryLanguage", databaseId)
+                        .param("page", page.toString())
+                        .param("pageSize", pageSize.toString())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(query))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(response), true));
+    }
 
+    @Test
+    @DisplayName("Get database structure")
+    void testGetDatabaseStructure() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        SqlDatabaseStructureDto databaseStructure = new SqlDatabaseStructureDto(List.of(
+                  new SchemaDto("public",
+                          List.of(
+                                  new TableDto("address", List.of(
+                                          new Column("user_id", "integer", false,
+                                                  new SqlDatabaseStructure.ForeignKey(
+                                                          "public",
+                                                          "\"user\"",
+                                                          "id")),
+                                          new Column("city", "character varying", false),
+                                          new Column("id", "integer", true)
+                                  ))))));
 
+        // when
+        when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenReturn(databaseStructure);
 
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(databaseStructure), true));
+    }
 
+    @Test
+    @DisplayName("Get database structure not existing database")
+    void testGetDatabaseStructureNotExistingDatabase() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
 
+        // when
+        when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
+    @Test
+    @DisplayName("Get crate script")
+    void testGetCreateScript() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        // language=SQL
+        String createScript = """
+                CREATE SCHEMA IF NOT EXISTS "public";
 
+                CREATE TABLE IF NOT EXISTS public.address
+                (
+                	id INTEGER PRIMARY KEY,
+                	user_id INTEGER REFERENCES "user"(id),
+                	city CHARACTER VARYING,
+                	street CHARACTER VARYING,
+                	state CHARACTER VARYING,
+                	postal_code CHARACTER VARYING
+                );
 
+                CREATE TABLE IF NOT EXISTS public.example_table
+                (
+                	id INTEGER PRIMARY KEY,
+                	name CHARACTER VARYING
+                );""";
 
+        // when
+        when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenReturn(createScript);
 
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string(createScript));
+    }
 
+    @Test
+    @DisplayName("Get crate script from not existing database")
+    void testGetDatabaseCreateScriptNotExistingDatabase() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
 
+        // when
+        when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
+    @Test
+    @DisplayName("Get chats of database")
+    void getChatsOfDatabase() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        List<ChatHistoryItem> response = List.of(
+                new ChatHistoryItem(UUID.randomUUID(), "oldest user"),
+                new ChatHistoryItem(UUID.randomUUID(), "New chat"));
 
+        // when
+        when(chatService.findChatsByDatabaseId(databaseId)).thenReturn(response);
 
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/chats", databaseId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(response), true));
+    }
 
+    @Test
+    @DisplayName("Get chats of not existing database")
+    void getChatsOfNotExistingDatabase() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // when
+        when(chatService.findChatsByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/chats", databaseId))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 }
