@@ -204,7 +204,7 @@ class DatabaseControllerTest {
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
-                        "password":"password password password password password password",
+                        "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
                         "engine":"POSTGRES"
                     }""",
                         // language=JSON
@@ -213,7 +213,7 @@ class DatabaseControllerTest {
                          "name": "length must be between 1 and 32",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
-                         "password":"length must be between 1 and 32"
+                         "password":"length must be between 1 and 128"
                      }""",
                         false
                 },
@@ -344,7 +344,7 @@ class DatabaseControllerTest {
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
-                        "password":"password password password password password password",
+                        "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
                         "engine":"POSTGRES"
                     }""",
                         // language=JSON
@@ -353,7 +353,7 @@ class DatabaseControllerTest {
                          "name": "length must be between 1 and 32",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
-                         "password":"length must be between 1 and 32"
+                         "password":"length must be between 1 and 128"
                      }""",
                         false
                 },
@@ -376,7 +376,7 @@ class DatabaseControllerTest {
                         "host": "length must be between 1 and 253",
                         "database": "length must be between 1 and 253",
                         "userName": "length must be between 1 and 128",
-                        "password": "length must be between 1 and 32"
+                        "password": "length must be between 1 and 128"
                     }""",
                         false
                 }

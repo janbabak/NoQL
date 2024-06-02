@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.ChatService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,6 +34,7 @@ class ChatControllerTest {
     private final String ROOT_URL = "/chat";
 
     @Test
+    @DisplayName("Create chat")
     void testCreateChat() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -41,16 +43,16 @@ class ChatControllerTest {
                 .id(chatId)
                 .name("New chat")
                 .build();
+        // language=JSON
         String responseContent =
-                // language=JSON
-                 """
-                 {
-                     "id":"%s",
-                     "name":"New chat",
-                     "messages":null,
-                     "modificationDate":null
-                }
-                """.formatted(chatId);
+                """
+                         {
+                             "id":"%s",
+                             "name":"New chat",
+                             "messages":null,
+                             "modificationDate":null
+                        }
+                        """.formatted(chatId);
 
         // when
         when(chatService.create(databaseId)).thenReturn(chatDto);
@@ -66,6 +68,7 @@ class ChatControllerTest {
     }
 
     @Test
+    @DisplayName("Create chat to not existing database")
     void testCreateChatNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -83,6 +86,7 @@ class ChatControllerTest {
     }
 
     @Test
+    @DisplayName("Get chat by id")
     void testGetChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -95,13 +99,14 @@ class ChatControllerTest {
         when(chatService.findById(chatId)).thenReturn(chatDto);
 
         // then
-        mockMvc.perform(get(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
                 .andDo(print())
                 .andExpect(status().isOk());
 
     }
 
     @Test
+    @DisplayName("Get not existing chat by id")
     void testGetNotExistingChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -110,36 +115,39 @@ class ChatControllerTest {
         when(chatService.findById(chatId)).thenThrow(EntityNotFoundException.class);
 
         // then
-        mockMvc.perform(get(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @DisplayName("Delete chat by id")
     void testDeleteChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{id}", chatId))
+        mockMvc.perform(delete(ROOT_URL + "/{chatId}", chatId))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @DisplayName("Rename chat by id")
     void testRenameChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
         String name = "Find all users";
 
         // then
-        mockMvc.perform(put(ROOT_URL + "/{id}/name", chatId)
+        mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
                         .param("name", name))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @DisplayName("Rename not existing chat")
     void testRenameNotExistingChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -149,13 +157,14 @@ class ChatControllerTest {
         doThrow(EntityNotFoundException.class).when(chatService).renameChat(chatId, name);
 
         // then
-        mockMvc.perform(put(ROOT_URL + "/{id}/name", chatId)
+        mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
                         .param("name", name))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @DisplayName("Add message to chat")
     void testAddMessageToChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -164,11 +173,11 @@ class ChatControllerTest {
                 .llmResult(
                         // language=JSON
                         """
-                        {
-                             "databaseQuery": "SELECT * FROM users WHERE age > 25",
-                             "generatePlot": false,
-                             "pythonCode": null
-                         }""")
+                                {
+                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
+                                     "generatePlot": false,
+                                     "pythonCode": null
+                                 }""")
                 .build();
 
         // when
@@ -184,18 +193,20 @@ class ChatControllerTest {
     }
 
     @Test
+    @DisplayName("Add message to not existing chat")
     void testAddMessageToNotExistingChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
         CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
                 .nlQuery("Find all users older than 25")
-                .llmResult(// language=JSON
+                .llmResult(
+                        // language=JSON
                         """
-                        {
-                             "databaseQuery": "SELECT * FROM users WHERE age > 25",
-                             "generatePlot": false,
-                             "pythonCode": null
-                         }""")
+                                {
+                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
+                                     "generatePlot": false,
+                                     "pythonCode": null
+                                 }""")
                 .build();
 
         // when

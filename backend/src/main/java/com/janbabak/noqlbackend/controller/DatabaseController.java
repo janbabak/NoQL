@@ -68,7 +68,8 @@ public class DatabaseController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@Validated(ValidationSequence.class) @RequestBody Database request) throws DatabaseConnectionException {
+    public Database create(@Validated(ValidationSequence.class) @RequestBody Database request)
+            throws DatabaseConnectionException {
         return databaseService.create(request);
     }
 

@@ -446,24 +446,33 @@ components:
 
     DatabaseHost:
       type: string
+      minLength: 1
+      maxLength: 253
       example: "localhost"
 
     DatabasePort:
       type: integer
+      minimum: 1
       example: 5432
 
     DatabaseDatabase:
       description: Name of the database used in the connection url.
       type: string
+      minLength: 1
+      maxLength: 253
       example: "eshop"
 
     DatabaseUsername:
       description: Username of database user.
       type: string
+      minLength: 1
+      maxLength: 128
       example: "admin"
 
     DatabasePassword:
       type: string
+      minLength: 1
+      maxLength: 128
       example: "admin1234"
 
     DatabaseEngine:
