@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.model.query;
 
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.sql.ResultSet;
@@ -14,6 +15,7 @@ import java.util.List;
  * Response with retrieved data.
  */
 @Data
+@Builder
 @AllArgsConstructor
 public class QueryResponse {
 
@@ -32,6 +34,7 @@ public class QueryResponse {
     }
 
     @Data
+    @AllArgsConstructor
     public static class RetrievedData {
         private final List<String> columnNames;
         private final List<List<String>> rows;

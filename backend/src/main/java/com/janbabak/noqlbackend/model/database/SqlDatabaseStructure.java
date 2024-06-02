@@ -141,6 +141,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
      * Represents database column inside a table.
      */
     @Data
+    @AllArgsConstructor
     public static class Column {
         private String name;
         private String dataType;
