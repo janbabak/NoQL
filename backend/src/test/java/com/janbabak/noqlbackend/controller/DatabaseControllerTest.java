@@ -420,7 +420,8 @@ class DatabaseControllerTest {
         when(queryService.executeChat(databaseId, request, pageSize)).thenReturn(response);
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat?pageSize={pageSize}", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+                        .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request)))
@@ -446,7 +447,8 @@ class DatabaseControllerTest {
 
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat?pageSize={pageSize}", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+                        .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request)))
@@ -454,4 +456,64 @@ class DatabaseControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(response, true));
     }
+
+    @Test
+    @DisplayName("Load chat result")
+    void testLoadChatResult() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        Integer page = 1;
+        Integer pageSize = 2;
+        QueryResponse response = QueryResponse.builder()
+                .totalCount(10L)
+                .errorMessage(null)
+                .data(new QueryResponse.RetrievedData(
+                        List.of("name", "email", "age"),
+                        List.of(
+                                List.of("John", "john@gmail.com", "26"),
+                                List.of("Lenny", "lenny@gmail.com", "65"))))
+                .chatQueryWithResponse(ChatQueryWithResponseDto.builder()
+                        .id(UUID.randomUUID())
+                        .nlQuery("find all users older than 25")
+                        .timestamp(null)
+                        .llmResult(new ChatQueryWithResponseDto.LLMResult(
+                                "SELECT * FROM users WHERE age > 25", null))
+                        .build())
+                .build();
+
+        // when
+        when(queryService.loadChatResult(databaseId, chatId, page, pageSize)).thenReturn(response);
+
+        // then
+        mockMvc.perform(
+                get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                        .param("page", page.toString())
+                        .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(response), true));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
