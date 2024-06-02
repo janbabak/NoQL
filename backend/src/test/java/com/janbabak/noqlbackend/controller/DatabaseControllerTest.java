@@ -1,8 +1,12 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import com.janbabak.noqlbackend.service.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -372,5 +376,82 @@ class DatabaseControllerTest {
                         false
                 }
         };
+    }
+
+    @Test
+    @DisplayName("Delete database")
+    void testDeleteDatabaseById() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // then
+        mockMvc.perform(delete(ROOT_URL + "/{id}", databaseId))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Execute chat")
+    void testExecuteChat() throws Exception {
+
+        // given
+        Integer pageSize = 2;
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", LlmModel.GPT_4o);
+        QueryResponse response = QueryResponse.builder()
+                .totalCount(10L)
+                .errorMessage(null)
+                .data(new QueryResponse.RetrievedData(
+                        List.of("name", "email", "age"),
+                        List.of(
+                                List.of("John", "john@gmail.com", "26"),
+                                List.of("Lenny", "lenny@gmail.com", "65"))))
+                .chatQueryWithResponse(ChatQueryWithResponseDto.builder()
+                        .id(UUID.randomUUID())
+                        .nlQuery("find all users older than 25")
+                        .timestamp(null)
+                        .llmResult(new ChatQueryWithResponseDto.LLMResult(
+                                "SELECT * FROM users WHERE age > 25", null))
+                        .build())
+                .build();
+
+        // when
+        when(queryService.executeChat(databaseId, request, pageSize)).thenReturn(response);
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat?pageSize={pageSize}", databaseId, pageSize)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(response), true));
+    }
+
+    @Test
+    @DisplayName("Execute chat bad request")
+    void testExecuteChatBadRequest() throws Exception {
+        // given
+        Integer pageSize = 2;
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest(chatId, null, null);
+        // language=JSON
+        String response = """
+                {
+                   "query":"must not be blank",
+                   "model":"must not be null"
+                }""";
+
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat?pageSize={pageSize}", databaseId, pageSize)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(response, true));
     }
 }

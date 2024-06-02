@@ -4,12 +4,14 @@ import com.janbabak.noqlbackend.config.ResourceConfig;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class ChatQueryWithResponseDto {
     private UUID id;
