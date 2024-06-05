@@ -63,6 +63,49 @@ class DatabaseEntityServiceTest {
         }
     };
 
+    private final SqlDatabaseStructure databaseStructure = new SqlDatabaseStructure(Map.of(
+            "public", new SqlDatabaseStructure.Schema("public", Map.of(
+                    "user", new SqlDatabaseStructure.Table("user", Map.of(
+                            "id", new SqlDatabaseStructure.Column(
+                                    "id",
+                                    "integer",
+                                    false),
+                            "name", new SqlDatabaseStructure.Column(
+                                    "name",
+                                    "character varying",
+                                    false),
+                            "surname", new SqlDatabaseStructure.Column(
+                                    "surname",
+                                    "character varying",
+                                    false),
+                            "age", new SqlDatabaseStructure.Column(
+                                    "age",
+                                    "integer",
+                                    false)
+                    )),
+                    "address", new SqlDatabaseStructure.Table(
+                            "address", Map.of(
+                            "user_id", new SqlDatabaseStructure.Column(
+                                    "user_id",
+                                    "integer",
+                                    false,
+                                    new SqlDatabaseStructure.ForeignKey(
+                                            "public",
+                                            "\"user\"",
+                                            "id")),
+                            "city", new SqlDatabaseStructure.Column(
+                                    "city",
+                                    "character varying",
+                                    false),
+                            " id", new SqlDatabaseStructure.Column(
+                                    "id",
+                                    "integer",
+                                    true
+                            )
+                    ))
+            )))
+    );
+
     @Test
     @DisplayName("Test find database by id")
     void testFindDatabaseById() throws EntityNotFoundException {
@@ -86,7 +129,7 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test find database by id not found")
-    void testFindNotExistingDatabaseById() {
+    void testFindDatabaseByIdNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
 
@@ -185,18 +228,15 @@ class DatabaseEntityServiceTest {
         Database actual = databaseEntityService.update(databaseId, updateDatabaseRequest);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
-        verify(databaseRepository).findById(idCaptor.capture());
         verify(databaseRepository).save(databaseCaptor.capture());
-        assertEquals(databaseId, idCaptor.getValue());
         assertEquals(updatedDatabase, databaseCaptor.getValue());
         assertEquals(database, actual);
     }
 
     @Test
     @DisplayName("Test update database not found")
-    void testUpdateNotExistingDatabase() {
+    void testUpdateDatabaseNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
         UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
@@ -210,9 +250,6 @@ class DatabaseEntityServiceTest {
         // then
         assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.update(databaseId, updateDatabaseRequest));
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(databaseRepository).findById(idCaptor.capture());
-        assertEquals(databaseId, idCaptor.getValue());
     }
 
     @Test
@@ -241,53 +278,11 @@ class DatabaseEntityServiceTest {
                 .name("local postgres")
                 .build();
 
-        SqlDatabaseStructure databaseStructure = new SqlDatabaseStructure(Map.of(
-                "public", new SqlDatabaseStructure.Schema("public", Map.of(
-                        "user", new SqlDatabaseStructure.Table("user", Map.of(
-                                "id", new SqlDatabaseStructure.Column(
-                                        "id",
-                                        "integer",
-                                        false),
-                                "name", new SqlDatabaseStructure.Column(
-                                        "name",
-                                        "character varying",
-                                        false),
-                                "surname", new SqlDatabaseStructure.Column(
-                                        "surname",
-                                        "character varying",
-                                        false),
-                                "age", new SqlDatabaseStructure.Column(
-                                        "age",
-                                        "integer",
-                                        false)
-                        )),
-                        "address", new SqlDatabaseStructure.Table(
-                                "address", Map.of(
-                                "user_id", new SqlDatabaseStructure.Column(
-                                        "user_id",
-                                        "integer",
-                                        false,
-                                        new SqlDatabaseStructure.ForeignKey(
-                                                "public",
-                                                "\"user\"",
-                                                "id")),
-                                "city", new SqlDatabaseStructure.Column(
-                                        "city",
-                                        "character varying",
-                                        false),
-                                " id", new SqlDatabaseStructure.Column(
-                                        "id",
-                                        "integer",
-                                        true
-                                )
-                        ))
-                )))
-        );
+        PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
 
         // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(DatabaseServiceFactory.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
-        PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
         when(DatabaseServiceFactory.getDatabaseService(database)).thenReturn(postgresServiceMock);
         when(postgresServiceMock.retrieveSchema()).thenReturn(databaseStructure);
 
@@ -295,5 +290,72 @@ class DatabaseEntityServiceTest {
 
         // then
         assertEquals(databaseStructure.toDto(), actual);
+    }
+
+    @Test
+    @DisplayName("Test get database structure not found")
+    void testGetDatabaseStructureNotFound() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class,
+                () -> databaseEntityService.getDatabaseStructureByDatabaseId(databaseId));
+    }
+
+    @Test
+    @DisplayName("Test get database create script")
+    void testGetDatabaseCreateScript() throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        Database database = Database.builder()
+                .id(databaseId)
+                .engine(DatabaseEngine.POSTGRES)
+                .name("local postgres")
+                .build();
+
+        // language=SQL
+        String expectedCreateScript = """
+                CREATE SCHEMA IF NOT EXISTS public;
+                
+                CREATE TABLE IF NOT EXISTS public.user
+                (
+                    id integer,
+                    name character varying,
+                    surname character varying,
+                    age integer
+                );""";
+
+        PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
+        SqlDatabaseStructure sqlDatabaseStructureMock = Mockito.mock(SqlDatabaseStructure.class);
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+        when(DatabaseServiceFactory.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
+        when(DatabaseServiceFactory.getDatabaseService(database)).thenReturn(postgresServiceMock);
+        when(postgresServiceMock.retrieveSchema()).thenReturn(sqlDatabaseStructureMock);
+        when(sqlDatabaseStructureMock.generateCreateScript()).thenReturn(expectedCreateScript);
+
+        String actual = databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId);
+
+        // then
+        assertEquals(expectedCreateScript, actual);
+    }
+
+    @Test
+    @DisplayName("Test get database create script not found")
+    void testGetDatabaseCreateScriptNotFound() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class,
+                () -> databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId));
     }
 }

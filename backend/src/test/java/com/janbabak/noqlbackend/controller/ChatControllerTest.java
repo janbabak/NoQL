@@ -68,7 +68,7 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Create chat to not existing database")
+    @DisplayName("Create chat in not existing database")
     void testCreateChatNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -106,8 +106,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Get not existing chat by id")
-    void testGetNotExistingChat() throws Exception {
+    @DisplayName("Get chat by id not found")
+    void testGetChatByIdNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
 
@@ -147,8 +147,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename not existing chat")
-    void testRenameNotExistingChat() throws Exception {
+    @DisplayName("Rename chat not found")
+    void testRenameChatNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
         String name = "Find all users";
@@ -193,8 +193,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Add message to not existing chat")
-    void testAddMessageToNotExistingChat() throws Exception {
+    @DisplayName("Add message to chat not found")
+    void testAddMessageToChatNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
         CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()

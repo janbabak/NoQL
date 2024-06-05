@@ -112,8 +112,8 @@ class DatabaseControllerTest {
     }
 
     @Test
-    @DisplayName("Get not existing database")
-    void testGetNotExistingDatabase() throws Exception {
+    @DisplayName("Get database by id not found")
+    void testGetDatabaseByIdNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
 
@@ -572,8 +572,8 @@ class DatabaseControllerTest {
     }
 
     @Test
-    @DisplayName("Get database structure not existing database")
-    void testGetDatabaseStructureNotExistingDatabase() throws Exception {
+    @DisplayName("Get database structure not found")
+    void testGetDatabaseStructureNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
 
@@ -622,8 +622,8 @@ class DatabaseControllerTest {
     }
 
     @Test
-    @DisplayName("Get crate script from not existing database")
-    void testGetDatabaseCreateScriptNotExistingDatabase() throws Exception {
+    @DisplayName("Get crate script database not found")
+    void testGetDatabaseCreateScriptNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
 
