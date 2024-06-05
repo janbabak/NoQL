@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.chat;
 
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;

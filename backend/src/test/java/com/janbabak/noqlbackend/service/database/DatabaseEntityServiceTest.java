@@ -124,7 +124,7 @@ class DatabaseEntityServiceTest {
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepository).findById(idCaptor.capture());
-        assertEquals(idCaptor.getValue(), databaseId);
+        assertEquals(databaseId, idCaptor.getValue());
         assertEquals(database, actual);
     }
 
@@ -141,7 +141,7 @@ class DatabaseEntityServiceTest {
         assertThrows(EntityNotFoundException.class, () -> databaseEntityService.findById(databaseId));
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepository).findById(idCaptor.capture());
-        assertEquals(idCaptor.getValue(), databaseId);
+        assertEquals(databaseId, idCaptor.getValue());
     }
 
     @Test
