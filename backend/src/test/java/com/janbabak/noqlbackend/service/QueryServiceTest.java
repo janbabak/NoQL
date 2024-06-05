@@ -1,24 +1,32 @@
 package com.janbabak.noqlbackend.service;
 
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QueryServiceTest {
     @InjectMocks
     private QueryService queryService;
+
+    @Mock
+    private Settings settings;
 
     private final Database postgresDatabase;
 
@@ -26,13 +34,108 @@ class QueryServiceTest {
         postgresDatabase = new Database(
                 UUID.randomUUID(),
                 "Postgres db",
-                "host", 5432,
+                "localhost",
+                5432,
                 "database",
-                "user",
-                "password",
+                "jan",
+                "4530958340??",
                 DatabaseEngine.POSTGRES,
                 List.of());
     }
+
+    @Test
+    @DisplayName("Test create system query")
+    void testCreateSystemQueryTest() {
+        // given
+        UUID chatId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        // language=SQL
+        String dbStructure = """
+                CREATE SCHEMA IF NOT EXISTS public;
+                
+                CREATE TABLE IF NOT EXISTS public.user
+                (
+                    id integer,
+                    name character varying,
+                    surname character varying,
+                    age integer
+                );""";
+
+        // TODO: remove embedded credentials after it is fixed in QueryService
+        String expectedSystemQuery = """
+                You are an assistant that helps users visualise data. You have two functions. The first function
+                is translation of natural language queries into a database language. The second function is
+                visualising data. If the user wants to show or display or find or retrieve some data, translate
+                it into an SQL query for the postgres database. I will use this query for displaying the data in form of table. If the user wants to
+                plot, chart or visualize the data, create a Python script that will select the data and
+                visualise them in a chart. Save the generated chart into a file called ./plotService/plots/123e4567-e89b-12d3-a456-426614174000.png and don't show it.
+                To connect to the database use host='localhost',
+                port=5432, user='user', password='password', database='database'.
+                
+                Your response must be in JSON format
+                { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
+              
+                The database structure looks like this:CREATE SCHEMA IF NOT EXISTS public;
+                
+                CREATE TABLE IF NOT EXISTS public.user
+                (
+                    id integer,
+                    name character varying,
+                    surname character varying,
+                    age integer
+                );""";
+
+        // when
+        String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase, chatId);
+
+        // then
+        assertEquals(expectedSystemQuery, actualSystemQuery);
+    }
+
+    @ParameterizedTest
+    @MethodSource("setPaginationDataProvider")
+    @DisplayName("Test set pagination")
+    void testSetPagination(String query, Integer page, Integer pageSize, String expectedQuery) throws BadRequestException {
+        // when
+        when(settings.getMaxPageSize()).thenReturn(50);
+        if (pageSize == null) {
+            when(settings.getDefaultPageSize()).thenReturn(10);
+        }
+        String actualValue = queryService.setPaginationInSqlQuery(query, page, pageSize, postgresDatabase);
+
+        // then
+        assertEquals(expectedQuery, actualValue);
+    }
+
+    @SuppressWarnings("all")
+    static Object[][] setPaginationDataProvider() {
+        return new Object[][]{
+                {
+                        // language=SQL
+                        "SELECT name FROM cvut.student WHERE grade < 3;",
+                        8,
+                        15,
+                        // language=SQL
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 15 OFFSET 120;"
+                },
+                {
+                        // language=SQL
+                        "SELECT name FROM cvut.student WHERE grade < 3;",
+                        null,
+                        null,
+                        // language=SQL
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 10 OFFSET 0;"
+                },
+                {
+                        // language=SQL
+                        "SELECT name FROM cvut.student WHERE grade < 3;",
+                        4,
+                        null,
+                        // language=SQL
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 10 OFFSET 40;"
+                }
+        };
+    }
+
 
     @Disabled // TODO: fix
     @ParameterizedTest
@@ -239,8 +342,8 @@ class QueryServiceTest {
                 },
                 // incorrect response without markdown
                 {
-                    "It looks like you are using a Postgresql database.",
-                    "It looks like you are using a Postgresql database."
+                        "It looks like you are using a Postgresql database.",
+                        "It looks like you are using a Postgresql database."
                 }
         };
     }

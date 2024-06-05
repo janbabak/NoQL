@@ -40,7 +40,7 @@ public class Database {
 
     @NotBlank(groups = FirstValidationGroup.class)
     @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
-    private String host;
+    private String host; // TODO: create custom hostname validation rule
 
     @NotNull(groups = FirstValidationGroup.class)
     @Min(value = 1, groups = SecondValidationGroup.class)

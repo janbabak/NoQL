@@ -64,16 +64,17 @@ public class QueryService {
                         is translation of natural language queries into a database language. The second function is
                         visualising data. If the user wants to show or display or find or retrieve some data, translate
                         it into""")
-                .append(database.isSQL() ? "an SQL query" : "an query language query")
+                .append(database.isSQL() ? " an SQL query" : " an query language query")
                 .append(" for the ")
                 .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
                 .append("""
-                        \ndatabase. I will use this query for displaying the data in form of table. If the user wants to
+                         database. I will use this query for displaying the data in form of table. If the user wants to
                         plot, chart or visualize the data, create a Python script that will select the data and
                         visualise them in a chart. Save the generated chart into a file called""")
                 .append(" " + PlotService.plotsDirPath.get() + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
                 .append("""
-                         and don't show it. To connect to the database use host='localhost',
+                         and don't show it.
+                        To connect to the database use host='localhost',
                         port=5432, user='user', password='password', database='database'.
                                                 
                         Your response must be in JSON format
@@ -103,10 +104,10 @@ public class QueryService {
             page = 0;
         }
         if (pageSize == null) {
-            pageSize = settings.defaultPageSize;
+            pageSize = settings.getDefaultPageSize();
         }
-        if (pageSize > settings.maxPageSize) {
-            log.error("Page size={} greater than maximal allowed value={}", pageSize, settings.maxPageSize);
+        if (pageSize > settings.getMaxPageSize()) {
+            log.error("Page size={} greater than maximal allowed value={}", pageSize, settings.getMaxPageSize());
             throw new BadRequestException("Page size is greater than maximum allowed value.");
         }
 
