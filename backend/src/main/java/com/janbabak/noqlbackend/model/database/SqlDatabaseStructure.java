@@ -13,6 +13,7 @@ import java.util.Map;
  * Represents an SQL database object - contains information about schemas, tables, columns, primary keys
  */
 @Data
+@AllArgsConstructor
 public class SqlDatabaseStructure implements DatabaseStructure {
     public final static String DEFAULT_SCHEMA = "public";
     private Map<String, Schema> schemas;
@@ -87,6 +88,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
      * Represents database schema.
      */
     @Data
+    @AllArgsConstructor
     public static class Schema {
         private String name;
         private Map<String, Table> tables;
@@ -101,6 +103,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
      * Represents database table inside a schema.
      */
     @Data
+    @AllArgsConstructor
     public static class Table {
         private String name;
         private Map<String, Column> columns;
