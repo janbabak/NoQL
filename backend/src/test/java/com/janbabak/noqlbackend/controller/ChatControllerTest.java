@@ -3,7 +3,7 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
-import com.janbabak.noqlbackend.service.ChatService;
+import com.janbabak.noqlbackend.service.chat.ChatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

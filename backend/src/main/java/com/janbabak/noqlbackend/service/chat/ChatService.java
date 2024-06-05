@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.chat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
@@ -13,6 +13,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
