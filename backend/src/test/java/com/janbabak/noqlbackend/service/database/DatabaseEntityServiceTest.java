@@ -368,7 +368,9 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test get database create script")
-    void testGetDatabaseCreateScript() throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+    void testGetDatabaseCreateScript()
+            throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+
         // given
         UUID databaseId = UUID.randomUUID();
 
