@@ -269,7 +269,9 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test get database structure")
-    void testGetDatabaseStructure() throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+    void testGetDatabaseStructure()
+            throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+
         // given
         UUID databaseId = UUID.randomUUID();
         Database database = Database.builder()
