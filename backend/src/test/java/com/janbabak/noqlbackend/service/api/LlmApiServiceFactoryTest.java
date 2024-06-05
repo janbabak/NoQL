@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -10,6 +11,7 @@ class LlmApiServiceFactoryTest {
 
     @ParameterizedTest
     @MethodSource("testGetQueryApiServiceDataProvider")
+    @DisplayName("Test get query API service based on the model.")
     void testGetQueryApiService(LlmModel model, Class<?> expected) {
         // when
         QueryApi queryApiService = LlmApiServiceFactory.getQueryApiService(model);
