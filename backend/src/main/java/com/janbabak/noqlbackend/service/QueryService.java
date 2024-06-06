@@ -103,12 +103,18 @@ public class QueryService {
         if (page == null) {
             page = 0;
         }
+        if (page < 0) {
+            String error = "Page number cannot be negative, page=" + page;
+            log.error(error);
+            throw new BadRequestException(error);
+        }
         if (pageSize == null) {
             pageSize = settings.getDefaultPageSize();
         }
         if (pageSize > settings.getMaxPageSize()) {
-            log.error("Page size={} greater than maximal allowed value={}", pageSize, settings.getMaxPageSize());
-            throw new BadRequestException("Page size is greater than maximum allowed value.");
+            String error = "Page size is greater than maximum allowed value=" + settings.getMaxPageSize();
+            log.error(error);
+            throw new BadRequestException(error);
         }
 
         query = query.trim();
@@ -119,7 +125,8 @@ public class QueryService {
         };
     }
 
-    private String trimAndRemoveTrailingSemicolon(String query) {
+    // package private for testing
+    String trimAndRemoveTrailingSemicolon(String query) {
         query = query.trim();
 
         if (query.isEmpty()) {
@@ -128,7 +135,7 @@ public class QueryService {
 
         // removes trailing semicolon if it is present
         return query.charAt(query.length() - 1) == ';'
-                ? query.substring(0, query.length() - 1)
+                ? query.substring(0, query.length() - 1).trim()
                 : query;
     }
 
