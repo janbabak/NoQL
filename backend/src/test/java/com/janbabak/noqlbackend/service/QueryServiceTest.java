@@ -1,8 +1,15 @@
 package com.janbabak.noqlbackend.service;
 
+import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
+import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +31,12 @@ import static org.mockito.Mockito.when;
 class QueryServiceTest {
     @InjectMocks
     private QueryService queryService;
+
+    @Mock
+    private DatabaseRepository databaseRepository;
+
+    @Mock
+    private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Mock
     private Settings settings;
@@ -373,5 +387,52 @@ class QueryServiceTest {
                          }"""
                 }
         };
+    }
+
+    @Test
+    @DisplayName("Test execute query-language query database not found")
+    void testExecuteQueryLanguageQueryDatabaseNotFound() {
+        // given
+        String query = "SELECT * FROM public.user;";
+        UUID databaseId = UUID.randomUUID();
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class,
+                () -> queryService.executeQueryLanguageSelectQuery(databaseId, query, 0, 10));
+    }
+
+    @Test
+    @DisplayName("Test load chat result chat not found")
+    void testLoadChatResultTestNotFound()
+            throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+
+        // given
+        UUID chatId = UUID.randomUUID();
+        UUID databaseId = UUID.randomUUID();
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+        when(chatQueryWithResponseRepository.findLatestMessageFromChat(chatId)).thenReturn(Optional.empty());
+        QueryResponse actual = queryService.loadChatResult(databaseId, chatId, 0, 10);
+
+        // then
+        assertNull(actual);
+    }
+
+    @Test
+    @DisplayName("Test execute chat database not found")
+    void testExecuteChatDatabaseNotFound() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", LlmModel.GPT_4o);
+
+        // when
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, request, 10));
     }
 }
