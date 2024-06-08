@@ -14,6 +14,7 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -76,6 +77,12 @@ public class EntityServiceIntegrationTest {
             return "";
         }
     };
+
+    @AfterEach
+    void tearDown() {
+        databaseServiceFactoryMock.close(); // deregister the mock in current thread
+    }
+
 
     @Test
     @DisplayName("Test create, modify, and delete objects")
