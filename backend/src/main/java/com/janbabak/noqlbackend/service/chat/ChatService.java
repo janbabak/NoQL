@@ -17,6 +17,7 @@ import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -47,6 +48,7 @@ public class ChatService {
      * @return chat
      * @throws EntityNotFoundException chat of specified id not found
      */
+    @Transactional
     public ChatDto findById(UUID chatId) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
@@ -129,6 +131,7 @@ public class ChatService {
      * @return created message with response
      * @throws EntityNotFoundException chat of specified id not found.
      */
+    @Transactional
     public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
 
