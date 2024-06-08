@@ -64,16 +64,17 @@ public class QueryService {
                         is translation of natural language queries into a database language. The second function is
                         visualising data. If the user wants to show or display or find or retrieve some data, translate
                         it into""")
-                .append(database.isSQL() ? "an SQL query" : "an query language query")
+                .append(database.isSQL() ? " an SQL query" : " an query language query")
                 .append(" for the ")
                 .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
                 .append("""
-                        \ndatabase. I will use this query for displaying the data in form of table. If the user wants to
+                         database. I will use this query for displaying the data in form of table. If the user wants to
                         plot, chart or visualize the data, create a Python script that will select the data and
                         visualise them in a chart. Save the generated chart into a file called""")
                 .append(" " + PlotService.plotsDirPath.get() + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
                 .append("""
-                         and don't show it. To connect to the database use host='localhost',
+                         and don't show it.
+                        To connect to the database use host='localhost',
                         port=5432, user='user', password='password', database='database'.
                                                 
                         Your response must be in JSON format
@@ -102,12 +103,18 @@ public class QueryService {
         if (page == null) {
             page = 0;
         }
-        if (pageSize == null) {
-            pageSize = settings.defaultPageSize;
+        if (page < 0) {
+            String error = "Page number cannot be negative, page=" + page;
+            log.error(error);
+            throw new BadRequestException(error);
         }
-        if (pageSize > settings.maxPageSize) {
-            log.error("Page size={} greater than maximal allowed value={}", pageSize, settings.maxPageSize);
-            throw new BadRequestException("Page size is greater than maximum allowed value.");
+        if (pageSize == null) {
+            pageSize = settings.getDefaultPageSize();
+        }
+        if (pageSize > settings.getMaxPageSize()) {
+            String error = "Page size is greater than maximum allowed value=" + settings.getMaxPageSize();
+            log.error(error);
+            throw new BadRequestException(error);
         }
 
         query = query.trim();
@@ -118,7 +125,8 @@ public class QueryService {
         };
     }
 
-    private String trimAndRemoveTrailingSemicolon(String query) {
+    // package private for testing
+    String trimAndRemoveTrailingSemicolon(String query) {
         query = query.trim();
 
         if (query.isEmpty()) {
@@ -127,7 +135,7 @@ public class QueryService {
 
         // removes trailing semicolon if it is present
         return query.charAt(query.length() - 1) == ';'
-                ? query.substring(0, query.length() - 1)
+                ? query.substring(0, query.length() - 1).trim()
                 : query;
     }
 
@@ -190,133 +198,6 @@ public class QueryService {
         } catch (SQLException e) {
             throw new DatabaseExecutionException("Cannot parse total count value from query");
         }
-    }
-
-    /**
-     * Heuristic that decides whether a column is categorical or not. Categorical column is a column where
-     * number of unique values < number of all values / 3
-     *
-     * @param columnName      examined column
-     * @param selectQuery     select to retrieve entire result without pagination
-     * @param queryResultSet  result of executed selectQuery
-     * @param databaseService service that can handle the query
-     * @return true if categorical, otherwise false
-     */
-    private boolean isCategorical(
-            String columnName,
-            String selectQuery,
-            ResultSet queryResultSet,
-            BaseDatabaseService databaseService)
-            throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
-        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-
-        String selectNumberOfValues = "SELECT COUNT(DISTINCT %s) AS distinctCount, COUNT(%s) AS count FROM (%s);"
-                .formatted(columnName, columnName, selectQuery);
-
-        ResultSet resultSet = databaseService.executeQuery(selectNumberOfValues);
-
-        long totalCount;
-        long distinctCount;
-        try {
-            if (!resultSet.next()) {
-                return false; // shouldn't happen
-            }
-            distinctCount = resultSet.getLong(1);
-            totalCount = resultSet.getLong(2);
-        } catch (SQLException e) {
-            throw new DatabaseExecutionException("Cannot parse counts values from query");
-        }
-
-        return switch (getColumnDataType(columnName, queryResultSet)) {
-            // categorical data are usually numbers, strings or booleans
-            case BIT, TINYINT, SMALLINT, INTEGER, BIGINT, NUMERIC, CHAR, VARCHAR,
-                    LONGVARCHAR, BOOLEAN, NCHAR, NVARCHAR, LONGNVARCHAR -> distinctCount * 3 < totalCount;
-            default -> false;
-        };
-    }
-
-    /**
-     * Decides whether a column is numerical or not.
-     *
-     * @param columnName     examined column
-     * @param queryResultSet result of executed query
-     * @return true if is numerical, false otherwise
-     * @throws SQLException ... TODO
-     */
-    private boolean isNumerical(String columnName, ResultSet queryResultSet) throws SQLException {
-        return switch (getColumnDataType(columnName, queryResultSet)) {
-            case BIT, TINYINT, SMALLINT, INTEGER, BIGINT, NUMERIC -> true;
-            default -> false;
-        };
-    }
-
-    /**
-     * Decides whether a column is numerical or not.
-     *
-     * @param columnName     examined column
-     * @param queryResultSet result of executed query
-     * @return true if is timestamp, false otherwise
-     * @throws SQLException ... TODO
-     */
-    private boolean isTimestamp(String columnName, ResultSet queryResultSet) throws SQLException {
-        return switch (getColumnDataType(columnName, queryResultSet)) {
-            case DATE, TIME, TIMESTAMP -> true;
-            default -> false;
-        };
-    }
-
-    /**
-     * Get data type of column.
-     *
-     * @param columnName name of investigated column
-     * @param resultSet  result set that contains columName column
-     * @return int value that represents the datatype, 0 if column not found
-     * @throws SQLException ... TODO
-     */
-    private int getColumnDataType(String columnName, ResultSet resultSet) throws SQLException {
-        ResultSetMetaData rsmd = resultSet.getMetaData();
-
-        for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-            if (Objects.equals(columnName, rsmd.getColumnName(i))) {
-                return rsmd.getColumnType(i);
-            }
-        }
-        return 0;
-    }
-
-    // TODO: remove or use
-    /**
-     * Classify columns into column types
-     *
-     * @param resultSet               query result
-     * @param query                   generated query without pagination
-     * @param retrievedData           result object
-     * @param specificDatabaseService specific database service capable of executing query
-     * @return column types
-     * @throws SQLException                TODO
-     * @throws DatabaseConnectionException connection failure
-     * @throws DatabaseExecutionException  execution fail
-     */
-    @SuppressWarnings("unused")
-    private ColumnTypes getColumnTypes(
-            ResultSet resultSet,
-            String query,
-            RetrievedData retrievedData,
-            BaseDatabaseService specificDatabaseService
-    ) throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
-        ColumnTypes columnTypes = new ColumnTypes();
-        for (String columnName : retrievedData.getColumnNames()) {
-            if (isCategorical(columnName, query, resultSet, specificDatabaseService)) {
-                columnTypes.addCategorical(columnName);
-            }
-            if (isNumerical(columnName, resultSet)) {
-                columnTypes.addNumeric(columnName);
-            }
-            if (isTimestamp(columnName, resultSet)) {
-                columnTypes.addTimestamp(columnName);
-            }
-        }
-        return columnTypes;
     }
 
     /**
