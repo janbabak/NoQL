@@ -70,7 +70,7 @@ public class PostgresDAO extends DatabaseDAO {
 
     @Override
     public void testConnection() throws DatabaseConnectionException {
-        connect();
+        connect(true);
 
         if (connection == null) {
             throw new DatabaseConnectionException();
