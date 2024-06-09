@@ -60,11 +60,31 @@ public abstract class DatabaseDAO {
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
     public ResultSet query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
-        connect();
+        connect(true);
 
         try {
-            log.info("Execute query={}.", query);
+            log.info("Execute read-only query={}.", query);
             return connection.createStatement().executeQuery(query);
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException(e.getMessage());
+        } finally {
+            disconnect();
+        }
+    }
+
+    /**
+     * Update the database. Not read-only connection.
+     *
+     * @param query query string
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException query execution failed (syntax error)
+     */
+    @SuppressWarnings("SameParameterValue")
+    void updateDatabase(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+        try {
+            connect(false);
+            log.info("Execute query={}.", query);
+            connection.createStatement().executeUpdate(query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         } finally {
@@ -90,13 +110,15 @@ public abstract class DatabaseDAO {
     /**
      * Connect to the database.
      *
+     * @param readOnly if true, the connection is read-only
      * @throws DatabaseConnectionException cannot establish connection with the database
      */
-    protected void connect() throws DatabaseConnectionException {
+    protected void connect(Boolean readOnly) throws DatabaseConnectionException {
         try {
             connection = DriverManager.getConnection(
                     createConnectionUrl(), databaseMetadata.getUserName(), databaseMetadata.getPassword());
-            connection.setReadOnly(true);
+            connection.setReadOnly(readOnly);
+            connection.setAutoCommit(!readOnly);
         } catch (SQLException e) {
             log.error("Error while connecting to database - message={}.", e.getMessage());
             throw new DatabaseConnectionException(e.getMessage());
