@@ -57,8 +57,9 @@ public class DockerService {
      * If container with the same name already exists, it will be removed.
      *
      * @param request configuration
+     * @return id of the created container
      */
-    public void runContainer(RunContainerRequest request) {
+    public String runContainer(RunContainerRequest request) {
         removeContainer(request.containerName);
         pullImage(request.imageName);
 
@@ -81,7 +82,7 @@ public class DockerService {
 
         String containerId = executeCommand(commandBuilder.toString()).trim();
         log.info("Container ID: {}", containerId);
-        System.out.println("Container ID: " + containerId);
+        return containerId;
     }
 
     /**
@@ -140,7 +141,6 @@ public class DockerService {
             throw new RuntimeException("Command failed with exit code: " + process.exitValue());
         }
         log.error("Command executed: '{}'", command);
-        System.out.println("Command executed: " + command);
         return output.toString();
     }
 
