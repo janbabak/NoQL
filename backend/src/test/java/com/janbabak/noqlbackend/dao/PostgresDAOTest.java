@@ -2,9 +2,7 @@ package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.model.entity.Database;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -16,50 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PostgresDAOTest {
-
-    @Autowired
-    private LocalPostgresService localPostgresService;
-
-    private PostgresDAO postgresDAO;
-
-    private final Database postgresDatabase = Database.builder()
-            .name("Local testing postgres")
-            .host(LocalPostgresService.POSTGRES_HOST)
-            .database(LocalPostgresService.POSTGRES_DB)
-            .userName(LocalPostgresService.POSTGRES_USER)
-            .password(LocalPostgresService.POSTGRES_PASSWORD)
-            .port(LocalPostgresService.POSTGRES_PORT)
-            .build();
-
-    @BeforeAll
-    void setUp() throws InterruptedException, DatabaseConnectionException, DatabaseExecutionException {
-        localPostgresService.startPostgres();
-        postgresDAO = new PostgresDAO(postgresDatabase);
-        // language=SQL
-        postgresDAO.updateDatabase("""
-                -- create table user
-                  CREATE TABLE IF NOT EXISTS "user"
-                  (
-                      id         SERIAL PRIMARY KEY,
-                      name       VARCHAR(100),
-                      age        INTEGER,
-                      sex        CHAR(10),
-                      email      VARCHAR(100),
-                      created_at TIMESTAMP DEFAULT NOW()
-                  );
-                    INSERT INTO "user" (name, age, sex, email)
-                    VALUES ('John Doe', 25, 'M', 'john.doe@example.com'),
-                           ('Jane Smith', 30, 'F', 'jane.smith@example.com'),
-                           ('Jane Doe', 28, 'F', 'jane.doe@example.com');"""
-        );
-    }
-
-    @AfterAll
-    void tearDown() {
-        localPostgresService.stopPostgres();
-    }
+class PostgresDAOTest extends PostgresTest {
 
     @Test
     @DisplayName("Test create connection URL")
@@ -109,5 +64,24 @@ class PostgresDAOTest {
         ResultSet resultSet = postgresDAO.query("SELECT COUNT(*) FROM public.user;");
         resultSet.next();
         return resultSet.getInt("count");
+    }
+
+    @Override
+    protected String getCreateScript() {
+        // language=SQL
+        return """
+                CREATE TABLE IF NOT EXISTS "user"
+                (
+                    id         SERIAL PRIMARY KEY,
+                    name       VARCHAR(100),
+                    age        INTEGER,
+                    sex        CHAR(10),
+                    email      VARCHAR(100),
+                    created_at TIMESTAMP DEFAULT NOW()
+                );
+                  INSERT INTO "user" (name, age, sex, email)
+                  VALUES ('John Doe', 25, 'M', 'john.doe@example.com'),
+                         ('Jane Smith', 30, 'F', 'jane.smith@example.com'),
+                         ('Jane Doe', 28, 'F', 'jane.doe@example.com');""";
     }
 }
