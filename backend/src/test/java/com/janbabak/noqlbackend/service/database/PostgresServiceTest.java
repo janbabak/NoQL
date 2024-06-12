@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.PostgresTest;
+import com.janbabak.noqlbackend.dao.PostgresTest2;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
@@ -25,9 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresServiceTest extends PostgresTest {
+class PostgresServiceTest extends PostgresTest2 {
 
-    private final PostgresService postgresService = new PostgresService(postgresDatabase);
+    @SuppressWarnings("FieldCanBeLocal")
+    private PostgresService postgresService;
 
     private SqlDatabaseStructure databaseStructure;
 
@@ -48,8 +50,9 @@ class PostgresServiceTest extends PostgresTest {
 
     @BeforeAll
     @Override
-    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException, InterruptedException {
+    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
+        postgresService = new PostgresService(postgresDatabase);
         databaseStructure = postgresService.retrieveSchema();
     }
 

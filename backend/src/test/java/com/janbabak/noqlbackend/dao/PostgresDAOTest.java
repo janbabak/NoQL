@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresDAOTest extends PostgresTest {
+class PostgresDAOTest extends PostgresTest2 {
 
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:postgresql://localhost:5433/test-database";
+        String expected = "jdbc:postgresql://localhost:" + getDatabasePort() + "/test-database";
         assertEquals(expected, postgresDAO.createConnectionUrl());
     }
 
