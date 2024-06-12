@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresDAOTest extends PostgresTest2 {
+class PostgresDAOTest extends PostgresTest {
 
     @Test
     @DisplayName("Test create connection URL")

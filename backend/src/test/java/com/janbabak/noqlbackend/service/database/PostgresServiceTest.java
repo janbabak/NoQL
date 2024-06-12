@@ -1,7 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.PostgresTest;
-import com.janbabak.noqlbackend.dao.PostgresTest2;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
@@ -26,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresServiceTest extends PostgresTest2 {
+class PostgresServiceTest extends PostgresTest {
 
     @SuppressWarnings("FieldCanBeLocal")
     private PostgresService postgresService;
