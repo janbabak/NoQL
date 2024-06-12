@@ -27,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 class PostgresServiceTest extends PostgresTest {
 
-    private final PostgresService postgresService = new PostgresService(postgresDatabase);
+    @SuppressWarnings("FieldCanBeLocal")
+    private PostgresService postgresService;
 
     private SqlDatabaseStructure databaseStructure;
 
@@ -48,8 +49,9 @@ class PostgresServiceTest extends PostgresTest {
 
     @BeforeAll
     @Override
-    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException, InterruptedException {
+    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
+        postgresService = new PostgresService(postgresDatabase);
         databaseStructure = postgresService.retrieveSchema();
     }
 

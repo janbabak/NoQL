@@ -19,7 +19,7 @@ class PostgresDAOTest extends PostgresTest {
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:postgresql://localhost:5433/test-database";
+        String expected = "jdbc:postgresql://localhost:" + getDatabasePort() + "/test-database";
         assertEquals(expected, postgresDAO.createConnectionUrl());
     }
 
