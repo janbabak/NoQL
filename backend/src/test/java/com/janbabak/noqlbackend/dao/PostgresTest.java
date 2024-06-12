@@ -23,7 +23,7 @@ abstract public class PostgresTest {
     static final String DATABASE_NAME = "test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
-    static final String CONTAINER_VERSION = "16-alpine";
+    static final String CONTAINER_VERSION = "postgres:16-alpine";
 
     @Container
     @SuppressWarnings("resource")
