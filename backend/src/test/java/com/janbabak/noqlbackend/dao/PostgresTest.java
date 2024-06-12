@@ -23,11 +23,11 @@ abstract public class PostgresTest {
     static final String DATABASE_NAME = "test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
-    static final String CONTAINER_VERSION = "postgres:16-alpine";
+    static final String CONTAINER_NAME = "postgres:16-alpine";
 
     @Container
     @SuppressWarnings("resource")
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(CONTAINER_VERSION)
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(CONTAINER_NAME)
             .withDatabaseName(DATABASE_NAME)
             .withUsername(DATABASE_USERNAME)
             .withPassword(DATABASE_PASSWORD);
