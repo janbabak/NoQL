@@ -15,9 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,6 +43,11 @@ class PostgresServiceTest extends PostgresTest {
     private final String DATE_DATA_TYPE = "date";
     @SuppressWarnings("FieldCanBeLocal")
     private final String TIMESTAMP_DATA_TYPE = "timestamp without time zone";
+
+    @Override
+    protected String getCreateScript() {
+        return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresAllTables.sql");
+    }
 
     @BeforeAll
     @Override
@@ -303,17 +305,6 @@ class PostgresServiceTest extends PostgresTest {
         for (String primaryKey : primaryKeys) {
             assertTrue(table.getPrimaryKeys().contains(primaryKey));
         }
-    }
-
-    @Override
-    protected String getCreateScript() {
-        String initScriptPath = "./src/test/java/com/janbabak/noqlbackend/dao/postgresInitScript.sql";
-        try {
-            return new String(Files.readAllBytes(Paths.get(initScriptPath)));
-        } catch (IOException e) {
-            System.out.println("Cannot read init script: " + e.getMessage());
-        }
-        return null;
     }
 
 }

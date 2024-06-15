@@ -16,6 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class PostgresDAOTest extends PostgresTest {
 
+    @Override
+    protected String getCreateScript() {
+        return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+    }
+
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
@@ -41,7 +46,7 @@ class PostgresDAOTest extends PostgresTest {
     @Test
     @DisplayName("Test connection is readOnly")
     void testConnectionIsReadyOnly() throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
-        assertEquals(3, getUsersCount());
+        assertEquals(22, getUsersCount());
 
         // try to delete users from read-only connection
         try {
@@ -51,7 +56,7 @@ class PostgresDAOTest extends PostgresTest {
             // do nothing
         }
 
-        assertEquals(3, getUsersCount());
+        assertEquals(22, getUsersCount());
     }
 
     /**
@@ -66,22 +71,4 @@ class PostgresDAOTest extends PostgresTest {
         return resultSet.getInt("count");
     }
 
-    @Override
-    protected String getCreateScript() {
-        // language=SQL
-        return """
-                CREATE TABLE IF NOT EXISTS "user"
-                (
-                    id         SERIAL PRIMARY KEY,
-                    name       VARCHAR(100),
-                    age        INTEGER,
-                    sex        CHAR(10),
-                    email      VARCHAR(100),
-                    created_at TIMESTAMP DEFAULT NOW()
-                );
-                  INSERT INTO "user" (name, age, sex, email)
-                  VALUES ('John Doe', 25, 'M', 'john.doe@example.com'),
-                         ('Jane Smith', 30, 'F', 'jane.smith@example.com'),
-                         ('Jane Doe', 28, 'F', 'jane.doe@example.com');""";
-    }
 }

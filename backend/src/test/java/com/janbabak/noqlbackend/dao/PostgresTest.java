@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
+import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +10,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 /**
  * Abstract class for testing Postgres database. It uses Testcontainers to run Postgres in Docker container.
@@ -50,6 +56,8 @@ abstract public class PostgresTest {
                 .userName(postgres.getUsername())
                 .password(postgres.getPassword())
                 .port(postgres.getFirstMappedPort())
+                .chats(new ArrayList<>())
+                .engine(DatabaseEngine.POSTGRES)
                 .build();
 
         postgresDAO = new PostgresDAO(postgresDatabase);
@@ -62,6 +70,21 @@ abstract public class PostgresTest {
 
     protected Integer getDatabasePort() {
         return postgres.getFirstMappedPort();
+    }
+
+    /**
+     * Load script from file.
+     *
+     * @param path path to the file
+     * @return content of the file
+     */
+    protected String loadScriptFromFile(String path) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(path)));
+        } catch (IOException e) {
+            System.out.println("Cannot read init script: " + e.getMessage());
+        }
+        return null;
     }
 
     protected abstract String getCreateScript();
