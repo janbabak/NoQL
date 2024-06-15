@@ -22,6 +22,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -109,123 +112,143 @@ public class QueryServiceIntegrationTest extends PostgresTest {
         assertEquals(expectedResponse, queryResponse);
     }
 
-    @Test
-    @DisplayName("Test load chat results with table")
-    void testLoadChatResultsWithTable() throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+    /**
+     * @param page               page number
+     * @param pageSize           number of items per page
+     * @param expectedTotalCount total count of rows
+     * @param plotResult         if the result contains plot
+     * @param messageRequests    list of messages to save into database
+     * @param expectedResponse   expected response
+     */
+    @ParameterizedTest
+    @MethodSource("testLoadChatDataProvider")
+    @DisplayName("Test load chat")
+    void testLoadChatResults(
+            Integer page,
+            Integer pageSize,
+            Long expectedTotalCount,
+            Boolean plotResult,
+            List<CreateChatQueryWithResponseRequest> messageRequests,
+            QueryResponse expectedResponse
+    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+
         // given
         UUID databaseId = postgresDatabase.getId();
-        Integer page = 1;
-        Integer pageSize = 10;
         ChatDto chat = chatService.create(databaseId);
-        CreateChatQueryWithResponseRequest messageRequest1 = new CreateChatQueryWithResponseRequest(
-                "find emails of all users",
-                // language=JSON
-                """
-                        {
-                            "databaseQuery": "SELECT email FROM public.user;",
-                            "generatePlot": false,
-                            "pythonCode": ""
-                        }""");
-        CreateChatQueryWithResponseRequest messageRequest2 = new CreateChatQueryWithResponseRequest(
-                "sort them in descending order",
-                // language=JSON
-                """
-                        {
-                            "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
-                            "generatePlot": false,
-                            "pythonCode": ""
-                        }""");
-
-        chatService.addMessageToChat(chat.getId(), messageRequest1);
-        ChatQueryWithResponse message2 = chatService.addMessageToChat(chat.getId(), messageRequest2);
-
-        QueryResponse expectedResponse = new QueryResponse(
-                new QueryResponse.RetrievedData(
-                        List.of("email"),
-                        List.of(List.of("jane.doe@example.com"),
-                                List.of("james.wilson@example.com"),
-                                List.of("grace.miller@example.com"),
-                                List.of("emma.scott@example.com"),
-                                List.of("emily.johnson@example.com"),
-                                List.of("ella.thomas@example.com"),
-                                List.of("david.taylor@example.com"),
-                                List.of("daniel.miller@example.com"),
-                                List.of("christopher.johnson@example.com"),
-                                List.of("bob.smith@example.com"))),
-                22L,
-                new ChatQueryWithResponseDto(
-                        message2.getId(),
-                        "sort them in descending order",
-                        new ChatQueryWithResponseDto.LLMResult(
-                                // language=SQL
-                                "SELECT email FROM public.user ORDER BY email DESC;",
-                                null),
-                        message2.getTimestamp()),
-                null);
-
+        List<ChatQueryWithResponse> messages = new ArrayList<>();
+        for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
+            messages.add(chatService.addMessageToChat(chat.getId(), messageRequest));
+        }
 
         // when
         QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.getId(), page, pageSize);
 
+        // message id and timestamp are generated, so we need to set them manually
+        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
+        expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(lastMessage.getTimestamp());
+        if (plotResult) {
+            expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
+                    "/static/images/" + chat.getId() + ".png");
+        }
+
         // then
-        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
-        assertEquals(22, queryResponse.getTotalCount());
+        assertTrue(pageSize >= queryResponse.getData().getRows().size());
+        assertEquals(expectedTotalCount, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
         chatService.deleteChatById(chat.getId());
     }
 
-    @Test
-    @DisplayName("Test load chat results with plot")
-    void testLoadChatResultsWithPlot() throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
-        // given
-        UUID databaseId = postgresDatabase.getId();
-        Integer page = 0;
-        Integer pageSize = 2;
-        ChatDto chat = chatService.create(databaseId);
-        CreateChatQueryWithResponseRequest messageRequest1 = new CreateChatQueryWithResponseRequest(
-                "find emails of all users",
-                // language=JSON
-                """
-                        {
-                            "databaseQuery": "SELECT email FROM public.user;",
-                            "generatePlot": false,
-                            "pythonCode": ""
-                        }""");
-        CreateChatQueryWithResponseRequest messageRequest2 = new CreateChatQueryWithResponseRequest(
-                "plot sex of users older than 24",
-                FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"));
+    /**
+     * @return page, page size, expected total count, plot result, messages, expected response
+     */
+    Object[][] testLoadChatDataProvider() {
+        return new Object[][]{
+                {
+                        0, // page
+                        10, // page size
+                        2L, // expected total count
+                        true, // plot result
+                        List.of( // messages
+                                new CreateChatQueryWithResponseRequest(
+                                        "find emails of all users",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM public.user;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }"""),
+                                new CreateChatQueryWithResponseRequest(
+                                        "plot sex of users older than 24",
+                                        FileUtils.getFileContent(
+                                                "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
+                        new QueryResponse( // expected response
+                                new QueryResponse.RetrievedData(
+                                        List.of("sex", "count"),
+                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                                2L,
+                                new ChatQueryWithResponseDto(
+                                        null,
+                                        "plot sex of users older than 24",
+                                        new ChatQueryWithResponseDto.LLMResult(
+                                                // language=SQL
+                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                                null),
+                                        null),
+                                null)
+                },
+                {
+                        1, // page
+                        10, // page size
+                        22L, // expected total count
+                        false, // plot result
+                        List.of(new CreateChatQueryWithResponseRequest( // messages
+                                        "find emails of all users",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM public.user;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }"""),
+                                new CreateChatQueryWithResponseRequest(
+                                        "sort them in descending order",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }""")),
+                        new QueryResponse( // expected response
+                                new QueryResponse.RetrievedData(
+                                        List.of("email"),
+                                        List.of(List.of("jane.doe@example.com"),
+                                                List.of("james.wilson@example.com"),
+                                                List.of("grace.miller@example.com"),
+                                                List.of("emma.scott@example.com"),
+                                                List.of("emily.johnson@example.com"),
+                                                List.of("ella.thomas@example.com"),
+                                                List.of("david.taylor@example.com"),
+                                                List.of("daniel.miller@example.com"),
+                                                List.of("christopher.johnson@example.com"),
+                                                List.of("bob.smith@example.com"))),
+                                22L,
+                                new ChatQueryWithResponseDto(
+                                        null,
+                                        "sort them in descending order",
+                                        new ChatQueryWithResponseDto.LLMResult(
+                                                // language=SQL
+                                                "SELECT email FROM public.user ORDER BY email DESC;",
+                                                null),
+                                        null),
+                                null)
 
-        chatService.addMessageToChat(chat.getId(), messageRequest1);
-        ChatQueryWithResponse message2 = chatService.addMessageToChat(chat.getId(), messageRequest2);
-
-        QueryResponse expectedResponse = new QueryResponse(
-                new QueryResponse.RetrievedData(
-                        List.of("sex", "count"),
-                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
-                2L,
-                new ChatQueryWithResponseDto(
-                        message2.getId(),
-                        "plot sex of users older than 24",
-                        new ChatQueryWithResponseDto.LLMResult(
-                                // language=SQL
-                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
-                                "/static/images/" + chat.getId() + ".png"),
-                        message2.getTimestamp()),
-                null);
-
-
-        // when
-        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.getId(), page, pageSize);
-
-        // then
-        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
-        assertEquals(2, queryResponse.getTotalCount());
-        assertEquals(expectedResponse, queryResponse);
-
-        // cleanup
-        chatService.deleteChatById(chat.getId());
+                }
+        };
     }
 
     @Test
