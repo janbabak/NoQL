@@ -4,25 +4,37 @@ import com.janbabak.noqlbackend.dao.PostgresTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
+import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import org.apache.coyote.BadRequestException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -37,6 +49,10 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     @Autowired
     private ChatService chatService;
 
+    MockedStatic<LlmApiServiceFactory> apiServiceMock = Mockito.mockStatic(LlmApiServiceFactory.class);
+
+    QueryApi queryApi = Mockito.mock(QueryApi.class);
+
     @Override
     protected String getCreateScript() {
         return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresUsers.sql");
@@ -46,7 +62,17 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
+
         databaseService.create(postgresDatabase);
+
+        apiServiceMock
+                .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
+                .thenReturn(queryApi);
+    }
+
+    @AfterAll
+    void tearDown() {
+        apiServiceMock.close();
     }
 
     @Test
@@ -144,6 +170,77 @@ public class QueryServiceIntegrationTest extends PostgresTest {
         assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
         assertEquals(22, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
+
+        // cleanup
+        chatService.deleteChatById(chat.getId());
     }
 
+    @Test
+    @DisplayName("Test execute chat")
+    void testExecuteChat() throws EntityNotFoundException, LLMException, BadRequestException, DatabaseConnectionException, DatabaseExecutionException {
+        // given
+        UUID databaseId = postgresDatabase.getId();
+        Integer pageSize = 8;
+        ChatDto chat = chatService.create(databaseId);
+        CreateChatQueryWithResponseRequest messageRequest1 = new CreateChatQueryWithResponseRequest(
+                "find emails of all users",
+                // language=JSON
+                """
+                        {
+                            "databaseQuery": "SELECT email FROM public.user;",
+                            "generatePlot": false,
+                            "pythonCode": ""
+                        }""");
+
+        QueryRequest request = new QueryRequest(chat.getId(), "sort them in descending order", LlmModel.GPT_4o);
+
+        chatService.addMessageToChat(chat.getId(), messageRequest1);
+
+        // language=JSON
+        String llmResponse = """
+                {
+                    "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
+                    "generatePlot": false
+                }""";
+
+        QueryResponse expectedResponse = new QueryResponse(
+                new QueryResponse.RetrievedData(
+                        List.of("email"),
+                        List.of(List.of("william.davis@example.com"),
+                                List.of("sophia.lopez@example.com"),
+                                List.of("sarah.brown@example.com"),
+                                List.of("olivia.garcia@example.com"),
+                                List.of("nicholas.brown@example.com"),
+                                List.of("michael.davis@example.com"),
+                                List.of("matthew.hernandez@example.com"),
+                                List.of("john.doe@example.com"))),
+                22L,
+                new ChatQueryWithResponseDto(
+                        null,
+                        "sort them in descending order",
+                        new ChatQueryWithResponseDto.LLMResult(
+                                // language=SQL
+                                "SELECT email FROM public.user ORDER BY email DESC;",
+                                null),
+                        null),
+                null);
+
+        // when
+        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+        QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
+
+        // message id and timestamp are generated, so we need to set them manually
+        expectedResponse.getChatQueryWithResponse().setId(
+                queryResponse.getChatQueryWithResponse().getId());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(
+                queryResponse.getChatQueryWithResponse().getTimestamp());
+
+        // then
+        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
+        assertEquals(22, queryResponse.getTotalCount());
+        assertEquals(expectedResponse, queryResponse);
+
+        // cleanup
+        chatService.deleteChatById(chat.getId());
+    }
 }
