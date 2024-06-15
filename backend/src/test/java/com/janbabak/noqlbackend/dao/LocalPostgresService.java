@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend.dao;
 
-import com.janbabak.noqlbackend.service.DockerService;
-import com.janbabak.noqlbackend.service.DockerService.RunContainerRequest;
+import com.janbabak.noqlbackend.service.containers.DockerService;
+import com.janbabak.noqlbackend.service.containers.DockerService.RunContainerRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.stereotype.Service;
@@ -38,6 +38,8 @@ public class LocalPostgresService {
 
     /**
      * Starts a local Postgres container with the specified configuration. Wait 5s for the container to start.
+     *
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     public void startPostgres() throws InterruptedException {
         startPostgres(5000);
@@ -47,12 +49,14 @@ public class LocalPostgresService {
      * Starts a local Postgres container with the specified configuration
      *
      * @param waitMillis time to wait for the container to start
+     * @throws InterruptedException if the thread is interrupted while waiting
      */
     public void startPostgres(Integer waitMillis) throws InterruptedException {
         RunContainerRequest request = DockerService.RunContainerRequest.builder()
                 .imageName(POSTGRES_IMAGE_NAME)
                 .containerName(POSTGRES_CONTAINER_NAME)
                 .portMappings(List.of(new DockerService.PortMapping(POSTGRES_PORT, 5432)))
+                .detachedMode(true)
                 .environmentVariables(List.of(
                         new DockerService.EnvironmentVariableMapping("POSTGRES_USER", POSTGRES_USER),
                         new DockerService.EnvironmentVariableMapping("POSTGRES_PASSWORD", POSTGRES_PASSWORD),

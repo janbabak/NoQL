@@ -47,34 +47,22 @@ public class PlotService {
         // create working and plot directories
         workingDirectory = WORKING_DIRECTORY_PATH.toFile();
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
-            throw new RuntimeException("Cannot create working directory for plot service");
+            logAndThrowRuntimeError("Cannot create working directory in plot service");
         }
         plotsDirectory = plotsDirPath.get().toFile();
         if (!plotsDirectory.exists() && !plotsDirectory.mkdirs()) {
-            throw new RuntimeException("Cannot create plot directory in plot service");
+            logAndThrowRuntimeError("Cannot create plot directory in plot service");
         }
 
         // create script
         script = scriptPath.get().toFile();
         try {
             if (!script.exists() && !script.createNewFile()) {
-                throw new RuntimeException("Cannot create plot script");
+                logAndThrowRuntimeError("Cannot create plot script");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot create plot script: " + e.getMessage());
+            logAndThrowRuntimeError("Cannot create plot script: " + e.getMessage());
         }
-    }
-
-    /**
-     * Override content of script
-     *
-     * @param scriptContent script content (code)
-     * @throws IOException cannot write into the file
-     */
-    private void createPlotScript(String scriptContent) throws IOException {
-        FileWriter writer = new FileWriter(script, false);
-        writer.write(scriptContent);
-        writer.close();
     }
 
     /**
@@ -125,5 +113,22 @@ public class PlotService {
         } catch (IOException e) {
             log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
         }
+    }
+
+    /**
+     * Override content of script
+     *
+     * @param scriptContent script content (code)
+     * @throws IOException cannot write into the file
+     */
+    private void createPlotScript(String scriptContent) throws IOException {
+        FileWriter writer = new FileWriter(script, false);
+        writer.write(scriptContent);
+        writer.close();
+    }
+
+    private void logAndThrowRuntimeError(String errorMessage) {
+        log.error(errorMessage);
+        throw new RuntimeException(errorMessage);
     }
 }

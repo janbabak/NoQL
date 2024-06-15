@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.containers;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -35,22 +35,30 @@ public class DockerService {
             @NotNull String imageName,
             String containerName,
             List<PortMapping> portMappings,
-            List<EnvironmentVariableMapping> environmentVariables
+            List<VolumeMapping> volumeMappings,
+            List<EnvironmentVariableMapping> environmentVariables,
+            Boolean detachedMode,
+            Boolean interactiveMode
     ) {
     }
 
     /**
-     * Represents a port mapping between the host and the container
+     * Represents a port mapping between the host and the container.
      */
     public record PortMapping(int hostPort, int containerPort) {
     }
 
     /**
-     * Represents an environment variable mapping
+     * Represents a volume mapping between the host and the container.
+     */
+    public record VolumeMapping(String hostPath, String containerPath) {
+    }
+
+    /**
+     * Represents an environment variable mapping.
      */
     public record EnvironmentVariableMapping(String key, String value) {
     }
-
 
     /**
      * Runs a container with the specified configuration in detached mode.
@@ -63,7 +71,13 @@ public class DockerService {
         removeContainer(request.containerName);
         pullImage(request.imageName);
 
-        StringBuilder commandBuilder = new StringBuilder("docker run -d");
+        StringBuilder commandBuilder = new StringBuilder("docker run");
+        if (request.detachedMode) {
+            commandBuilder.append(" -d");
+        }
+        if (request.interactiveMode) {
+            commandBuilder.append(" -it");
+        }
         if (request.containerName != null) {
             commandBuilder.append(" --name ").append(request.containerName);
         }
@@ -71,6 +85,12 @@ public class DockerService {
             for (PortMapping portMapping : request.portMappings) {
                 commandBuilder
                         .append(" -p ").append(portMapping.hostPort).append(":").append(portMapping.containerPort);
+            }
+        }
+        if (request.volumeMappings != null) {
+            for (VolumeMapping volumeMapping : request.volumeMappings) {
+                commandBuilder
+                        .append(" -v ").append(volumeMapping.hostPath).append(":").append(volumeMapping.containerPath);
             }
         }
         if (request.environmentVariables != null) {
@@ -102,7 +122,13 @@ public class DockerService {
      */
     public void pullImage(String imageName) {
         String command = "docker pull " + imageName;
-        executeCommand(command);
+        System.out.println(command);
+        // TODO: remove - plot-service image is not uploaded so far
+        try {
+            executeCommand(command);
+        } catch (Exception e) {
+            log.error("Image pull failed: '{}'", imageName);
+        }
     }
 
     /**
