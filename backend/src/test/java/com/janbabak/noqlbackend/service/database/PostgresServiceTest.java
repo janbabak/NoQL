@@ -8,6 +8,7 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Schema;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
+import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class PostgresServiceTest extends PostgresTest {
 
     @Override
     protected String getCreateScript() {
-        return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresAllTables.sql");
+        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql");
     }
 
     @BeforeAll

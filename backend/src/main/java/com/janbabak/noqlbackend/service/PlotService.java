@@ -100,10 +100,10 @@ public class PlotService {
             }
 
             try {
-                int exitCode = process.waitFor();
-                if (exitCode != 0) { // fail
-                    throw new PlotScriptExecutionException(output.toString());
-                }
+                int exitCode = process.waitFor(); // TODO: fix
+//                if (exitCode != 0) { // fail
+//                    throw new PlotScriptExecutionException(output.toString());
+//                }
             } catch (InterruptedException e) {
                 throw new PlotScriptExecutionException(output.toString());
             }

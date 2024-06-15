@@ -16,6 +16,7 @@ import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatService;
+import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,7 +56,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
     @Override
     protected String getCreateScript() {
-        return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
     }
 
     @BeforeAll
@@ -177,7 +178,8 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
     @Test
     @DisplayName("Test execute chat")
-    void testExecuteChat() throws EntityNotFoundException, LLMException, BadRequestException, DatabaseConnectionException, DatabaseExecutionException {
+    void testExecuteChat() throws EntityNotFoundException, LLMException, BadRequestException,
+            DatabaseConnectionException, DatabaseExecutionException {
         // given
         UUID databaseId = postgresDatabase.getId();
         Integer pageSize = 8;
@@ -238,6 +240,54 @@ public class QueryServiceIntegrationTest extends PostgresTest {
         // then
         assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
         assertEquals(22, queryResponse.getTotalCount());
+        assertEquals(expectedResponse, queryResponse);
+
+        // cleanup
+        chatService.deleteChatById(chat.getId());
+    }
+
+    @Test
+    @DisplayName("Test execute chat with plot")
+    void testExecuteChatWithPlot() throws EntityNotFoundException, DatabaseConnectionException,
+            DatabaseExecutionException, LLMException, BadRequestException {
+        // given
+        UUID databaseId = postgresDatabase.getId();
+        Integer pageSize = 8;
+        ChatDto chat = chatService.create(databaseId);
+
+        QueryRequest request = new QueryRequest(chat.getId(), "plot sex of users older than 24", LlmModel.GPT_4o);
+
+        String llmResponse = FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json");
+
+        QueryResponse expectedResponse = new QueryResponse(
+                new QueryResponse.RetrievedData(
+                        List.of("sex", "count"),
+                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                2L,
+                new ChatQueryWithResponseDto(
+                        null,
+                        "plot sex of users older than 24",
+                        new ChatQueryWithResponseDto.LLMResult(
+                                // language=SQL
+                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                "/static/images/" + chat.getId() + ".png"),
+                        null),
+                null);
+
+        // when
+        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+        // TODO: generates plot - consider mocking it
+        QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
+
+        // message id and timestamp are generated, so we need to set them manually
+        expectedResponse.getChatQueryWithResponse().setId(
+                queryResponse.getChatQueryWithResponse().getId());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(
+                queryResponse.getChatQueryWithResponse().getTimestamp());
+
+        // then
+        assertEquals(2, queryResponse.getData().getRows().size());
+        assertEquals(2, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup

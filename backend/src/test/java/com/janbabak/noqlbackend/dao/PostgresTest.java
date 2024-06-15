@@ -11,9 +11,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -70,21 +67,6 @@ abstract public class PostgresTest {
 
     protected Integer getDatabasePort() {
         return postgres.getFirstMappedPort();
-    }
-
-    /**
-     * Load script from file.
-     *
-     * @param path path to the file
-     * @return content of the file
-     */
-    protected String loadScriptFromFile(String path) {
-        try {
-            return new String(Files.readAllBytes(Paths.get(path)));
-        } catch (IOException e) {
-            System.out.println("Cannot read init script: " + e.getMessage());
-        }
-        return null;
     }
 
     protected abstract String getCreateScript();

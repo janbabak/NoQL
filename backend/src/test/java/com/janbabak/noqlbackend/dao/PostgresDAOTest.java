@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
+import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,7 +19,7 @@ class PostgresDAOTest extends PostgresTest {
 
     @Override
     protected String getCreateScript() {
-        return loadScriptFromFile("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
     }
 
     @Test
