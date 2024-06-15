@@ -110,8 +110,8 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     }
 
     @Test
-    @DisplayName("Test load chat results")
-    void testLoadChatResults() throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+    @DisplayName("Test load chat results with table")
+    void testLoadChatResultsWithTable() throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
         // given
         UUID databaseId = postgresDatabase.getId();
         Integer page = 1;
@@ -177,9 +177,62 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     }
 
     @Test
-    @DisplayName("Test execute chat")
-    void testExecuteChat() throws EntityNotFoundException, LLMException, BadRequestException,
+    @DisplayName("Test load chat results with plot")
+    void testLoadChatResultsWithPlot() throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+        // given
+        UUID databaseId = postgresDatabase.getId();
+        Integer page = 0;
+        Integer pageSize = 2;
+        ChatDto chat = chatService.create(databaseId);
+        CreateChatQueryWithResponseRequest messageRequest1 = new CreateChatQueryWithResponseRequest(
+                "find emails of all users",
+                // language=JSON
+                """
+                        {
+                            "databaseQuery": "SELECT email FROM public.user;",
+                            "generatePlot": false,
+                            "pythonCode": ""
+                        }""");
+        CreateChatQueryWithResponseRequest messageRequest2 = new CreateChatQueryWithResponseRequest(
+                "plot sex of users older than 24",
+                FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"));
+
+        chatService.addMessageToChat(chat.getId(), messageRequest1);
+        ChatQueryWithResponse message2 = chatService.addMessageToChat(chat.getId(), messageRequest2);
+
+        QueryResponse expectedResponse = new QueryResponse(
+                new QueryResponse.RetrievedData(
+                        List.of("sex", "count"),
+                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                2L,
+                new ChatQueryWithResponseDto(
+                        message2.getId(),
+                        "plot sex of users older than 24",
+                        new ChatQueryWithResponseDto.LLMResult(
+                                // language=SQL
+                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                "/static/images/" + chat.getId() + ".png"),
+                        message2.getTimestamp()),
+                null);
+
+
+        // when
+        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.getId(), page, pageSize);
+
+        // then
+        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
+        assertEquals(2, queryResponse.getTotalCount());
+        assertEquals(expectedResponse, queryResponse);
+
+        // cleanup
+        chatService.deleteChatById(chat.getId());
+    }
+
+    @Test
+    @DisplayName("Test execute chat with table")
+    void testExecuteChatWithTable() throws EntityNotFoundException, LLMException, BadRequestException,
             DatabaseConnectionException, DatabaseExecutionException {
+
         // given
         UUID databaseId = postgresDatabase.getId();
         Integer pageSize = 8;
@@ -250,6 +303,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     @DisplayName("Test execute chat with plot")
     void testExecuteChatWithPlot() throws EntityNotFoundException, DatabaseConnectionException,
             DatabaseExecutionException, LLMException, BadRequestException {
+
         // given
         UUID databaseId = postgresDatabase.getId();
         Integer pageSize = 8;
