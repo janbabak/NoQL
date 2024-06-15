@@ -20,21 +20,19 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
-import static com.janbabak.noqlbackend.model.query.QueryResponse.ColumnTypes;
 import static com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto.LLMResult;
 import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
-import static java.sql.Types.*;
 
 @Slf4j
 @Service
@@ -147,7 +145,8 @@ public class QueryService {
      * @param response model's response
      * @return executable query
      */
-    public String extractQueryFromMarkdownInResponse(String response) {
+    public String extractQueryFromMarkdownInResponse(@NotNull String response) {
+
         int markdownIndex = response.indexOf("```");
 
         // markdown not detected
@@ -381,13 +380,19 @@ public class QueryService {
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
-            llmResponseJson = extractQueryFromMarkdownInResponse(llmResponseJson);
+            if (llmResponseJson == null) {
+                errors.add("Response is null");
+                continue;
+            } else {
+                llmResponseJson = extractQueryFromMarkdownInResponse(llmResponseJson);
+            }
 
             try {
                 return showResultTableAndGeneratePlot(
                         queryRequest, llmResponseJson, specificDatabaseService, database, pageSize);
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
+                log.error("Cannot parse response JSON: {}", llmResponseJson);
             } catch (SQLException e) {
                 errors.add("Error occurred when execution your query: " + e.getMessage());
             } catch (PlotScriptExecutionException e) {

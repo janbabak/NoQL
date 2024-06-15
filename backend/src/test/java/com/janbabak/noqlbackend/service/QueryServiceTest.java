@@ -27,6 +27,9 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+/**
+ * QueryService unit tests.
+ */
 @ExtendWith(MockitoExtension.class)
 class QueryServiceTest {
     @InjectMocks
@@ -249,6 +252,10 @@ class QueryServiceTest {
                         "SELECT name FROM cvut.student WHERE grade < 3\t   \n;    \n",
                         // language=SQL
                         "SELECT name FROM cvut.student WHERE grade < 3"
+                },
+                {
+                    "",
+                    ""
                 }
         };
     }
