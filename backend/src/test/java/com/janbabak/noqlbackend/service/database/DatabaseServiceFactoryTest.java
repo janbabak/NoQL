@@ -43,7 +43,7 @@ class DatabaseServiceFactoryTest {
                 // TODO: implement database service for MySQL
                /* {
                         Database.builder()
-                                .name("postgres db")
+                                .name("my-sql db")
                                 .engine(DatabaseEngine.MYSQL)
                                 .build(),
                         null
@@ -81,7 +81,7 @@ class DatabaseServiceFactoryTest {
                 // TODO: implement database service for MySQL
                 /* {
                          Database.builder()
-                                 .name("postgres db")
+                                 .name("my-sql db")
                                  .engine(DatabaseEngine.MYSQL)
                                  .build(),
                          null

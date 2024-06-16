@@ -11,12 +11,14 @@ import java.util.List;
 
 import static java.lang.Thread.sleep;
 
+// TODO: remove???
 /**
  * Service for managing a local Postgres container for testing purposes.
  */
 @Service
 @SpringBootTest
 @ActiveProfiles("test")
+@SuppressWarnings("unused")
 public class LocalPostgresService {
 
     public static final String POSTGRES_USER = "test-user";

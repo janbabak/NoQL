@@ -18,7 +18,7 @@ import static java.lang.Thread.sleep;
 public class DockerService {
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final long SECONDS_TIMEOUT = 60 * 5;
+    private final long SECONDS_TIMEOUT = 30L;
 
 
     /**

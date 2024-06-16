@@ -22,8 +22,8 @@ public class PlotService {
     public static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
+    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5L;
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
-    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5000L;
     public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
 

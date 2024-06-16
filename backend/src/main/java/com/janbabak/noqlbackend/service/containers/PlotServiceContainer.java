@@ -28,6 +28,7 @@ public class PlotServiceContainer {
      *
      * @throws InterruptedException if the thread is interrupted while waiting
      */
+    @SuppressWarnings("unused")
     public void start() throws InterruptedException {
         start(WAIT_TO_START_MILLIS);
     }
@@ -50,10 +51,7 @@ public class PlotServiceContainer {
                 .build();
 
         containerId = dockerService.runContainer(request);
-        // don't wait, for example when starting the container in bean initialization
-        if (waitMillis > 0) {
-            sleep(waitMillis);
-        }
+        sleep(waitMillis);
     }
 
     /**
@@ -62,17 +60,5 @@ public class PlotServiceContainer {
     public void stop() {
         log.info("Stopping Plot Service Container;");
         dockerService.stopContainer(containerId);
-    }
-
-    // TODO: remove
-    public static void main(String[] args) {
-        PlotServiceContainer plotServiceContainer = new PlotServiceContainer(new DockerService());
-        try {
-            plotServiceContainer.start();
-            System.out.println("Container started. Press enter to stop the container.");
-            plotServiceContainer.stop();
-        } catch (InterruptedException e) {
-            log.error("Thread interrupted while waiting for the container to start", e);
-        }
     }
 }
