@@ -262,17 +262,17 @@ public class QueryServiceIntegrationTest extends PostgresTest {
      */
     @ParameterizedTest
     @MethodSource("testExecuteChatWithPlotDataProvider")
-    @DisplayName("Test execute chat with plot")
-    void testExecuteChatWithPlot(
+    @DisplayName("Test execute chat")
+    void testExecuteChat(
             Integer pageSize,
             Long totalCount,
             Boolean plotResult,
             List<CreateChatQueryWithResponseRequest> messages,
             QueryRequest request,
             String llmResponse,
-            QueryResponse expectedResponse)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException,
-            BadRequestException {
+            QueryResponse expectedResponse
+    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            LLMException, BadRequestException {
 
         // given
         UUID databaseId = postgresDatabase.getId();

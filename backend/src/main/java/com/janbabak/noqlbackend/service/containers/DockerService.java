@@ -150,21 +150,30 @@ public class DockerService {
     private String executeCommand(String command) {
         Process process;
         StringBuilder output = new StringBuilder();
+        StringBuilder error = new StringBuilder();
         try {
             process = new ProcessBuilder("sh", "-c", command).start();
             process.waitFor(SECONDS_TIMEOUT, TimeUnit.SECONDS);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
             String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+            while ((line = outputReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
+            }
+
+            while ((line = errorReader.readLine()) != null) {
+                error.append(line).append(System.lineSeparator());
             }
         } catch (IOException | InterruptedException e) {
-            log.error("Command execution failed: '{}'", command);
+            log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
             throw new RuntimeException(e);
         }
-        if (process.exitValue() != 0) {
-            log.error("Command failed: '{}'", command);
-            throw new RuntimeException("Command failed with exit code: " + process.exitValue());
+        int exitValue = process.exitValue();
+        process.destroy();
+        if (exitValue != 0) {
+            log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
+            throw new RuntimeException("Command failed with exit code: " + exitValue);
         }
         log.error("Command executed: '{}'", command);
         return output.toString();

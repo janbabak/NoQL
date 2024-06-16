@@ -397,6 +397,13 @@ class QueryServiceTest {
     }
 
     @Test
+    @DisplayName("Test extract query from markdown response bad request")
+    @SuppressWarnings("all")
+    void testExtractQueryFromMarkdownResponseBadRequest() {
+        assertThrows(NullPointerException.class, () -> queryService.extractQueryFromMarkdownInResponse(null));
+    }
+
+    @Test
     @DisplayName("Test execute query-language query database not found")
     void testExecuteQueryLanguageQueryDatabaseNotFound() {
         // given

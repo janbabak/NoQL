@@ -1,6 +1,8 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
+import com.janbabak.noqlbackend.service.containers.PlotServiceContainer;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +27,15 @@ public class PlotService {
             () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Supplier<Path> scriptPath =
             () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+
     @SuppressWarnings("FieldCanBeLocal")
-    File workingDirectory;
-    File plotsDirectory;
-    File script;
+    private final PlotServiceContainer plotServiceContainer;
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private File workingDirectory;
+    @SuppressWarnings("FieldCanBeLocal")
+    private File plotsDirectory;
+    private File script;
 
     /**
      * Get path to plot of chat
@@ -43,7 +50,7 @@ public class PlotService {
     /**
      * Create working directory and plot script
      */
-    PlotService() {
+    PlotService(PlotServiceContainer plotServiceContainer) {
         // create working and plot directories
         workingDirectory = WORKING_DIRECTORY_PATH.toFile();
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
@@ -63,6 +70,18 @@ public class PlotService {
         } catch (IOException e) {
             logAndThrowRuntimeError("Cannot create plot script: " + e.getMessage());
         }
+
+        this.plotServiceContainer = plotServiceContainer;
+        try {
+            this.plotServiceContainer.start(0);
+        } catch (InterruptedException e) {
+            logAndThrowRuntimeError(e.getMessage());
+        }
+    }
+
+    @PreDestroy // springboot bean "destructor" callback
+    public void destroy() {
+        plotServiceContainer.stop();
     }
 
     /**

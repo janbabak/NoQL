@@ -17,7 +17,6 @@ public class PlotServiceContainer {
 
     private static final String IMAGE_NAME = "janbabak/plot-service:1.0.0"; // TODO: change to :latest
     private static final String CONTAINER_NAME = "plot-service";
-
     private static final int WAIT_TO_START_MILLIS = 5000; // waits 5s for the container to start
 
     private final DockerService dockerService;
@@ -51,7 +50,10 @@ public class PlotServiceContainer {
                 .build();
 
         containerId = dockerService.runContainer(request);
-        sleep(waitMillis);
+        // don't wait, for example when starting the container in bean initialization
+        if (waitMillis > 0) {
+            sleep(waitMillis);
+        }
     }
 
     /**
