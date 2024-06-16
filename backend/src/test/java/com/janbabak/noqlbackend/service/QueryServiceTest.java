@@ -84,7 +84,7 @@ class QueryServiceTest {
                 it into an SQL query for the postgres database. I will use this query for displaying the data in form of table. If the user wants to
                 plot, chart or visualize the data, create a Python script that will select the data and
                 visualise them in a chart. Save the generated chart into a file called ./plotService/plots/123e4567-e89b-12d3-a456-426614174000.png and don't show it.
-                To connect to the database use host='localhost',
+                To connect to the database use host='host.docker.internal',
                 port=5432, user='user', password='password', database='database'.
 
                 Your response must be in JSON format

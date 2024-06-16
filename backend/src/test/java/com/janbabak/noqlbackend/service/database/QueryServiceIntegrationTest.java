@@ -313,6 +313,31 @@ public class QueryServiceIntegrationTest extends PostgresTest {
         return new Object[][]{
                 {
                         8, // page size
+                        2L, // total count
+                        true, // plot result
+                        List.of(), // messages
+                        // query request
+                        new QueryRequest(null, "plot sex of users older than 24", LlmModel.GPT_4o),
+                        // LLM response
+                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
+                        // expected response
+                        new QueryResponse(
+                                new QueryResponse.RetrievedData(
+                                        List.of("sex", "count"),
+                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                                2L,
+                                new ChatQueryWithResponseDto(
+                                        null,
+                                        "plot sex of users older than 24",
+                                        new ChatQueryWithResponseDto.LLMResult(
+                                                // language=SQL
+                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                                null),
+                                        null),
+                                null)
+                },
+                {
+                        8, // page size
                         22L, // total count
                         false, // plot result
                         List.of(new CreateChatQueryWithResponseRequest( // messages
@@ -355,31 +380,6 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         null),
                                 null)
 
-                },
-                {
-                        8, // page size
-                        2L, // total count
-                        true, // plot result
-                        List.of(), // messages
-                        // query request
-                        new QueryRequest(null, "plot sex of users older than 24", LlmModel.GPT_4o),
-                        // LLM response
-                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
-                        // expected response
-                        new QueryResponse(
-                                new QueryResponse.RetrievedData(
-                                        List.of("sex", "count"),
-                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
-                                2L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "plot sex of users older than 24",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
-                                                null),
-                                        null),
-                                null)
                 },
         };
     }

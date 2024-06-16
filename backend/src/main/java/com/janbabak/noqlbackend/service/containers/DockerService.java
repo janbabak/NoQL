@@ -122,7 +122,6 @@ public class DockerService {
      */
     public void pullImage(String imageName) {
         String command = "docker pull " + imageName;
-        System.out.println(command);
         // TODO: remove - plot-service image is not uploaded so far
         try {
             executeCommand(command);
@@ -161,10 +160,12 @@ public class DockerService {
             while ((line = outputReader.readLine()) != null) {
                 output.append(line).append(System.lineSeparator());
             }
+            outputReader.close();
 
             while ((line = errorReader.readLine()) != null) {
                 error.append(line).append(System.lineSeparator());
             }
+            errorReader.close();
         } catch (IOException | InterruptedException e) {
             log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
             throw new RuntimeException(e);
@@ -175,7 +176,7 @@ public class DockerService {
             log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
             throw new RuntimeException("Command failed with exit code: " + exitValue);
         }
-        log.error("Command executed: '{}'", command);
+        log.info("Command executed: '{}'", command);
         return output.toString();
     }
 

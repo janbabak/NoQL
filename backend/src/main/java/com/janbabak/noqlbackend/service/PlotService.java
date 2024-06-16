@@ -10,7 +10,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for generating plots/charts/graphs.
@@ -23,19 +23,20 @@ public class PlotService {
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
-    public static final Supplier<Path> plotsDirPath =
-            () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
-    private static final Supplier<Path> scriptPath =
-            () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5000L;
+    public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
+    private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
 
     @SuppressWarnings("FieldCanBeLocal")
     private final PlotServiceContainer plotServiceContainer;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private File workingDirectory;
+    private final File workingDirectory;
+
     @SuppressWarnings("FieldCanBeLocal")
-    private File plotsDirectory;
-    private File script;
+    private final File plotsDirectory;
+
+    private final File script;
 
     /**
      * Get path to plot of chat
@@ -44,7 +45,7 @@ public class PlotService {
      * @return path to the plot (does not verify whether the file exist).
      */
     public static Path getPlotPath(UUID chatId) {
-        return Path.of(plotsDirPath.get() + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
+        return Path.of(plotsDirPath + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
     }
 
     /**
@@ -56,13 +57,13 @@ public class PlotService {
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create working directory in plot service");
         }
-        plotsDirectory = plotsDirPath.get().toFile();
+        plotsDirectory = plotsDirPath.toFile();
         if (!plotsDirectory.exists() && !plotsDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create plot directory in plot service");
         }
 
         // create script
-        script = scriptPath.get().toFile();
+        script = scriptPath.toFile();
         try {
             if (!script.exists() && !script.createNewFile()) {
                 logAndThrowRuntimeError("Cannot create plot script");
@@ -95,23 +96,38 @@ public class PlotService {
 
         try {
             createPlotScript(scriptContent);
-            ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get().toString());
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "sh", "-c", "docker exec plot-service python " + scriptPath);
             Process process = processBuilder.start();
 
             // read output and return it if failure
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             StringBuilder output = new StringBuilder();
+            StringBuilder error = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = outputReader.readLine()) != null) {
                 output.append(line);
             }
+            outputReader.close();
+
+            while ((line = errorReader.readLine()) != null) {
+                error.append(line);
+            }
+            errorReader.close();
 
             try {
-                int exitCode = process.waitFor(); // TODO: fix
-//                if (exitCode != 0) { // fail
-//                    throw new PlotScriptExecutionException(output.toString());
-//                }
+                process.waitFor(GENERATE_PLOT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                int exitCode = process.exitValue();
+                process.destroy();
+                if (exitCode != 0) { // fail
+                    log.error("Plot scrip execution failed. exit code: {}, output: '{}', error: '{}'",
+                            exitCode, output, error);
+                    throw new PlotScriptExecutionException(output.toString());
+                }
             } catch (InterruptedException e) {
+                log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",
+                        output, error, e.getMessage());
                 throw new PlotScriptExecutionException(output.toString());
             }
         } catch (IOException e) {

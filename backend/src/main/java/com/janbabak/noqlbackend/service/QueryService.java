@@ -55,6 +55,7 @@ public class QueryService {
      */
     @SuppressWarnings("all")
     public static String createSystemQuery(String dbStructure, Database database, UUID chatId) {
+        // TODO: localhost -> host.docker.internal
         // TODO: securly insert credentials from coresponding database
         return new StringBuilder(
                 """
@@ -69,10 +70,10 @@ public class QueryService {
                          database. I will use this query for displaying the data in form of table. If the user wants to
                         plot, chart or visualize the data, create a Python script that will select the data and
                         visualise them in a chart. Save the generated chart into a file called""")
-                .append(" " + PlotService.plotsDirPath.get() + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
+                .append(" " + PlotService.plotsDirPath + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
                 .append("""
                          and don't show it.
-                        To connect to the database use host='localhost',
+                        To connect to the database use host='host.docker.internal',
                         port=5432, user='user', password='password', database='database'.
                                                 
                         Your response must be in JSON format
