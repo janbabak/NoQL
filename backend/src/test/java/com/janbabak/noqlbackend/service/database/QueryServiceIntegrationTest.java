@@ -12,6 +12,7 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
@@ -77,6 +78,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     @AfterAll
     void tearDown() {
         apiServiceMock.close();
+        PlotService.deleteWorkingDirectory();
     }
 
     @Test
@@ -262,17 +264,17 @@ public class QueryServiceIntegrationTest extends PostgresTest {
      */
     @ParameterizedTest
     @MethodSource("testExecuteChatWithPlotDataProvider")
-    @DisplayName("Test execute chat with plot")
-    void testExecuteChatWithPlot(
+    @DisplayName("Test execute chat")
+    void testExecuteChat(
             Integer pageSize,
             Long totalCount,
             Boolean plotResult,
             List<CreateChatQueryWithResponseRequest> messages,
             QueryRequest request,
             String llmResponse,
-            QueryResponse expectedResponse)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException,
-            BadRequestException {
+            QueryResponse expectedResponse
+    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            LLMException, BadRequestException {
 
         // given
         UUID databaseId = postgresDatabase.getId();
@@ -311,6 +313,31 @@ public class QueryServiceIntegrationTest extends PostgresTest {
      */
     Object[][] testExecuteChatWithPlotDataProvider() {
         return new Object[][]{
+                {
+                        8, // page size
+                        2L, // total count
+                        true, // plot result
+                        List.of(), // messages
+                        // query request
+                        new QueryRequest(null, "plot sex of users older than 24", LlmModel.GPT_4o),
+                        // LLM response
+                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
+                        // expected response
+                        new QueryResponse(
+                                new QueryResponse.RetrievedData(
+                                        List.of("sex", "count"),
+                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                                2L,
+                                new ChatQueryWithResponseDto(
+                                        null,
+                                        "plot sex of users older than 24",
+                                        new ChatQueryWithResponseDto.LLMResult(
+                                                // language=SQL
+                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                                null),
+                                        null),
+                                null)
+                },
                 {
                         8, // page size
                         22L, // total count
@@ -355,31 +382,6 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         null),
                                 null)
 
-                },
-                {
-                        8, // page size
-                        2L, // total count
-                        true, // plot result
-                        List.of(), // messages
-                        // query request
-                        new QueryRequest(null, "plot sex of users older than 24", LlmModel.GPT_4o),
-                        // LLM response
-                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
-                        // expected response
-                        new QueryResponse(
-                                new QueryResponse.RetrievedData(
-                                        List.of("sex", "count"),
-                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
-                                2L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "plot sex of users older than 24",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
-                                                null),
-                                        null),
-                                null)
                 },
         };
     }

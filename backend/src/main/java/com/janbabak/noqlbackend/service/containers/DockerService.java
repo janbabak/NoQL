@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.containers;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -18,7 +18,7 @@ import static java.lang.Thread.sleep;
 public class DockerService {
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final long SECONDS_TIMEOUT = 60 * 5;
+    private final long SECONDS_TIMEOUT = 30L;
 
 
     /**
@@ -35,22 +35,30 @@ public class DockerService {
             @NotNull String imageName,
             String containerName,
             List<PortMapping> portMappings,
-            List<EnvironmentVariableMapping> environmentVariables
+            List<VolumeMapping> volumeMappings,
+            List<EnvironmentVariableMapping> environmentVariables,
+            Boolean detachedMode,
+            Boolean interactiveMode
     ) {
     }
 
     /**
-     * Represents a port mapping between the host and the container
+     * Represents a port mapping between the host and the container.
      */
     public record PortMapping(int hostPort, int containerPort) {
     }
 
     /**
-     * Represents an environment variable mapping
+     * Represents a volume mapping between the host and the container.
+     */
+    public record VolumeMapping(String hostPath, String containerPath) {
+    }
+
+    /**
+     * Represents an environment variable mapping.
      */
     public record EnvironmentVariableMapping(String key, String value) {
     }
-
 
     /**
      * Runs a container with the specified configuration in detached mode.
@@ -63,7 +71,13 @@ public class DockerService {
         removeContainer(request.containerName);
         pullImage(request.imageName);
 
-        StringBuilder commandBuilder = new StringBuilder("docker run -d");
+        StringBuilder commandBuilder = new StringBuilder("docker run");
+        if (request.detachedMode) {
+            commandBuilder.append(" -d");
+        }
+        if (request.interactiveMode) {
+            commandBuilder.append(" -it");
+        }
         if (request.containerName != null) {
             commandBuilder.append(" --name ").append(request.containerName);
         }
@@ -71,6 +85,12 @@ public class DockerService {
             for (PortMapping portMapping : request.portMappings) {
                 commandBuilder
                         .append(" -p ").append(portMapping.hostPort).append(":").append(portMapping.containerPort);
+            }
+        }
+        if (request.volumeMappings != null) {
+            for (VolumeMapping volumeMapping : request.volumeMappings) {
+                commandBuilder
+                        .append(" -v ").append(volumeMapping.hostPath).append(":").append(volumeMapping.containerPath);
             }
         }
         if (request.environmentVariables != null) {
@@ -102,7 +122,12 @@ public class DockerService {
      */
     public void pullImage(String imageName) {
         String command = "docker pull " + imageName;
-        executeCommand(command);
+        // TODO: remove - plot-service image is not uploaded so far
+        try {
+            executeCommand(command);
+        } catch (Exception e) {
+            log.error("Image pull failed: '{}'", imageName);
+        }
     }
 
     /**
@@ -124,23 +149,34 @@ public class DockerService {
     private String executeCommand(String command) {
         Process process;
         StringBuilder output = new StringBuilder();
+        StringBuilder error = new StringBuilder();
         try {
             process = new ProcessBuilder("sh", "-c", command).start();
             process.waitFor(SECONDS_TIMEOUT, TimeUnit.SECONDS);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
             String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
+            while ((line = outputReader.readLine()) != null) {
+                output.append(line).append(System.lineSeparator());
             }
+            outputReader.close();
+
+            while ((line = errorReader.readLine()) != null) {
+                error.append(line).append(System.lineSeparator());
+            }
+            errorReader.close();
         } catch (IOException | InterruptedException e) {
-            log.error("Command execution failed: '{}'", command);
+            log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
             throw new RuntimeException(e);
         }
-        if (process.exitValue() != 0) {
-            log.error("Command failed: '{}'", command);
-            throw new RuntimeException("Command failed with exit code: " + process.exitValue());
+        int exitValue = process.exitValue();
+        process.destroy();
+        if (exitValue != 0) {
+            log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
+            throw new RuntimeException("Command failed with exit code: " + exitValue);
         }
-        log.error("Command executed: '{}'", command);
+        log.info("Command executed: '{}'", command);
         return output.toString();
     }
 

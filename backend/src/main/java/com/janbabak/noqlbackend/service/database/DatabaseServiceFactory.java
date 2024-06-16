@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service.database;
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.model.entity.Database;
+import jakarta.validation.constraints.NotNull;
 
 public class DatabaseServiceFactory {
 
@@ -12,10 +13,10 @@ public class DatabaseServiceFactory {
      * @param database database metadata.
      * @return correct database service
      */
-    public static BaseDatabaseService getDatabaseService(Database database) {
+    public static @NotNull BaseDatabaseService getDatabaseService(@NotNull Database database) {
         return switch (database.getEngine()) {
             case POSTGRES -> new PostgresService(database);
-            case MYSQL -> null; // TODO: implement
+            case MYSQL -> throw new RuntimeException("MySQL is not supported yet.");
         };
     }
 
@@ -25,10 +26,10 @@ public class DatabaseServiceFactory {
      * @param database database metadata
      * @return correct DAO
      */
-    public static DatabaseDAO getDatabaseDAO(Database database) {
+    public static @NotNull DatabaseDAO getDatabaseDAO(@NotNull Database database) {
         return switch (database.getEngine()) {
             case POSTGRES -> new PostgresDAO(database);
-            case MYSQL -> null; // TODO: implement
+            case MYSQL -> throw new RuntimeException("MySQL is not supported yet.");
         };
     }
 }

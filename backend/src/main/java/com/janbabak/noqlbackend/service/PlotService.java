@@ -1,6 +1,8 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
+import com.janbabak.noqlbackend.service.containers.PlotServiceContainer;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -8,7 +10,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
-import java.util.function.Supplier;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for generating plots/charts/graphs.
@@ -20,15 +22,21 @@ public class PlotService {
     public static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
+    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5L;
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
-    public static final Supplier<Path> plotsDirPath =
-            () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
-    private static final Supplier<Path> scriptPath =
-            () -> Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
+    private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+
     @SuppressWarnings("FieldCanBeLocal")
-    File workingDirectory;
-    File plotsDirectory;
-    File script;
+    private final PlotServiceContainer plotServiceContainer;
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private static File workingDirectory;
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private static File plotsDirectory;
+
+    private static File script;
 
     /**
      * Get path to plot of chat
@@ -37,31 +45,118 @@ public class PlotService {
      * @return path to the plot (does not verify whether the file exist).
      */
     public static Path getPlotPath(UUID chatId) {
-        return Path.of(plotsDirPath.get() + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
+        return Path.of(plotsDirPath + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
     }
 
     /**
      * Create working directory and plot script
      */
-    PlotService() {
+    PlotService(PlotServiceContainer plotServiceContainer) {
         // create working and plot directories
         workingDirectory = WORKING_DIRECTORY_PATH.toFile();
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
-            throw new RuntimeException("Cannot create working directory for plot service");
+            logAndThrowRuntimeError("Cannot create working directory in plot service");
         }
-        plotsDirectory = plotsDirPath.get().toFile();
+        plotsDirectory = plotsDirPath.toFile();
         if (!plotsDirectory.exists() && !plotsDirectory.mkdirs()) {
-            throw new RuntimeException("Cannot create plot directory in plot service");
+            logAndThrowRuntimeError("Cannot create plot directory in plot service");
         }
 
         // create script
-        script = scriptPath.get().toFile();
+        script = scriptPath.toFile();
         try {
             if (!script.exists() && !script.createNewFile()) {
-                throw new RuntimeException("Cannot create plot script");
+                logAndThrowRuntimeError("Cannot create plot script");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Cannot create plot script: " + e.getMessage());
+            logAndThrowRuntimeError("Cannot create plot script: " + e.getMessage());
+        }
+
+        this.plotServiceContainer = plotServiceContainer;
+        try {
+            this.plotServiceContainer.start(0);
+        } catch (InterruptedException e) {
+            logAndThrowRuntimeError(e.getMessage());
+        }
+    }
+
+    @PreDestroy // springboot bean "destructor" callback
+    public void destroy() {
+        plotServiceContainer.stop();
+    }
+
+    /**
+     * Generate plot
+     *
+     * @param scriptContent content of python file responsible for plot generation (code)
+     * @throws PlotScriptExecutionException script returned not successful return code or failed
+     */
+    public void generatePlot(String scriptContent)
+            throws PlotScriptExecutionException {
+
+        try {
+            createPlotScript(scriptContent);
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "sh", "-c", "docker exec plot-service python " + scriptPath);
+            Process process = processBuilder.start();
+
+            // read output and return it if failure
+            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            StringBuilder output = new StringBuilder();
+            StringBuilder error = new StringBuilder();
+            String line;
+            while ((line = outputReader.readLine()) != null) {
+                output.append(line);
+            }
+            outputReader.close();
+
+            while ((line = errorReader.readLine()) != null) {
+                error.append(line);
+            }
+            errorReader.close();
+
+            try {
+                process.waitFor(GENERATE_PLOT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                int exitCode = process.exitValue();
+                process.destroy();
+                if (exitCode != 0) { // fail
+                    log.error("Plot scrip execution failed. exit code: {}, output: '{}', error: '{}'",
+                            exitCode, output, error);
+                    throw new PlotScriptExecutionException(output.toString());
+                }
+            } catch (InterruptedException e) {
+                log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",
+                        output, error, e.getMessage());
+                throw new PlotScriptExecutionException(output.toString());
+            }
+        } catch (IOException e) {
+            throw new PlotScriptExecutionException(e.getMessage());
+        }
+    }
+
+    // TODO: verify that is working after credentials are injected into the script
+    /**
+     * Delete plot associated with a chat.
+     *
+     * @param chatId chat identifier
+     */
+    public void deletePlot(UUID chatId) {
+        Path path = getPlotPath(chatId);
+
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
+        }
+    }
+
+    /**
+     * Used in tests. Warning: deletes all files in working directory including plots.
+     */
+    public static void deleteWorkingDirectory() {
+        if (!script.delete() || !plotsDirectory.delete() || !workingDirectory.delete()) {
+            log.error("Cannot clear working directory.");
         }
     }
 
@@ -77,53 +172,8 @@ public class PlotService {
         writer.close();
     }
 
-    /**
-     * Generate plot
-     *
-     * @param scriptContent content of python file responsible for plot generation (code)
-     * @throws PlotScriptExecutionException script returned not successful return code or failed
-     */
-    public void generatePlot(String scriptContent)
-            throws PlotScriptExecutionException {
-
-        try {
-            createPlotScript(scriptContent);
-            ProcessBuilder processBuilder = new ProcessBuilder("python3", scriptPath.get().toString());
-            Process process = processBuilder.start();
-
-            // read output and return it if failure
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
-            }
-
-            try {
-                int exitCode = process.waitFor(); // TODO: fix
-//                if (exitCode != 0) { // fail
-//                    throw new PlotScriptExecutionException(output.toString());
-//                }
-            } catch (InterruptedException e) {
-                throw new PlotScriptExecutionException(output.toString());
-            }
-        } catch (IOException e) {
-            throw new PlotScriptExecutionException(e.getMessage());
-        }
-    }
-
-    /**
-     * Delete plot associated with a chat.
-     *
-     * @param chatId chat identifier
-     */
-    public void deletePlot(UUID chatId) {
-        Path path = getPlotPath(chatId);
-
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
-        }
+    private void logAndThrowRuntimeError(String errorMessage) {
+        log.error(errorMessage);
+        throw new RuntimeException(errorMessage);
     }
 }
