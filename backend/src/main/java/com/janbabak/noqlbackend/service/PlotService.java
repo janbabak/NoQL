@@ -135,7 +135,7 @@ public class PlotService {
         }
     }
 
-    // TODO: verify that is working after creadentials are injected into the script
+    // TODO: verify that is working after credentials are injected into the script
     /**
      * Delete plot associated with a chat.
      *
