@@ -12,6 +12,7 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
@@ -77,6 +78,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     @AfterAll
     void tearDown() {
         apiServiceMock.close();
+        PlotService.deleteWorkingDirectory();
     }
 
     @Test

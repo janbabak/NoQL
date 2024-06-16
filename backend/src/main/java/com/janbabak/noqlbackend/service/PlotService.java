@@ -31,12 +31,12 @@ public class PlotService {
     private final PlotServiceContainer plotServiceContainer;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final File workingDirectory;
+    private static File workingDirectory;
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final File plotsDirectory;
+    private static File plotsDirectory;
 
-    private final File script;
+    private static File script;
 
     /**
      * Get path to plot of chat
@@ -135,6 +135,7 @@ public class PlotService {
         }
     }
 
+    // TODO: verify that is working after creadentials are injected into the script
     /**
      * Delete plot associated with a chat.
      *
@@ -147,6 +148,15 @@ public class PlotService {
             Files.deleteIfExists(path);
         } catch (IOException e) {
             log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
+        }
+    }
+
+    /**
+     * Used in tests. Warning: deletes all files in working directory including plots.
+     */
+    public static void deleteWorkingDirectory() {
+        if (!script.delete() || !plotsDirectory.delete() || !workingDirectory.delete()) {
+            log.error("Cannot clear working directory.");
         }
     }
 
