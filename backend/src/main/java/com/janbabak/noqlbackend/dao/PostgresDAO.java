@@ -22,12 +22,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
-    protected String createConnectionUrl() {
-        return "jdbc:postgresql://" + databaseMetadata.getHost() + ":" + databaseMetadata.getPort() +
-                "/" + databaseMetadata.getDatabase();
-    }
-
-    @Override
+    @SuppressWarnings("all") // IDE can't see the columns
     public ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
@@ -54,6 +49,7 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     @Override
+    @SuppressWarnings("all") // IDE can't see the columns
     public ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
@@ -68,12 +64,28 @@ public class PostgresDAO extends DatabaseDAO {
         return query(select);
     }
 
+    /**
+     * Test connection to database.
+     *
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     */
     @Override
     public void testConnection() throws DatabaseConnectionException {
         connect(true);
 
         if (connection == null) {
             throw new DatabaseConnectionException();
-        }
+        } // TODO: move to ancestor
+    }
+
+    /**
+     * Create connection URL for specific database engine.
+     *
+     * @return connection URL
+     */
+    @Override
+    protected String createConnectionUrl() {
+        return "jdbc:postgresql://" + databaseMetadata.getHost() + ":" + databaseMetadata.getPort() +
+                "/" + databaseMetadata.getDatabase(); // TODO: formatted string
     }
 }

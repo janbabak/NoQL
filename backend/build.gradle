@@ -34,6 +34,8 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	runtimeOnly 'org.postgresql:postgresql'
+ 	implementation 'mysql:mysql-connector-java:8.0.33'
+
 
 	annotationProcessor 'org.projectlombok:lombok'
 
@@ -41,6 +43,7 @@ dependencies {
 	testImplementation 'com.h2database:h2:2.2.224'
 	testImplementation "org.testcontainers:junit-jupiter:1.19.8"
 	testImplementation "org.testcontainers:postgresql:1.19.8"
+	testImplementation "org.testcontainers:mysql:1.19.8"
 }
 
 tasks.named('test') {
