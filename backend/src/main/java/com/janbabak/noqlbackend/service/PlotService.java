@@ -156,8 +156,6 @@ public class PlotService {
         return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
     }
 
-    // TODO: verify that is working after credentials are injected into the script
-
     /**
      * Delete plot associated with a chat.
      *
