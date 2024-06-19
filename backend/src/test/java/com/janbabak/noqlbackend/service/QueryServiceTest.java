@@ -63,7 +63,6 @@ class QueryServiceTest {
     @DisplayName("Test create system query")
     void testCreateSystemQueryTest() {
         // given
-        UUID chatId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         // language=SQL
         String dbStructure = """
                 CREATE SCHEMA IF NOT EXISTS public;
@@ -83,9 +82,8 @@ class QueryServiceTest {
                 visualising data. If the user wants to show or display or find or retrieve some data, translate
                 it into an SQL query for the postgres database. I will use this query for displaying the data in form of table. If the user wants to
                 plot, chart or visualize the data, create a Python script that will select the data and
-                visualise them in a chart. Save the generated chart into a file called ./plotService/plots/123e4567-e89b-12d3-a456-426614174000.png and don't show it.
-                To connect to the database use host='host.docker.internal',
-                port=5432, user='user', password='password', database='database'.
+                visualise them in a chart. Save the generated chart into a file called ./plotService/plots/noQlGeneratedPlot.png and don't show it.
+                To connect to the database use host='localhost', port=ppp45345ppp , user='admin4445900234', password='dkl45349?405', database='database99889899'.
 
                 Your response must be in JSON format
                 { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
@@ -101,7 +99,7 @@ class QueryServiceTest {
                 );""";
 
         // when
-        String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase, chatId);
+        String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase);
 
         // then
         assertEquals(expectedSystemQuery, actualSystemQuery);

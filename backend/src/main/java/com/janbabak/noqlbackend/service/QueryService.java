@@ -38,6 +38,15 @@ import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 @Service
 @RequiredArgsConstructor
 public class QueryService {
+    public final static String PASSWORD_PLACEHOLDER = "dkl45349?405";
+    public final static String USER_PLACEHOLDER = "admin4445900234";
+    public final static String DATABASE_PLACEHOLDER = "database99889899";
+    public final static String PORT_PLACEHOLDER = "ppp45345ppp";
+    public final static String HOST_PLACEHOLDER = "localhost";
+    public final static String PLOT_FILE_NAME_PLACEHOLDER = "noQlGeneratedPlot";
+    /** if host = {@code localhost} then it is replaced by this value, works on mac OS, not sure about other systems */
+    public final static String DOCKER_LOCALHOST = "host.docker.internal";
+
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final Settings settings;
@@ -46,17 +55,15 @@ public class QueryService {
     private final PlotService plotService;
 
     /**
-     * Create system query that commands the LLM with instructions
+     * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
+     * that will be replaced latter by the actual values for security reasons.
      *
      * @param dbStructure structure of the database (in form of create script)
      * @param database    database
-     * @param chatId      chat identifier
      * @return system query
      */
     @SuppressWarnings("all")
-    public static String createSystemQuery(String dbStructure, Database database, UUID chatId) {
-        // TODO: localhost -> host.docker.internal
-        // TODO: securly insert credentials from coresponding database
+    public static String createSystemQuery(String dbStructure, Database database) {
         return new StringBuilder(
                 """
                         You are an assistant that helps users visualise data. You have two functions. The first function
@@ -70,12 +77,16 @@ public class QueryService {
                          database. I will use this query for displaying the data in form of table. If the user wants to
                         plot, chart or visualize the data, create a Python script that will select the data and
                         visualise them in a chart. Save the generated chart into a file called""")
-                .append(" " + PlotService.plotsDirPath + "/" + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION)
+                .append(" ").append(PlotService.plotsDirPath).append("/")
+                .append(PLOT_FILE_NAME_PLACEHOLDER).append(PlotService.PLOT_IMAGE_FILE_EXTENSION)
                 .append("""
                          and don't show it.
-                        To connect to the database use host='host.docker.internal',
-                        port=5432, user='user', password='password', database='database'.
-                                                
+                        To connect to the database use host='""").append(HOST_PLACEHOLDER)
+                .append("', port=").append(PORT_PLACEHOLDER)
+                .append(" , user='").append(USER_PLACEHOLDER)
+                .append("', password='").append(PASSWORD_PLACEHOLDER)
+                .append("', database='").append(DATABASE_PLACEHOLDER).append("'.\n\n")
+                .append("""                       
                         Your response must be in JSON format
                         { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
                                          
@@ -323,7 +334,7 @@ public class QueryService {
 
         if (llmResponse.getGeneratePlot()) {
             log.info("Generate plot");
-            plotService.generatePlot(llmResponse.getPythonCode());
+            plotService.generatePlot(llmResponse.getPythonCode(), database, queryRequest.getChatId());
         }
 
         RetrievedData retrievedData = null;
@@ -370,8 +381,7 @@ public class QueryService {
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQuery(
-                databaseStructure.generateCreateScript(), database, queryRequest.getChatId());
+        String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
         List<ChatQueryWithResponse> chatHistory =
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());

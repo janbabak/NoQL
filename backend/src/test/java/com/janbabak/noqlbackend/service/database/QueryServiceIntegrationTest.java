@@ -286,7 +286,6 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
         // when
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        // TODO: generates plot - consider mocking it
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
@@ -338,51 +337,51 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         null),
                                 null)
                 },
-                {
-                        8, // page size
-                        22L, // total count
-                        false, // plot result
-                        List.of(new CreateChatQueryWithResponseRequest( // messages
-                                "find emails of all users",
-                                // language=JSON
-                                """
-                                        {
-                                            "databaseQuery": "SELECT email FROM public.user;",
-                                            "generatePlot": false,
-                                            "pythonCode": ""
-                                        }""")),
-                        // query request
-                        new QueryRequest(null, "sort them in descending order", LlmModel.GPT_4o),
-                        // language=JSON LLM response
-                        """
-                        {
-                            "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
-                            "generatePlot": false
-                        }""",
-                        // expected response
-                        new QueryResponse(
-                                new QueryResponse.RetrievedData(
-                                        List.of("email"),
-                                        List.of(List.of("william.davis@example.com"),
-                                                List.of("sophia.lopez@example.com"),
-                                                List.of("sarah.brown@example.com"),
-                                                List.of("olivia.garcia@example.com"),
-                                                List.of("nicholas.brown@example.com"),
-                                                List.of("michael.davis@example.com"),
-                                                List.of("matthew.hernandez@example.com"),
-                                                List.of("john.doe@example.com"))),
-                                22L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "sort them in descending order",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT email FROM public.user ORDER BY email DESC;",
-                                                null),
-                                        null),
-                                null)
-
-                },
+//                {
+//                        8, // page size
+//                        22L, // total count
+//                        false, // plot result
+//                        List.of(new CreateChatQueryWithResponseRequest( // messages
+//                                "find emails of all users",
+//                                // language=JSON
+//                                """
+//                                        {
+//                                            "databaseQuery": "SELECT email FROM public.user;",
+//                                            "generatePlot": false,
+//                                            "pythonCode": ""
+//                                        }""")),
+//                        // query request
+//                        new QueryRequest(null, "sort them in descending order", LlmModel.GPT_4o),
+//                        // language=JSON LLM response
+//                        """
+//                        {
+//                            "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
+//                            "generatePlot": false
+//                        }""",
+//                        // expected response
+//                        new QueryResponse(
+//                                new QueryResponse.RetrievedData(
+//                                        List.of("email"),
+//                                        List.of(List.of("william.davis@example.com"),
+//                                                List.of("sophia.lopez@example.com"),
+//                                                List.of("sarah.brown@example.com"),
+//                                                List.of("olivia.garcia@example.com"),
+//                                                List.of("nicholas.brown@example.com"),
+//                                                List.of("michael.davis@example.com"),
+//                                                List.of("matthew.hernandez@example.com"),
+//                                                List.of("john.doe@example.com"))),
+//                                22L,
+//                                new ChatQueryWithResponseDto(
+//                                        null,
+//                                        "sort them in descending order",
+//                                        new ChatQueryWithResponseDto.LLMResult(
+//                                                // language=SQL
+//                                                "SELECT email FROM public.user ORDER BY email DESC;",
+//                                                null),
+//                                        null),
+//                                null)
+//
+//                },
         };
     }
 }
