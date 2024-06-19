@@ -214,7 +214,7 @@ class DatabaseControllerTest {
                          "host": "invalid hostname",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
-                         "password":"length must be between 1 and 128"
+                         "password":"length must be between 1 and 253"
                      }""",
                         false
                 },
@@ -355,7 +355,7 @@ class DatabaseControllerTest {
                          "host": "invalid hostname",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
-                         "password":"length must be between 1 and 128"
+                         "password":"length must be between 1 and 253"
                      }""",
                         false
                 },
@@ -378,7 +378,7 @@ class DatabaseControllerTest {
                         "host": "invalid hostname",
                         "database": "length must be between 1 and 253",
                         "userName": "length must be between 1 and 128",
-                        "password": "length must be between 1 and 128"
+                        "password": "length must be between 1 and 253"
                     }""",
                         false
                 }

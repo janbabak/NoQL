@@ -59,7 +59,7 @@ public class Database {
     private String userName;
 
     @NotBlank(groups = FirstValidationGroup.class)
-    @Length(min = 1, max = 128, groups = SecondValidationGroup.class) // TODO: is 128 enough?
+    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
     private String password;
 
     @NotNull(groups = FirstValidationGroup.class)

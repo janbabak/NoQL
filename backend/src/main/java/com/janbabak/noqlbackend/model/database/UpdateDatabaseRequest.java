@@ -42,7 +42,7 @@ public class UpdateDatabaseRequest {
     private String userName;
 
     @Nullable
-    @Length(min = 1, max = 128)
+    @Length(min = 1, max = 253)
     private String password;
 
     @Nullable
