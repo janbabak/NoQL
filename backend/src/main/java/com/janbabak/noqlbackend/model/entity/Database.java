@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
+import com.janbabak.noqlbackend.validation.ValidHostName;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -39,8 +40,8 @@ public class Database {
     private String name;
 
     @NotBlank(groups = FirstValidationGroup.class)
-    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
-    private String host; // TODO: create custom hostname validation rule
+    @ValidHostName(groups = SecondValidationGroup.class)
+    private String host;
 
     @NotNull(groups = FirstValidationGroup.class)
     @Min(value = 1, groups = SecondValidationGroup.class)

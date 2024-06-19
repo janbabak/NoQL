@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.database;
 
+import com.janbabak.noqlbackend.validation.ValidHostName;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class UpdateDatabaseRequest {
     private String name;
 
     @Nullable
-    @Length(min = 1, max = 253)
+    @ValidHostName
     private String host;
 
     @Nullable
