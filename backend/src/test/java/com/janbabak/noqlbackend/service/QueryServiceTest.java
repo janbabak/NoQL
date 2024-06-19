@@ -75,7 +75,6 @@ class QueryServiceTest {
                     age integer
                 );""";
 
-        // TODO: remove embedded credentials after it is fixed in QueryService
         String expectedSystemQuery = """
                 You are an assistant that helps users visualise data. You have two functions. The first function
                 is translation of natural language queries into a database language. The second function is
