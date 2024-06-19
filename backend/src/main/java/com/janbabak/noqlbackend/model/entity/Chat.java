@@ -1,10 +1,14 @@
 package com.janbabak.noqlbackend.model.entity;
 
+import com.janbabak.noqlbackend.validation.FirstValidationGroup;
+import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ public class Chat {
 
     private Timestamp modificationDate;
 
+    @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 32, groups = SecondValidationGroup.class)
     private String name;
 
     public void addMessage(ChatQueryWithResponse newMessage) {
@@ -47,7 +53,7 @@ public class Chat {
     }
 
     /**
-     * Add colledtion of new messages to the chat.
+     * Add collection of new messages to the chat.
      * @param newMessages new messages
      */
     public void addMessages(Collection<ChatQueryWithResponse> newMessages) {

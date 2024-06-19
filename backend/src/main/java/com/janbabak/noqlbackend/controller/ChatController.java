@@ -5,8 +5,8 @@ import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +48,7 @@ public class ChatController {
 
     /**
      * Delete chat by id.
+     *
      * @param chatId chat identifier
      */
     @DeleteMapping("/{chatId}")
@@ -56,16 +57,16 @@ public class ChatController {
         chatService.deleteChatById(chatId);
     }
 
-    // TODO: name max length
     /**
      * Rename chat.
+     *
      * @param chatId chat identifier
-     * @param name new name
+     * @param name   new name
      * @throws EntityNotFoundException chat of specified id not found.
      */
     @PutMapping("/{chatId}/name")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void rename(@PathVariable UUID chatId, @RequestParam @Valid @NotEmpty String name)
+    public void rename(@PathVariable UUID chatId, @RequestParam @Valid @Length(min = 1, max = 32) String name)
             throws EntityNotFoundException {
         chatService.renameChat(chatId, name);
     }
@@ -73,7 +74,7 @@ public class ChatController {
     /**
      * Add message to a chat. Does not verify if the JSON is valid.
      *
-     * @param chatId      chat identifier
+     * @param chatId  chat identifier
      * @param request message
      * @throws EntityNotFoundException chat of specified id not found.
      */

@@ -323,6 +323,7 @@ paths:
         - name: name
           in: query
           description: New name
+          required: true
           schema:
             $ref: '#/components/schemas/ChatName'
       responses:
@@ -704,6 +705,8 @@ components:
     ChatName:
       type: string
       example: "Find oldest student"
+      minLength: 1
+      maxLength: 32
 
     Settings:
       type: object

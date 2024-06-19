@@ -164,6 +164,34 @@ class ChatControllerTest {
     }
 
     @Test
+    @DisplayName("Delete chat by id too long name")
+    void testDeleteChatByIdTooLongName() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+        String name = "To long name. More than 32 chars.";
+
+        // then
+        mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
+                        .param("name", name))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Delete chat by id empty name")
+    void testDeleteChatByIdEmptyName() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+        String name = "";
+
+        // then
+        mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
+                        .param("name", name))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("Add message to chat")
     void testAddMessageToChat() throws Exception {
         // given
