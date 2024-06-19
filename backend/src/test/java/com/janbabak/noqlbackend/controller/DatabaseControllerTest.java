@@ -167,7 +167,7 @@ class DatabaseControllerTest {
                     {
                         "id": "6678fc72-1a55-4146-b74b-b3f5aac677df",
                         "name":"Local Postgres",
-                        "host":"localhost",
+                        "host":"127.0.0.1",
                         "port":5432,
                         "database":"database",
                         "userName":"user",
@@ -200,7 +200,7 @@ class DatabaseControllerTest {
                         """
                     {
                         "name":"Local Postgres database for testing purposes",
-                        "host":"localhost",
+                        "host":"localhost-home",
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
@@ -211,6 +211,7 @@ class DatabaseControllerTest {
                         """
                     {
                          "name": "length must be between 1 and 32",
+                         "host": "invalid hostname",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
                          "password":"length must be between 1 and 128"
@@ -340,7 +341,7 @@ class DatabaseControllerTest {
                         """
                     {
                         "name":"Local Postgres database for testing purposes",
-                        "host":"localhost",
+                        "host":"localhost-invalid",
                         "port":5432,
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
@@ -351,6 +352,7 @@ class DatabaseControllerTest {
                         """
                     {
                          "name": "length must be between 1 and 32",
+                         "host": "invalid hostname",
                          "database":"length must be between 1 and 253",
                          "userName":"length must be between 1 and 128",
                          "password":"length must be between 1 and 128"
@@ -373,7 +375,7 @@ class DatabaseControllerTest {
                         """
                     {
                         "name": "length must be between 1 and 32",
-                        "host": "length must be between 1 and 253",
+                        "host": "invalid hostname",
                         "database": "length must be between 1 and 253",
                         "userName": "length must be between 1 and 128",
                         "password": "length must be between 1 and 128"
@@ -492,10 +494,10 @@ class DatabaseControllerTest {
 
         // then
         mockMvc.perform(
-                get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
-                        .param("page", page.toString())
-                        .param("pageSize", pageSize.toString())
-                        .param("chatId", chatId.toString()))
+                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                                .param("page", page.toString())
+                                .param("pageSize", pageSize.toString())
+                                .param("chatId", chatId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -532,12 +534,12 @@ class DatabaseControllerTest {
 
         // then
         mockMvc.perform(
-                post(ROOT_URL + "/{databaseId}/query/queryLanguage", databaseId)
-                        .param("page", page.toString())
-                        .param("pageSize", pageSize.toString())
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content(query))
+                        post(ROOT_URL + "/{databaseId}/query/queryLanguage", databaseId)
+                                .param("page", page.toString())
+                                .param("pageSize", pageSize.toString())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .content(query))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -549,17 +551,17 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         SqlDatabaseStructureDto databaseStructure = new SqlDatabaseStructureDto(List.of(
-                  new SchemaDto("public",
-                          List.of(
-                                  new TableDto("address", List.of(
-                                          new Column("user_id", "integer", false,
-                                                  new SqlDatabaseStructure.ForeignKey(
-                                                          "public",
-                                                          "\"user\"",
-                                                          "id")),
-                                          new Column("city", "character varying", false),
-                                          new Column("id", "integer", true)
-                                  ))))));
+                new SchemaDto("public",
+                        List.of(
+                                new TableDto("address", List.of(
+                                        new Column("user_id", "integer", false,
+                                                new SqlDatabaseStructure.ForeignKey(
+                                                        "public",
+                                                        "\"user\"",
+                                                        "id")),
+                                        new Column("city", "character varying", false),
+                                        new Column("id", "integer", true)
+                                ))))));
 
         // when
         when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenReturn(databaseStructure);
