@@ -14,6 +14,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -24,7 +25,8 @@ abstract public class MySqlTest {
     static final String DATABASE_NAME = "mysql-test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
-    static final String CONTAINER_NAME = "mysql:5.7.34";
+    static final String CONTAINER_NAME = "mysql:8.3.0";
+    static final String COMNAND_SEPARATOR = "-- command separator";
 
     @Container
     @SuppressWarnings("resource")
@@ -51,9 +53,11 @@ abstract public class MySqlTest {
 
         mysqlDAO = new MySqlDAO(mysqlDatabase);
 
-        String createScript = getCreateScript();
-        if (createScript != null) {
-            mysqlDAO.updateDatabase(createScript);
+        List<String> scripts = getCreateScript();
+        for (String script : scripts) {
+            if (script != null) {
+                mysqlDAO.updateDatabase(script);
+            }
         }
     }
 
@@ -61,6 +65,12 @@ abstract public class MySqlTest {
         return mysql.getFirstMappedPort(); // TODO: ancestor
     }
 
-    protected abstract String getCreateScript(); // TODO: move to ancestor
+    /**
+     * Get list of scripts to create database. Each script is one command in case of MySQL, multiple commands in one
+     * script don't work.
+     *
+     * @return list of commands.
+     */
+    protected abstract List<String> getCreateScript(); // TODO: move to ancestor
 
 }
