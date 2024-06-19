@@ -61,6 +61,4 @@ public class Chat {
             addMessage(message);
         }
     }
-
-    // TODO: user reference
 }
