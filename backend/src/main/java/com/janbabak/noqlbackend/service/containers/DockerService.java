@@ -179,20 +179,5 @@ public class DockerService {
         log.info("Command executed: '{}'", command);
         return output.toString();
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        DockerService dockerService = new DockerService();
-        dockerService.runContainer(RunContainerRequest.builder()
-                .imageName("mysql")
-                .containerName("muj-mysql")
-                .portMappings(List.of(new PortMapping(27017, 27017)))
-                .environmentVariables(List.of(
-                        new EnvironmentVariableMapping("MYSQL_ROOT_PASSWORD", "root"),
-                        new EnvironmentVariableMapping("MYSQL_ALLOW_EMPTY_PASSWORD", "yes"),
-                        new EnvironmentVariableMapping("MYSQL_ROOT_PASSWORD", "secret")))
-                .build());
-        sleep(10);
-        dockerService.stopContainer("muj-mysql");
-    }
 }
 
