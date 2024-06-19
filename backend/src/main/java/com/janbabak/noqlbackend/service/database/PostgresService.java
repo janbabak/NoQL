@@ -98,13 +98,16 @@ public class PostgresService extends BaseDatabaseService {
                 }
                 SqlDatabaseStructure.Table table = schema.getTables().get(foreignKeyData.referencingTable);
                 if (table == null) {
-                    continue;
+                    // table not found, because table name is in double quotes
+                    table = schema.getTables().get(stripQuotes(foreignKeyData.referencingTable));
+                    if (table == null) {
+                        continue;
+                    }
                 }
                 SqlDatabaseStructure.Column column = table.getColumns().get(foreignKeyData.referencingColumn);
                 if (column == null) {
                     continue;
                 }
-                // TODO: Do I want to verify existence of these data?
                 column.setForeignKey(new SqlDatabaseStructure.ForeignKey(
                         foreignKeyData.referencedSchema,
                         foreignKeyData.referencedTable,
@@ -182,10 +185,23 @@ public class PostgresService extends BaseDatabaseService {
         }
 
         // when dot is found, it usually separates the schema and table name (unless the schema name contains dot)
-        return new Pair<>(
-                data.substring(0, dotIndex), // schema
-                data.substring(dotIndex + 1) // table
-        );
+        String schema = data.substring(0, dotIndex);
+        String table = data.substring(dotIndex + 1);
+
+        return new Pair<>(schema, table);
+    }
+
+    /**
+     * Strip double quotes from the string.
+     *
+     * @param s e.g. {@code s = "\"order\"";}
+     * @return {@code "order"}
+     */
+    private String stripQuotes(String s) {
+        if (s.length() > 2 && s.charAt(0) == '"' && s.charAt(s.length() - 1) == '"') {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 
     private record ForeignKeyData(

@@ -10,7 +10,6 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -159,7 +158,6 @@ class PostgresServiceTest extends PostgresTest {
                 table.getColumns().get("postal_code"));
     }
 
-    @Disabled // TODO: fix the user_id and address foreign key detection in the service
     @Test
     @DisplayName("Test order table")
     void testOrderTable() {
