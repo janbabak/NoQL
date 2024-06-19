@@ -286,7 +286,6 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
         // when
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        // TODO: generates plot - consider mocking it
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually

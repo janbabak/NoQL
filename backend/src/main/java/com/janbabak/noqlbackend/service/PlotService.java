@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.containers.PlotServiceContainer;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -89,13 +90,15 @@ public class PlotService {
      * Generate plot
      *
      * @param scriptContent content of python file responsible for plot generation (code)
+     * @param database      database object - use its real credentials instead of placeholders
+     * @param chatId        chat identifier - used for naming the plot
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public void generatePlot(String scriptContent)
+    public void generatePlot(String scriptContent, Database database, UUID chatId)
             throws PlotScriptExecutionException {
 
         try {
-            createPlotScript(scriptContent);
+            createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "sh", "-c", "docker exec plot-service python " + scriptPath);
             Process process = processBuilder.start();
@@ -135,7 +138,24 @@ public class PlotService {
         }
     }
 
-    // TODO: verify that is working after credentials are injected into the script
+    /**
+     * Replace placeholders in the script with real credentials.
+     *
+     * @param scriptContent script with placeholders
+     * @param database      database with real credentials
+     * @param chatId        chat identifierf
+     * @return script with real credentials
+     */
+    String replaceCredentialsInScript(String scriptContent, Database database, UUID chatId) {
+        scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER, database.getPassword());
+        scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
+        scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
+        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, chatId.toString());
+        scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
+                database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
+        return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
+    }
+
     /**
      * Delete plot associated with a chat.
      *
