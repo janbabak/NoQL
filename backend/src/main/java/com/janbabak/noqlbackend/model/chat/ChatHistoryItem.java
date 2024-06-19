@@ -10,6 +10,6 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class ChatHistoryItem {
-    private UUID id; // TODO: rename to chatId?
+    private UUID id;
     private String name;
 }
