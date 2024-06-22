@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
+import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,12 +44,12 @@ class DatabaseEntityServiceTest {
     private final DatabaseDAO databaseDaoMock = new DatabaseDAO() {
 
         @Override
-        public ResultSet getSchemasTablesColumns() {
+        public ResultSetWrapper getSchemasTablesColumns() {
             return null;
         }
 
         @Override
-        public ResultSet getForeignKeys() {
+        public ResultSetWrapper getForeignKeys() {
             return null;
         }
 

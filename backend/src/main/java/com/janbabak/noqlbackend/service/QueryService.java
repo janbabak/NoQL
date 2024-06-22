@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
@@ -26,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -44,7 +44,9 @@ public class QueryService {
     public final static String PORT_PLACEHOLDER = "ppp45345ppp";
     public final static String HOST_PLACEHOLDER = "localhost";
     public final static String PLOT_FILE_NAME_PLACEHOLDER = "noQlGeneratedPlot";
-    /** if host = {@code localhost} then it is replaced by this value, works on mac OS, not sure about other systems */
+    /**
+     * if host = {@code localhost} then it is replaced by this value, works on mac OS, not sure about other systems
+     */
     public final static String DOCKER_LOCALHOST = "host.docker.internal";
 
     private final DatabaseRepository databaseRepository;
@@ -202,10 +204,8 @@ public class QueryService {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
         String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
-        ResultSet resultSet = databaseService.executeQuery(selectCountQuery);
-
-        try {
-            return resultSet.next() ? resultSet.getLong(1) : null;
+        try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
+            return result.resultSet().next() ? result.resultSet().getLong(1) : null;
         } catch (SQLException e) {
             throw new DatabaseExecutionException("Cannot parse total count value from query");
         }
@@ -241,10 +241,9 @@ public class QueryService {
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
 
-        try {
-            ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
+        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
             return QueryResponse.successfulResponse(
-                    new RetrievedData(resultSet), null, getTotalCount(query, databaseService));
+                    new RetrievedData(result.resultSet()), null, getTotalCount(query, databaseService));
         } catch (DatabaseExecutionException | SQLException e) {
             return QueryResponse.failedResponse(null, e.getMessage());
         }
@@ -293,9 +292,8 @@ public class QueryService {
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), page, pageSize, database);
 
-        try {
-            ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
-            RetrievedData retrievedData = new RetrievedData(resultSet);
+        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
+            RetrievedData retrievedData = new RetrievedData(result.resultSet());
             Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), databaseService);
 
             return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
@@ -341,9 +339,10 @@ public class QueryService {
         Long totalCount = null;
         if (llmResponse.getDatabaseQuery() != null || !llmResponse.getGeneratePlot()) {
             String paginatedQuery = setPaginationInSqlQuery(llmResponse.getDatabaseQuery(), 0, pageSize, database);
-            ResultSet resultSet = databaseService.executeQuery(paginatedQuery);
-            retrievedData = new RetrievedData(resultSet);
-            totalCount = getTotalCount(llmResponse.getDatabaseQuery(), databaseService);
+            try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
+                retrievedData = new RetrievedData(result.resultSet());
+                totalCount = getTotalCount(llmResponse.getDatabaseQuery(), databaseService);
+            }
         }
 
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(

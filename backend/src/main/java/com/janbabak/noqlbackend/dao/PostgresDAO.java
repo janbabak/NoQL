@@ -6,8 +6,6 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.sql.ResultSet;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PostgresDAO extends DatabaseDAO {
@@ -23,7 +21,7 @@ public class PostgresDAO extends DatabaseDAO {
 
     @Override
     @SuppressWarnings("all") // IDE can't see the columns
-    public ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
                 SELECT columns.table_schema,
@@ -50,7 +48,7 @@ public class PostgresDAO extends DatabaseDAO {
 
     @Override
     @SuppressWarnings("all") // IDE can't see the columns
-    public ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = """
                 SELECT conrelid::regclass AS table_name,

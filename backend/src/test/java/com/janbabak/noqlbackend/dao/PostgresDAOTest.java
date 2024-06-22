@@ -40,22 +40,24 @@ class PostgresDAOTest extends PostgresTest {
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         // language=SQL
-        assertDoesNotThrow(() -> resultRef.set(postgresDAO.query("SELECT * FROM public.user;")));
+        assertDoesNotThrow(() -> {
+            try (ResultSetWrapper result = postgresDAO.query("SELECT * FROM public.user;")) {
+                resultRef.set(result.resultSet());
+            }
+        });
         assertNotNull(resultRef.get());
     }
 
     @Test
     @DisplayName("Test connection is readOnly")
+    @SuppressWarnings("all") // epmty try-catch block
     void testConnectionIsReadyOnly() throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
         assertEquals(22, getUsersCount());
 
-        // try to delete users from read-only connection
-        try {
-            // language=SQL
-            postgresDAO.query("DELETE FROM public.user WHERE age > 0;");
-        } catch (DatabaseExecutionException e) {
-            // do nothing
-        }
+        // language=SQL
+        String query = "DELETE FROM public.user WHERE age > 0;";
+        try (ResultSetWrapper result = postgresDAO.query(query)) {}
+        catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
     }
@@ -67,9 +69,12 @@ class PostgresDAOTest extends PostgresTest {
      */
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
-        ResultSet resultSet = postgresDAO.query("SELECT COUNT(*) FROM public.user;");
-        resultSet.next();
-        return resultSet.getInt("count");
+        String query = "SELECT COUNT(*) FROM public.user;";
+
+        try (ResultSetWrapper result = postgresDAO.query(query)) {
+            result.resultSet().next();
+            return result.resultSet().getInt("count");
+        }
     }
 
 }

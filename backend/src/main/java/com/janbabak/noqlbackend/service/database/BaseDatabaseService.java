@@ -1,14 +1,13 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
+import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.sql.ResultSet;
 
 /**
  * This service handles operations with database using the {@link DatabaseDAO } with standard Connection as a DAO.
@@ -30,7 +29,7 @@ public abstract class BaseDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public ResultSet executeQuery(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper executeQuery(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         return databaseDAO.query(query);
     }
 

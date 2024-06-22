@@ -49,23 +49,24 @@ class MySqlDAOTest extends MySqlTest {
     @DisplayName("Test query database")
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
-        assertDoesNotThrow(() -> resultRef.set(mysqlDAO.query("SELECT * FROM `user`")));
+        assertDoesNotThrow(() -> {
+            try (ResultSetWrapper result = mysqlDAO.query("SELECT * FROM `user`")) {
+                resultRef.set(result.resultSet());
+            }
+        });
         assertNotNull(resultRef.get());
     }
 
     @Test
     @DisplayName("Test connection is readOnly")
+    @SuppressWarnings("all") // epmty try-catch block
     void testConnectionIsReadyOnly() throws DatabaseConnectionException, DatabaseExecutionException, SQLException {
         assertEquals(22, getUsersCount());
 
-        // try to delete users from read-only connection
-        try {
-            mysqlDAO.query("DELETE FROM `user` WHERE age > 0;");
-        } catch (DatabaseExecutionException e) {
-            // do nothing
-        } finally {
-            mysqlDAO.disconnect();
-        }
+        // language=SQL
+        String query = "DELETE FROM public.user WHERE age > 0;";
+        try (ResultSetWrapper result = mysqlDAO.query(query)) {}
+        catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
     }
@@ -76,8 +77,9 @@ class MySqlDAOTest extends MySqlTest {
      * @return number of records in the user table
      */
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
-        ResultSet resultSet = mysqlDAO.query("SELECT COUNT(*) AS count FROM `user`;");
-        resultSet.next();
-        return resultSet.getInt("count");
+        try (ResultSetWrapper result = mysqlDAO.query("SELECT COUNT(*) AS count FROM `user`;")) {
+            result.resultSet().next();
+            return result.resultSet().getInt("count");
+        }
     }
 }

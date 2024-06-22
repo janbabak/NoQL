@@ -1,12 +1,9 @@
 package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.sql.ResultSet;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -20,11 +17,9 @@ public class MySqlDAO extends DatabaseDAO {
      * Retrieve database schemas, tables columns and primary keys.
      *
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     @Override
-    public ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper getSchemasTablesColumns() {
         return null;
     }
 
@@ -32,11 +27,9 @@ public class MySqlDAO extends DatabaseDAO {
      * Retrieve foreign keys.
      *
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     @Override
-    public ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper getForeignKeys() {
         return null;
     }
 
