@@ -26,7 +26,7 @@ abstract public class MySqlTest {
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
     static final String CONTAINER_NAME = "mysql:8.3.0";
-    static final String COMNAND_SEPARATOR = "-- command separator";
+    static final String COMMAND_SEPARATOR = "-- command separator";
 
     @Container
     @SuppressWarnings("resource")

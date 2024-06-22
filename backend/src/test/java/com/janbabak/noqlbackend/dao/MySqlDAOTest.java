@@ -29,7 +29,7 @@ class MySqlDAOTest extends MySqlTest {
     @Override
     protected List<String> getCreateScript() {
         return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlUsers.sql")
-                .split(COMNAND_SEPARATOR)).toList();
+                .split(COMMAND_SEPARATOR)).toList();
     }
 
     @Test
