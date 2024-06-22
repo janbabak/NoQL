@@ -67,8 +67,6 @@ public abstract class DatabaseDAO {
             return connection.createStatement().executeQuery(query);
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
-        } finally {
-            disconnect();
         }
     }
 
@@ -100,6 +98,17 @@ public abstract class DatabaseDAO {
     public abstract void testConnection() throws DatabaseConnectionException;
 
     /**
+     * Close connection to the database.
+     */
+    public void disconnect() {
+        try {
+            this.connection.close();
+        } catch (SQLException e) {
+            log.error("Error while disconnecting from database - message={}.", e.getMessage());
+        }
+    }
+
+    /**
      * Create connection URL for specific database engine.
      *
      * @return connection URL
@@ -123,16 +132,4 @@ public abstract class DatabaseDAO {
             throw new DatabaseConnectionException(e.getMessage());
         }
     }
-
-    /**
-     * Close connection to the database.
-     */
-    protected void disconnect() {
-        try {
-            this.connection.close();
-        } catch (SQLException e) {
-            log.error("Error while disconnecting from database - message={}.", e.getMessage());
-        }
-    }
-
 }
