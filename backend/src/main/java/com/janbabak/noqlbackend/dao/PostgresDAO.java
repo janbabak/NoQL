@@ -14,11 +14,21 @@ public class PostgresDAO extends DatabaseDAO {
         super(database);
     }
 
-    @SuppressWarnings("unused")
-    public PostgresDAO() {
-        super();
-    }
-
+    /**
+     * Retrieve database schemas, tables columns and primary keys.<br />
+     * Returned columns:<br />
+     * <ul>
+     *     <li>table_schema e.g. cvut</li>
+     *     <li>table_name e.g. student</li>
+     *     <li>column_name e.g. student_specialization_id</li>
+     *     <li>data_type e.g. int</li>
+     *     <li>primary_key e.g. true</li>
+     * </ul>
+     *
+     * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
     @Override
     @SuppressWarnings("all") // IDE can't see the columns
     public ResultSetWrapper getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException {
@@ -38,14 +48,31 @@ public class PostgresDAO extends DatabaseDAO {
                   AND columns.table_schema != 'information_schema'
                   AND columns.table_name IN (SELECT table_name
                                              FROM information_schema.tables
-                                             WHERE table_type = 'BASE TABLE'
-                                               AND table_catalog = current_database())
-                ORDER BY table_schema, table_name, ordinal_position;
+                                             WHERE
+                                                table_type = 'BASE TABLE'
+                                                AND table_catalog = current_database())
+                ORDER BY
+                    table_schema,
+                    table_name,
+                    ordinal_position;
                 """;
 
         return query(select);
     }
 
+    /**
+     * Retrieve foreign keys.<br />
+     * Returned columns:<br />
+     * <ul>
+     *     <li>table_name e.g. cvut.student</li>
+     *     <li>foreign_key e.g. student_specialization_id_fkey</li>
+     *     <li>constraint_definition e.g. FOREIGN KEY (specialization_id) REFERENCES cvut.specialisation(id)</li>
+     * </ul>
+     *
+     * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
     @Override
     @SuppressWarnings("all") // IDE can't see the columns
     public ResultSetWrapper getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException {
