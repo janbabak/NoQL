@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `user`
     sex        CHAR(10),
     email      VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 -- command separator
 

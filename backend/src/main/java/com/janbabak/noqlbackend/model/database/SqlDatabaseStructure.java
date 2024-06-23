@@ -23,7 +23,6 @@ public class SqlDatabaseStructure implements DatabaseStructure {
      */
     public SqlDatabaseStructure() {
         schemas = new HashMap<>();
-//        schemas.put(DEFAULT_SCHEMA, new Schema(DEFAULT_SCHEMA));
     }
 
     /**

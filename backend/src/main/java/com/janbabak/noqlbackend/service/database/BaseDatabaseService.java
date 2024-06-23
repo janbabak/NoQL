@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 public abstract class BaseDatabaseService {
     protected DatabaseDAO databaseDAO; // initialized by the descendant class
 
-    @Autowired
     @SuppressWarnings("all")
+    @Autowired
     protected DatabaseRepository databaseRepository;
 
     /**

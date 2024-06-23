@@ -40,7 +40,8 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSetWrapper getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException;
+    public abstract ResultSetWrapper getSchemasTablesColumns()
+            throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Retrieve foreign keys.

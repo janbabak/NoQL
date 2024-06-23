@@ -25,11 +25,7 @@ class DatabaseServiceFactoryTest {
     @MethodSource("testGetDatabaseServiceDataProvider")
     @DisplayName("Test get database service based on the database engine.")
     void testGetDatabaseService(Database database, Class<? extends BaseDatabaseService> expected) {
-        // when
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-
-        // then
-        assertInstanceOf(expected, databaseService);
+        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseService(database));
     }
 
     static Object[][] testGetDatabaseServiceDataProvider() {
@@ -62,11 +58,7 @@ class DatabaseServiceFactoryTest {
     @MethodSource("testGetDatabaseDaoDataProvider")
     @DisplayName("Test get database DAO based on the database engine.")
     void testGetDatabaseDao(Database database, Class<? extends DatabaseDAO> expected) {
-        // when
-        DatabaseDAO databaseDao = DatabaseServiceFactory.getDatabaseDAO(database);
-
-        // then
-        assertInstanceOf(expected, databaseDao);
+        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseDAO(database));
     }
 
     static Object[][] testGetDatabaseDaoDataProvider() {
