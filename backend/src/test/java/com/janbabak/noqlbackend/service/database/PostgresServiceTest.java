@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.PostgresTest;
+import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
@@ -8,6 +8,7 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Schema;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -22,12 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresServiceTest extends PostgresTest {
+class PostgresServiceTest extends LocalDatabaseTest {
 
     @SuppressWarnings("FieldCanBeLocal")
     private PostgresService postgresService;
 
     private SqlDatabaseStructure databaseStructure;
+    public Database getDatabase() {
+        return postgresDatabase;
+    }
 
     private final String INTEGER_DATA_TYPE = "integer";
     @SuppressWarnings("FieldCanBeLocal")
@@ -44,16 +48,20 @@ class PostgresServiceTest extends PostgresTest {
     @SuppressWarnings("FieldCanBeLocal")
     private final String TIMESTAMP_DATA_TYPE = "timestamp without time zone";
 
+    /**
+     * Get scripts for initialization of the databases
+     */
     @Override
-    protected List<String> getInitializationScripts() {
-        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql"));
+    protected InitScripts getPostgresInitializationScripts() {
+        return InitScripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql"));
     }
 
     @BeforeAll
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
-        postgresService = new PostgresService(database);
+        postgresService = new PostgresService(getDatabase());
         databaseStructure = postgresService.retrieveSchema();
     }
 

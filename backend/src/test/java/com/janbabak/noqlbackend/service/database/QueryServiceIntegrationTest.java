@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.PostgresTest;
+import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -9,6 +9,7 @@ import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
@@ -43,7 +44,11 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class QueryServiceIntegrationTest extends PostgresTest {
+public class QueryServiceIntegrationTest extends LocalDatabaseTest {
+
+    private Database getDatabase() {
+        return postgresDatabase;
+    }
 
     @Autowired
     private QueryService queryService;
@@ -58,9 +63,13 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
+    /**
+     * Get scripts for initialization of the databases
+     */
     @Override
-    protected List<String> getInitializationScripts() {
-        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
+    protected InitScripts getPostgresInitializationScripts() {
+        return InitScripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
     }
 
     @BeforeAll
@@ -68,7 +77,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
 
-        databaseService.create(database);
+        databaseService.create(getDatabase());
 
         apiServiceMock
                 .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
@@ -88,7 +97,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
         // given
-        UUID databaseId = database.getId();
+        UUID databaseId = getDatabase().getId();
         Integer page = 1;
         Integer pageSize = 5;
         // language=SQL
@@ -136,7 +145,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
         // given
-        UUID databaseId = database.getId();
+        UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
@@ -279,7 +288,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
             LLMException, BadRequestException {
 
         // given
-        UUID databaseId = database.getId();
+        UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
         request.setChatId(chat.getId());
         for (CreateChatQueryWithResponseRequest message : messages) {

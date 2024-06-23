@@ -1,9 +1,10 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.MySqlTest;
+import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -11,18 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class MySqlServiceTest extends MySqlTest {
+class MySqlServiceTest extends LocalDatabaseTest {
     @SuppressWarnings("FieldCanBeLocal")
     private MySqlService mySqlService;
 
     private SqlDatabaseStructure databaseStructure;
+
+    private Database getDatabase() {
+        return mySqlDatabase;
+    }
 
     private final String INTEGER_DATA_TYPE = "int";
     @SuppressWarnings("FieldCanBeLocal")
@@ -39,17 +43,20 @@ class MySqlServiceTest extends MySqlTest {
     @SuppressWarnings("FieldCanBeLocal")
     private final String TIMESTAMP_DATA_TYPE = "timestamp";
 
+    /**
+     * Get scripts for initialization of the databases
+     */
     @Override
-    protected List<String> getInitializationScripts() {
-        return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlAllTables.sql")
-                .split(COMMAND_SEPARATOR)).toList();
+    protected InitScripts getPostgresInitializationScripts() {
+        return InitScripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlAllTables.sql"));
     }
 
     @BeforeAll
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
-        mySqlService = new MySqlService(database);
+        mySqlService = new MySqlService(getDatabase());
         databaseStructure = mySqlService.retrieveSchema();
     }
 

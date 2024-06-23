@@ -9,31 +9,43 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresDAOTest extends PostgresTest {
+class PostgresDAOTest extends LocalDatabaseTest {
 
-    @Override
-    protected List<String> getInitializationScripts() {
-        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
+    public int getDatabasePort() {
+        return getPostgresPort();
     }
+
+    public DatabaseDAO getDatabaseDao() {
+        return postgresDAO;
+    }
+
+    /**
+     * Get scripts for initialization of the databases
+     */
+    @Override
+    protected InitScripts getPostgresInitializationScripts() {
+        return InitScripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
+    }
+
 
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
         String expected = "jdbc:postgresql://localhost:" + getDatabasePort() + "/test-database";
-        assertEquals(expected, databaseDAO.createConnectionUrl());
+        assertEquals(expected, getDatabaseDao().createConnectionUrl());
     }
 
     @Test
     @DisplayName("Test connection")
     void testConnection() {
-        assertDoesNotThrow(() -> databaseDAO.testConnection());
+        assertDoesNotThrow(() -> getDatabaseDao().testConnection());
     }
 
     @Test
@@ -43,7 +55,7 @@ class PostgresDAOTest extends PostgresTest {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         assertDoesNotThrow(() -> {
             // language=SQL
-            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM eshop_user;")) {
+            try (ResultSetWrapper result = getDatabaseDao().query("SELECT * FROM eshop_user;")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -57,8 +69,8 @@ class PostgresDAOTest extends PostgresTest {
         assertEquals(22, getUsersCount());
 
         // language=SQL
-        String query = "DELETE FROM public.user WHERE age > 0;";
-        try (ResultSetWrapper result = databaseDAO.query(query)) {}
+        String query = "DELETE FROM eshop_user WHERE age > 0;";
+        try (ResultSetWrapper result = getDatabaseDao().query(query)) {}
         catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
@@ -74,10 +86,9 @@ class PostgresDAOTest extends PostgresTest {
         // language=SQL
         String query = "SELECT COUNT(*) AS count FROM eshop_user;";
 
-        try (ResultSetWrapper result = databaseDAO.query(query)) {
+        try (ResultSetWrapper result = getDatabaseDao().query(query)) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }
     }
-
 }

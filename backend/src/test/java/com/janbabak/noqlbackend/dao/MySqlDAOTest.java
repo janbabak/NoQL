@@ -10,33 +10,42 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class MySqlDAOTest extends MySqlTest {
+class MySqlDAOTest extends LocalDatabaseTest {
 
+    public int getDatabasePort() {
+        return getMySqlPort();
+    }
+
+    public DatabaseDAO getDatabaseDao() {
+        return mySqlDAO;
+    }
+
+    /**
+     * Get scripts for initialization of the databases
+     */
     @Override
-    protected List<String> getInitializationScripts() {
-        return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql")
-                .split(COMMAND_SEPARATOR)).toList();
+    protected InitScripts getPostgresInitializationScripts() {
+        return InitScripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
     }
 
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
         String expected = "jdbc:mysql://localhost:" + getDatabasePort() + "/test-database";
-        assertEquals(expected, databaseDAO.createConnectionUrl());
+        assertEquals(expected, getDatabaseDao().createConnectionUrl());
     }
 
     @Test
     @DisplayName("Test connection")
     void testConnection() {
-        assertDoesNotThrow(() -> databaseDAO.testConnection());
+        assertDoesNotThrow(() -> getDatabaseDao().testConnection());
     }
 
     @Test
@@ -46,7 +55,7 @@ class MySqlDAOTest extends MySqlTest {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         assertDoesNotThrow(() -> {
             // language=SQL
-            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM eshop_user;")) {
+            try (ResultSetWrapper result = getDatabaseDao().query("SELECT * FROM eshop_user;")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -60,8 +69,8 @@ class MySqlDAOTest extends MySqlTest {
         assertEquals(22, getUsersCount());
 
         // language=SQL
-        String query = "DELETE FROM public.user WHERE age > 0;";
-        try (ResultSetWrapper result = databaseDAO.query(query)) {}
+        String query = "DELETE FROM eshop_user WHERE age > 0;";
+        try (ResultSetWrapper result = getDatabaseDao().query(query)) {}
         catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
@@ -76,7 +85,7 @@ class MySqlDAOTest extends MySqlTest {
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
         String select = "SELECT COUNT(*) AS count FROM eshop_user;";
-        try (ResultSetWrapper result = databaseDAO.query(select)) {
+        try (ResultSetWrapper result = getDatabaseDao().query(select)) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }
