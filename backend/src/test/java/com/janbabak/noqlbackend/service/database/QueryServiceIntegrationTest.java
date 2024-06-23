@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
+import com.janbabak.noqlbackend.dao.AbstractLocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class QueryServiceIntegrationTest extends LocalDatabaseTest {
+public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
 
     private Database getDatabase() {
         return postgresDatabase;

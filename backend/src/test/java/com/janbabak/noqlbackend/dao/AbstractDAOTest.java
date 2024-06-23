@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public abstract class AbstractDAOTest extends LocalDatabaseTest {
+public abstract class AbstractDAOTest extends AbstractLocalDatabaseTest {
 
     @Test
     @DisplayName("Test connection")

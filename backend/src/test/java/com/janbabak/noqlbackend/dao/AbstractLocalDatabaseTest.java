@@ -26,7 +26,7 @@ import java.util.Arrays;
 @ActiveProfiles("test")
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class LocalDatabaseTest {
+public abstract class AbstractLocalDatabaseTest {
     protected static final String DATABASE_NAME = "test-database";
     private static final String DATABASE_USERNAME = "test-user";
     private static final String DATABASE_PASSWORD = "test-password";
