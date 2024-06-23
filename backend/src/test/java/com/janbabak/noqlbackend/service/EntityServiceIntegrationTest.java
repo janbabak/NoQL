@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
+import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -59,12 +59,12 @@ public class EntityServiceIntegrationTest {
     private final DatabaseDAO databaseDaoMock = new DatabaseDAO() {
 
         @Override
-        public ResultSet getSchemasTablesColumns() {
+        public ResultSetWrapper getSchemasTablesColumns() {
             return null;
         }
 
         @Override
-        public ResultSet getForeignKeys() {
+        public ResultSetWrapper getForeignKeys() {
             return null;
         }
 

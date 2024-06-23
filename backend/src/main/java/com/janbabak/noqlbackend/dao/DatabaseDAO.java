@@ -40,7 +40,8 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getSchemasTablesColumns() throws DatabaseConnectionException, DatabaseExecutionException;
+    public abstract ResultSetWrapper getSchemasTablesColumns()
+            throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Retrieve foreign keys.
@@ -49,7 +50,7 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public abstract ResultSet getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException;
+    public abstract ResultSetWrapper getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException;
 
     /**
      * Query the database.
@@ -59,16 +60,24 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    public ResultSet query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+    public ResultSetWrapper query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         connect(true);
 
         try {
             log.info("Execute read-only query={}.", query);
-            return connection.createStatement().executeQuery(query);
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            return new ResultSetWrapper(resultSet, () -> {
+                try {
+                    disconnect();
+                    statement.close();
+                    resultSet.close();
+                } catch (SQLException e) {
+                    log.error("Error while closing statement and result set - message={}.", e.getMessage());
+                }
+            });
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
-        } finally {
-            disconnect();
         }
     }
 
@@ -79,12 +88,13 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException query execution failed (syntax error)
      */
-    @SuppressWarnings("SameParameterValue")
     void updateDatabase(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         try {
             connect(false);
             log.info("Execute query={}.", query);
-            connection.createStatement().executeUpdate(query);
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(query);
+            statement.close();
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());
         } finally {
@@ -99,6 +109,17 @@ public abstract class DatabaseDAO {
      */
     @SuppressWarnings("all")
     public abstract void testConnection() throws DatabaseConnectionException;
+
+    /**
+     * Close connection to the database.
+     */
+    public void disconnect() {
+        try {
+            this.connection.close();
+        } catch (SQLException e) {
+            log.error("Error while disconnecting from database - message={}.", e.getMessage());
+        }
+    }
 
     /**
      * Create connection URL for specific database engine.
@@ -124,16 +145,4 @@ public abstract class DatabaseDAO {
             throw new DatabaseConnectionException(e.getMessage());
         }
     }
-
-    /**
-     * Close connection to the database.
-     */
-    protected void disconnect() {
-        try {
-            this.connection.close();
-        } catch (SQLException e) {
-            log.error("Error while disconnecting from database - message={}.", e.getMessage());
-        }
-    }
-
 }

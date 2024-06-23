@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.PostgresDAO;
+import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -49,9 +50,8 @@ public class PostgresService extends BaseDatabaseService {
      */
     private void retrieveSchemasTablesColumns(SqlDatabaseStructure db)
             throws DatabaseConnectionException, DatabaseExecutionException {
-        ResultSet resultSet = databaseDAO.getSchemasTablesColumns();
-
-        try {
+        try (ResultSetWrapper result = databaseDAO.getSchemasTablesColumns()) {
+            ResultSet resultSet = result.resultSet();
             while (resultSet.next()) {
                 String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
                 String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
@@ -82,12 +82,11 @@ public class PostgresService extends BaseDatabaseService {
      */
     private void retrieveForeignKeys(SqlDatabaseStructure db)
             throws DatabaseConnectionException, DatabaseExecutionException {
-        ResultSet resultSet = databaseDAO.getForeignKeys();
 
-        try {
-            while (resultSet.next()) {
-                String constraintDefinition = resultSet.getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
-                String referencingSchemaAndTable = resultSet.getString(TABLE_NAME_COLUMN_NAME);
+        try (ResultSetWrapper result = databaseDAO.getForeignKeys()) {
+            while (result.resultSet().next()) {
+                String constraintDefinition = result.resultSet().getString(FOREIGN_KEY_DEFINITION_COLUMN_NAME);
+                String referencingSchemaAndTable = result.resultSet().getString(TABLE_NAME_COLUMN_NAME);
 
                 ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 

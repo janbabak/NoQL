@@ -22,7 +22,7 @@ import java.util.ArrayList;
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract public class PostgresTest {
-
+    // TODO: rename to PostgresTest
     static final String DATABASE_NAME = "test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";

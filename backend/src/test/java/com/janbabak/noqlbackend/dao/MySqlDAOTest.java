@@ -3,45 +3,54 @@ package com.janbabak.noqlbackend.dao;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class PostgresDAOTest extends PostgresTest {
+class MySqlDAOTest extends MySqlTest {
 
+    /**
+     * Get list of scripts to create database. Each script is one command in case of MySQL, multiple commands in one
+     * script don't work.
+     *
+     * @return list of commands.
+     */
     @Override
-    protected String getCreateScript() {
-        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+    protected List<String> getCreateScript() {
+        return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlUsers.sql")
+                .split(COMMAND_SEPARATOR)).toList();
     }
 
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:postgresql://localhost:" + getDatabasePort() + "/test-database";
-        assertEquals(expected, postgresDAO.createConnectionUrl());
+        String expected = "jdbc:mysql://localhost:" + getDatabasePort() + "/mysql-test-database";
+        assertEquals(expected, mysqlDAO.createConnectionUrl());
     }
 
     @Test
     @DisplayName("Test connection")
     void testConnection() {
-        assertDoesNotThrow(() -> postgresDAO.testConnection());
+        assertDoesNotThrow(() -> mysqlDAO.testConnection());
     }
 
     @Test
     @DisplayName("Test query database")
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
-        // language=SQL
         assertDoesNotThrow(() -> {
-            try (ResultSetWrapper result = postgresDAO.query("SELECT * FROM public.user;")) {
+            try (ResultSetWrapper result = mysqlDAO.query("SELECT * FROM `user`")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -56,7 +65,7 @@ class PostgresDAOTest extends PostgresTest {
 
         // language=SQL
         String query = "DELETE FROM public.user WHERE age > 0;";
-        try (ResultSetWrapper result = postgresDAO.query(query)) {}
+        try (ResultSetWrapper result = mysqlDAO.query(query)) {}
         catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
@@ -68,13 +77,9 @@ class PostgresDAOTest extends PostgresTest {
      * @return number of records in the user table
      */
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
-        // language=SQL
-        String query = "SELECT COUNT(*) FROM public.user;";
-
-        try (ResultSetWrapper result = postgresDAO.query(query)) {
+        try (ResultSetWrapper result = mysqlDAO.query("SELECT COUNT(*) AS count FROM `user`;")) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }
     }
-
 }

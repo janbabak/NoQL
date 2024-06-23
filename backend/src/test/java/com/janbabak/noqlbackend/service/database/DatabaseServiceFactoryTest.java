@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
+import com.janbabak.noqlbackend.dao.MySqlDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -24,11 +25,7 @@ class DatabaseServiceFactoryTest {
     @MethodSource("testGetDatabaseServiceDataProvider")
     @DisplayName("Test get database service based on the database engine.")
     void testGetDatabaseService(Database database, Class<? extends BaseDatabaseService> expected) {
-        // when
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-
-        // then
-        assertInstanceOf(expected, databaseService);
+        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseService(database));
     }
 
     static Object[][] testGetDatabaseServiceDataProvider() {
@@ -40,14 +37,13 @@ class DatabaseServiceFactoryTest {
                                 .build(),
                         PostgresService.class
                 },
-                // TODO: implement database service for MySQL
-               /* {
+                {
                         Database.builder()
                                 .name("my-sql db")
                                 .engine(DatabaseEngine.MYSQL)
                                 .build(),
-                        null
-                }*/
+                        MySqlService.class
+                }
         };
     }
 
@@ -62,11 +58,7 @@ class DatabaseServiceFactoryTest {
     @MethodSource("testGetDatabaseDaoDataProvider")
     @DisplayName("Test get database DAO based on the database engine.")
     void testGetDatabaseDao(Database database, Class<? extends DatabaseDAO> expected) {
-        // when
-        DatabaseDAO databaseDao = DatabaseServiceFactory.getDatabaseDAO(database);
-
-        // then
-        assertInstanceOf(expected, databaseDao);
+        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseDAO(database));
     }
 
     static Object[][] testGetDatabaseDaoDataProvider() {
@@ -78,14 +70,13 @@ class DatabaseServiceFactoryTest {
                                 .build(),
                         PostgresDAO.class
                 },
-                // TODO: implement database service for MySQL
-                /* {
-                         Database.builder()
-                                 .name("my-sql db")
-                                 .engine(DatabaseEngine.MYSQL)
-                                 .build(),
-                         null
-                 }*/
+                {
+                        Database.builder()
+                                .name("my-sql db")
+                                .engine(DatabaseEngine.MYSQL)
+                                .build(),
+                        MySqlDAO.class
+                }
         };
     }
 }
