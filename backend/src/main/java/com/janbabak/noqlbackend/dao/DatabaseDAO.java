@@ -107,8 +107,13 @@ public abstract class DatabaseDAO {
      *
      * @throws DatabaseConnectionException cannot establish connection with the database
      */
-    @SuppressWarnings("all")
-    public abstract void testConnection() throws DatabaseConnectionException;
+    public void testConnection() throws DatabaseConnectionException {
+        connect(true);
+
+        if (connection == null) {
+            throw new DatabaseConnectionException();
+        }
+    }
 
     /**
      * Close connection to the database.
