@@ -116,10 +116,10 @@ class MySqlServiceTest extends MySqlTest {
         assertEquals(
                 new SqlDatabaseStructure.Column("id", INTEGER_DATA_TYPE, true, null),
                 table.getColumns().get("id"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("user_id", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("public", "\"user\"", "id")),
-//                table.getColumns().get("user_id"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("user_id", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "user", "id")),
+                table.getColumns().get("user_id"));
         assertEquals(
                 new SqlDatabaseStructure.Column("street", VARCHAR_DATA_TYPE, false, null),
                 table.getColumns().get("street"));
@@ -141,10 +141,10 @@ class MySqlServiceTest extends MySqlTest {
         assertEquals(
                 new SqlDatabaseStructure.Column("id", INTEGER_DATA_TYPE, true, null),
                 table.getColumns().get("id"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("user_id", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("public", "\"user\"", "id")),
-//                table.getColumns().get("user_id"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("user_id", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "user", "id")),
+                table.getColumns().get("user_id"));
         assertEquals(
                 new SqlDatabaseStructure.Column("order_date", DATE_DATA_TYPE, false, null),
                 table.getColumns().get("order_date"));
@@ -154,10 +154,10 @@ class MySqlServiceTest extends MySqlTest {
         assertEquals(
                 new SqlDatabaseStructure.Column("payment_method", VARCHAR_DATA_TYPE, false, null),
                 table.getColumns().get("payment_method"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("shipping_address_id", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("public", "address", "id")),
-//                table.getColumns().get("shipping_address_id"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("shipping_address_id", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "address", "id")),
+                table.getColumns().get("shipping_address_id"));
         assertEquals(
                 new SqlDatabaseStructure.Column("is_shipped", BOOLEAN_DATA_TYPE, false, null),
                 table.getColumns().get("is_shipped"));
@@ -203,10 +203,10 @@ class MySqlServiceTest extends MySqlTest {
         assertEquals(
                 new SqlDatabaseStructure.Column("grade", INTEGER_DATA_TYPE, false, null),
                 table.getColumns().get("grade"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("specialisation_id", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("cvut", "specialisation", "id")),
-//                table.getColumns().get("specialisation_id"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("specialisation_id", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "specialisation", "id")),
+                table.getColumns().get("specialisation_id"));
     }
 
     @Test
@@ -219,14 +219,14 @@ class MySqlServiceTest extends MySqlTest {
         assertEquals(
                 new SqlDatabaseStructure.Column("data", VARCHAR_DATA_TYPE, false, null),
                 table.getColumns().get("data"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("author", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("public", "\"user\"", "id")),
-//                table.getColumns().get("author"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("reviewer_of_data", INTEGER_DATA_TYPE, false,
-//                        new SqlDatabaseStructure.ForeignKey("cvut", "student", "id")),
-//                table.getColumns().get("reviewer_of_data"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("author", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "user", "id")),
+                table.getColumns().get("author"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("reviewer_of_data", INTEGER_DATA_TYPE, false,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "student", "id")),
+                table.getColumns().get("reviewer_of_data"));
     }
 
     @Test
@@ -245,16 +245,16 @@ class MySqlServiceTest extends MySqlTest {
     @DisplayName("Test exam table")
     void testExamTable() {
         SqlDatabaseStructure.Table table = databaseStructure.getSchemas().get(DATABASE_NAME).getTables().get("exam");
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("student", INTEGER_DATA_TYPE, true,
-//                        new SqlDatabaseStructure.ForeignKey("cvut", "student", "id")),
-//                table.getColumns().get("student"));
-//        assertEquals(
-//                new SqlDatabaseStructure.Column("course", INTEGER_DATA_TYPE, true, new SqlDatabaseStructure.ForeignKey(
-//                        "cvut",
-//                        "course",
-//                        "\"(identifier of course\"")),
-//                table.getColumns().get("course"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("student", INTEGER_DATA_TYPE, true,
+                        new SqlDatabaseStructure.ForeignKey(DATABASE_NAME, "student", "id")),
+                table.getColumns().get("student"));
+        assertEquals(
+                new SqlDatabaseStructure.Column("course", INTEGER_DATA_TYPE, true, new SqlDatabaseStructure.ForeignKey(
+                        DATABASE_NAME,
+                        "course",
+                        "(identifier of course")),
+                table.getColumns().get("course"));
     }
 
 

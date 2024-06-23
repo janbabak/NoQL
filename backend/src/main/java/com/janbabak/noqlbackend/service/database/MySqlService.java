@@ -99,7 +99,7 @@ public class MySqlService extends BaseDatabaseService {
                     continue;
                 }
                 Column column = table.getColumns().get(referencingColumn);
-                if (column != null) {
+                if (column == null) {
                     continue;
                 }
                 column.setForeignKey(new ForeignKey(referencedSchema, referencedTable, referencedColumn));
