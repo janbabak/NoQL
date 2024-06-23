@@ -7,7 +7,9 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -22,6 +24,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 abstract public class PostgresTest extends LocalDatabaseTest {
     static final String CONTAINER_NAME = "postgres:16-alpine";
 
+    @Container
+    protected static PostgreSQLContainer<?> databaseContainer;
+
     static {
         try (PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>(CONTAINER_NAME)) {
             databaseContainer = postgresContainer
@@ -31,13 +36,17 @@ abstract public class PostgresTest extends LocalDatabaseTest {
         }
     }
 
-    @Override
     @BeforeAll
+    @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
     }
 
     protected DatabaseEngine getDatabaseEngine() {
         return DatabaseEngine.POSTGRES;
+    }
+
+    protected JdbcDatabaseContainer<?> getDatabaseContainer() {
+        return databaseContainer;
     }
 }

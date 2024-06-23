@@ -10,8 +10,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +21,11 @@ import java.util.List;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class LocalDatabaseTest {
     protected static final String DATABASE_NAME = "test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
-
-    @Container
-    protected static JdbcDatabaseContainer<?> databaseContainer;
 
     protected DatabaseDAO databaseDAO;
     protected Database database;
@@ -40,11 +34,11 @@ public abstract class LocalDatabaseTest {
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         database = Database.builder()
                 .name("Local testing database")
-                .host(databaseContainer.getHost())
-                .database(databaseContainer.getDatabaseName())
-                .userName(databaseContainer.getUsername())
-                .password(databaseContainer.getPassword())
-                .port(databaseContainer.getFirstMappedPort())
+                .host(getDatabaseContainer().getHost())
+                .database(getDatabaseContainer().getDatabaseName())
+                .userName(getDatabaseContainer().getUsername())
+                .password(getDatabaseContainer().getPassword())
+                .port(getDatabaseContainer().getFirstMappedPort())
                 .chats(new ArrayList<>())
                 .engine(getDatabaseEngine())
                 .build();
@@ -57,7 +51,7 @@ public abstract class LocalDatabaseTest {
     }
 
     protected Integer getDatabasePort() {
-        return databaseContainer.getFirstMappedPort();
+        return getDatabaseContainer().getFirstMappedPort();
     }
 
     /**
@@ -69,4 +63,6 @@ public abstract class LocalDatabaseTest {
     protected abstract List<String> getInitializationScripts();
 
     protected abstract DatabaseEngine getDatabaseEngine();
+
+    protected abstract JdbcDatabaseContainer<?> getDatabaseContainer();
 }

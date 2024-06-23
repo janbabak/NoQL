@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -25,6 +27,9 @@ abstract public class MySqlTest extends LocalDatabaseTest {
     static final String CONTAINER_NAME = "mysql:8.3.0";
     public static final String COMMAND_SEPARATOR = "-- command separator";
 
+    @Container
+    protected static MySQLContainer<?> databaseContainer;
+
     static {
         try (MySQLContainer<?> mySQLContainer = new MySQLContainer<>(CONTAINER_NAME)) {
             databaseContainer = mySQLContainer
@@ -34,13 +39,17 @@ abstract public class MySqlTest extends LocalDatabaseTest {
         }
     }
 
-    @Override
     @BeforeAll
+    @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
     }
 
     protected DatabaseEngine getDatabaseEngine() {
         return DatabaseEngine.MYSQL;
+    }
+
+    protected JdbcDatabaseContainer<?> getDatabaseContainer() {
+        return databaseContainer;
     }
 }
