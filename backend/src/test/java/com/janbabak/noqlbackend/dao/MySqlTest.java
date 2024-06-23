@@ -22,11 +22,11 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract public class MySqlTest {
 
-    static final String DATABASE_NAME = "mysql-test-database";
+    public static final String COMMAND_SEPARATOR = "-- command separator";
+    protected static final String DATABASE_NAME = "mysql-test-database";
     static final String DATABASE_USERNAME = "test-user";
     static final String DATABASE_PASSWORD = "test-password";
     static final String CONTAINER_NAME = "mysql:8.3.0";
-    static final String COMMAND_SEPARATOR = "-- command separator";
 
     @Container
     @SuppressWarnings("resource")
