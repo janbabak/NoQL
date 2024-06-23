@@ -9,8 +9,9 @@ plotService
 
 .aws
 
-# Example database
+# Example databases
 exampleDatabase/data
+exampleDatabase/mysql-data
 
 # Experimantal
 experimental

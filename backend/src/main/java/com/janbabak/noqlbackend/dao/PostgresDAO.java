@@ -90,27 +90,13 @@ public class PostgresDAO extends DatabaseDAO {
     }
 
     /**
-     * Test connection to database.
-     *
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     */
-    @Override
-    public void testConnection() throws DatabaseConnectionException {
-        connect(true);
-
-        if (connection == null) {
-            throw new DatabaseConnectionException();
-        } // TODO: move to ancestor
-    }
-
-    /**
      * Create connection URL for specific database engine.
      *
      * @return connection URL
      */
     @Override
     protected String createConnectionUrl() {
-        return "jdbc:postgresql://" + databaseMetadata.getHost() + ":" + databaseMetadata.getPort() +
-                "/" + databaseMetadata.getDatabase(); // TODO: formatted string
+        return "jdbc:postgresql://%s:%d/%s"
+                .formatted(databaseMetadata.getHost(), databaseMetadata.getPort(), databaseMetadata.getDatabase());
     }
 }
