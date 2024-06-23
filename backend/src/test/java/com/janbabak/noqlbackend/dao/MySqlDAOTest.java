@@ -20,7 +20,7 @@ class MySqlDAOTest extends AbstractSqlDAOTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getPostgresInitializationScripts() {
+    protected InitScripts getInitializationScripts() {
         return InitScripts.mySql(
                 FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
     }

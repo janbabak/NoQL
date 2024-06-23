@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,34 +28,35 @@ import java.util.Arrays;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class LocalDatabaseTest {
     protected static final String DATABASE_NAME = "test-database";
-    static final String DATABASE_USERNAME = "test-user";
-    static final String DATABASE_PASSWORD = "test-password";
+    private static final String DATABASE_USERNAME = "test-user";
+    private static final String DATABASE_PASSWORD = "test-password";
 
-    static final String POSTGRES_CONTAINER_NAME = "postgres:16-alpine";
-    static final String MYSQL_CONTAINER_NAME = "mysql:8.3.0";
+    private static final String POSTGRES_CONTAINER_NAME = "postgres:16-alpine";
+    private static final String MYSQL_CONTAINER_NAME = "mysql:8.3.0";
 
-    public static final String COMMAND_SEPARATOR = "-- command separator";
-
-    @Container
-    protected static PostgreSQLContainer<?> postgresContainer;
-
-    @Container
-    protected static MySQLContainer<?> mySqlContainer;
+    private static final String COMMAND_SEPARATOR = "-- command separator";
 
     protected PostgresDAO postgresDAO;
     protected MySqlDAO mySqlDAO;
     protected Database postgresDatabase;
     protected Database mySqlDatabase;
 
+    @Container
+    private static PostgreSQLContainer<?> postgresContainer;
+
+    @Container
+    private static MySQLContainer<?> mySqlContainer;
+
     static {
-        try (PostgreSQLContainer<?> container = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME)) {
-            postgresContainer = container
+        try (PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME);
+             MySQLContainer<?> mysql = new MySQLContainer<>(MYSQL_CONTAINER_NAME)) {
+
+            postgresContainer = postgres
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
                     .withPassword(DATABASE_PASSWORD);
-        }
-        try (MySQLContainer<?> container = new MySQLContainer<>(MYSQL_CONTAINER_NAME)) {
-            mySqlContainer = container
+
+            mySqlContainer = mysql
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
                     .withPassword(DATABASE_PASSWORD);
@@ -63,36 +65,18 @@ public abstract class LocalDatabaseTest {
 
     @BeforeAll
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
-        InitScripts initScripts = getPostgresInitializationScripts();
+        InitScripts initScripts = getInitializationScripts();
 
-        postgresDatabase = Database.builder()
-                .name("Local postgres testing database")
-                .host(postgresContainer.getHost())
-                .database(postgresContainer.getDatabaseName())
-                .userName(postgresContainer.getUsername())
-                .password(postgresContainer.getPassword())
-                .port(postgresContainer.getFirstMappedPort())
-                .chats(new ArrayList<>())
-                .engine(DatabaseEngine.POSTGRES)
-                .build();
-
+        // postgres
+        postgresDatabase = createDatabase(postgresContainer, DatabaseEngine.POSTGRES);
         postgresDAO = new PostgresDAO(postgresDatabase);
 
         if (initScripts.postgresScript != null) {
             postgresDAO.updateDatabase(initScripts.postgresScript);
         }
 
-        mySqlDatabase = Database.builder()
-                .name("Local MySQL testing database")
-                .host(mySqlContainer.getHost())
-                .database(mySqlContainer.getDatabaseName())
-                .userName(mySqlContainer.getUsername())
-                .password(mySqlContainer.getPassword())
-                .port(mySqlContainer.getFirstMappedPort())
-                .chats(new ArrayList<>())
-                .engine(DatabaseEngine.MYSQL)
-                .build();
-
+        // mysql
+        mySqlDatabase = createDatabase(mySqlContainer, DatabaseEngine.MYSQL);
         mySqlDAO = new MySqlDAO(mySqlDatabase);
 
         if (initScripts.mySqlScript != null) {
@@ -100,8 +84,12 @@ public abstract class LocalDatabaseTest {
                 mySqlDAO.updateDatabase(script);
             }
         }
-
     }
+
+    /**
+     * Get scripts for initialization of the databases
+     */
+    protected abstract InitScripts getInitializationScripts();
 
     protected Integer getPostgresPort() {
         return postgresContainer.getFirstMappedPort();
@@ -111,11 +99,26 @@ public abstract class LocalDatabaseTest {
         return mySqlContainer.getFirstMappedPort();
     }
 
-    /**
-     * Get scripts for initialization of the databases
-     */
-    protected abstract InitScripts getPostgresInitializationScripts();
+    private Database createDatabase(JdbcDatabaseContainer<?> container, DatabaseEngine engine) {
+        return Database.builder()
+                .name("Local testing database")
+                .host(container.getHost())
+                .database(container.getDatabaseName())
+                .userName(container.getUsername())
+                .password(container.getPassword())
+                .port(container.getFirstMappedPort())
+                .chats(new ArrayList<>())
+                .engine(engine)
+                .build();
+    }
 
+    /**
+     * Scripts for initialization of the databases
+     *
+     * @param postgresScript commands for Postgres
+     * @param mySqlScript    commands for MySQL separated by {@link #COMMAND_SEPARATOR} because MySQL doesn't support
+     *                       multiple commands in one query
+     */
     public record InitScripts(String postgresScript, String mySqlScript) {
 
         public static InitScripts mySql(String mySqlScript) {

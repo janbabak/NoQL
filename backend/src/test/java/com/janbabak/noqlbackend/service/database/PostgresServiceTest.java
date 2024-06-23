@@ -52,7 +52,7 @@ class PostgresServiceTest extends LocalDatabaseTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getPostgresInitializationScripts() {
+    protected InitScripts getInitializationScripts() {
         return InitScripts.postgres(
                 FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql"));
     }
