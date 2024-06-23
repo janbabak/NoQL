@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Thread.sleep;
-
 @Slf4j
 @Service
 public class DockerService {
@@ -122,12 +120,7 @@ public class DockerService {
      */
     public void pullImage(String imageName) {
         String command = "docker pull " + imageName;
-        // TODO: remove - plot-service image is not uploaded so far
-        try {
-            executeCommand(command);
-        } catch (Exception e) {
-            log.error("Image pull failed: '{}'", imageName);
-        }
+        executeCommand(command);
     }
 
     /**
