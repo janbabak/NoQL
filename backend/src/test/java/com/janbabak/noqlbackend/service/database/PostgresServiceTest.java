@@ -54,7 +54,7 @@ class PostgresServiceTest extends AbstractLocalDatabaseTest {
     @Override
     protected InitScripts getInitializationScripts() {
         return InitScripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/allTables.sql"));
     }
 
     @BeforeAll

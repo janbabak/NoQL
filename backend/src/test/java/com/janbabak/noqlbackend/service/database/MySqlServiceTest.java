@@ -49,7 +49,7 @@ class MySqlServiceTest extends AbstractLocalDatabaseTest {
     @Override
     protected InitScripts getInitializationScripts() {
         return InitScripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlAllTables.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTables.sql"));
     }
 
     @BeforeAll
