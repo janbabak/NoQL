@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
+import com.janbabak.noqlbackend.dao.MySqlDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -40,14 +41,13 @@ class DatabaseServiceFactoryTest {
                                 .build(),
                         PostgresService.class
                 },
-                // TODO: implement database service for MySQL
-               /* {
+                {
                         Database.builder()
                                 .name("my-sql db")
                                 .engine(DatabaseEngine.MYSQL)
                                 .build(),
-                        null
-                }*/
+                        MySqlService.class
+                }
         };
     }
 
@@ -78,14 +78,13 @@ class DatabaseServiceFactoryTest {
                                 .build(),
                         PostgresDAO.class
                 },
-                // TODO: implement database service for MySQL
-                /* {
-                         Database.builder()
-                                 .name("my-sql db")
-                                 .engine(DatabaseEngine.MYSQL)
-                                 .build(),
-                         null
-                 }*/
+                {
+                        Database.builder()
+                                .name("my-sql db")
+                                .engine(DatabaseEngine.MYSQL)
+                                .build(),
+                        MySqlDAO.class
+                }
         };
     }
 }
