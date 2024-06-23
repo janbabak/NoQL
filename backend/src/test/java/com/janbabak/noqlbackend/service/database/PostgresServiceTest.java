@@ -45,15 +45,15 @@ class PostgresServiceTest extends PostgresTest {
     private final String TIMESTAMP_DATA_TYPE = "timestamp without time zone";
 
     @Override
-    protected String getCreateScript() {
-        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql");
+    protected List<String> getInitializationScripts() {
+        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresAllTables.sql"));
     }
 
     @BeforeAll
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
-        postgresService = new PostgresService(postgresDatabase);
+        postgresService = new PostgresService(database);
         databaseStructure = postgresService.retrieveSchema();
     }
 

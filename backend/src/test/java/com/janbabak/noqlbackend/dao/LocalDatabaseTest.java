@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract class for testing classes that access databases.<br />
+ * It uses Testcontainers to run databases in Docker container.<br />
+ * It doesn't change the Spring profile, so the database is not used by ORM repositories.
+ */
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers
@@ -40,10 +46,10 @@ public abstract class LocalDatabaseTest {
                 .password(databaseContainer.getPassword())
                 .port(databaseContainer.getFirstMappedPort())
                 .chats(new ArrayList<>())
-                .engine(DatabaseEngine.POSTGRES)
+                .engine(getDatabaseEngine())
                 .build();
 
-        databaseDAO = new MySqlDAO(database);
+        databaseDAO = DatabaseServiceFactory.getDatabaseDAO(database);
 
         for (String script : getInitializationScripts()) {
             databaseDAO.updateDatabase(script);
@@ -61,4 +67,6 @@ public abstract class LocalDatabaseTest {
      * @return list of commands.
      */
     protected abstract List<String> getInitializationScripts();
+
+    protected abstract DatabaseEngine getDatabaseEngine();
 }

@@ -59,8 +59,8 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
     @Override
-    protected String getCreateScript() {
-        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+    protected List<String> getInitializationScripts() {
+        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql"));
     }
 
     @BeforeAll
@@ -68,7 +68,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
 
-        databaseService.create(postgresDatabase);
+        databaseService.create(database);
 
         apiServiceMock
                 .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
@@ -87,7 +87,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = database.getId();
         Integer page = 1;
         Integer pageSize = 5;
         // language=SQL
@@ -135,7 +135,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = database.getId();
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
@@ -277,7 +277,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
             LLMException, BadRequestException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = database.getId();
         ChatDto chat = chatService.create(databaseId);
         request.setChatId(chat.getId());
         for (CreateChatQueryWithResponseRequest message : messages) {

@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,21 +19,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class PostgresDAOTest extends PostgresTest {
 
     @Override
-    protected String getCreateScript() {
-        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+    protected List<String> getInitializationScripts() {
+        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql"));
     }
 
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
         String expected = "jdbc:postgresql://localhost:" + getDatabasePort() + "/test-database";
-        assertEquals(expected, postgresDAO.createConnectionUrl());
+        assertEquals(expected, databaseDAO.createConnectionUrl());
     }
 
     @Test
     @DisplayName("Test connection")
     void testConnection() {
-        assertDoesNotThrow(() -> postgresDAO.testConnection());
+        assertDoesNotThrow(() -> databaseDAO.testConnection());
     }
 
     @Test
@@ -41,7 +42,7 @@ class PostgresDAOTest extends PostgresTest {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         // language=SQL
         assertDoesNotThrow(() -> {
-            try (ResultSetWrapper result = postgresDAO.query("SELECT * FROM public.user;")) {
+            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM public.user;")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -56,7 +57,7 @@ class PostgresDAOTest extends PostgresTest {
 
         // language=SQL
         String query = "DELETE FROM public.user WHERE age > 0;";
-        try (ResultSetWrapper result = postgresDAO.query(query)) {}
+        try (ResultSetWrapper result = databaseDAO.query(query)) {}
         catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
@@ -71,7 +72,7 @@ class PostgresDAOTest extends PostgresTest {
         // language=SQL
         String query = "SELECT COUNT(*) FROM public.user;";
 
-        try (ResultSetWrapper result = postgresDAO.query(query)) {
+        try (ResultSetWrapper result = databaseDAO.query(query)) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }
