@@ -20,15 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MySqlDAOTest extends MySqlTest {
 
-    /**
-     * Get list of scripts to create database. Each script is one command in case of MySQL, multiple commands in one
-     * script don't work.
-     *
-     * @return list of commands.
-     */
     @Override
     protected List<String> getInitializationScripts() {
-        return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlUsers.sql")
+        return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql")
                 .split(COMMAND_SEPARATOR)).toList();
     }
 
@@ -47,10 +41,12 @@ class MySqlDAOTest extends MySqlTest {
 
     @Test
     @DisplayName("Test query database")
+    @SuppressWarnings("all") // IDE can't see the columns
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         assertDoesNotThrow(() -> {
-            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM `user`")) {
+            // language=SQL
+            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM eshop_user;")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -76,8 +72,11 @@ class MySqlDAOTest extends MySqlTest {
      *
      * @return number of records in the user table
      */
+    @SuppressWarnings("all") // IDE can't see the columns
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
-        try (ResultSetWrapper result = databaseDAO.query("SELECT COUNT(*) AS count FROM `user`;")) {
+        // language=SQL
+        String select = "SELECT COUNT(*) AS count FROM eshop_user;";
+        try (ResultSetWrapper result = databaseDAO.query(select)) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }

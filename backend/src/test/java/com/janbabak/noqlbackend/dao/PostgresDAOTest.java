@@ -20,7 +20,7 @@ class PostgresDAOTest extends PostgresTest {
 
     @Override
     protected List<String> getInitializationScripts() {
-        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql"));
+        return List.of(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
     }
 
     @Test
@@ -38,11 +38,12 @@ class PostgresDAOTest extends PostgresTest {
 
     @Test
     @DisplayName("Test query database")
+    @SuppressWarnings("all") // IDE can't see the columns
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
-        // language=SQL
         assertDoesNotThrow(() -> {
-            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM public.user;")) {
+            // language=SQL
+            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM eshop_user;")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -68,9 +69,10 @@ class PostgresDAOTest extends PostgresTest {
      *
      * @return number of records in the user table
      */
+    @SuppressWarnings("all") // IDE can't see the columns
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
         // language=SQL
-        String query = "SELECT COUNT(*) FROM public.user;";
+        String query = "SELECT COUNT(*) AS count FROM eshop_user;";
 
         try (ResultSetWrapper result = databaseDAO.query(query)) {
             result.resultSet().next();
