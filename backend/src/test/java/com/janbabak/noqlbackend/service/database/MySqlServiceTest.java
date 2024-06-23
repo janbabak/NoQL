@@ -30,15 +30,6 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
         TIMESTAMP_DATA_TYPE = "timestamp";
     }
 
-    /**
-     * Get scripts for initialization of the databases
-     */
-    @Override
-    protected InitScripts getInitializationScripts() {
-        return InitScripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTables.sql"));
-    }
-
     protected Database getDatabase() {
         return mySqlDatabase;
     }
@@ -87,19 +78,29 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
         return getTable(getDefaultSchema(), "exam");
     }
 
+    /**
+     * Get scripts for initialization of the databases
+     */
+    @Override
+    protected InitScripts getInitializationScripts() {
+        return InitScripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTables.sql"));
+    }
+
     @Test
     @DisplayName("Test schemas")
     void testSchemas() {
         // MySQL does not have schemas like postgres. The top level is the database and it contains tables.
         assertEquals(1, databaseStructure.getSchemas().size());
-        assertTrue(databaseStructure.getSchemas().containsKey(DATABASE_NAME));
+        assertTrue(databaseStructure.getSchemas().containsKey(getDefaultSchema()));
     }
 
     @Test
     @DisplayName("Test default schema/database")
     void testDefaultSchema() {
-        SqlDatabaseStructure.Schema schema = databaseStructure.getSchemas().get(DATABASE_NAME);
-        assertEquals(DATABASE_NAME, schema.getName());
+        SqlDatabaseStructure.Schema schema = databaseStructure.getSchemas().get(getDefaultSchema());
+
+        assertEquals(getDefaultSchema(), schema.getName());
         assertEquals(8, schema.getTables().size());
         assertTrue(schema.getTables().containsKey("user"));
         assertTrue(schema.getTables().containsKey("address"));
@@ -112,8 +113,10 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
 
         verifyTable(schema.getTables().get("user"), "user", List.of("id"),
                 List.of("id", "name", "age", "sex", "email", "created_at"));
+
         verifyTable(schema.getTables().get("address"), "address", List.of("id"),
                 List.of("id", "user_id", "street", "city", "state", "postal_code"));
+
         verifyTable(schema.getTables().get("order"), "order", List.of("id"),
                 List.of("id", "user_id", "order_date", "total_amount", "payment_method", "shipping_address_id",
                         "is_shipped", "tracking_number", "status", "notes"));

@@ -31,15 +31,6 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
         TIMESTAMP_DATA_TYPE = "timestamp without time zone";
     }
 
-    /**
-     * Get scripts for initialization of the databases
-     */
-    @Override
-    protected InitScripts getInitializationScripts() {
-        return InitScripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/allTables.sql"));
-    }
-
     protected Database getDatabase() {
         return postgresDatabase;
     }
@@ -98,6 +89,15 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
         return "\"(identifier of course\"";
     }
 
+    /**
+     * Get scripts for initialization of the databases
+     */
+    @Override
+    protected InitScripts getInitializationScripts() {
+        return InitScripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/allTables.sql"));
+    }
+
     @Test
     @DisplayName("Test schemas")
     void testSchemas() {
@@ -109,8 +109,9 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test public schema")
     void testPublicSchema() {
-        Schema schema = databaseStructure.getSchemas().get("public");
-        assertEquals("public", schema.getName());
+        Schema schema = databaseStructure.getSchemas().get(getDefaultSchema());
+
+        assertEquals(getDefaultSchema(), schema.getName());
         assertEquals(3, schema.getTables().size());
         assertTrue(schema.getTables().containsKey("user"));
         assertTrue(schema.getTables().containsKey("address"));
@@ -118,8 +119,10 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
 
         verifyTable(schema.getTables().get("user"), "user", List.of("id"),
                 List.of("id", "name", "age", "sex", "email", "created_at"));
+
         verifyTable(schema.getTables().get("address"), "address", List.of("id"),
                 List.of("id", "user_id", "street", "city", "state", "postal_code"));
+
         verifyTable(schema.getTables().get("order"), "order", List.of("id"),
                 List.of("id", "user_id", "order_date", "total_amount", "payment_method", "shipping_address_id",
                         "is_shipped", "tracking_number", "status", "notes"));
@@ -128,9 +131,9 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test cvut schema")
     void testCvutSchema() {
-        Schema schema = databaseStructure.getSchemas().get("cvut");
+        Schema schema = databaseStructure.getSchemas().get(getCvutSchema());
 
-        assertEquals("cvut", schema.getName());
+        assertEquals(getCvutSchema(), schema.getName());
         assertEquals(5, schema.getTables().size());
         assertTrue(schema.getTables().containsKey("specialisation"));
         assertTrue(schema.getTables().containsKey("student"));
@@ -140,12 +143,16 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
 
         verifyTable(schema.getTables().get("specialisation"), "specialisation", List.of("id"),
                 List.of("id", "name", "manager"));
+
         verifyTable(schema.getTables().get("student"), "student", List.of("id"),
                 List.of("id", "name", "birthdate", "grade", "specialisation_id"));
+
         verifyTable(schema.getTables().get("fit_wiki"), "fit_wiki", List.of("identifier"),
                 List.of("identifier", "data", "author", "reviewer_of_data"));
+
         verifyTable(schema.getTables().get("course"), "course", List.of("(identifier of course"),
                 List.of("(identifier of course", "name"));
+
         verifyTable(schema.getTables().get("exam"), "exam", List.of("student", "course"),
                 List.of("student", "course"));
     }

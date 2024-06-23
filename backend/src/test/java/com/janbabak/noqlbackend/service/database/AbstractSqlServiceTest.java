@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
 
+    // these data type fields must be set in the constructor of the extending class
     protected String INTEGER_DATA_TYPE;
     protected String NUMERIC_DATA_TYPE;
     protected String VARCHAR_DATA_TYPE;
@@ -28,9 +29,7 @@ public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
     protected String DATE_DATA_TYPE;
     protected String TIMESTAMP_DATA_TYPE;
 
-    private SqlDatabaseService databaseService;
     protected SqlDatabaseStructure databaseStructure;
-
 
     abstract Database getDatabase();
     abstract SqlDatabaseService getSqlService(Database database);
@@ -45,6 +44,10 @@ public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
     abstract Table getCourseTable();
     abstract Table getExamTable();
 
+    protected Table getTable(String schema, String tableName) {
+        return databaseStructure.getSchemas().get(schema).getTables().get(tableName);
+    }
+
     protected String getUserTableName() {
         return "user";
     }
@@ -53,11 +56,31 @@ public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
         return "(identifier of course";
     }
 
+    /**
+     * Verify that the table contains the only expected columns and primary keys.
+     *
+     * @param table       table to verify
+     * @param name        name of the table
+     * @param primaryKeys primary keys of the table
+     * @param columns     columns of the table
+     */
+    protected void verifyTable(Table table, String name, List<String> primaryKeys, List<String> columns) {
+        assertEquals(name, table.getName());
+        assertEquals(columns.size(), table.getColumns().size());
+        assertEquals(primaryKeys.size(), table.getPrimaryKeys().size());
+        for (String column : columns) {
+            assertTrue(table.getColumns().containsKey(column));
+        }
+        for (String primaryKey : primaryKeys) {
+            assertTrue(table.getPrimaryKeys().contains(primaryKey));
+        }
+    }
+
     @BeforeAll
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
-        databaseService = getSqlService(getDatabase());
+        SqlDatabaseService databaseService = getSqlService(getDatabase());
         databaseStructure = databaseService.retrieveSchema();
     }
 
@@ -229,29 +252,5 @@ public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
         assertEquals(new Column("course", INTEGER_DATA_TYPE, true,
                         new ForeignKey(getCvutSchema(), "course", getCourseIdentifier())),
                 table.getColumns().get("course"));
-    }
-
-    protected Table getTable(String schema, String tableName) {
-        return databaseStructure.getSchemas().get(schema).getTables().get(tableName);
-    }
-
-    /**
-     * Verify that the table contains the only expected columns and primary keys.
-     *
-     * @param table       table to verify
-     * @param name        name of the table
-     * @param primaryKeys primary keys of the table
-     * @param columns     columns of the table
-     */
-    protected void verifyTable(Table table, String name, List<String> primaryKeys, List<String> columns) {
-        assertEquals(name, table.getName());
-        assertEquals(columns.size(), table.getColumns().size());
-        assertEquals(primaryKeys.size(), table.getPrimaryKeys().size());
-        for (String column : columns) {
-            assertTrue(table.getColumns().containsKey(column));
-        }
-        for (String primaryKey : primaryKeys) {
-            assertTrue(table.getPrimaryKeys().contains(primaryKey));
-        }
     }
 }
