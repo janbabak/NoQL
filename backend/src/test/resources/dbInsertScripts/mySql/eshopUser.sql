@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `user`
+CREATE TABLE IF NOT EXISTS eshop_user
 (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     name       VARCHAR(100),
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `user`
 
 -- command separator
 
-INSERT INTO `user` (name, age, sex, email)
+INSERT INTO eshop_user (name, age, sex, email)
 VALUES ('John Doe', 25, 'M', 'john.doe@example.com'),
        ('Jane Smith', 30, 'F', 'jane.smith@example.com'),
        ('Jane Doe', 28, 'F', 'jane.doe@example.com'),

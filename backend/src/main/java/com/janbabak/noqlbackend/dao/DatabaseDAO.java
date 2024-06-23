@@ -38,7 +38,7 @@ public abstract class DatabaseDAO {
      *
      * @return query result
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException query execution failed (syntax error)
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     public abstract ResultSetWrapper getSchemasTablesColumns()
             throws DatabaseConnectionException, DatabaseExecutionException;
@@ -48,7 +48,7 @@ public abstract class DatabaseDAO {
      *
      * @return query result
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException query execution failed (syntax error)
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     public abstract ResultSetWrapper getForeignKeys() throws DatabaseConnectionException, DatabaseExecutionException;
 
@@ -58,7 +58,7 @@ public abstract class DatabaseDAO {
      * @param query query string
      * @return query result
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException query execution failed (syntax error)
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     public ResultSetWrapper query(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         connect(true);
@@ -86,7 +86,7 @@ public abstract class DatabaseDAO {
      *
      * @param query query string
      * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException query execution failed (syntax error)
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
     void updateDatabase(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         try {
@@ -119,6 +119,9 @@ public abstract class DatabaseDAO {
      * Close connection to the database.
      */
     public void disconnect() {
+        if (this.connection == null) {
+            return;
+        }
         try {
             this.connection.close();
         } catch (SQLException e) {

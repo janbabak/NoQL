@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.PostgresTest;
+import com.janbabak.noqlbackend.dao.AbstractLocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -9,6 +9,7 @@ import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
@@ -43,7 +44,11 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class QueryServiceIntegrationTest extends PostgresTest {
+public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
+
+    private Database getDatabase() {
+        return postgresDatabase;
+    }
 
     @Autowired
     private QueryService queryService;
@@ -58,9 +63,13 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
+    /**
+     * Get scripts for initialization of the databases
+     */
     @Override
-    protected String getCreateScript() {
-        return FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgresUsers.sql");
+    protected InitScripts getInitializationScripts() {
+        return InitScripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
     }
 
     @BeforeAll
@@ -68,7 +77,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
 
-        databaseService.create(postgresDatabase);
+        databaseService.create(getDatabase());
 
         apiServiceMock
                 .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
@@ -83,15 +92,16 @@ public class QueryServiceIntegrationTest extends PostgresTest {
 
     @Test
     @DisplayName("Test execute query language query")
+    @SuppressWarnings("all") // IDE can't see the columns
     void testExecuteQueryLanguageQuery()
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = getDatabase().getId();
         Integer page = 1;
         Integer pageSize = 5;
         // language=SQL
-        String query = "SELECT id, name, age, sex, email FROM public.user ORDER BY name;";
+        String query = "SELECT id, name, age, sex, email FROM eshop_user ORDER BY name;";
 
         QueryResponse expectedResponse = new QueryResponse(
                 new QueryResponse.RetrievedData(
@@ -135,7 +145,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
@@ -166,6 +176,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     /**
      * @return page, page size, expected total count, plot result, messages, expected response
      */
+    @SuppressWarnings("all") // IDE can't see the columns
     Object[][] testLoadChatDataProvider() {
         return new Object[][]{
                 {
@@ -179,7 +190,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         // language=JSON
                                         """
                                                 {
-                                                    "databaseQuery": "SELECT email FROM public.user;",
+                                                    "databaseQuery": "SELECT email FROM eshop_user;",
                                                     "generatePlot": false,
                                                     "pythonCode": ""
                                                 }"""),
@@ -197,7 +208,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
                                                 null),
                                         null),
                                 null)
@@ -212,7 +223,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         // language=JSON
                                         """
                                                 {
-                                                    "databaseQuery": "SELECT email FROM public.user;",
+                                                    "databaseQuery": "SELECT email FROM eshop_user;",
                                                     "generatePlot": false,
                                                     "pythonCode": ""
                                                 }"""),
@@ -221,7 +232,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         // language=JSON
                                         """
                                                 {
-                                                    "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
+                                                    "databaseQuery": "SELECT email FROM eshop_user ORDER BY email DESC;",
                                                     "generatePlot": false,
                                                     "pythonCode": ""
                                                 }""")),
@@ -244,7 +255,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         "sort them in descending order",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT email FROM public.user ORDER BY email DESC;",
+                                                "SELECT email FROM eshop_user ORDER BY email DESC;",
                                                 null),
                                         null),
                                 null)
@@ -277,7 +288,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
             LLMException, BadRequestException {
 
         // given
-        UUID databaseId = postgresDatabase.getId();
+        UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
         request.setChatId(chat.getId());
         for (CreateChatQueryWithResponseRequest message : messages) {
@@ -310,6 +321,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
     /**
      * @return page size, total count, plot result, messages, request, LLM response, expected response
      */
+    @SuppressWarnings("all") // IDE can't see the columns
     Object[][] testExecuteChatWithPlotDataProvider() {
         return new Object[][]{
                 {
@@ -332,7 +344,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM public.user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
                                                 null),
                                         null),
                                 null)
@@ -346,7 +358,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                 // language=JSON
                                 """
                                         {
-                                            "databaseQuery": "SELECT email FROM public.user;",
+                                            "databaseQuery": "SELECT email FROM eshop_user;",
                                             "generatePlot": false,
                                             "pythonCode": ""
                                         }""")),
@@ -355,7 +367,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                         // language=JSON LLM response
                         """
                         {
-                            "databaseQuery": "SELECT email FROM public.user ORDER BY email DESC;",
+                            "databaseQuery": "SELECT email FROM eshop_user ORDER BY email DESC;",
                             "generatePlot": false
                         }""",
                         // expected response
@@ -376,7 +388,7 @@ public class QueryServiceIntegrationTest extends PostgresTest {
                                         "sort them in descending order",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT email FROM public.user ORDER BY email DESC;",
+                                                "SELECT email FROM eshop_user ORDER BY email DESC;",
                                                 null),
                                         null),
                                 null)
