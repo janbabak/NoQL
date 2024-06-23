@@ -27,7 +27,7 @@ class MySqlDAOTest extends MySqlTest {
      * @return list of commands.
      */
     @Override
-    protected List<String> getCreateScript() {
+    protected List<String> getInitializationScripts() {
         return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlUsers.sql")
                 .split(COMMAND_SEPARATOR)).toList();
     }
@@ -35,14 +35,14 @@ class MySqlDAOTest extends MySqlTest {
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:mysql://localhost:" + getDatabasePort() + "/mysql-test-database";
-        assertEquals(expected, mysqlDAO.createConnectionUrl());
+        String expected = "jdbc:mysql://localhost:" + getDatabasePort() + "/test-database";
+        assertEquals(expected, databaseDAO.createConnectionUrl());
     }
 
     @Test
     @DisplayName("Test connection")
     void testConnection() {
-        assertDoesNotThrow(() -> mysqlDAO.testConnection());
+        assertDoesNotThrow(() -> databaseDAO.testConnection());
     }
 
     @Test
@@ -50,7 +50,7 @@ class MySqlDAOTest extends MySqlTest {
     void testQuery() {
         AtomicReference<ResultSet> resultRef = new AtomicReference<>();
         assertDoesNotThrow(() -> {
-            try (ResultSetWrapper result = mysqlDAO.query("SELECT * FROM `user`")) {
+            try (ResultSetWrapper result = databaseDAO.query("SELECT * FROM `user`")) {
                 resultRef.set(result.resultSet());
             }
         });
@@ -65,7 +65,7 @@ class MySqlDAOTest extends MySqlTest {
 
         // language=SQL
         String query = "DELETE FROM public.user WHERE age > 0;";
-        try (ResultSetWrapper result = mysqlDAO.query(query)) {}
+        try (ResultSetWrapper result = databaseDAO.query(query)) {}
         catch (DatabaseExecutionException e) {}
 
         assertEquals(22, getUsersCount());
@@ -77,7 +77,7 @@ class MySqlDAOTest extends MySqlTest {
      * @return number of records in the user table
      */
     private Integer getUsersCount() throws SQLException, DatabaseConnectionException, DatabaseExecutionException {
-        try (ResultSetWrapper result = mysqlDAO.query("SELECT COUNT(*) AS count FROM `user`;")) {
+        try (ResultSetWrapper result = databaseDAO.query("SELECT COUNT(*) AS count FROM `user`;")) {
             result.resultSet().next();
             return result.resultSet().getInt("count");
         }

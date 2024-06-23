@@ -40,7 +40,7 @@ class MySqlServiceTest extends MySqlTest {
     private final String TIMESTAMP_DATA_TYPE = "timestamp";
 
     @Override
-    protected List<String> getCreateScript() {
+    protected List<String> getInitializationScripts() {
         return Arrays.stream(FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySqlAllTables.sql")
                 .split(COMMAND_SEPARATOR)).toList();
     }
@@ -49,7 +49,7 @@ class MySqlServiceTest extends MySqlTest {
     @Override
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
-        mySqlService = new MySqlService(mysqlDatabase);
+        mySqlService = new MySqlService(database);
         databaseStructure = mySqlService.retrieveSchema();
     }
 
