@@ -15,7 +15,7 @@ import static java.lang.Thread.sleep;
 @RequiredArgsConstructor
 public class PlotServiceContainer {
 
-    private static final String IMAGE_NAME = "janbabak/plot-service:1.0.0"; // TODO: change to :latest
+    private static final String IMAGE_NAME = "janbabak/plot-service:1.0.0";
     private static final String CONTAINER_NAME = "plot-service";
     private static final int WAIT_TO_START_MILLIS = 5000; // waits 5s for the container to start
 

@@ -21,6 +21,7 @@ exampleProject/.env
 exampleProject/node_modules
 
 # NoQL backend
+backend/bin/
 /backend/.idea/
 /backend/backend.iml
 .gradle
@@ -370,7 +371,7 @@ pyrightconfig.json
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
+.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
