@@ -132,7 +132,7 @@ public class QueryService {
         query = query.trim();
 
         return switch (database.getEngine()) {
-            case POSTGRES, MYSQL -> "SELECT * FROM (%s) LIMIT %d OFFSET %d;"
+            case POSTGRES, MYSQL -> "SELECT * FROM (%s) AS query LIMIT %d OFFSET %d;"
                     .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
         };
     }
@@ -203,7 +203,7 @@ public class QueryService {
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-        String selectCountQuery = "SELECT COUNT(*) AS count from (%s);".formatted(selectQuery);
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;".formatted(selectQuery);
         try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
             return result.resultSet().next() ? result.resultSet().getLong(1) : null;
         } catch (SQLException e) {

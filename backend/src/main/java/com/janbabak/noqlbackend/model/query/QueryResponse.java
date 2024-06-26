@@ -53,29 +53,10 @@ public class QueryResponse {
             while (resultSet.next()) {
                 List<String> row = new ArrayList<>();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    row.add(resultSet.getString(i));
+                    row.add(resultSet.getString(i).trim());
                 }
                 rows.add(row);
             }
-        }
-    }
-
-    @Data
-    public static class ColumnTypes {
-        private final List<String> categorical = new ArrayList<>();
-        private final List<String> numeric = new ArrayList<>();
-        private final List<String> timestamp = new ArrayList<>();
-
-        public void addCategorical(String columnName) {
-            categorical.add(columnName);
-        }
-
-        public void addNumeric(String columnName) {
-            numeric.add(columnName);
-        }
-
-        public void addTimestamp(String columnName) {
-            timestamp.add(columnName);
         }
     }
 }
