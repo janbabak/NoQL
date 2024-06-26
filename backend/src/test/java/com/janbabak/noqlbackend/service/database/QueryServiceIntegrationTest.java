@@ -68,8 +68,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @Override
     protected Scripts getInitializationScripts() {
         return new Scripts(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"),
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUser.sql"),
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUser.sql"));
     }
 
     /**
@@ -78,8 +78,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @Override
     protected Scripts getCleanupScript() {
         return new Scripts(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUserCleanup.sql"),
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUserCleanup.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUserCleanup.sql"),
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUserCleanup.sql"));
     }
 
     @BeforeAll

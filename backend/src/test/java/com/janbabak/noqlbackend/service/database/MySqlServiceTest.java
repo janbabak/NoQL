@@ -84,7 +84,7 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     @Override
     protected Scripts getInitializationScripts() {
         return Scripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTables.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/allTables.sql"));
     }
 
     /**
@@ -93,7 +93,7 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     @Override
     protected Scripts getCleanupScript() {
         return Scripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTablesCleanup.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/allTablesCleanup.sql"));
     }
 
     @Test

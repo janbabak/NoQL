@@ -22,7 +22,7 @@ class MySqlDAOTest extends AbstractSqlDAOTest {
     @Override
     protected Scripts getInitializationScripts() {
         return Scripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUser.sql"));
     }
 
     /**
@@ -31,7 +31,7 @@ class MySqlDAOTest extends AbstractSqlDAOTest {
     @Override
     protected Scripts getCleanupScript() {
         return Scripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUserCleanup.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUserCleanup.sql"));
     }
 
     @Test

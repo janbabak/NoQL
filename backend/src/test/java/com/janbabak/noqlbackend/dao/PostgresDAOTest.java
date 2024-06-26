@@ -21,7 +21,7 @@ class PostgresDAOTest extends AbstractSqlDAOTest {
     @Override
     protected Scripts getInitializationScripts() {
         return Scripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUser.sql"));
     }
 
     /**
@@ -30,7 +30,7 @@ class PostgresDAOTest extends AbstractSqlDAOTest {
     @Override
     protected Scripts getCleanupScript() {
         return Scripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUserCleanup.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUserCleanup.sql"));
     }
 
     @Test

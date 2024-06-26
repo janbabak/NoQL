@@ -95,7 +95,7 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Override
     protected Scripts getInitializationScripts() {
         return Scripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/allTables.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/allTables.sql"));
     }
 
     /**
@@ -104,7 +104,7 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Override
     protected Scripts getCleanupScript() {
         return Scripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/allTablesCleanup.sql"));
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/allTablesCleanup.sql"));
     }
 
     @Test
