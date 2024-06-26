@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public abstract class AbstractDAOTest extends AbstractLocalDatabaseTest {
+public abstract class AbstractDAOTest extends LocalDatabaseTest {
 
     @Test
     @DisplayName("Test connection")

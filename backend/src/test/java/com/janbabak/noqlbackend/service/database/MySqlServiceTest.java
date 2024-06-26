@@ -82,9 +82,18 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getInitializationScripts() {
-        return InitScripts.mySql(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/allTables.sql"));
+    protected Scripts getInitializationScripts() {
+        return Scripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/allTables.sql"));
+    }
+
+    /**
+     * Get scripts for cleanup of the databases.
+     */
+    @Override
+    protected Scripts getCleanupScript() {
+        return Scripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/allTablesCleanup.sql"));
     }
 
     @Test

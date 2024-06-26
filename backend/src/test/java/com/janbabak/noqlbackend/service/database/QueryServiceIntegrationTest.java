@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.AbstractLocalDatabaseTest;
+import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
+public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
     private Database getDatabase() {
         return postgresDatabase;
@@ -66,10 +66,20 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getInitializationScripts() {
-        return new InitScripts(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"),
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
+    protected Scripts getInitializationScripts() {
+        return new Scripts(
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUser.sql"),
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUser.sql"));
+    }
+
+    /**
+     * Get scripts for cleanup of the databases.
+     */
+    @Override
+    protected Scripts getCleanupScript() {
+        return new Scripts(
+                FileUtils.getFileContent("./src/test/resources/dbScripts/postgres/eshopUserCleanup.sql"),
+                FileUtils.getFileContent("./src/test/resources/dbScripts/mySql/eshopUserCleanup.sql"));
     }
 
     @BeforeAll
@@ -86,7 +96,10 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
     }
 
     @AfterAll
-    void tearDown() {
+    @Override
+    protected void tearDown() throws DatabaseConnectionException, DatabaseExecutionException {
+        super.tearDown();
+
         databaseService.deleteById(postgresDatabase.getId());
         databaseService.deleteById(mySqlDatabase.getId());
 
