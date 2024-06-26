@@ -20,9 +20,18 @@ class MySqlDAOTest extends AbstractSqlDAOTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getInitializationScripts() {
-        return InitScripts.mySql(
+    protected Scripts getInitializationScripts() {
+        return Scripts.mySql(
                 FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
+    }
+
+    /**
+     * Get scripts for cleanup of the databases.
+     */
+    @Override
+    protected Scripts getCleanupScript() {
+        return Scripts.mySql(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUserCleanup.sql"));
     }
 
     @Test

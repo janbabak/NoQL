@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS "order"
 -- create schema cvut
 CREATE SCHEMA IF NOT EXISTS "cvut";
 
--- create table specialization
+-- create table specialisation
 CREATE TABLE IF NOT EXISTS cvut.specialisation
 (
     id     SERIAL PRIMARY KEY,

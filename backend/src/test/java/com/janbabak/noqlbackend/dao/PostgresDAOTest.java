@@ -19,11 +19,19 @@ class PostgresDAOTest extends AbstractSqlDAOTest {
      * Get scripts for initialization of the databases
      */
     @Override
-    protected InitScripts getInitializationScripts() {
-        return InitScripts.postgres(
+    protected Scripts getInitializationScripts() {
+        return Scripts.postgres(
                 FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
     }
 
+    /**
+     * Get scripts for cleanup of the databases.
+     */
+    @Override
+    protected Scripts getCleanupScript() {
+        return Scripts.postgres(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUserCleanup.sql"));
+    }
 
     @Test
     @DisplayName("Test create connection URL")

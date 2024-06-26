@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -16,13 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Abstract class for testing classes that access databases.<br />
+ * Class for testing classes that access databases.<br />
  * It uses Testcontainers to run databases in Docker container.<br />
  * It doesn't change the Spring profile, so the database is not used by ORM repositories.
  */
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class AbstractLocalDatabaseTest {
+public class LocalDatabaseTest {
     protected static final String DATABASE_NAME = "test-database";
     private static final String DATABASE_USERNAME = "test-user";
     private static final String DATABASE_PASSWORD = "test-password";
@@ -61,23 +62,45 @@ public abstract class AbstractLocalDatabaseTest {
 
     @BeforeAll
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
-        InitScripts initScripts = getInitializationScripts();
-
-        // postgres
         postgresDatabase = createDatabase(postgresContainer, DatabaseEngine.POSTGRES);
         postgresDAO = new PostgresDAO(postgresDatabase);
 
-        if (initScripts.postgresScript != null) {
-            postgresDAO.updateDatabase(initScripts.postgresScript);
-        }
-
-        // mysql
         mySqlDatabase = createDatabase(mySqlContainer, DatabaseEngine.MYSQL);
         mySqlDAO = new MySqlDAO(mySqlDatabase);
 
-        if (initScripts.mySqlScript != null) {
-            for (String script : Arrays.stream(initScripts.mySqlScript.split(COMMAND_SEPARATOR)).toList()) {
-                mySqlDAO.updateDatabase(script);
+        Scripts initScripts = getInitializationScripts();
+        if (initScripts == null) {
+            return;
+        }
+
+        executeScripts(initScripts);
+    }
+
+    @AfterAll
+    protected void tearDown() throws DatabaseConnectionException, DatabaseExecutionException {
+        Scripts cleanupScript = getCleanupScript();
+        if (cleanupScript == null) {
+            return;
+        }
+
+        executeScripts(cleanupScript);
+    }
+
+    /**
+     * Execute in all databases if scripts are provided.
+     *
+     * @param scripts scripts to execute
+     * @throws DatabaseConnectionException cannot establish connection to the database
+     * @throws DatabaseExecutionException  cannot execute the script - syntax error
+     */
+    private void executeScripts(Scripts scripts) throws DatabaseConnectionException, DatabaseExecutionException {
+        if (scripts.postgresScript != null) {
+            postgresDAO.updateDatabase(scripts.postgresScript);
+        }
+
+        if (scripts.mySqlScript != null) {
+            for (String command : Arrays.stream(scripts.mySqlScript.split(COMMAND_SEPARATOR)).toList()) {
+                mySqlDAO.updateDatabase(command);
             }
         }
     }
@@ -85,7 +108,16 @@ public abstract class AbstractLocalDatabaseTest {
     /**
      * Get scripts for initialization of the databases
      */
-    protected abstract InitScripts getInitializationScripts();
+    protected Scripts getInitializationScripts() {
+        return null;
+    }
+
+    /**
+     * Get scripts for cleanup of the databases.
+     */
+    protected Scripts getCleanupScript() {
+        return null;
+    }
 
     protected Integer getPostgresPort() {
         return postgresContainer.getFirstMappedPort();
@@ -115,14 +147,14 @@ public abstract class AbstractLocalDatabaseTest {
      * @param mySqlScript    commands for MySQL separated by {@link #COMMAND_SEPARATOR} because MySQL doesn't support
      *                       multiple commands in one query
      */
-    public record InitScripts(String postgresScript, String mySqlScript) {
+    public record Scripts(String postgresScript, String mySqlScript) {
 
-        public static InitScripts mySql(String mySqlScript) {
-            return new InitScripts(null, mySqlScript);
+        public static Scripts mySql(String mySqlScript) {
+            return new Scripts(null, mySqlScript);
         }
 
-        public static InitScripts postgres(String postgresScript) {
-            return new InitScripts(postgresScript, null);
+        public static Scripts postgres(String postgresScript) {
+            return new Scripts(postgresScript, null);
         }
     }
 }

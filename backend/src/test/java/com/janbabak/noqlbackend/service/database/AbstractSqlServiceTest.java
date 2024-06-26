@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
-import com.janbabak.noqlbackend.dao.AbstractLocalDatabaseTest;
+import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public abstract class AbstractSqlServiceTest extends AbstractLocalDatabaseTest {
+public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
 
     // these data type fields must be set in the constructor of the extending class
     protected String INTEGER_DATA_TYPE;

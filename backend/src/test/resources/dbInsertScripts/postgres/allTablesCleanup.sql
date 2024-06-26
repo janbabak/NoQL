@@ -26,4 +26,3 @@ DROP TABLE IF EXISTS cvut.course;
 
 -- Drop schema
 DROP SCHEMA IF EXISTS cvut CASCADE;
-
