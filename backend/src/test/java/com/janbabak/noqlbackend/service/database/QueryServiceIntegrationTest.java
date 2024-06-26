@@ -23,7 +23,6 @@ import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
@@ -68,8 +67,9 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
      */
     @Override
     protected InitScripts getInitializationScripts() {
-        return InitScripts.postgres(
-                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"));
+        return new InitScripts(
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/postgres/eshopUser.sql"),
+                FileUtils.getFileContent("./src/test/resources/dbInsertScripts/mySql/eshopUser.sql"));
     }
 
     @BeforeAll
@@ -77,7 +77,8 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
     protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
         super.setUp();
 
-        databaseService.create(getDatabase());
+        databaseService.create(postgresDatabase);
+        databaseService.create(mySqlDatabase);
 
         apiServiceMock
                 .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
@@ -86,18 +87,24 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
 
     @AfterAll
     void tearDown() {
+        databaseService.deleteById(postgresDatabase.getId());
+        databaseService.deleteById(mySqlDatabase.getId());
+
         apiServiceMock.close();
+
         PlotService.deleteWorkingDirectory();
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("databaseDataProvider")
     @DisplayName("Test execute query language query")
-    @SuppressWarnings("all") // IDE can't see the columns
-    void testExecuteQueryLanguageQuery()
+    @SuppressWarnings("all")
+        // IDE can't see the columns
+    void testExecuteQueryLanguageQuery(Database database)
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
         // given
-        UUID databaseId = getDatabase().getId();
+        UUID databaseId = database.getId();
         Integer page = 1;
         Integer pageSize = 5;
         // language=SQL
@@ -106,11 +113,11 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
         QueryResponse expectedResponse = new QueryResponse(
                 new QueryResponse.RetrievedData(
                         List.of("id", "name", "age", "sex", "email"),
-                        List.of(List.of("10", "David Taylor", "45", "M         ", "david.taylor@example.com"),
-                                List.of("19", "Ella Thomas", "24", "F         ", "ella.thomas@example.com"),
-                                List.of("5", "Emily Johnson", "40", "F         ", "emily.johnson@example.com"),
-                                List.of("17", "Emma Scott", "30", "F         ", "emma.scott@example.com"),
-                                List.of("21", "Grace Miller", "34", "F         ", "grace.miller@example.com"))),
+                        List.of(List.of("10", "David Taylor", "45", "M", "david.taylor@example.com"),
+                                List.of("19", "Ella Thomas", "24", "F", "ella.thomas@example.com"),
+                                List.of("5", "Emily Johnson", "40", "F", "emily.johnson@example.com"),
+                                List.of("17", "Emma Scott", "30", "F", "emma.scott@example.com"),
+                                List.of("21", "Grace Miller", "34", "F", "grace.miller@example.com"))),
                 22L,
                 null,
                 null);
@@ -122,6 +129,13 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
         assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
         assertEquals(22, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
+    }
+
+    Object[] databaseDataProvider() {
+        return new Object[]{
+                postgresDatabase,
+                mySqlDatabase
+        };
     }
 
     /**
@@ -176,7 +190,8 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
     /**
      * @return page, page size, expected total count, plot result, messages, expected response
      */
-    @SuppressWarnings("all") // IDE can't see the columns
+    @SuppressWarnings("all")
+    // IDE can't see the columns
     Object[][] testLoadChatDataProvider() {
         return new Object[][]{
                 {
@@ -201,7 +216,7 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
                         new QueryResponse( // expected response
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                                        List.of(List.of("M", "11"), List.of("F", "11"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,
@@ -321,7 +336,8 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
     /**
      * @return page size, total count, plot result, messages, request, LLM response, expected response
      */
-    @SuppressWarnings("all") // IDE can't see the columns
+    @SuppressWarnings("all")
+    // IDE can't see the columns
     Object[][] testExecuteChatWithPlotDataProvider() {
         return new Object[][]{
                 {
@@ -337,7 +353,7 @@ public class QueryServiceIntegrationTest extends AbstractLocalDatabaseTest {
                         new QueryResponse(
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M         ", "11"), List.of("F         ", "11"))),
+                                        List.of(List.of("M", "11"), List.of("F", "11"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,

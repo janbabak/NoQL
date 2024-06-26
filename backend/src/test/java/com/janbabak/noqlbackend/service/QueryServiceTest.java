@@ -130,7 +130,7 @@ class QueryServiceTest {
                         8,
                         15,
                         // language=SQL
-                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 15 OFFSET 120;"
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) AS query LIMIT 15 OFFSET 120;"
                 },
                 {
                         // language=SQL
@@ -138,7 +138,7 @@ class QueryServiceTest {
                         8,
                         15,
                         // language=SQL
-                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 15 OFFSET 120;"
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) AS query LIMIT 15 OFFSET 120;"
                 },
                 {
                         // language=SQL
@@ -146,7 +146,7 @@ class QueryServiceTest {
                         null, // null page
                         null, // null page size
                         // language=SQL
-                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 10 OFFSET 0;"
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) AS query LIMIT 10 OFFSET 0;"
                 },
                 {
                         // language=SQL
@@ -154,7 +154,7 @@ class QueryServiceTest {
                         4,
                         null, // null page size
                         // language=SQL
-                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) LIMIT 10 OFFSET 40;"
+                        "SELECT * FROM (SELECT name FROM cvut.student WHERE grade < 3) AS query LIMIT 10 OFFSET 40;"
                 }
         };
     }

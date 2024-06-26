@@ -53,7 +53,7 @@ public class QueryResponse {
             while (resultSet.next()) {
                 List<String> row = new ArrayList<>();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    row.add(resultSet.getString(i));
+                    row.add(resultSet.getString(i).trim());
                 }
                 rows.add(row);
             }
