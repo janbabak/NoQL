@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
@@ -76,7 +77,7 @@ public class Database {
     /**
      * @return true if database engine is SQL
      */
-    @JsonIgnore
+    @JsonProperty("isSQL")
     @SuppressWarnings("all") // 'default' branch is unnecessary
     public Boolean isSQL() {
         return switch (engine) {

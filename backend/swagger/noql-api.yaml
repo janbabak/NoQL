@@ -382,6 +382,9 @@ components:
           $ref: '#/components/schemas/DatabasePassword'
         engine:
           $ref: '#/components/schemas/DatabaseEngine'
+        isSQL:
+          type: boolean
+          example: true
 
     CreateDatabaseRequest:
       type: object

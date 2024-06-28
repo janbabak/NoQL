@@ -25,7 +25,7 @@ class Api {
     if (this.instance == null) {
       this.instance = new Api()
     }
-    // TODO use logging
+    // TODO use log
     console.log('BE URL is: localhost:8080')
     return this.instance
   }
