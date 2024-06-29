@@ -9,6 +9,7 @@ interface SnackbarState {
 
 const DEFAULT_DURATION: number = 5000
 const DEFAULT_ANCHOR: SnackbarOrigin = { vertical: 'bottom', horizontal: 'center' }
+const DEFAULT_TYPE: SnackbarType = SnackbarType.INFO
 
 const initialState: SnackbarState = {
   open: false,
@@ -43,7 +44,8 @@ export const {
 
 export {
   DEFAULT_ANCHOR,
-  DEFAULT_DURATION
+  DEFAULT_DURATION,
+  DEFAULT_TYPE,
 }
 
 export default snackbarSlice.reducer

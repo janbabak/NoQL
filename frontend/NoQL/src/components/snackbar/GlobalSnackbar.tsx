@@ -1,9 +1,14 @@
-import { Snackbar } from '@mui/material'
+import { Alert, Snackbar } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../state/store.ts'
 import { SnackbarConfig } from './GlobalSnackbar.types.ts'
-import { closeSnackbar, DEFAULT_ANCHOR, DEFAULT_DURATION } from '../../state/snackbarSlice.ts'
 import { ReactElement, useMemo } from 'react'
+import {
+  closeSnackbar,
+  DEFAULT_ANCHOR,
+  DEFAULT_DURATION,
+  DEFAULT_TYPE
+} from '../../state/snackbarSlice.ts'
 
 export function GlobalSnackbar(): ReactElement {
 
@@ -34,10 +39,18 @@ export function GlobalSnackbar(): ReactElement {
   return (
     <Snackbar
       open={open}
-      message={config.message}
       autoHideDuration={autoHideDuration}
       anchorOrigin={config.anchor || DEFAULT_ANCHOR}
       onClose={handleClose}
-    />
+    >
+      <Alert
+        severity={config.type || DEFAULT_TYPE}
+        variant="filled"
+        onClose={handleClose}
+        sx={{ width: '100%' }}
+      >
+        {config.message}
+      </Alert>
+    </Snackbar>
   )
 }

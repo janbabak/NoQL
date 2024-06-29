@@ -1,10 +1,10 @@
 import { SnackbarOrigin } from '@mui/material-next/Snackbar'
 
 enum SnackbarType {
-  INFO,
-  SUCCESS,
-  WARNING,
-  ERROR
+  INFO = 'info',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
 }
 
 interface SnackbarConfig {
