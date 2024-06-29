@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { DatabaseStructure, SqlDatabaseStructure } from '../../../types/DatabaseStructure.ts'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { SqlStructure } from './SqlStructure.tsx'
+import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { AppDispatch } from '../../../state/store.ts'
+import { useDispatch } from 'react-redux'
 
 interface DatabaseStructureProps {
   databaseId: string,
@@ -12,6 +15,8 @@ interface DatabaseStructureProps {
 }
 
 export function DatabaseStructureSubpage({ databaseId, database, databaseLoading }: DatabaseStructureProps) {
+
+  const dispatch: AppDispatch = useDispatch()
 
   const [
     databaseStructure,
@@ -35,7 +40,7 @@ export function DatabaseStructureSubpage({ databaseId, database, databaseLoading
       const response = await databaseApi.getStructure(databaseId)
       setDatabaseStructure(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handle
+      showErrorWithMessageAndError(dispatch, 'Failed to load database structure', error)
     } finally {
       setDatabaseStructureLoading(false)
     }

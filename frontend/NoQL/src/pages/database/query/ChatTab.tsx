@@ -16,6 +16,7 @@ import { AppDispatch, RootState } from '../../../state/store.ts'
 import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
 import { ModelSelect } from './ModelSelect.tsx'
+import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ChatTabProps {
   databaseId: string,
@@ -103,7 +104,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     // @ts-ignore
     if (result.payload.messages.length > 0) {
       // @ts-ignore
-      void loadQueryLanguageQuery(result.payload.id)
+      void loadChatResult(result.payload.id)
     } else {
       setQueryResult(null)
     }
@@ -148,7 +149,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
         dispatch(addMessage(response.data.chatQueryWithResponse))
       }
     } catch (error: unknown) {
-      console.log(error) // TODO: handle
+      showErrorWithMessageAndError(dispatch, 'Failed to execute query', error)
     } finally {
       setQueryLoading(false)
     }
@@ -170,7 +171,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
       setQueryResult(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handles
+      showErrorWithMessageAndError(dispatch, 'Failed to load next page', error)
     } finally {
       setPageLoading(false)
     }
@@ -180,7 +181,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Fetch result of query language query.
    * @param chatId identifier
    */
-  async function loadQueryLanguageQuery(chatId: string): Promise<void> {
+  async function loadChatResult(chatId: string): Promise<void> {
     setQueryLoading(true)
     try {
       const response: AxiosResponse<QueryResponse> =
@@ -189,7 +190,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
       setPage(0)
       setQueryResult(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handles
+      showErrorWithMessageAndError(dispatch, 'Failed to load chat', error)
     } finally {
       setQueryLoading(false)
     }
@@ -199,11 +200,11 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
    * Load query result of a chat - load it's content and query response.
    * @param chatId chat id
    */
-  async function loadChatResult(chatId: string): Promise<void> {
+  async function loadChatAndResult(chatId: string): Promise<void> {
     const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
     // @ts-expect-error
     if (result.payload.messages.length > 0) {
-      await loadQueryLanguageQuery(chatId)
+      await loadChatResult(chatId)
     } else {
       setQueryResult(null)
     }
@@ -217,7 +218,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
     >
       <div className={styles.chatTabContainer}>
         <ChatHistory
-          loadChatResult={loadChatResult}
+          loadChatResult={loadChatAndResult}
           loadChatHistoryAndChatAndResult={loadChatHistoryAndChatAndResult}
           databaseId={databaseId}
           setQueryResult={setQueryResult}

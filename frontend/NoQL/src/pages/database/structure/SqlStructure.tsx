@@ -4,7 +4,7 @@ import { TreeItem } from '@mui/x-tree-view/TreeItem'
 import { Schema } from '../../../types/DatabaseStructure.ts'
 import { SqlColumn } from './SqlColumn.tsx'
 import React, { useState } from 'react'
-import { Button } from '@mui/material'
+import { Alert, Button } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import StorageRoundedIcon from '@mui/icons-material/StorageRounded'
@@ -19,7 +19,9 @@ export function SqlStructure({ structure }: SqlStructureProps) {
   const [
     expandedItems,
     setExpandedItems
-  ] = useState<string[]>(structure.schemas.map((schema: Schema) => schema.name))
+  ] = useState<string[]>(structure
+    ? structure.schemas.map((schema: Schema) => schema.name)
+    : [])
 
   function handleExpandedItemsChange(_event: React.SyntheticEvent, itemIds: string[]): void {
     setExpandedItems(itemIds)
@@ -79,6 +81,56 @@ export function SqlStructure({ structure }: SqlStructureProps) {
       </Button>
     </div>
 
+  const TreeViewContent =
+    <>
+      {!structure
+        ? <Alert severity="error">Failed to load database structure</Alert>
+        : structure.schemas.map((schema: Schema, schemaIndex: number) => {
+          return (
+            <TreeItem
+              itemId={schema.name}
+              sx={{ marginBottom: '1rem' }}
+              label={
+                <span className={styles.treeItemLabel}>
+                  <StorageRoundedIcon />
+                  {schema.name}
+                </span>}
+              key={schemaIndex}
+            >
+              {
+                schema.tables.map((table: Table, tableIndex: number) => {
+                  return (
+                    <TreeItem
+                      itemId={schema.name + '.' + table.name}
+                      label={
+                        <span className={styles.treeItemLabel}>
+                          <BackupTableRoundedIcon />
+                          {table.name}
+                        </span>}
+                      key={tableIndex}
+                    >
+                      {
+                        table.columns.map((column: Column, columnIndex: number) => {
+                          return (
+                            <SqlColumn
+                              column={column}
+                              key={columnIndex}
+                              openForeignKey={openForeignKey}
+                              id={schema.name + '.' + table.name + '.' + column.name}
+                            />
+                          )
+                        })
+                      }
+                    </TreeItem>
+                  )
+                })
+              }
+            </TreeItem>
+          )
+        })
+      }
+    </>
+
   return (
     <>
       {ExpansionButtons}
@@ -87,51 +139,7 @@ export function SqlStructure({ structure }: SqlStructureProps) {
         expandedItems={expandedItems}
         onExpandedItemsChange={handleExpandedItemsChange}
       >
-        {
-          structure.schemas.map((schema: Schema, schemaIndex: number) => {
-            return (
-              <TreeItem
-                itemId={schema.name}
-                sx={{ marginBottom: '1rem' }}
-                label={
-                  <span className={styles.treeItemLabel}>
-                  <StorageRoundedIcon />
-                    {schema.name}
-                </span>}
-                key={schemaIndex}
-              >
-                {
-                  schema.tables.map((table: Table, tableIndex: number) => {
-                    return (
-                      <TreeItem
-                        itemId={schema.name + '.' + table.name}
-                        label={
-                          <span className={styles.treeItemLabel}>
-                          <BackupTableRoundedIcon />
-                            {table.name}
-                        </span>}
-                        key={tableIndex}
-                      >
-                        {
-                          table.columns.map((column: Column, columnIndex: number) => {
-                            return (
-                              <SqlColumn
-                                column={column}
-                                key={columnIndex}
-                                openForeignKey={openForeignKey}
-                                id={schema.name + '.' + table.name + '.' + column.name}
-                              />
-                            )
-                          })
-                        }
-                      </TreeItem>
-                    )
-                  })
-                }
-              </TreeItem>
-            )
-          })
-        }
+        {TreeViewContent}
       </SimpleTreeView>
     </>
   )
