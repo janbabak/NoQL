@@ -3,10 +3,9 @@ import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
-import { Button, CircularProgress } from '@mui/material'
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../../state/store.ts'
-import { showSnackbar } from '../../../state/snackbarSlice.ts'
+import { CircularProgress } from '@mui/material'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../state/store.ts'
 
 interface UsersQueryProps {
   query: string
@@ -66,8 +65,6 @@ export function ChatView() {
       <CircularProgress />
     </div>
 
-  const dispatch: AppDispatch = useDispatch()
-
   return (
     <>
       {chatLoading && ChatLoading}
@@ -88,12 +85,6 @@ export function ChatView() {
           }
         </div>
       }
-      <Button
-        variant="contained"
-        onClick={() => dispatch(showSnackbar({ message: 'persist', persist: true}))}
-      >
-        Show snack
-      </Button>
     </>
   )
 }
