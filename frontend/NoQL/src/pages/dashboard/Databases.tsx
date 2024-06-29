@@ -4,8 +4,14 @@ import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { Typography } from '@mui/material'
 import styles from './Dashboard.module.css'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../state/store.ts'
+import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 export function Databases() {
+
+  const dispatch: AppDispatch = useDispatch()
+
   const [
     databases,
     setDatabases
@@ -16,24 +22,25 @@ export function Databases() {
     setDatabasesLoading
   ] = useState<boolean>(false)
 
-  useEffect(() => {
+  useEffect((): void => {
     void loadDatabases()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Load list of databases from the backend
-  async function loadDatabases() {
+  async function loadDatabases(): Promise<void> {
     setDatabasesLoading(true)
     try {
       const response = await databaseApi.getAll()
       setDatabases(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handle, show user
+      showErrorWithMessageAndError(dispatch, "Failed to load databases", error)
     } finally {
       setDatabasesLoading(false)
     }
   }
 
-  const Loading = <div>loading ...</div>
+  const Loading = <div>loading ...</div> // TODO: loading
 
   const DatabasesList =
     <ul>{

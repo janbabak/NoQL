@@ -10,8 +10,13 @@ import { useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { useParams } from 'react-router'
+import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { AppDispatch } from '../../state/store.ts'
+import { useDispatch } from 'react-redux'
 
 export function DatabasePage() {
+
+  const dispatch: AppDispatch = useDispatch()
 
   const { id } = useParams<string>()
 
@@ -37,7 +42,7 @@ export function DatabasePage() {
       const response = await databaseApi.getById(id || '')
       setDatabase(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handle
+      showErrorWithMessageAndError(dispatch, 'Failed to load database', error)
     } finally {
       setDatabaseLoading(false)
     }

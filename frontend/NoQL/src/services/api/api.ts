@@ -49,13 +49,19 @@ class Api {
    * @param path in url
    * @param data request body
    * @param parameters query parameters
+   * @param headers http(s) headers
    */
-  post(path: string, data: string | number | boolean | object | null, parameters: ApiParameter[] = []):
-    Promise<AxiosResponse> {
+  post(path: string,
+       data: string | number | boolean | object | null,
+       parameters: ApiParameter[] = [],
+       headers: { [key: string]: string } = {}
+  ): Promise<AxiosResponse> {
+
     const requestConfig = {
       url: this.createUrl(path, parameters),
       method: 'POST',
-      data: data
+      data: data,
+      headers: headers,
     } as AxiosRequestConfig
 
     return this.axiosInstance.request(requestConfig)

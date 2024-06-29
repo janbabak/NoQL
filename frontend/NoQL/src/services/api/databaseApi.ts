@@ -32,6 +32,12 @@ const databaseApi = {
     return this.API.get(this.DOMAIN + '/' + id + '/structure')
   },
 
+  /**
+   * Query the user's database by executing chat.
+   * @param databaseId database identifier
+   * @param request query request
+   * @param pageSize number of items in one page
+   */
   queryChat(databaseId: string, request: QueryRequest, pageSize: number): Promise<AxiosResponse<QueryResponse>> {
     return this.API.post(
       this.DOMAIN + '/' + databaseId + '/query/chat',
@@ -44,6 +50,13 @@ const databaseApi = {
     )
   },
 
+  /**
+   * Load chat result.
+   * @param databaseId database identifier
+   * @param chatId chat identifier
+   * @param page page number (first page is 0)
+   * @param pageSize number of items in one page
+   */
   loadChatResult(databaseId: string, chatId: string, page: number, pageSize: number):
     Promise<AxiosResponse<QueryResponse>> {
 
@@ -88,7 +101,10 @@ const databaseApi = {
           name: 'pageSize',
           value: pageSize
         }
-      ])
+      ],
+      {
+        'Content-Type': 'text/plain'
+      })
   },
 
   /**

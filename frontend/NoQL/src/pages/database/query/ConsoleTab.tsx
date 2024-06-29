@@ -8,6 +8,9 @@ import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { LinearProgress } from '@mui/material'
+import { AppDispatch } from '../../../state/store.ts'
+import { useDispatch } from 'react-redux'
+import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ConsoleTabProps {
   databaseId: string
@@ -23,6 +26,8 @@ export function ConsoleTab(
     queryLanguageQuery,
     setQueryLanguageQuery
   }: ConsoleTabProps) {
+
+  const dispatch: AppDispatch = useDispatch()
 
   const [
     queryResult,
@@ -52,7 +57,7 @@ export function ConsoleTab(
         databaseId, queryLanguageQuery, 0, pageSize)
       setQueryResult(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handles
+      showErrorWithMessageAndError(dispatch, 'Failed to execute query', error)
     } finally {
       setQueryLoading(false)
     }
@@ -72,7 +77,7 @@ export function ConsoleTab(
 
       setQueryResult(response.data)
     } catch (error: unknown) {
-      console.log(error) // TODO: handles
+      showErrorWithMessageAndError(dispatch, 'Failed to execute query', error)
     } finally {
       setQueryLoading(false)
     }
