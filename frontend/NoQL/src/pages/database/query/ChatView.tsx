@@ -3,9 +3,9 @@ import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import React, { useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
-import { CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
+import { LoadersStack } from '../../../components/loaders/LoadersStack.tsx'
 
 interface UsersQueryProps {
   query: string
@@ -17,7 +17,7 @@ interface ModelsResponse {
 
 function ModelsResponse({ chatQueryResult }: ModelsResponse) {
   return (
-   chatQueryResult?.databaseQuery != null
+    chatQueryResult?.databaseQuery != null
       ? <SyntaxHighlighter
         style={theme}
         language="SQL"
@@ -62,15 +62,14 @@ export function ChatView() {
 
   const ChatLoading =
     <div className={styles.chatWindowLoading}>
-      <CircularProgress />
+      <LoadersStack height={50} />
     </div>
 
   return (
     <>
-      {chatLoading && ChatLoading}
-
-      {!chatLoading &&
-        <div ref={chatWindowRef} className={styles.chatWindow}>
+      {chatLoading
+        ? ChatLoading
+        : <div ref={chatWindowRef} className={styles.chatWindow}>
           {
             chat?.messages.length == 0
               ? <div className={styles.startChatting}>Start chatting...</div>
