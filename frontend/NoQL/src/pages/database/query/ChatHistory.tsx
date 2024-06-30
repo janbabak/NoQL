@@ -17,7 +17,7 @@ import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../st
 import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { setChat } from '../../../state/chat/chatSlice.ts'
-import { LoadersStack } from '../../../components/loaders/LoadersStack.tsx'
+import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 
 interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
@@ -216,7 +216,7 @@ export function ChatHistory(
 
       <div className={styles.chatHistoryList}>
         {chatHistoryLoading
-          ? <LoadersStack count={3} height={40}/>
+          ? <SkeletonStack count={3} height={40}/>
           : <div>
             {
               chatHistory.map((chat: ChatHistoryItem, index: number) => {

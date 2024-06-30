@@ -6,7 +6,7 @@ interface RectangularLoaderProps {
   height?: number // height in px
 }
 
-export function RectangularLoader({ className, elevation = 3, height = 10 }: RectangularLoaderProps) {
+export function RectangleSkeleton({ className, elevation = 3, height = 10 }: RectangularLoaderProps) {
   return (
     <Paper elevation={elevation}>
       <Skeleton

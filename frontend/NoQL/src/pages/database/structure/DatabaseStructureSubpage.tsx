@@ -7,7 +7,7 @@ import { SqlStructure } from './SqlStructure.tsx'
 import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { AppDispatch } from '../../../state/store.ts'
 import { useDispatch } from 'react-redux'
-import { LoadersStack } from '../../../components/loaders/LoadersStack.tsx'
+import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 
 interface DatabaseStructureProps {
   databaseId: string,
@@ -64,7 +64,7 @@ export function DatabaseStructureSubpage({ databaseId, database, databaseLoading
       </Typography>
 
       { databaseStructureLoading
-        ? <LoadersStack height={24} count={5} />
+        ? <SkeletonStack height={24} count={5} />
         : Structure
       }
     </>

@@ -5,7 +5,7 @@ import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../state/store.ts'
-import { LoadersStack } from '../../../components/loaders/LoadersStack.tsx'
+import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 
 interface UsersQueryProps {
   query: string
@@ -62,7 +62,7 @@ export function ChatView() {
 
   const ChatLoading =
     <div className={styles.chatWindowLoading}>
-      <LoadersStack height={50} />
+      <SkeletonStack height={50} />
     </div>
 
   return (

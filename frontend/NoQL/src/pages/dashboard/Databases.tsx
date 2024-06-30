@@ -1,12 +1,13 @@
-import { ReactElement, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
-import { Typography, Skeleton, Paper } from '@mui/material'
+import { Typography } from '@mui/material'
 import styles from './Dashboard.module.css'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../state/store.ts'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 
 export function Databases() {
 
@@ -40,21 +41,6 @@ export function Databases() {
     }
   }
 
-  const Loading =
-    <>
-      {[...Array(3)].map((_, index: number): ReactElement => {
-        return (
-          <Paper elevation={3}>
-            <Skeleton
-              animation="wave"
-              variant="rectangular"
-              key={index}
-              className={styles.databaseCardSkeleton}
-            />
-          </Paper>)
-      })}
-    </>
-
   const DatabasesList =
     <ul>{
       databases.map((db: Database) =>
@@ -63,8 +49,10 @@ export function Databases() {
 
   return (
     <>
-      <Typography variant="h4" component="h2">Databases</Typography>
-      {databasesLoading ? Loading : DatabasesList}
+      <Typography variant="h4" component="h2" style={{marginBottom: '1rem'}}>Databases</Typography>
+      {databasesLoading
+        ? <SkeletonStack height={158}/>
+        : DatabasesList}
     </>
   )
 }
