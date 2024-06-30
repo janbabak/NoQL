@@ -7,14 +7,14 @@ interface Chat {
   id: string,
   name: string,
   messages: ChatQueryWithResponse[],
-  modificationDate: string, // TODO date
+  modificationDate: Date,
 }
 
 interface ChatQueryWithResponse {
   id: string,
   nlQuery: string, // natural language query
   llmResult: LLMResult, // large language model result
-  timestamp: string, // TODO date
+  timestamp: Date,
 }
 
 interface LLMResult {
