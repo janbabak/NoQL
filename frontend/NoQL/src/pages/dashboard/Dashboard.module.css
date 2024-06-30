@@ -8,12 +8,6 @@
     margin: .5rem 0;
 }
 
-.databaseCardSkeleton {
-    margin: 1rem 0;
-    border-radius: 0.2rem;
-    height: 10rem !important;
-}
-
 @media screen and (max-width: 400px) {
     .databaseCardFirstRow {
         flex-direction: column;

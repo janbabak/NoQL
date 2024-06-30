@@ -8,7 +8,6 @@ import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../state/store.ts'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 
-
 export function Databases() {
 
   const dispatch: AppDispatch = useDispatch()
