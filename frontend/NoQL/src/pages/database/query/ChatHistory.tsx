@@ -2,7 +2,7 @@ import styles from './Query.module.css'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'
-import { CircularProgress, Menu, MenuItem, TextField } from '@mui/material'
+import { Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
@@ -17,6 +17,7 @@ import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../st
 import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { setChat } from '../../../state/chat/chatSlice.ts'
+import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 
 interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
@@ -176,11 +177,6 @@ export function ChatHistory(
       New chat
     </LoadingButton>
 
-  const ChatHistoryLoading =
-    <div className={styles.chatHistoryLoading}>
-      <CircularProgress />
-    </div>
-
   const ChatMenu =
     <Menu
       id="fade-menu"
@@ -219,10 +215,9 @@ export function ChatHistory(
       {CreateNewChatButton}
 
       <div className={styles.chatHistoryList}>
-        {chatHistoryLoading && ChatHistoryLoading}
-
-        {!chatHistoryLoading &&
-          <div>
+        {chatHistoryLoading
+          ? <SkeletonStack count={3} height={40}/>
+          : <div>
             {
               chatHistory.map((chat: ChatHistoryItem, index: number) => {
                 return (

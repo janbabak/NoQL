@@ -7,6 +7,7 @@ import { SqlStructure } from './SqlStructure.tsx'
 import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { AppDispatch } from '../../../state/store.ts'
 import { useDispatch } from 'react-redux'
+import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 
 interface DatabaseStructureProps {
   databaseId: string,
@@ -48,7 +49,7 @@ export function DatabaseStructureSubpage({ databaseId, database, databaseLoading
 
   const Structure =
     <>
-      { database?.isSQL
+      {database?.isSQL
         ? <SqlStructure structure={databaseStructure as SqlDatabaseStructure} />
         : <div>database engine not supported</div>
       }
@@ -58,12 +59,14 @@ export function DatabaseStructureSubpage({ databaseId, database, databaseLoading
     <>
       <Typography variant="h2" component="h1">Structure</Typography>
 
-      {databaseLoading && <span>loading...</span>}
-      {!databaseLoading &&
-        <Typography variant="h4" component="h2" sx={{marginBottom: '2rem'}}>{database?.name}</Typography>
-      }
+      <Typography variant="h4" component="h2" sx={{ marginBottom: '2rem' }}>
+        {databaseLoading ? 'Database' : database?.name}
+      </Typography>
 
-      {!databaseStructureLoading && Structure}
+      { databaseStructureLoading
+        ? <SkeletonStack height={24} count={5} />
+        : Structure
+      }
     </>
   )
 }

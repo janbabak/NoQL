@@ -7,6 +7,7 @@ import styles from './Dashboard.module.css'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../state/store.ts'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 
 export function Databases() {
 
@@ -34,13 +35,11 @@ export function Databases() {
       const response = await databaseApi.getAll()
       setDatabases(response.data)
     } catch (error: unknown) {
-      showErrorWithMessageAndError(dispatch, "Failed to load databases", error)
+      showErrorWithMessageAndError(dispatch, 'Failed to load databases', error)
     } finally {
       setDatabasesLoading(false)
     }
   }
-
-  const Loading = <div>loading ...</div> // TODO: loading
 
   const DatabasesList =
     <ul>{
@@ -50,8 +49,10 @@ export function Databases() {
 
   return (
     <>
-      <Typography variant="h4" component="h2">Databases</Typography>
-      {databasesLoading ? Loading : DatabasesList}
+      <Typography variant="h4" component="h2" style={{marginBottom: '1rem'}}>Databases</Typography>
+      {databasesLoading
+        ? <SkeletonStack height={158}/>
+        : DatabasesList}
     </>
   )
 }
