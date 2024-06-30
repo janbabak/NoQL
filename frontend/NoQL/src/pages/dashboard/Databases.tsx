@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
-import { Typography } from '@mui/material'
+import { Typography, Skeleton, Paper } from '@mui/material'
 import styles from './Dashboard.module.css'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../state/store.ts'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+
 
 export function Databases() {
 
@@ -34,13 +35,26 @@ export function Databases() {
       const response = await databaseApi.getAll()
       setDatabases(response.data)
     } catch (error: unknown) {
-      showErrorWithMessageAndError(dispatch, "Failed to load databases", error)
+      showErrorWithMessageAndError(dispatch, 'Failed to load databases', error)
     } finally {
       setDatabasesLoading(false)
     }
   }
 
-  const Loading = <div>loading ...</div> // TODO: loading
+  const Loading =
+    <>
+      {[...Array(3)].map((_, index: number): ReactElement => {
+        return (
+          <Paper elevation={3}>
+            <Skeleton
+              animation="wave"
+              variant="rectangular"
+              key={index}
+              className={styles.databaseCardSkeleton}
+            />
+          </Paper>)
+      })}
+    </>
 
   const DatabasesList =
     <ul>{
