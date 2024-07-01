@@ -8,8 +8,8 @@ interface ApiParameter {
 
 class Api {
   axiosInstance: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:8080', // TODO: get from env
-    timeout: 90_000 // TODO: figure out the best value
+    baseURL: import.meta.env.VITE_BACKEND_URL,
+    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT_MILIS),
   })
 
   /** forbid constructor, because api is a singleton */
@@ -26,7 +26,7 @@ class Api {
       this.instance = new Api()
     }
     // TODO use log
-    console.log('BE URL is: localhost:8080')
+    console.log('BE URL is: ' + this.instance.axiosInstance.defaults.baseURL)
     return this.instance
   }
 
