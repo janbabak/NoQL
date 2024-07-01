@@ -55,7 +55,6 @@
     height: calc(100% - 10rem);
 }
 
-/* TODO: do I really wanna hide the scrollbars */
 /* Hide scrollbar for Chrome, Safari and Opera*/
 .chatHistoryList::-webkit-scrollbar,
 .chatWindow::-webkit-scrollbar {
