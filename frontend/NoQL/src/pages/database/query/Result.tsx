@@ -31,12 +31,12 @@ export function Result(
   const [
     timestamp,
     setTimestamp
-  ] = useState<number>(Date.now());
+  ] = useState<number>(Date.now())
 
   // Function to update the timestamp, triggering a reload of the image
   const reloadImage = (): void => {
-    setTimestamp(Date.now());
-  };
+    setTimestamp(Date.now())
+  }
 
   useEffect((): void => {
     reloadImage()
@@ -72,10 +72,12 @@ export function Result(
           }
 
           {queryResponse?.chatQueryWithResponse?.llmResult?.plotUrl != null &&
-            // TODO: backend url
-            <Paper elevation={2} style={{marginBottom: '2rem', display: 'flex', justifyContent: 'center'}}>
-              <img src={'http://localhost:8080' + queryResponse.chatQueryWithResponse.llmResult.plotUrl + `?timestamp=${timestamp}`}
-                   alt="plot"
+            <Paper elevation={2} style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+              <img
+                src={import.meta.env.VITE_BACKEND_URL
+                  + queryResponse.chatQueryWithResponse.llmResult.plotUrl
+                  + `?timestamp=${timestamp}`}
+                alt="plot"
               />
             </Paper>
           }
