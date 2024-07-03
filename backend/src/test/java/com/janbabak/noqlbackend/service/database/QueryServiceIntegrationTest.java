@@ -162,7 +162,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @param expectedResponse   expected response
      */
     @ParameterizedTest
-    @Disabled
     @MethodSource("testLoadChatDataProvider")
     @DisplayName("Test load chat")
     void testLoadChatResults(
