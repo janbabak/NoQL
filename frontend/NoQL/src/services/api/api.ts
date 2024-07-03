@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
+import { log } from '../loging/logger.ts'
 
 /** query parameter */
 interface ApiParameter {
@@ -14,6 +15,7 @@ class Api {
 
   /** forbid constructor, because api is a singleton */
   private constructor() {
+    log.info("BE URL is: " + this.axiosInstance.defaults.baseURL)
   }
 
   static instance: Api | null = null
@@ -25,8 +27,6 @@ class Api {
     if (this.instance == null) {
       this.instance = new Api()
     }
-    // TODO use log
-    console.log('BE URL is: ' + this.instance.axiosInstance.defaults.baseURL)
     return this.instance
   }
 
@@ -36,10 +36,10 @@ class Api {
    * @param parameters query parameters
    */
   get(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'GET'
-    } as AxiosRequestConfig
+    }
 
     return this.axiosInstance.request(requestConfig)
   }
@@ -57,12 +57,12 @@ class Api {
        headers: { [key: string]: string } = {}
   ): Promise<AxiosResponse> {
 
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'POST',
       data: data,
       headers: headers,
-    } as AxiosRequestConfig
+    }
 
     return this.axiosInstance.request(requestConfig)
   }
@@ -75,11 +75,11 @@ class Api {
    */
   put(path: string, data: string | null, parameters: ApiParameter[] = []):
     Promise<AxiosResponse> {
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'PUT',
       data: data
-    } as AxiosRequestConfig
+    }
 
     return this.axiosInstance.request(requestConfig)
   }
@@ -90,10 +90,10 @@ class Api {
    * @param parameters query parameters
    */
   delete(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
-    const requestConfig = {
+    const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'DELETE'
-    } as AxiosRequestConfig
+    }
 
     return this.axiosInstance.request(requestConfig)
   }
