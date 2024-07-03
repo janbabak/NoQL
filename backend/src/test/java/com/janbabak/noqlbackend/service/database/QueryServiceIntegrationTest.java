@@ -28,6 +28,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -46,6 +48,8 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryServiceIntegrationTest.class);
 
     private Database getDatabase() {
         return postgresDatabase;
@@ -196,6 +200,10 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // then
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(expectedTotalCount, queryResponse.getTotalCount());
+        System.out.println("query response");
+        System.out.println(queryResponse);
+        System.out.println("expected response");
+        System.out.println(expectedResponse);
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup

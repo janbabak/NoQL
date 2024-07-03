@@ -25,4 +25,4 @@ jobs:
 
       - name: Build with Gradle
         working-directory: backend
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
