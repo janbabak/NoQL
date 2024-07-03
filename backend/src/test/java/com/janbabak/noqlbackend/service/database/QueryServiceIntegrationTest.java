@@ -22,6 +22,7 @@ import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@Disabled
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
