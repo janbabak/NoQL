@@ -129,10 +129,12 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
-    void testCreateDatabase(String request, String response, Boolean success) throws Exception {
+    void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
+            throws Exception {
+
         // when
         if (success) {
-            when(databaseService.create(any())).thenReturn(createFromJson(response, Database.class));
+            when(databaseService.create(any())).thenReturn(createdDatabase);
         }
 
         // then
@@ -155,13 +157,23 @@ class DatabaseControllerTest {
                         """
                     {
                         "name":"Local Postgres",
-                        "host":"localhost",
+                        "host":"127.0.0.1",
                         "port":5432,
                         "database":"database",
                         "userName":"user",
                         "password":"password",
                         "engine":"POSTGRES"
                     }""",
+                        Database.builder()
+                                .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
+                                .name("Local Postgres")
+                                .host("127.0.0.1")
+                                .port(5432)
+                                .database("database")
+                                .userName("user")
+                                .password("password")
+                                .engine(DatabaseEngine.POSTGRES)
+                                .build(),
                         // language=JSON
                         """
                     {
@@ -172,7 +184,8 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "isSQL": true
                     }""",
                         true,
                 },
@@ -188,6 +201,7 @@ class DatabaseControllerTest {
                         "password":"password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -207,6 +221,7 @@ class DatabaseControllerTest {
                         "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -230,6 +245,7 @@ class DatabaseControllerTest {
                         "password":"",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
