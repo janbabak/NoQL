@@ -107,7 +107,7 @@ export function ConsoleTab(
 
       <Result
         queryResponse={queryResult}
-        editQueryInConsole={(_query: string) => console.log('implement')}
+        editQueryInConsole={(_query: string) => console.log('implement')} // TODO: implement
         showEditInConsoleButton={false}
         page={page}
         pageSize={pageSize}
