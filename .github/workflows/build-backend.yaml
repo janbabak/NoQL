@@ -25,5 +25,8 @@ jobs:
 #      - name: Setup Gradle
 #        uses: gradle/actions/setup-gradle@v3
 
+      - name: List files
+        run: ls -la
+
       - name: Build with Gradle
         run: ./gradlew build
