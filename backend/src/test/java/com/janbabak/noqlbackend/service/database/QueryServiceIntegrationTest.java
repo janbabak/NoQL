@@ -200,10 +200,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // then
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(expectedTotalCount, queryResponse.getTotalCount());
-        System.out.println("query response");
-        System.out.println(queryResponse);
-        System.out.println("expected response");
-        System.out.println(expectedResponse);
+        log.info("expected response: {}", expectedResponse);
+        log.info("query response: {}", queryResponse);
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
