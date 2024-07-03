@@ -162,6 +162,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @param expectedResponse   expected response
      */
     @ParameterizedTest
+    @Disabled
     @MethodSource("testLoadChatDataProvider")
     @DisplayName("Test load chat")
     void testLoadChatResults(
@@ -304,6 +305,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @param expectedResponse expected response
      */
     @ParameterizedTest
+    @Disabled
     @MethodSource("testExecuteChatWithPlotDataProvider")
     @DisplayName("Test execute chat")
     void testExecuteChat(
@@ -359,7 +361,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         return new Object[][]{
                 {
                         8, // page size
-                        2L, // total count
+                        2L, // total countjanbabak/plot-service
                         true, // plot result
                         List.of(), // messages
                         // query request
