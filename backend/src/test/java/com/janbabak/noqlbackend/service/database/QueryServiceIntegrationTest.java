@@ -42,7 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@Disabled
+//@Disabled
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
@@ -340,6 +340,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         }
 
         // then
+        System.out.println("query response");
+        System.out.println(queryResponse);
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(totalCount, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
