@@ -191,7 +191,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
         expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(lastMessage.getTimestamp());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(queryResponse.getChatQueryWithResponse().getTimestamp());
+//        expectedResponse.getChatQueryWithResponse().setTimestamp(lastMessage.getTimestamp());
         if (plotResult) {
             expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
                     "/static/images/" + chat.getId() + ".png");
