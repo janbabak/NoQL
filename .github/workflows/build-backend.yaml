@@ -19,10 +19,6 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: List files
-        working-directory: backend
-        run: ls -la
-
       - name: Build with Gradle
         working-directory: backend
         run: ./gradlew clean test --tests "com.janbabak.noqlbackend.service.database.QueryServiceIntegrationTest.testExecuteChat" -PshowLogs --stacktrace

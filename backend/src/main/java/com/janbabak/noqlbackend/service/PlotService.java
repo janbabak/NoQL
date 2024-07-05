@@ -72,13 +72,13 @@ public class PlotService {
         } catch (InterruptedException e) {
             logAndThrowRuntimeError(e.getMessage());
         }
-        printDockerPsOutput();
+        printDockerPsOutput("docker ps -a");
     }
 
-    void printDockerPsOutput() {
+    void printDockerPsOutput(String command) {
         StringBuilder output = new StringBuilder("\n");
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker ps -a");
+            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", command);
             Process process = processBuilder.start();
             BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -89,7 +89,7 @@ public class PlotService {
         } catch (IOException e) {
             log.error("Cannot print docker ps output: {}", e.getMessage());
         } finally {
-            log.info("Docker ps output: {}", output);
+            log.info("Docker output: {}", output);
         }
     }
 
@@ -108,7 +108,8 @@ public class PlotService {
      */
     public void generatePlot(String scriptContent, Database database, UUID chatId)
             throws PlotScriptExecutionException {
-        printDockerPsOutput();
+        printDockerPsOutput("docker ps -a");
+        printDockerPsOutput("docker logs plot-service");
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
             ProcessBuilder processBuilder = new ProcessBuilder(
