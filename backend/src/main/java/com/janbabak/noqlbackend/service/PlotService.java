@@ -27,7 +27,9 @@ public class PlotService {
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
+    @SuppressWarnings("FieldCanBeLocal")
     private static File plotsDirectory;
     private static File script;
     private final PlotServiceContainer plotServiceContainer;
@@ -72,25 +74,6 @@ public class PlotService {
         } catch (InterruptedException e) {
             logAndThrowRuntimeError(e.getMessage());
         }
-        printDockerPsOutput("docker ps -a");
-    }
-
-    void printDockerPsOutput(String command) {
-        StringBuilder output = new StringBuilder("\n");
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", command);
-            Process process = processBuilder.start();
-            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = outputReader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-            outputReader.close();
-        } catch (IOException e) {
-            log.error("Cannot print docker ps output: {}", e.getMessage());
-        } finally {
-            log.info("Docker output: {}", output);
-        }
     }
 
     @PreDestroy // springboot bean "destructor" callback
@@ -108,8 +91,7 @@ public class PlotService {
      */
     public void generatePlot(String scriptContent, Database database, UUID chatId)
             throws PlotScriptExecutionException {
-        printDockerPsOutput("docker ps -a");
-        printDockerPsOutput("docker logs plot-service");
+
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
             ProcessBuilder processBuilder = new ProcessBuilder(
@@ -181,15 +163,6 @@ public class PlotService {
             Files.deleteIfExists(path);
         } catch (IOException e) {
             log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
-        }
-    }
-
-    /**
-     * Used in tests. Warning: deletes all files in working directory including plots.
-     */
-    public static void deleteWorkingDirectory() {
-        if (!script.delete() || !plotsDirectory.delete() || !workingDirectory.delete()) {
-            log.error("Cannot clear working directory.");
         }
     }
 

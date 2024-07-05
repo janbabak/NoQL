@@ -197,8 +197,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // then
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(expectedTotalCount, queryResponse.getTotalCount());
-//        log.info("expected response: {}", expectedResponse);
-//        log.info("query response: {}", queryResponse);
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
@@ -346,8 +344,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         }
 
         // then
-        System.out.println("query response");
-        System.out.println(queryResponse);
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(totalCount, queryResponse.getTotalCount());
         assertEquals(expectedResponse, queryResponse);
@@ -365,7 +361,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         return new Object[][]{
                 {
                         8, // page size
-                        2L, // total countjanbabak/plot-service
+                        2L, // total count
                         true, // plot result
                         List.of(), // messages
                         // query request
