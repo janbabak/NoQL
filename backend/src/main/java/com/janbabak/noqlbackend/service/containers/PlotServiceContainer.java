@@ -33,6 +33,8 @@ public class PlotServiceContainer {
         start(WAIT_TO_START_MILLIS);
     }
 
+    public static String network = null;
+
     /**
      * Starts the plot service container and waits for the specified time.
      *
@@ -48,6 +50,7 @@ public class PlotServiceContainer {
                 .volumeMappings(List.of(new VolumeMapping("`pwd`/plotService", "/plotService")))
                 .detachedMode(true)
                 .interactiveMode(true)
+                .network(network)
                 .build();
 
         containerId = dockerService.runContainer(request);

@@ -4,11 +4,13 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.containers.PlotServiceContainer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,19 +46,31 @@ public class LocalDatabaseTest {
     @Container
     private static MySQLContainer<?> mySqlContainer;
 
+    private static final String networkAlias = "noql-network";
+
+    private static final Network network;
+
     static {
-        try (PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME);
+        network = Network.newNetwork();
+        PlotServiceContainer.network = network.getId();
+        try (
+             PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME);
              MySQLContainer<?> mysql = new MySQLContainer<>(MYSQL_CONTAINER_NAME)) {
 
+            System.out.println("Creating network and containers: " + network.getId());
             postgresContainer = postgres
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
-                    .withPassword(DATABASE_PASSWORD);
+                    .withPassword(DATABASE_PASSWORD)
+                    .withNetwork(network)
+                    .withNetworkAliases(networkAlias);
 
             mySqlContainer = mysql
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
-                    .withPassword(DATABASE_PASSWORD);
+                    .withPassword(DATABASE_PASSWORD)
+                    .withNetwork(network)
+                    .withNetworkAliases(networkAlias);
         }
     }
 

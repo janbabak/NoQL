@@ -36,7 +36,8 @@ public class DockerService {
             List<VolumeMapping> volumeMappings,
             List<EnvironmentVariableMapping> environmentVariables,
             Boolean detachedMode,
-            Boolean interactiveMode
+            Boolean interactiveMode,
+            String network
     ) {
     }
 
@@ -95,6 +96,9 @@ public class DockerService {
             for (EnvironmentVariableMapping envMapping : request.environmentVariables) {
                 commandBuilder.append(" -e ").append(envMapping.key).append("=").append(envMapping.value);
             }
+        }
+        if (request.network != null) {
+            commandBuilder.append(" --network ").append(request.network);
         }
         commandBuilder.append(" ").append(request.imageName);
 
