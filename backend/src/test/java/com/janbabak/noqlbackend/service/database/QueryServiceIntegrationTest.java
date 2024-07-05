@@ -22,7 +22,6 @@ import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,7 +43,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-//@Disabled
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
@@ -191,8 +189,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
         expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(queryResponse.getChatQueryWithResponse().getTimestamp());
-//        expectedResponse.getChatQueryWithResponse().setTimestamp(lastMessage.getTimestamp());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(
+                queryResponse.getChatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
                     "/static/images/" + chat.getId() + ".png");
@@ -201,8 +199,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // then
         assertTrue(pageSize >= queryResponse.getData().getRows().size());
         assertEquals(expectedTotalCount, queryResponse.getTotalCount());
-        log.info("expected response: {}", expectedResponse);
-        log.info("query response: {}", queryResponse);
+//        log.info("expected response: {}", expectedResponse);
+//        log.info("query response: {}", queryResponse);
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
@@ -311,7 +309,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @param expectedResponse expected response
      */
     @ParameterizedTest
-    @Disabled
     @MethodSource("testExecuteChatWithPlotDataProvider")
     @DisplayName("Test execute chat")
     void testExecuteChat(
