@@ -164,8 +164,8 @@ public class PlotService {
         scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
         scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
         scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, chatId.toString());
-//        scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
-//                database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
+        scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
+                database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
         return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
     }
 
