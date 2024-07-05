@@ -1,5 +1,5 @@
 {
   "databaseQuery": "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
   "generatePlot": true,
-  "pythonCode": "import matplotlib.pyplot as plt\nimport psycopg2\n\nconn = psycopg2.connect(host='postgresTestName', port=ppp45345ppp, user='admin4445900234', password='dkl45349?405', database='database99889899')\ncur = conn.cursor()\ncur.execute(\"SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex\")\nrows = cur.fetchall()\n\nsex = [row[0] for row in rows]\ncount = [row[1] for row in rows]\n\nplt.bar(sex, count)\nplt.xlabel('Sex')\nplt.ylabel('Count')\nplt.title('Count of Users by Sex (Age > 4)')\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')"
+  "pythonCode": "import matplotlib.pyplot as plt\nimport psycopg2\n\nconn = psycopg2.connect(host='localhost', port=ppp45345ppp, user='admin4445900234', password='dkl45349?405', database='database99889899')\ncur = conn.cursor()\ncur.execute(\"SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex\")\nrows = cur.fetchall()\n\nsex = [row[0] for row in rows]\ncount = [row[1] for row in rows]\n\nplt.bar(sex, count)\nplt.xlabel('Sex')\nplt.ylabel('Count')\nplt.title('Count of Users by Sex (Age > 4)')\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')"
 }

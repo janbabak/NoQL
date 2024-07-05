@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,7 +20,6 @@ class PlotServiceTest {
     @Autowired
     private PlotService plotService;
 
-    @Disabled
     @ParameterizedTest
     @MethodSource("replaceCredentialsDataProvider")
     @DisplayName("Replace credentials in the script")
