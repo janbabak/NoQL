@@ -41,7 +41,7 @@ public class LocalDatabaseTest {
     protected Database mySqlDatabase;
 
     @Container
-    private static PostgreSQLContainer<?> postgresContainer;
+    public static PostgreSQLContainer<?> postgresContainer;
 
     @Container
     private static MySQLContainer<?> mySqlContainer;
@@ -63,7 +63,10 @@ public class LocalDatabaseTest {
                     .withUsername(DATABASE_USERNAME)
                     .withPassword(DATABASE_PASSWORD)
                     .withNetwork(network)
-                    .withNetworkAliases(networkAlias);
+                    .withNetworkAliases(networkAlias)
+                    .withAccessToHost(true)
+                    .withExtraHost("localhost", "localhost")
+                    .withCreateContainerCmdModifier(cmd -> cmd.withName("postgresTestName"));
 
             mySqlContainer = mysql
                     .withDatabaseName(DATABASE_NAME)
