@@ -39,14 +39,13 @@ public class LocalDatabaseTest {
     protected Database mySqlDatabase;
 
     @Container
-    public static PostgreSQLContainer<?> postgresContainer;
+    private static PostgreSQLContainer<?> postgresContainer;
 
     @Container
     private static MySQLContainer<?> mySqlContainer;
 
     static {
-        try (
-             PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME);
+        try (PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_CONTAINER_NAME);
              MySQLContainer<?> mysql = new MySQLContainer<>(MYSQL_CONTAINER_NAME)) {
 
             postgresContainer = postgres
