@@ -41,6 +41,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+/**
+ * Integration tests for {@link QueryService}. Tests the interaction between the service and the database.
+ * PlotService had to be mocked because connection problems between containers.
+ */
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
@@ -232,14 +236,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         new QueryResponse( // expected response
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M", "11"), List.of("F", "11"))),
+                                        List.of(List.of("M", "9"), List.of("F", "10"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
                                                 null),
                                         null),
                                 null)
@@ -372,14 +376,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         new QueryResponse(
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M", "11"), List.of("F", "11"))),
+                                        List.of(List.of("M", "9"), List.of("F", "10"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
                                                 null),
                                         null),
                                 null)
