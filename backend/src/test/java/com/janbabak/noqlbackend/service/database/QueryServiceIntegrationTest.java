@@ -1,10 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
@@ -25,12 +22,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -53,8 +53,12 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         return postgresDatabase;
     }
 
+    @InjectMocks
     @Autowired
     private QueryService queryService;
+
+    @MockBean
+    private PlotService plotService;
 
     @Autowired
     private DatabaseEntityService databaseService;
@@ -108,8 +112,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         databaseService.deleteById(mySqlDatabase.getId());
 
         apiServiceMock.close();
-
-        PlotService.deleteWorkingDirectory();
     }
 
     @ParameterizedTest
@@ -320,7 +322,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             String llmResponse,
             QueryResponse expectedResponse
     ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException, BadRequestException {
+            LLMException, BadRequestException, PlotScriptExecutionException {
 
         // given
         UUID databaseId = getDatabase().getId();
@@ -332,6 +334,10 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // when
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+
+        doNothing().when(plotService).generatePlot(any(), any(), any());
+//        doNothing().when(plotService).de;
+
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually

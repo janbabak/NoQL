@@ -46,8 +46,6 @@ public class LocalDatabaseTest {
     @Container
     private static MySQLContainer<?> mySqlContainer;
 
-    private static final String networkAlias = "noql-network";
-
     private static final Network network;
 
     static {
@@ -62,18 +60,13 @@ public class LocalDatabaseTest {
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
                     .withPassword(DATABASE_PASSWORD)
-                    .withNetwork(network)
-                    .withNetworkAliases(networkAlias)
-                    .withAccessToHost(true)
-                    .withExtraHost("localhost", "localhost")
-                    .withCreateContainerCmdModifier(cmd -> cmd.withName("postgresTestName"));
+                    .withNetwork(network);
 
             mySqlContainer = mysql
                     .withDatabaseName(DATABASE_NAME)
                     .withUsername(DATABASE_USERNAME)
                     .withPassword(DATABASE_PASSWORD)
-                    .withNetwork(network)
-                    .withNetworkAliases(networkAlias);
+                    .withNetwork(network);
         }
     }
 
