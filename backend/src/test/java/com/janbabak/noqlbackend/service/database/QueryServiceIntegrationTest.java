@@ -25,8 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -46,8 +44,6 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
-
-    private static final Logger log = LoggerFactory.getLogger(QueryServiceIntegrationTest.class);
 
     private Database getDatabase() {
         return postgresDatabase;
@@ -336,7 +332,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
 
         doNothing().when(plotService).generatePlot(any(), any(), any());
-//        doNothing().when(plotService).de;
 
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
