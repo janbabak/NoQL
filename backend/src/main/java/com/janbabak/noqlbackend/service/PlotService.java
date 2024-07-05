@@ -27,17 +27,12 @@ public class PlotService {
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final PlotServiceContainer plotServiceContainer;
-
     @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
-
     @SuppressWarnings("FieldCanBeLocal")
     private static File plotsDirectory;
-
     private static File script;
+    private final PlotServiceContainer plotServiceContainer;
 
     /**
      * Get path to plot of chat
@@ -168,15 +163,6 @@ public class PlotService {
             Files.deleteIfExists(path);
         } catch (IOException e) {
             log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
-        }
-    }
-
-    /**
-     * Used in tests. Warning: deletes all files in working directory including plots.
-     */
-    public static void deleteWorkingDirectory() {
-        if (!script.delete() || !plotsDirectory.delete() || !workingDirectory.delete()) {
-            log.error("Cannot clear working directory.");
         }
     }
 

@@ -1,10 +1,7 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
@@ -25,10 +22,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -39,8 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+/**
+ * Integration tests for {@link QueryService}. Tests the interaction between the service and the database.
+ * PlotService had to be mocked because connection problems between containers.
+ */
 @SpringBootTest
 @ActiveProfiles("test")
 public class QueryServiceIntegrationTest extends LocalDatabaseTest {
@@ -49,8 +53,12 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         return postgresDatabase;
     }
 
+    @InjectMocks
     @Autowired
     private QueryService queryService;
+
+    @MockBean
+    private PlotService plotService;
 
     @Autowired
     private DatabaseEntityService databaseService;
@@ -104,8 +112,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         databaseService.deleteById(mySqlDatabase.getId());
 
         apiServiceMock.close();
-
-        PlotService.deleteWorkingDirectory();
     }
 
     @ParameterizedTest
@@ -185,7 +191,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
         expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(lastMessage.getTimestamp());
+        expectedResponse.getChatQueryWithResponse().setTimestamp(
+                queryResponse.getChatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
                     "/static/images/" + chat.getId() + ".png");
@@ -229,14 +236,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         new QueryResponse( // expected response
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M", "11"), List.of("F", "11"))),
+                                        List.of(List.of("M", "9"), List.of("F", "10"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
                                                 null),
                                         null),
                                 null)
@@ -313,7 +320,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             String llmResponse,
             QueryResponse expectedResponse
     ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException, BadRequestException {
+            LLMException, BadRequestException, PlotScriptExecutionException {
 
         // given
         UUID databaseId = getDatabase().getId();
@@ -325,6 +332,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // when
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+
+        doNothing().when(plotService).generatePlot(any(), any(), any());
+
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
@@ -366,14 +376,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         new QueryResponse(
                                 new QueryResponse.RetrievedData(
                                         List.of("sex", "count"),
-                                        List.of(List.of("M", "11"), List.of("F", "11"))),
+                                        List.of(List.of("M", "9"), List.of("F", "10"))),
                                 2L,
                                 new ChatQueryWithResponseDto(
                                         null,
                                         "plot sex of users older than 24",
                                         new ChatQueryWithResponseDto.LLMResult(
                                                 // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 4 GROUP BY sex",
+                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
                                                 null),
                                         null),
                                 null)

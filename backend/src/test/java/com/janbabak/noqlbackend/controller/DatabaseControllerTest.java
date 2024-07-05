@@ -129,10 +129,12 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
-    void testCreateDatabase(String request, String response, Boolean success) throws Exception {
+    void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
+            throws Exception {
+
         // when
         if (success) {
-            when(databaseService.create(any())).thenReturn(createFromJson(response, Database.class));
+            when(databaseService.create(any())).thenReturn(createdDatabase);
         }
 
         // then
@@ -155,13 +157,23 @@ class DatabaseControllerTest {
                         """
                     {
                         "name":"Local Postgres",
-                        "host":"localhost",
+                        "host":"127.0.0.1",
                         "port":5432,
                         "database":"database",
                         "userName":"user",
                         "password":"password",
                         "engine":"POSTGRES"
                     }""",
+                        Database.builder()
+                                .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
+                                .name("Local Postgres")
+                                .host("127.0.0.1")
+                                .port(5432)
+                                .database("database")
+                                .userName("user")
+                                .password("password")
+                                .engine(DatabaseEngine.POSTGRES)
+                                .build(),
                         // language=JSON
                         """
                     {
@@ -172,7 +184,8 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "isSQL": true
                     }""",
                         true,
                 },
@@ -188,6 +201,7 @@ class DatabaseControllerTest {
                         "password":"password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -207,6 +221,7 @@ class DatabaseControllerTest {
                         "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -230,6 +245,7 @@ class DatabaseControllerTest {
                         "password":"",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -247,13 +263,15 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Update database")
     @MethodSource("updateDatabaseDataProvider")
-    void testUpdateDatabase(String request, String response, Boolean success) throws Exception {
+    void testUpdateDatabase(String request, Database updatedDatabase, String response, Boolean success)
+            throws Exception {
+
         // given
         UUID databaseId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
         // when
         if (success) {
-            when(databaseService.update(eq(databaseId), any())).thenReturn(createFromJson(response, Database.class));
+            when(databaseService.update(eq(databaseId), any())).thenReturn(updatedDatabase);
         }
 
         // then
@@ -277,6 +295,16 @@ class DatabaseControllerTest {
                     {
                         "name":"Updated name"
                     }""",
+                        Database.builder()
+                                .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
+                                .name("Updated name")
+                                .host("localhost")
+                                .port(5432)
+                                .database("database")
+                                .userName("user")
+                                .password("password")
+                                .engine(DatabaseEngine.POSTGRES)
+                                .build(),
                         // language=JSON
                         """
                     {
@@ -287,7 +315,8 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "isSQL": true
                     }""",
                         true,
                 },
@@ -303,6 +332,16 @@ class DatabaseControllerTest {
                         "password":"Updated password",
                         "engine":"MYSQL"
                     }""",
+                        Database.builder()
+                                .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
+                                .name("Updated name")
+                                .host("127.0.0.1")
+                                .port(5555)
+                                .database("Updated database")
+                                .userName("Updated user")
+                                .password("Updated password")
+                                .engine(DatabaseEngine.MYSQL)
+                                .build(),
                         // language=JSON
                         """
                     {
@@ -313,7 +352,8 @@ class DatabaseControllerTest {
                         "database":"Updated database",
                         "userName":"Updated user",
                         "password":"Updated password",
-                        "engine":"MYSQL"
+                        "engine":"MYSQL",
+                        "isSQL": true
                     }""",
                         true,
                 },
@@ -329,6 +369,7 @@ class DatabaseControllerTest {
                         "password":"password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -348,6 +389,7 @@ class DatabaseControllerTest {
                         "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
@@ -371,6 +413,7 @@ class DatabaseControllerTest {
                         "password":"",
                         "engine":"POSTGRES"
                     }""",
+                        null,
                         // language=JSON
                         """
                     {
