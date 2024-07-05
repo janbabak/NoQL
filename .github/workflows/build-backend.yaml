@@ -25,4 +25,5 @@ jobs:
 
       - name: Build with Gradle
         working-directory: backend
-        run: ./gradlew clean build -PshowLogs --stacktrace
+        run: ./gradlew clean test --tests "com.janbabak.noqlbackend.service.database.QueryServiceIntegrationTest.testExecuteChat" -PshowLogs --stacktrace
+#        run: ./gradlew clean build -PshowLogs --stacktrace

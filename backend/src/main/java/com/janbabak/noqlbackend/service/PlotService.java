@@ -27,17 +27,10 @@ public class PlotService {
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final PlotServiceContainer plotServiceContainer;
-
-    @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
-
-    @SuppressWarnings("FieldCanBeLocal")
     private static File plotsDirectory;
-
     private static File script;
+    private final PlotServiceContainer plotServiceContainer;
 
     /**
      * Get path to plot of chat
@@ -79,6 +72,25 @@ public class PlotService {
         } catch (InterruptedException e) {
             logAndThrowRuntimeError(e.getMessage());
         }
+        printDockerPsOutput();
+    }
+
+    void printDockerPsOutput() {
+        StringBuilder output = new StringBuilder("\n");
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker ps -a");
+            Process process = processBuilder.start();
+            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = outputReader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            outputReader.close();
+        } catch (IOException e) {
+            log.error("Cannot print docker ps output: {}", e.getMessage());
+        } finally {
+            log.info("Docker ps output: {}", output);
+        }
     }
 
     @PreDestroy // springboot bean "destructor" callback
@@ -96,7 +108,7 @@ public class PlotService {
      */
     public void generatePlot(String scriptContent, Database database, UUID chatId)
             throws PlotScriptExecutionException {
-
+        printDockerPsOutput();
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
             ProcessBuilder processBuilder = new ProcessBuilder(
