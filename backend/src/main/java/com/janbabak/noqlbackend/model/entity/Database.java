@@ -41,7 +41,7 @@ public class Database {
     private String name;
 
     @NotBlank(groups = FirstValidationGroup.class)
-    @ValidHostName(groups = SecondValidationGroup.class)
+//    @ValidHostName(groups = SecondValidationGroup.class)
     private String host;
 
     @NotNull(groups = FirstValidationGroup.class)

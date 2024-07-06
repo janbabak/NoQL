@@ -1,9 +1,8 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.service.containers.PlotServiceContainer;
-import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,7 @@ public class PlotService {
     @SuppressWarnings("FieldCanBeLocal")
     private static File plotsDirectory;
     private static File script;
-    private final PlotServiceContainer plotServiceContainer;
+    private final Settings settings;
 
     /**
      * Get path to plot of chat
@@ -47,7 +46,9 @@ public class PlotService {
     /**
      * Create working directory and plot script
      */
-    PlotService(PlotServiceContainer plotServiceContainer) {
+    PlotService(Settings settings) {
+        this.settings = settings;
+
         // create working and plot directories
         workingDirectory = WORKING_DIRECTORY_PATH.toFile();
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
@@ -67,18 +68,6 @@ public class PlotService {
         } catch (IOException e) {
             logAndThrowRuntimeError("Cannot create plot script: " + e.getMessage());
         }
-
-        this.plotServiceContainer = plotServiceContainer;
-        try {
-            this.plotServiceContainer.start(0);
-        } catch (InterruptedException e) {
-            logAndThrowRuntimeError(e.getMessage());
-        }
-    }
-
-    @PreDestroy // springboot bean "destructor" callback
-    public void destroy() {
-        plotServiceContainer.stop();
     }
 
     /**
@@ -94,8 +83,9 @@ public class PlotService {
 
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    "sh", "-c", "docker exec plot-service python " + scriptPath);
+            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
+                    .formatted(settings.getPlotServiceContainerName(), scriptPath));
+
             Process process = processBuilder.start();
 
             // read output and return it if failure

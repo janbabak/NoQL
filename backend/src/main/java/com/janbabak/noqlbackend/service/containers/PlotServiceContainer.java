@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service.containers;
 
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.service.containers.DockerService.RunContainerRequest;
 import com.janbabak.noqlbackend.service.containers.DockerService.VolumeMapping;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,12 @@ import static java.lang.Thread.sleep;
 public class PlotServiceContainer {
 
     private static final String IMAGE_NAME = "janbabak/plot-service:1.0.0";
-    private static final String CONTAINER_NAME = "plot-service";
     private static final int WAIT_TO_START_MILLIS = 5000; // waits 5s for the container to start
 
     private final DockerService dockerService;
+    private final Settings settings;
 
+    @SuppressWarnings("all")
     private String containerId;
 
     /**
@@ -44,7 +46,7 @@ public class PlotServiceContainer {
 
         RunContainerRequest request = RunContainerRequest.builder()
                 .imageName(IMAGE_NAME)
-                .containerName(CONTAINER_NAME)
+                .containerName(settings.plotServiceContainerName)
                 .volumeMappings(List.of(new VolumeMapping("`pwd`/plotService", "/plotService")))
                 .detachedMode(true)
                 .interactiveMode(true)
@@ -52,13 +54,5 @@ public class PlotServiceContainer {
 
         containerId = dockerService.runContainer(request);
         sleep(waitMillis);
-    }
-
-    /**
-     * Stops the plot service container.
-     */
-    public void stop() {
-        log.info("Stopping Plot Service Container;");
-        dockerService.stopContainer(containerId);
     }
 }

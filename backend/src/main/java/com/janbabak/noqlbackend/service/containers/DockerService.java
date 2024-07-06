@@ -160,6 +160,7 @@ public class DockerService {
             }
             errorReader.close();
         } catch (IOException | InterruptedException e) {
+            System.out.println("Command execution failed. command: '" + command + "', output: '" + output + "', error: '" + error + "'");
             log.error("Command execution failed. command: '{}', output: '{}', error: '{}'", command, output, error);
             throw new RuntimeException(e);
         }
