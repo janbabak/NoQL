@@ -73,7 +73,3 @@ docker compose up -d # TODO: create docker compose file (instead of using exampl
   java -jar backend-0.0.1-SNAPSHOT.jar > noql.log 2>&1 & # detached with logging
   ```
   
----
-
-
-  

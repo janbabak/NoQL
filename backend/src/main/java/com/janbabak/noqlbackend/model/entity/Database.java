@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
-import com.janbabak.noqlbackend.validation.ValidHostName;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -41,7 +40,6 @@ public class Database {
     private String name;
 
     @NotBlank(groups = FirstValidationGroup.class)
-//    @ValidHostName(groups = SecondValidationGroup.class)
     private String host;
 
     @NotNull(groups = FirstValidationGroup.class)
