@@ -22,4 +22,8 @@ public class Settings {
     /** Number of retries when translated query fails due to a syntax error */
     @Value("${app.settings.translationRetries}")
     public Integer translationRetries;
+
+    /** Name of the container where the plot service is running (e.g. when multiple instances are running */
+    @Value("${app.settings.plotServiceContainerName}")
+    public String plotServiceContainerName;
 }

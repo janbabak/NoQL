@@ -104,16 +104,6 @@ public class DockerService {
     }
 
     /**
-     * Stops a container
-     *
-     * @param container name or id of the container to be stopped
-     */
-    public void stopContainer(String container) {
-        String command = "docker stop " + container;
-        executeCommand(command);
-    }
-
-    /**
      * Pulls an image from the Docker Hub
      *
      * @param imageName name of the image to be pulled

@@ -5,10 +5,14 @@ plugins {
 }
 
 group = 'com.janbabak'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
 	sourceCompatibility = '17'
+}
+
+jar {
+	enabled = false // not to generate *plain.jar file
 }
 
 configurations {
