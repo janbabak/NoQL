@@ -14,5 +14,5 @@ docker compose -f infra/dev-stack/dev-stack.docker-compose.yaml up -d
 ## Stop Dev Stack
 
 ```bash
-docker compose -f infra/dev-stack/dev-stack.docker-compose.yaml down
+docker compose -f infra/dev-stack/dev-stack.docker-compose.yaml stop
 ```

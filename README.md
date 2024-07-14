@@ -33,26 +33,66 @@ git clone https://github.com/janbabak/NoQL.git
 cd NoQL/
 ```
 
-### Start database
+### Backend
 
-```bash
-docker compose up -d # TODO: create docker compose file (instead of using example db)
-```
+#### Local stack
 
-### Start the app
+- Local stack is used for frontend development. It uses a local database and a local backend running like docker-compose
+  services.
+- Details are in the [Local stack](infra/local-stack/README.md).
 
+#### Development stack
+
+- Development stack is used for backend development and frontend development. It uses a local database and other
+  dependencies running like docker-compose services and backend running on the host machine.
+- It is necessary to create a `NoQL/backend/.env.local` file with the following content:
+
+  ```dotenv
+    API_KEY="xxx" # change
+    LLAMA_AUTH_TOKEN="xxx" # change
+    AI_STUDIO_API_KEY="xxx" # change
+
+    NOQL_DB_NAME="database"
+    NOQL_DB_HOST="localhost"
+    NOQL_DB_PORT="5432"
+    NOQL_DB_USERNAME="user"
+    NOQL_DB_PASSWORD="password"
+
+    # Local databases - should match the NOQL_DB_xxx credentials
+    POSTGRES_PASSWORD="password"
+    POSTGRES_USER="user"
+    POSTGRES_DB="database"
+
+    # settings
+    PAGINATION_MAX_PAGE_SIZE=100
+    PAGINATION_DEFAULT_PAGE_SIZE=20
+
+    TRANSLATION_RETRIES=3
+    ```
+- Start [Dev stack](infra/dev-stack/README.md).
 - Set the development environment. The app will connect to the local database.
-  ```bash
-  export spring_profiles_active=local # TODO: create local profile
-  ```
-
+    ```bash
+    export spring_profiles_active=local # TODO: create local profile
+    ```
+- Start the backend app:
 - Run the backend
   ```bash
   cd backend
-  TODO: solve gradlew wrapper issue https://support.snyk.io/hc/en-us/articles/360007745957-Snyk-test-Could-not-find-or-load-main-class-org-gradle-wrapper-GradleWrapperMain
+  ./gradlew bootRun
+  ```
+  
+### Frontend
+- Install the frontend dependencies
+  ```bash
+  cd frontend/NoQL 
+  npm install
+  ```
+- Start the frontend
+  ```bash
+  npm run dev
   ```
 
-## Development
+## AWS
 
 - Connect to the AWS EC2 instance over SSH
   ```bash
