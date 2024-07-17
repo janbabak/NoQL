@@ -1,0 +1,22 @@
+name: Build frontend
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        working-directory: frontend/NoQL
+        run: npm install
+
+      - name: Build
+        working-directory: frontend/NoQL
+        run: npm run build
