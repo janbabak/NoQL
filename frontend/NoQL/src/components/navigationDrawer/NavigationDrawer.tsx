@@ -3,18 +3,17 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import InboxIcon from '@mui/icons-material/MoveToInbox'
-import MailIcon from '@mui/icons-material/Mail'
 import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
 import React, { Dispatch, SetStateAction } from 'react'
+import { NavigationDrawerLink } from './navigationDrawer.types.ts'
 
 interface DrawerProps {
   drawerOpen: boolean,
   setDrawerOpen: Dispatch<SetStateAction<boolean>>
+  links: NavigationDrawerLink[]
 }
 
-export function NavigationDrawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
+export function NavigationDrawer({ drawerOpen, setDrawerOpen, links }: DrawerProps) {
 
   const toggleDrawer = (open: boolean) =>
     (event: React.KeyboardEvent | React.MouseEvent): void => {
@@ -36,34 +35,18 @@ export function NavigationDrawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {['Dashboard', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton component="a" href="/">
+        {links.map((link, index) => (
+          <ListItem key={index} disablePadding>
+            <ListItemButton component="a" href={link.href}>
               <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                {link.icon}
               </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-
-      {/*TODO: parameter*/}
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={link.text} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
     </Box>
-
 
   return (
     <SwipeableDrawer

@@ -5,12 +5,25 @@ import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { NavigationDrawer } from '../navigationDrawer/NavigationDrawer.tsx'
 import { useState } from 'react'
 import styles from './Layout.module.css';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 export function Layout() {
   const [
     drawerOpen,
     setDrawerOpen
   ] = useState<boolean>(false)
+
+  const navigationDrawerLinks = [
+    {
+      text: 'Dashboard',
+      icon: <DashboardIcon />,
+      href: '/'
+    },{
+      text: 'Dashboard',
+      icon: <DashboardIcon />,
+      href: '/'
+    },
+  ]
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -23,6 +36,7 @@ export function Layout() {
       <NavigationDrawer
         drawerOpen={drawerOpen}
         setDrawerOpen={setDrawerOpen}
+        links={navigationDrawerLinks}
       />
 
       <main className={styles.main}>
