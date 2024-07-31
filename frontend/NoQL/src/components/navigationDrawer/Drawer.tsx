@@ -16,20 +16,17 @@ interface DrawerProps {
 
 export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
 
-  const toggleDrawer =
-    (open: boolean) =>
-      (event: React.KeyboardEvent | React.MouseEvent) => {
-        if (
-          event &&
-          event.type === 'keydown' &&
-          ((event as React.KeyboardEvent).key === 'Tab' ||
-            (event as React.KeyboardEvent).key === 'Shift')
-        ) {
-          return;
-        }
+  const toggleDrawer = (open: boolean) =>
+    (event: React.KeyboardEvent | React.MouseEvent): void => {
+      if (event
+        && event.type === 'keydown'
+        && ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')
+      ) {
+        return
+      }
 
-        setDrawerOpen(open);
-      };
+      setDrawerOpen(open)
+    }
 
   const list =
     <Box
@@ -67,16 +64,12 @@ export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
 
 
   return (
-    <div>
-        <React.Fragment>
-          <SwipeableDrawer
-            open={drawerOpen}
-            onClose={toggleDrawer(false)}
-            onOpen={toggleDrawer(true)}
-          >
-            {list}
-          </SwipeableDrawer>
-        </React.Fragment>
-    </div>
-  );
+    <SwipeableDrawer
+      open={drawerOpen}
+      onClose={toggleDrawer(false)}
+      onOpen={toggleDrawer(true)}
+    >
+      {list}
+    </SwipeableDrawer>
+  )
 }

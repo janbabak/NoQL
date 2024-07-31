@@ -7,13 +7,13 @@ import Typography from '@mui/material/Typography'
 import { SetStateAction } from 'react'
 
 interface CustomAppBarProps {
-  open: boolean,
+  drawerOpen: boolean,
   setDrawerOpen: React.Dispatch<SetStateAction<boolean>>,
 }
 
 export function ApplicationBar(
   {
-    open,
+    drawerOpen,
     setDrawerOpen,
   }: CustomAppBarProps) {
 
@@ -47,13 +47,13 @@ export function ApplicationBar(
       aria-label="open drawer"
       onClick={() => setDrawerOpen(true)}
       edge="start"
-      sx={{ mr: 2, ...(open && { display: 'none' }) }}
+      sx={{ mr: 2, ...(drawerOpen && { display: 'none' }) }}
     >
       <MenuIcon />
     </IconButton>
 
   return (
-    <StyledAppBar position="fixed" open={open} theme={theme}>
+    <StyledAppBar position="fixed" open={drawerOpen} theme={theme}>
       <Toolbar>
         {OpenDrawerButton}
         <Typography variant="h6" noWrap component="div">
