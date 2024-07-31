@@ -69,7 +69,6 @@ export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
   return (
     <div>
         <React.Fragment>
-          <Button onClick={toggleDrawer(true)} style={{margin: '4rem'}}>toggle</Button>
           <SwipeableDrawer
             open={drawerOpen}
             onClose={toggleDrawer(false)}

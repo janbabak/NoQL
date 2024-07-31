@@ -1,9 +1,7 @@
 import { Outlet } from 'react-router-dom'
-import * as React from 'react'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
-import { Main } from './Main.tsx'
 import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { Drawer } from '../navigationDrawer/Drawer.tsx'
@@ -42,9 +40,18 @@ export function Layout() {
         setDrawerOpen={setNavigationDrawerOpen}
       />
 
-      <Main>
-        <Outlet />
-      </Main>
+      <main style={{
+        border: '3px solid red',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        margin: '5rem auto 1rem auto',
+      }}>
+        <div>
+          <Outlet />
+        </div>
+      </main>
 
       <GlobalSnackbar />
     </Box>
