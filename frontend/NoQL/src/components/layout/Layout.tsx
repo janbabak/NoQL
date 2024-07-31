@@ -2,7 +2,6 @@ import { Outlet } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
-import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { Drawer } from '../navigationDrawer/Drawer.tsx'
 import { useState } from 'react'
@@ -10,7 +9,6 @@ import styles from './Layout.module.css';
 
 export function Layout() {
   const drawerWidth = 240
-  const theme: Theme = useTheme()
   const [
     navigationDrawerOpen,
     setNavigationDrawerOpen
@@ -20,9 +18,9 @@ export function Layout() {
     setNavigationDrawerOpen(true)
   }
 
-  function handleDrawerClose(): void {
-    setNavigationDrawerOpen(false)
-  }
+  // function handleDrawerClose(): void {
+  //   setNavigationDrawerOpen(false)
+  // }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -33,7 +31,6 @@ export function Layout() {
         open={navigationDrawerOpen}
         handleDrawerOpen={handleDrawerOpen}
         drawerWidth={drawerWidth}
-        theme={theme}
       />
 
       <Drawer

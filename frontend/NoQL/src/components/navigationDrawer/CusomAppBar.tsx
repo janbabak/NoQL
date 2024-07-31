@@ -1,4 +1,4 @@
-import { styled, Theme } from '@mui/material/styles'
+import { styled, Theme, useTheme } from '@mui/material/styles'
 import MuiAppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
@@ -9,20 +9,20 @@ interface CustomAppBarProps {
   open: boolean,
   handleDrawerOpen: () => void,
   drawerWidth: number,
-  theme: Theme,
 }
 
 export function ApplicationBar(
   {
     open,
     handleDrawerOpen,
-    theme
   }: CustomAppBarProps) {
 
   interface StyledAppBarProps {
     theme: Theme,
     open: boolean,
   }
+
+  const theme: Theme = useTheme()
 
   const StyledAppBar =
     styled(MuiAppBar, {
