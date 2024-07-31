@@ -1,55 +1,50 @@
 import { Outlet } from 'react-router-dom'
-import * as React from 'react'
 import Box from '@mui/material/Box'
-import CssBaseline from '@mui/material/CssBaseline'
 import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
-import { Main } from './Main.tsx'
-import { PersistentDrawer } from '../navigationDrawer/PersistentDrawer.tsx'
-import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
+import { NavigationDrawer } from '../navigationDrawer/NavigationDrawer.tsx'
+import { useState } from 'react'
+import styles from './Layout.module.css';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 export function Layout() {
-  const drawerWidth = 240
-  const theme: Theme = useTheme()
   const [
-    navigationDrawerOpen,
-    setNavigationDrawerOpen
-  ] = React.useState<boolean>(false)
+    drawerOpen,
+    setDrawerOpen
+  ] = useState<boolean>(false)
 
-  function handleDrawerOpen(): void {
-    setNavigationDrawerOpen(true)
-  }
-
-  function handleDrawerClose(): void {
-    setNavigationDrawerOpen(false)
-  }
+  const navigationDrawerLinks = [
+    {
+      text: 'Dashboard',
+      icon: <DashboardIcon />,
+      href: '/'
+    },{
+      text: 'Dashboard',
+      icon: <DashboardIcon />,
+      href: '/'
+    },
+  ]
 
   return (
     <Box sx={{ display: 'flex' }}>
 
-      <CssBaseline />
-
       <ApplicationBar
-        open={navigationDrawerOpen}
-        handleDrawerOpen={handleDrawerOpen}
-        drawerWidth={drawerWidth}
-        theme={theme}
+        drawerOpen={drawerOpen}
+        setDrawerOpen={setDrawerOpen}
       />
 
-      <PersistentDrawer
-        open={navigationDrawerOpen}
-        handleDrawerClose={handleDrawerClose}
-        drawerWidth={drawerWidth}
+      <NavigationDrawer
+        drawerOpen={drawerOpen}
+        setDrawerOpen={setDrawerOpen}
+        links={navigationDrawerLinks}
       />
 
-      <Main
-        open={navigationDrawerOpen}
-        drawerWidth={drawerWidth}
-        theme={theme}
-      >
-        <Outlet />
-      </Main>
-      
+      <main className={styles.main}>
+        <div>
+          <Outlet />
+        </div>
+      </main>
+
       <GlobalSnackbar />
     </Box>
   )

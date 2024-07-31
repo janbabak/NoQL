@@ -1,29 +1,28 @@
-import { styled, Theme } from '@mui/material/styles'
+import { styled, Theme, useTheme } from '@mui/material/styles'
 import MuiAppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
 import Typography from '@mui/material/Typography'
+import React, { SetStateAction } from 'react'
 
 interface CustomAppBarProps {
-  open: boolean,
-  handleDrawerOpen: () => void,
-  drawerWidth: number,
-  theme: Theme,
+  drawerOpen: boolean,
+  setDrawerOpen: React.Dispatch<SetStateAction<boolean>>,
 }
 
 export function ApplicationBar(
   {
-    open,
-    handleDrawerOpen,
-    drawerWidth,
-    theme
+    drawerOpen,
+    setDrawerOpen
   }: CustomAppBarProps) {
 
   interface StyledAppBarProps {
     theme: Theme,
     open: boolean,
   }
+
+  const theme: Theme = useTheme()
 
   const StyledAppBar =
     styled(MuiAppBar, {
@@ -34,8 +33,7 @@ export function ApplicationBar(
         duration: theme.transitions.duration.leavingScreen
       }),
       ...(open && {
-        width: `calc(100% - ${drawerWidth}px)`,
-        marginLeft: `${drawerWidth}px`,
+        width: '100%',
         transition: theme.transitions.create(['margin', 'width'], {
           easing: theme.transitions.easing.easeOut,
           duration: theme.transitions.duration.enteringScreen
@@ -47,15 +45,15 @@ export function ApplicationBar(
     <IconButton
       color="inherit"
       aria-label="open drawer"
-      onClick={handleDrawerOpen}
+      onClick={() => setDrawerOpen(true)}
       edge="start"
-      sx={{ mr: 2, ...(open && { display: 'none' }) }}
+      sx={{ mr: 2, ...(drawerOpen && { display: 'none' }) }}
     >
       <MenuIcon />
     </IconButton>
 
   return (
-    <StyledAppBar position="fixed" open={open} theme={theme}>
+    <StyledAppBar position="fixed" open={drawerOpen} theme={theme}>
       <Toolbar>
         {OpenDrawerButton}
         <Typography variant="h6" noWrap component="div">
