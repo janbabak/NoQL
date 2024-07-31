@@ -7,6 +7,7 @@ import { Main } from './Main.tsx'
 import { PersistentDrawer } from '../navigationDrawer/PersistentDrawer.tsx'
 import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
+import { Drawer } from '../navigationDrawer/Drawer.tsx'
 
 export function Layout() {
   const drawerWidth = 240
@@ -36,20 +37,12 @@ export function Layout() {
         theme={theme}
       />
 
-      <PersistentDrawer
-        open={navigationDrawerOpen}
-        handleDrawerClose={handleDrawerClose}
-        drawerWidth={drawerWidth}
-      />
+      <Drawer />
 
-      <Main
-        open={navigationDrawerOpen}
-        drawerWidth={drawerWidth}
-        theme={theme}
-      >
+      <Main>
         <Outlet />
       </Main>
-      
+
       <GlobalSnackbar />
     </Box>
   )
