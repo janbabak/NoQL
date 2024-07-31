@@ -6,6 +6,7 @@ import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { Drawer } from '../navigationDrawer/Drawer.tsx'
 import { useState } from 'react'
+import styles from './Layout.module.css';
 
 export function Layout() {
   const drawerWidth = 240
@@ -40,14 +41,7 @@ export function Layout() {
         setDrawerOpen={setNavigationDrawerOpen}
       />
 
-      <main style={{
-        border: '3px solid red',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        margin: '5rem auto 1rem auto',
-      }}>
+      <main className={styles.main}>
         <div>
           <Outlet />
         </div>
