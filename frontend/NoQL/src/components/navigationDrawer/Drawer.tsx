@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Box, Button, SwipeableDrawer } from '@mui/material'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
@@ -8,11 +7,14 @@ import InboxIcon from '@mui/icons-material/MoveToInbox'
 import MailIcon from '@mui/icons-material/Mail'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 
-export function Drawer() {
+interface DrawerProps {
+  drawerOpen: boolean,
+  setDrawerOpen: Dispatch<SetStateAction<boolean>>
+}
 
-  const [state, setState] = useState(false);
+export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
 
   const toggleDrawer =
     (open: boolean) =>
@@ -26,7 +28,7 @@ export function Drawer() {
           return;
         }
 
-        setState(open);
+        setDrawerOpen(open);
       };
 
   const list =
@@ -69,7 +71,7 @@ export function Drawer() {
         <React.Fragment>
           <Button onClick={toggleDrawer(true)} style={{margin: '4rem'}}>toggle</Button>
           <SwipeableDrawer
-            open={state}
+            open={drawerOpen}
             onClose={toggleDrawer(false)}
             onOpen={toggleDrawer(true)}
           >

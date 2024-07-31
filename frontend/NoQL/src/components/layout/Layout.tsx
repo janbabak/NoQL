@@ -4,10 +4,10 @@ import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
 import { Main } from './Main.tsx'
-import { PersistentDrawer } from '../navigationDrawer/PersistentDrawer.tsx'
 import { Theme, useTheme } from '@mui/material/styles'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { Drawer } from '../navigationDrawer/Drawer.tsx'
+import { useState } from 'react'
 
 export function Layout() {
   const drawerWidth = 240
@@ -15,7 +15,7 @@ export function Layout() {
   const [
     navigationDrawerOpen,
     setNavigationDrawerOpen
-  ] = React.useState<boolean>(false)
+  ] = useState<boolean>(false)
 
   function handleDrawerOpen(): void {
     setNavigationDrawerOpen(true)
@@ -37,7 +37,10 @@ export function Layout() {
         theme={theme}
       />
 
-      <Drawer />
+      <Drawer
+        drawerOpen={navigationDrawerOpen}
+        setDrawerOpen={setNavigationDrawerOpen}
+      />
 
       <Main>
         <Outlet />
