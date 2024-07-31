@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography'
 interface CustomAppBarProps {
   open: boolean,
   handleDrawerOpen: () => void,
-  drawerWidth: number,
 }
 
 export function ApplicationBar(

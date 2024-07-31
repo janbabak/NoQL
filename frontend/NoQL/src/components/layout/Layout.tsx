@@ -8,7 +8,6 @@ import { useState } from 'react'
 import styles from './Layout.module.css';
 
 export function Layout() {
-  const drawerWidth = 240
   const [
     navigationDrawerOpen,
     setNavigationDrawerOpen
@@ -30,7 +29,6 @@ export function Layout() {
       <ApplicationBar
         open={navigationDrawerOpen}
         handleDrawerOpen={handleDrawerOpen}
-        drawerWidth={drawerWidth}
       />
 
       <Drawer
