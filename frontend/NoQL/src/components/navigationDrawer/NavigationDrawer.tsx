@@ -14,7 +14,7 @@ interface DrawerProps {
   setDrawerOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
+export function NavigationDrawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
 
   const toggleDrawer = (open: boolean) =>
     (event: React.KeyboardEvent | React.MouseEvent): void => {
@@ -36,9 +36,9 @@ export function Drawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+        {['Dashboard', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton>
+            <ListItemButton component="a" href="/">
               <ListItemIcon>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
