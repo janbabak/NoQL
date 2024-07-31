@@ -14,7 +14,7 @@ interface CustomAppBarProps {
 export function ApplicationBar(
   {
     drawerOpen,
-    setDrawerOpen,
+    setDrawerOpen
   }: CustomAppBarProps) {
 
   interface StyledAppBarProps {

@@ -48,6 +48,8 @@ export function NavigationDrawer({ drawerOpen, setDrawerOpen }: DrawerProps) {
         ))}
       </List>
       <Divider />
+
+      {/*TODO: parameter*/}
       <List>
         {['All mail', 'Trash', 'Spam'].map((text, index) => (
           <ListItem key={text} disablePadding>
