@@ -13,14 +13,6 @@ export function Layout() {
     setNavigationDrawerOpen
   ] = useState<boolean>(false)
 
-  function handleDrawerOpen(): void {
-    setNavigationDrawerOpen(true)
-  }
-
-  // function handleDrawerClose(): void {
-  //   setNavigationDrawerOpen(false)
-  // }
-
   return (
     <Box sx={{ display: 'flex' }}>
 
@@ -28,7 +20,7 @@ export function Layout() {
 
       <ApplicationBar
         open={navigationDrawerOpen}
-        handleDrawerOpen={handleDrawerOpen}
+        setDrawerOpen={setNavigationDrawerOpen}
       />
 
       <Drawer

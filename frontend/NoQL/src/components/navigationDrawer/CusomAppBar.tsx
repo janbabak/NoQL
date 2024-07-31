@@ -4,16 +4,17 @@ import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
 import Typography from '@mui/material/Typography'
+import { SetStateAction } from 'react'
 
 interface CustomAppBarProps {
   open: boolean,
-  handleDrawerOpen: () => void,
+  setDrawerOpen: React.Dispatch<SetStateAction<boolean>>,
 }
 
 export function ApplicationBar(
   {
     open,
-    handleDrawerOpen,
+    setDrawerOpen,
   }: CustomAppBarProps) {
 
   interface StyledAppBarProps {
@@ -44,7 +45,7 @@ export function ApplicationBar(
     <IconButton
       color="inherit"
       aria-label="open drawer"
-      onClick={handleDrawerOpen}
+      onClick={() => setDrawerOpen(true)}
       edge="start"
       sx={{ mr: 2, ...(open && { display: 'none' }) }}
     >
