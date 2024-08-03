@@ -67,7 +67,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>Create Database</DialogTitle>
 
         <DialogContent>
@@ -91,7 +91,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               })}
             />
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: 'flex', gap: '1rem'}}>
               <TextField
                 margin="dense"
                 id="host"
@@ -144,7 +144,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
             <div style={{ display: 'flex', gap: '1rem' }}>
               <TextField
-                margin="dense"
+                style={{ marginTop: '0.75rem' }}
                 id="username"
                 label="Username"
                 type="text"
@@ -159,8 +159,8 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               />
 
               <TextField
-                margin="dense"
                 id="password"
+                style={{ marginTop: '0.75rem' }}
                 label="Password"
                 type="password"
                 fullWidth
