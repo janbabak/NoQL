@@ -24,23 +24,24 @@ interface CreateDatabaseDialogProps {
 
 export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProps) {
 
-  const form = useForm<CreateDatabaseRequest>({
-    defaultValues: {
-      name: '',
-      host: '',
-      port: 5433,
-      database: '',
-      userName: '',
-      password: '',
-      engine: DatabaseEngine.POSTGRES
-    }
-  })
+  const defaultValues: CreateDatabaseRequest = {
+    name: '',
+    host: '',
+    port: 5433,
+    database: '',
+    userName: '',
+    password: '',
+    engine: DatabaseEngine.POSTGRES
+  }
+
+  const form = useForm<CreateDatabaseRequest>({ defaultValues: defaultValues })
 
   const {
     control,
     register,
     handleSubmit,
-    formState
+    formState,
+    reset
   } = form
 
   const { errors } = formState
@@ -57,6 +58,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
     setSubmitLoading(true)
     try {
       await databaseApi.create(data)
+      reset(defaultValues)
       onClose()
     } catch (error: unknown) {
       const errorMessage = (error as any).response.data || 'Something went wrong. Please try again later.'
@@ -66,9 +68,14 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
     }
   }
 
+  function handleClose() {
+    reset(defaultValues)
+    onClose()
+  }
+
   const actionButtons =
     <div className={styles.dialogButtonsContainer}>
-      <Button onClick={onClose} aria-label="Cancel">Cancel</Button>
+      <Button onClick={handleClose} aria-label="Cancel">Cancel</Button>
       <LoadingButton
         loading={submitLoading}
         type="submit"
@@ -208,7 +215,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>Create Database</DialogTitle>
 
         <DialogContent>
