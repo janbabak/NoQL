@@ -10,11 +10,13 @@ import {
 import { Select } from '@mui/material-next'
 import { Controller, useForm } from 'react-hook-form'
 import databaseApi from '../../services/api/databaseApi.ts'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { CreateDatabaseRequest, DatabaseEngine } from '../../types/Database.ts'
+import SendRoundedIcon from '@mui/icons-material/SendRounded'
+import { LoadingButton } from '@mui/lab'
 
 interface CreateDatabaseDialogProps {
   open: boolean;
@@ -199,7 +201,12 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
             <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem'}}>
               <Button onClick={onClose}>Cancel</Button>
-              <Button type="submit">Create</Button>
+              <LoadingButton
+                loading={submitLoading}
+                type="submit"
+              >
+                Create
+              </LoadingButton>
             </div>
           </form>
 
