@@ -68,7 +68,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   const actionButtons =
     <div className={styles.dialogButtonsContainer}>
-      <Button onClick={onClose}>Cancel</Button>
+      <Button onClick={onClose} aria-label="Cancel">Cancel</Button>
       <LoadingButton
         loading={submitLoading}
         type="submit"
@@ -77,141 +77,142 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
       </LoadingButton>
     </div>
 
+  const createDatabaseForm =
+    <form noValidate onSubmit={handleSubmit(onSubmit)}>
+
+      <TextField
+        autoFocus
+        margin="dense"
+        id="name"
+        label="Name"
+        placeholder="My local postgres"
+        type="text"
+        fullWidth
+        variant="standard"
+        error={!!errors.name}
+        helperText={errors.name?.message}
+        {...register('name', {
+          required: 'Name is required',
+          maxLength: { value: 32, message: 'Name maximum allowed length is 32' }
+        })}
+      />
+
+      <div className={styles.formRow}>
+        <TextField
+          margin="dense"
+          id="host"
+          label="Host"
+          placeholder="localhost"
+          type="text"
+          fullWidth
+          variant="standard"
+          error={!!errors.host}
+          helperText={errors.host?.message}
+          {...register('host', {
+            required: 'Name is required',
+            maxLength: { value: 253, message: 'Host maximum length is 253' }
+          })}
+        />
+
+        <TextField
+          margin="dense"
+          id="port"
+          label="Port"
+          placeholder="5432"
+          type="number"
+          fullWidth
+          variant="standard"
+          error={!!errors.port}
+          helperText={errors.port?.message}
+          {...register('port', {
+            required: 'Port is required',
+            min: { value: 1, message: 'Port has to be greater than 0' },
+            pattern: { value: /^[0-9]+$/, message: 'Port must be an integer' }
+          })}
+        />
+
+        <TextField
+          margin="dense"
+          id="database"
+          label="Database"
+          placeholder="eshopUsers"
+          type="text"
+          fullWidth
+          variant="standard"
+          error={!!errors.database}
+          helperText={errors.database?.message}
+          {...register('database', {
+            required: 'Database is required',
+            maxLength: { value: 253, message: 'Database maximum length is 253' }
+          })}
+        />
+      </div>
+
+      <div className={styles.formRow}>
+        <TextField
+          id="username"
+          className={styles.formInputSecondRow}
+          label="Username"
+          type="text"
+          fullWidth
+          variant="standard"
+          error={!!errors.userName}
+          helperText={errors.userName?.message}
+          {...register('userName', {
+            required: 'Username is required',
+            maxLength: { value: 128, message: 'Username maximum length is 128' }
+          })}
+        />
+
+        <TextField
+          id="password"
+          className={styles.formInputSecondRow}
+          label="Password"
+          type="password"
+          fullWidth
+          variant="standard"
+          error={!!errors.password}
+          helperText={errors.password?.message}
+          {...register('password', {
+            required: 'Password is required',
+            maxLength: { value: 128, message: 'Password maximum length is 128' }
+          })}
+        />
+
+        <Controller
+          name="engine"
+          control={control}
+          render={({ field }) => (
+            <Select
+              id="engine"
+              label="Engine"
+              variant="standard"
+              {...field}
+              style={{ width: '100%' }}
+            >
+              {Object.keys(DatabaseEngine)
+                .filter((key: string) => isNaN(Number(key)))
+                .map((key) => {
+                  return (
+                    <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
+                      {key}
+                    </MenuItem>)
+                })}
+            </Select>
+          )}
+        />
+      </div>
+
+      {actionButtons}
+    </form>
+
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>Create Database</DialogTitle>
 
         <DialogContent>
-
-          <form noValidate onSubmit={handleSubmit(onSubmit)}>
-
-            <TextField
-              autoFocus
-              margin="dense"
-              id="name"
-              label="Name"
-              placeholder="My local postgres"
-              type="text"
-              fullWidth
-              variant="standard"
-              error={!!errors.name}
-              helperText={errors.name?.message}
-              {...register('name', {
-                required: 'Name is required',
-                maxLength: { value: 32, message: 'Name maximum allowed length is 32' }
-              })}
-            />
-
-            <div className={styles.formRow}>
-              <TextField
-                margin="dense"
-                id="host"
-                label="Host"
-                placeholder="localhost"
-                type="text"
-                fullWidth
-                variant="standard"
-                error={!!errors.host}
-                helperText={errors.host?.message}
-                {...register('host', {
-                  required: 'Name is required',
-                  maxLength: { value: 253, message: 'Host maximum length is 253' }
-                })}
-              />
-
-              <TextField
-                margin="dense"
-                id="port"
-                label="Port"
-                placeholder="5432"
-                type="number"
-                fullWidth
-                variant="standard"
-                error={!!errors.port}
-                helperText={errors.port?.message}
-                {...register('port', {
-                  required: 'Port is required',
-                  min: { value: 1, message: 'Port has to be greater than 0' },
-                  pattern: { value: /^[0-9]+$/, message: 'Port must be an integer' }
-                })}
-              />
-
-              <TextField
-                margin="dense"
-                id="database"
-                label="Database"
-                placeholder="eshopUsers"
-                type="text"
-                fullWidth
-                variant="standard"
-                error={!!errors.database}
-                helperText={errors.database?.message}
-                {...register('database', {
-                  required: 'Database is required',
-                  maxLength: { value: 253, message: 'Database maximum length is 253' }
-                })}
-              />
-            </div>
-
-            <div className={styles.formRow}>
-              <TextField
-                id="username"
-                className={styles.formInputSecondRow}
-                label="Username"
-                type="text"
-                fullWidth
-                variant="standard"
-                error={!!errors.userName}
-                helperText={errors.userName?.message}
-                {...register('userName', {
-                  required: 'Username is required',
-                  maxLength: { value: 128, message: 'Username maximum length is 128' }
-                })}
-              />
-
-              <TextField
-                id="password"
-                className={styles.formInputSecondRow}
-                label="Password"
-                type="password"
-                fullWidth
-                variant="standard"
-                error={!!errors.password}
-                helperText={errors.password?.message}
-                {...register('password', {
-                  required: 'Password is required',
-                  maxLength: { value: 128, message: 'Password maximum length is 128' }
-                })}
-              />
-
-              <Controller
-                name="engine"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    id="engine"
-                    label="Engine"
-                    variant="standard"
-                    {...field}
-                    style={{ width: '100%' }}
-                  >
-                    {Object.keys(DatabaseEngine)
-                      .filter((key: string) => isNaN(Number(key)))
-                      .map((key) => {
-                        return (
-                          <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
-                            {key}
-                          </MenuItem>)
-                      })}
-                  </Select>
-                )}
-              />
-            </div>
-
-            {actionButtons}
-          </form>
-
+          {createDatabaseForm}
         </DialogContent>
       </Dialog>
     </>

@@ -28,7 +28,7 @@ export function Databases() {
   const [
     createDatabaseDialogOpen,
     setCreateDatabaseDialogOpen
-  ] = useState<boolean>(true)
+  ] = useState<boolean>(false)
 
   useEffect((): void => {
     void loadDatabases()
@@ -48,6 +48,14 @@ export function Databases() {
     }
   }
 
+  function openCreateDatabaseDialog(): void {
+    setCreateDatabaseDialogOpen(true)
+  }
+
+  function closeCreateDatabaseDialog(): void {
+    setCreateDatabaseDialogOpen(false)
+  }
+
   const DatabasesList =
     <ul>{
       databases.map((db: Database) =>
@@ -65,7 +73,7 @@ export function Databases() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setCreateDatabaseDialogOpen(true)}>
+            onClick={openCreateDatabaseDialog}>
             Create
           </Button>
         </div>
@@ -73,7 +81,7 @@ export function Databases() {
 
       <CreateDatabaseDialog
         open={createDatabaseDialogOpen}
-        onClose={() => setCreateDatabaseDialogOpen(false)}
+        onClose={closeCreateDatabaseDialog}
       />
 
       {databasesLoading
