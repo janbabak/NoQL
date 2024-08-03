@@ -182,6 +182,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                     label="Engine"
                     variant="standard"
                     {...field}
+                    style={{ width: '100%' }}
                   >
                     {Object.keys(DatabaseEngine)
                       .filter((key: string) => isNaN(Number(key)))
@@ -196,10 +197,10 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               />
             </div>
 
-            <DialogActions>
+            <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem'}}>
               <Button onClick={onClose}>Cancel</Button>
               <Button type="submit">Create</Button>
-            </DialogActions>
+            </div>
           </form>
 
         </DialogContent>
