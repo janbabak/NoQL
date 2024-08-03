@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { CreateDatabaseRequest, DatabaseEngine } from '../../types/Database.ts'
 import { LoadingButton } from '@mui/lab'
+import styles from './Dashboard.module.css'
 
 interface CreateDatabaseDialogProps {
   open: boolean;
@@ -25,12 +26,12 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   const form = useForm<CreateDatabaseRequest>({
     defaultValues: {
-      name: 'fail',
-      host: 'localhost',
+      name: '',
+      host: '',
       port: 5433,
-      database: 'database',
-      userName: 'user',
-      password: 'password423432',
+      database: '',
+      userName: '',
+      password: '',
       engine: DatabaseEngine.POSTGRES
     }
   })
@@ -65,6 +66,17 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
     }
   }
 
+  const actionButtons =
+    <div className={styles.dialogButtonsContainer}>
+      <Button onClick={onClose}>Cancel</Button>
+      <LoadingButton
+        loading={submitLoading}
+        type="submit"
+      >
+        Create
+      </LoadingButton>
+    </div>
+
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -91,7 +103,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               })}
             />
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className={styles.formRow}>
               <TextField
                 margin="dense"
                 id="host"
@@ -142,10 +154,10 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className={styles.formRow}>
               <TextField
-                style={{ marginTop: '0.75rem' }}
                 id="username"
+                className={styles.formInputSecondRow}
                 label="Username"
                 type="text"
                 fullWidth
@@ -160,7 +172,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
               <TextField
                 id="password"
-                style={{ marginTop: '0.75rem' }}
+                className={styles.formInputSecondRow}
                 label="Password"
                 type="password"
                 fullWidth
@@ -197,15 +209,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               />
             </div>
 
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <Button onClick={onClose}>Cancel</Button>
-              <LoadingButton
-                loading={submitLoading}
-                type="submit"
-              >
-                Create
-              </LoadingButton>
-            </div>
+            {actionButtons}
           </form>
 
         </DialogContent>
