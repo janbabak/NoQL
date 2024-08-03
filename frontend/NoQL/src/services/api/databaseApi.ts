@@ -25,6 +25,14 @@ const databaseApi = {
   },
 
   /**
+   * Create new database.
+   * @param database
+   */
+  create(database: Database): Promise<AxiosResponse<Database>> {
+    return this.API.post(this.DOMAIN, database)
+  },
+
+  /**
    * Get database structure by id
    * @param id database identifier
    */

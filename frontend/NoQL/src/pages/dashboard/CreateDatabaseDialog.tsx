@@ -9,6 +9,11 @@ import {
 } from '@mui/material'
 import { Select } from '@mui/material-next'
 import { Controller, useForm } from 'react-hook-form'
+import databaseApi from '../../services/api/databaseApi.ts'
+import { useState } from 'react'
+import { AppDispatch } from '../../state/store.ts'
+import { useDispatch } from 'react-redux'
+import { showErrorMessage, showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface CreateDatabaseDialogProps {
   open: boolean;
@@ -20,7 +25,7 @@ type FormValues = {
   host: string;
   port: number;
   database: string;
-  username: string;
+  userName: string;
   password: string;
   engine: string;
 }
@@ -29,13 +34,13 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   const form = useForm<FormValues>({
     defaultValues: {
-      name: 'def name',
-      host: 'def host',
-      port: 2,
-      database: 'def database',
-      username: 'def username',
-      password: 'def password',
-      engine: 'postgres'
+      name: 'fail',
+      host: 'localhost',
+      port: 5433,
+      database: 'database',
+      userName: 'user',
+      password: 'password423432',
+      engine: 'POSTGRES'
     }
   })
 
@@ -48,8 +53,31 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
   const { errors } = formState
 
-  function onSubmit(data: FormValues) {
+  const dispatch: AppDispatch = useDispatch()
+
+  const [
+    submitLoading,
+    setSubmitLoading
+  ] = useState<boolean>(false)
+
+
+  async function onSubmit(data: FormValues) {
     console.log(data)
+
+    setSubmitLoading(true)
+    try {
+      const response = await databaseApi.create(data)
+      if (response.status >= 400 && response.status < 500) {
+        console.log('Database not create')
+        showErrorMessage(dispatch, "fail bro")
+      }
+      onClose()
+    } catch (error: unknown) {
+      const errorMessage = (error as any).response.data || 'Something went wrong'
+      showErrorMessage(dispatch, errorMessage)
+    } finally {
+      setSubmitLoading(false)
+    }
   }
 
   return (
@@ -98,7 +126,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               <TextField
                 margin="dense"
                 id="port"
-                label="port"
+                label="Port"
                 placeholder="5432"
                 type="number"
                 fullWidth
@@ -115,7 +143,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               <TextField
                 margin="dense"
                 id="database"
-                label="database"
+                label="Database"
                 placeholder='eshopUsers'
                 type="text"
                 fullWidth
@@ -133,13 +161,13 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               <TextField
                 margin="dense"
                 id="username"
-                label="username"
+                label="Username"
                 type="text"
                 fullWidth
                 variant="standard"
-                error={!!errors.username}
-                helperText={errors.username?.message}
-                {...register('username', {
+                error={!!errors.userName}
+                helperText={errors.userName?.message}
+                {...register('userName', {
                   required: 'Username is required',
                   maxLength: { value: 128, message: 'Username maximum length is 128' }
                 })}
@@ -148,7 +176,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               <TextField
                 margin="dense"
                 id="password"
-                label="password"
+                label="Password"
                 type="password"
                 fullWidth
                 variant="standard"
@@ -156,7 +184,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 helperText={errors.password?.message}
                 {...register('password', {
                   required: 'Password is required',
-                  minLength: { value: 128, message: 'Password maximum length is 128' },
+                  maxLength: { value: 128, message: 'Password maximum length is 128' },
                 })}
               />
 
@@ -166,12 +194,12 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 render={({ field }) => (
                   <Select
                     id="engine"
-                    label="engine"
+                    label="Engine"
                     variant="standard"
                     {...field} // Use field from Controller
                   >
-                    <MenuItem value="postgres">Postgres</MenuItem>
-                    <MenuItem value="mysql">MySql</MenuItem>
+                    <MenuItem value="POSTGRES">Postgres</MenuItem>
+                    <MenuItem value="MYSQL">MySql</MenuItem>
                   </Select>
                 )}
               />
