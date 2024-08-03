@@ -13,26 +13,17 @@ import databaseApi from '../../services/api/databaseApi.ts'
 import { useState } from 'react'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
-import { showErrorMessage, showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { CreateDatabaseRequest, DatabaseEngine } from '../../types/Database.ts'
 
 interface CreateDatabaseDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-type FormValues = {
-  name: string;
-  host: string;
-  port: number;
-  database: string;
-  userName: string;
-  password: string;
-  engine: string;
-}
-
 export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProps) {
 
-  const form = useForm<FormValues>({
+  const form = useForm<CreateDatabaseRequest>({
     defaultValues: {
       name: 'fail',
       host: 'localhost',
@@ -40,7 +31,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
       database: 'database',
       userName: 'user',
       password: 'password423432',
-      engine: 'POSTGRES'
+      engine: DatabaseEngine.POSTGRES
     }
   })
 
@@ -61,19 +52,13 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
   ] = useState<boolean>(false)
 
 
-  async function onSubmit(data: FormValues) {
-    console.log(data)
-
+  async function onSubmit(data: CreateDatabaseRequest) {
     setSubmitLoading(true)
     try {
-      const response = await databaseApi.create(data)
-      if (response.status >= 400 && response.status < 500) {
-        console.log('Database not create')
-        showErrorMessage(dispatch, "fail bro")
-      }
+      await databaseApi.create(data)
       onClose()
     } catch (error: unknown) {
-      const errorMessage = (error as any).response.data || 'Something went wrong'
+      const errorMessage = (error as any).response.data || 'Something went wrong. Please try again later.'
       showErrorMessage(dispatch, errorMessage)
     } finally {
       setSubmitLoading(false)
@@ -102,7 +87,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               helperText={errors.name?.message}
               {...register('name', {
                 required: 'Name is required',
-                maxLength: { value: 32, message: 'Name maximum allowed length is 32' },
+                maxLength: { value: 32, message: 'Name maximum allowed length is 32' }
               })}
             />
 
@@ -119,7 +104,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 helperText={errors.host?.message}
                 {...register('host', {
                   required: 'Name is required',
-                  maxLength: { value: 253, message: 'Host maximum length is 253' },
+                  maxLength: { value: 253, message: 'Host maximum length is 253' }
                 })}
               />
 
@@ -135,8 +120,8 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 helperText={errors.port?.message}
                 {...register('port', {
                   required: 'Port is required',
-                  min: { value: 1, message: 'Port has to be greater than 0'},
-                  pattern: { value: /^[0-9]+$/, message: 'Port must be an integer' },
+                  min: { value: 1, message: 'Port has to be greater than 0' },
+                  pattern: { value: /^[0-9]+$/, message: 'Port must be an integer' }
                 })}
               />
 
@@ -144,7 +129,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 margin="dense"
                 id="database"
                 label="Database"
-                placeholder='eshopUsers'
+                placeholder="eshopUsers"
                 type="text"
                 fullWidth
                 variant="standard"
@@ -152,7 +137,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 helperText={errors.database?.message}
                 {...register('database', {
                   required: 'Database is required',
-                  maxLength: { value: 253, message: 'Database maximum length is 253' },
+                  maxLength: { value: 253, message: 'Database maximum length is 253' }
                 })}
               />
             </div>
@@ -184,7 +169,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                 helperText={errors.password?.message}
                 {...register('password', {
                   required: 'Password is required',
-                  maxLength: { value: 128, message: 'Password maximum length is 128' },
+                  maxLength: { value: 128, message: 'Password maximum length is 128' }
                 })}
               />
 
@@ -196,10 +181,16 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                     id="engine"
                     label="Engine"
                     variant="standard"
-                    {...field} // Use field from Controller
+                    {...field}
                   >
-                    <MenuItem value="POSTGRES">Postgres</MenuItem>
-                    <MenuItem value="MYSQL">MySql</MenuItem>
+                    {Object.keys(DatabaseEngine)
+                      .filter((key: string) => isNaN(Number(key)))
+                      .map((key) => {
+                      return (
+                        <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
+                          {key}
+                        </MenuItem>)
+                    })}
                   </Select>
                 )}
               />
