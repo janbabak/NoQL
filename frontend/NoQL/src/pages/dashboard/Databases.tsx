@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
-import { Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import styles from './Dashboard.module.css'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../state/store.ts'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
+import AddIcon from '@mui/icons-material/Add'
+import { CreateDatabaseDialog } from './CreateDatabaseDialog.tsx'
 
 export function Databases() {
 
@@ -22,6 +24,11 @@ export function Databases() {
     databasesLoading,
     setDatabasesLoading
   ] = useState<boolean>(false)
+
+  const [
+    createDatabaseDialogOpen,
+    setCreateDatabaseDialogOpen
+  ] = useState<boolean>(true)
 
   useEffect((): void => {
     void loadDatabases()
@@ -49,9 +56,28 @@ export function Databases() {
 
   return (
     <>
-      <Typography variant="h4" component="h2" style={{marginBottom: '1rem'}}>Databases</Typography>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <Typography variant="h4" component="h2">
+          Databases
+        </Typography>
+
+        <div>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateDatabaseDialogOpen(true)}>
+            Create
+          </Button>
+        </div>
+      </div>
+
+      <CreateDatabaseDialog
+        open={createDatabaseDialogOpen}
+        onClose={() => setCreateDatabaseDialogOpen(false)}
+      />
+
       {databasesLoading
-        ? <SkeletonStack height={158}/>
+        ? <SkeletonStack height={158} />
         : DatabasesList}
     </>
   )
