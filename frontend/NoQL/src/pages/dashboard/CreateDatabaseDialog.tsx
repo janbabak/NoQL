@@ -1,7 +1,6 @@
 import {
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   MenuItem,
@@ -10,12 +9,11 @@ import {
 import { Select } from '@mui/material-next'
 import { Controller, useForm } from 'react-hook-form'
 import databaseApi from '../../services/api/databaseApi.ts'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { CreateDatabaseRequest, DatabaseEngine } from '../../types/Database.ts'
-import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import { LoadingButton } from '@mui/lab'
 
 interface CreateDatabaseDialogProps {
@@ -93,7 +91,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
               })}
             />
 
-            <div style={{ display: 'flex', gap: '1rem'}}>
+            <div style={{ display: 'flex', gap: '1rem' }}>
               <TextField
                 margin="dense"
                 id="host"
@@ -189,17 +187,17 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
                     {Object.keys(DatabaseEngine)
                       .filter((key: string) => isNaN(Number(key)))
                       .map((key) => {
-                      return (
-                        <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
-                          {key}
-                        </MenuItem>)
-                    })}
+                        return (
+                          <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
+                            {key}
+                          </MenuItem>)
+                      })}
                   </Select>
                 )}
               />
             </div>
 
-            <div style={{width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem'}}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
               <Button onClick={onClose}>Cancel</Button>
               <LoadingButton
                 loading={submitLoading}
