@@ -13,9 +13,11 @@ import databaseApi from '../../services/api/databaseApi.ts'
 
 interface CreateUpdateDatabaseProps {
   action: 'create' | 'update';
-  onClose?: () => void;
-  submit: ((data: UpdateDatabaseRequest) => Promise<AxiosResponse<Database, any>>) | ((data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>);
-  databaseId?: string;
+  onClose?: () => void; // used when form is in dialog
+  databaseId?: string; // required only when action is set to 'update'
+  submit:
+    ((data: UpdateDatabaseRequest) => Promise<AxiosResponse<Database, any>>) |
+    ((data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>);
 }
 
 export function CreateUpdateDatabaseForm(
@@ -36,8 +38,10 @@ export function CreateUpdateDatabaseForm(
     engine: DatabaseEngine.POSTGRES
   }
 
+  // load database data if action is update
   useEffect(() => {
     if (action === 'update' && databaseId) {
+
       databaseApi.getById(databaseId)
         .then((response): void => {
           const database = response.data
@@ -52,7 +56,8 @@ export function CreateUpdateDatabaseForm(
           })
         })
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [databaseId])
 
   const form = useForm<CreateDatabaseRequest>({ defaultValues: defaultValues })
 
