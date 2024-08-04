@@ -6,19 +6,25 @@ import { CreateDatabaseRequest, Database, DatabaseEngine, UpdateDatabaseRequest 
 import { LoadingButton } from '@mui/lab'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { showErrorMessage } from '../snackbar/GlobalSnackbar.helpers.ts'
 import { AxiosResponse } from 'axios'
+import databaseApi from '../../services/api/databaseApi.ts'
 
 interface CreateUpdateDatabaseProps {
   action: 'create' | 'update';
-  onClose: () => void;
-  submit:
-    ((data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>) |
-    ((data: UpdateDatabaseRequest) => Promise<AxiosResponse<Database, any>>);
+  onClose?: () => void;
+  submit: ((data: UpdateDatabaseRequest) => Promise<AxiosResponse<Database, any>>) | ((data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>);
+  databaseId?: string;
 }
 
-export function CreateUpdateDatabaseForm({ onClose, submit }: CreateUpdateDatabaseProps) {
+export function CreateUpdateDatabaseForm(
+  {
+    action,
+    onClose,
+    submit,
+    databaseId
+  }: CreateUpdateDatabaseProps) {
 
   const defaultValues: CreateDatabaseRequest = {
     name: '',
@@ -29,6 +35,24 @@ export function CreateUpdateDatabaseForm({ onClose, submit }: CreateUpdateDataba
     password: '',
     engine: DatabaseEngine.POSTGRES
   }
+
+  useEffect(() => {
+    if (action === 'update' && databaseId) {
+      databaseApi.getById(databaseId)
+        .then((response): void => {
+          const database = response.data
+          form.reset({
+            name: database.name,
+            host: database.host,
+            port: database.port,
+            database: database.database,
+            userName: database.userName,
+            password: database.password,
+            engine: database.engine
+          })
+        })
+    }
+  }, [])
 
   const form = useForm<CreateDatabaseRequest>({ defaultValues: defaultValues })
 
@@ -51,16 +75,20 @@ export function CreateUpdateDatabaseForm({ onClose, submit }: CreateUpdateDataba
 
   function handleClose() {
     reset(defaultValues)
-    onClose()
+    if (onClose) {
+      onClose()
+    }
   }
 
-  async function onSubmit(data: CreateDatabaseRequest) {
+  async function onSubmit(data: CreateDatabaseRequest | UpdateDatabaseRequest): Promise<void> {
     setSubmitLoading(true)
     try {
+      console.log(data)
+      // @ts-ignore
       await submit(data)
       handleClose()
     } catch (error: unknown) {
-      const errorMessage = (error as any).response.data || 'Something went wrong. Please try again later.'
+      const errorMessage = (error as any)?.response?.data || 'Something went wrong. Please try again later.'
       showErrorMessage(dispatch, errorMessage)
     } finally {
       setSubmitLoading(false)
@@ -69,12 +97,12 @@ export function CreateUpdateDatabaseForm({ onClose, submit }: CreateUpdateDataba
 
   const actionButtons =
     <div className={styles.dialogButtonsContainer}>
-      <Button onClick={handleClose} aria-label="Cancel">Cancel</Button>
-      <LoadingButton
-        loading={submitLoading}
-        type="submit"
-      >
-        Create
+      <Button onClick={handleClose} aria-label="Cancel">
+        Cancel
+      </Button>
+
+      <LoadingButton loading={submitLoading} type="submit">
+        {action === 'create' ? 'Create' : 'Update'}
       </LoadingButton>
     </div>
 

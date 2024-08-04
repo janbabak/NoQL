@@ -26,7 +26,10 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(
+        origins = "http://localhost:5173",
+        allowedHeaders = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RequestMapping(value = "/database", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class DatabaseController {
