@@ -58,8 +58,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
     setSubmitLoading(true)
     try {
       await databaseApi.create(data)
-      reset(defaultValues)
-      onClose()
+      handleClose()
     } catch (error: unknown) {
       const errorMessage = (error as any).response.data || 'Something went wrong. Please try again later.'
       showErrorMessage(dispatch, errorMessage)

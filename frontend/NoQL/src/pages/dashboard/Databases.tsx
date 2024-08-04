@@ -54,6 +54,7 @@ export function Databases() {
 
   function closeCreateDatabaseDialog(): void {
     setCreateDatabaseDialogOpen(false)
+    loadDatabases()
   }
 
   const DatabasesList =
