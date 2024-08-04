@@ -73,8 +73,10 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    */
-  put(path: string, data: string | null, parameters: ApiParameter[] = []):
-    Promise<AxiosResponse> {
+  put(path: string,
+      data: string | number | boolean | object | null,
+      parameters: ApiParameter[] = []): Promise<AxiosResponse> {
+
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'PUT',

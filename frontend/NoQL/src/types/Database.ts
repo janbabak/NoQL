@@ -17,7 +17,16 @@ interface CreateDatabaseRequest {
   database: string
   userName: string
   password: string
-  engine: DatabaseEngine
+  engine: DatabaseEngine | '' // empty string is used for default value
+}
+
+interface UpdateDatabaseRequest {
+  name: string
+  host: string
+  port: number
+  database: string
+  userName: string
+  password: string
 }
 
 enum DatabaseEngine {
@@ -25,5 +34,10 @@ enum DatabaseEngine {
   MYSQL
 }
 
-export type { Database, CreateDatabaseRequest }
 export { DatabaseEngine }
+
+export type {
+  Database,
+  CreateDatabaseRequest,
+  UpdateDatabaseRequest
+}

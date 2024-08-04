@@ -72,7 +72,7 @@ export function DatabasePage() {
     {
       label: 'Settings',
       buttonIcon: <SettingsRoundedIcon />,
-      component: <DatabaseSettings />
+      component: <DatabaseSettings databaseId={id || ''} />
     }
   ]
 
