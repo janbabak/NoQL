@@ -11,7 +11,7 @@ interface DatabaseSettingsProps {
 export function DatabaseSettings({ databaseId }: DatabaseSettingsProps) {
 
   async function updateDatabase(data: UpdateDatabaseRequest): Promise<AxiosResponse<Database>> {
-    return await databaseApi.update(data)
+    return await databaseApi.update(databaseId, data)
   }
 
   return (

@@ -34,10 +34,11 @@ const databaseApi = {
 
   /**
    * Update database.
+   * @param id database identifier
    * @param database
    */
-  update(database: UpdateDatabaseRequest): Promise<AxiosResponse<Database>> {
-    return this.API.put(this.DOMAIN, database)
+  update(id: string, database: UpdateDatabaseRequest): Promise<AxiosResponse<Database>> {
+    return this.API.put(this.DOMAIN + '/' + id, database)
   },
 
   /**
