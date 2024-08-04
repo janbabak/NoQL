@@ -35,7 +35,7 @@ export function CreateUpdateDatabaseForm(
     database: '',
     userName: '',
     password: '',
-    engine: DatabaseEngine.POSTGRES
+    engine: '',
   }
 
   // load database data if action is update
@@ -52,7 +52,7 @@ export function CreateUpdateDatabaseForm(
             database: database.database,
             userName: database.userName,
             password: database.password,
-            engine: database.engine
+            engine: database.engine as DatabaseEngine
           })
         })
     }
@@ -227,14 +227,13 @@ export function CreateUpdateDatabaseForm(
               {...field}
               style={{ width: '100%' }}
             >
-              {Object.keys(DatabaseEngine)
-                .filter((key: string) => isNaN(Number(key)))
-                .map((key) => {
-                  return (
-                    <MenuItem key={key} value={DatabaseEngine[key as keyof typeof DatabaseEngine]}>
-                      {key}
-                    </MenuItem>)
-                })}
+              {Object.values(DatabaseEngine)
+                .filter((value) => isNaN(Number(value)))
+                .map((value) => (
+                <MenuItem key={value} value={value}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           )}
         />
