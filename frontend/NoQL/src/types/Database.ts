@@ -10,9 +10,20 @@ interface Database {
   isSQL: boolean
 }
 
+interface CreateDatabaseRequest {
+  name: string
+  host: string
+  port: number
+  database: string
+  userName: string
+  password: string
+  engine: DatabaseEngine
+}
+
 enum DatabaseEngine {
   POSTGRES,
   MYSQL
 }
 
-export type { Database, DatabaseEngine }
+export type { Database, CreateDatabaseRequest }
+export { DatabaseEngine }

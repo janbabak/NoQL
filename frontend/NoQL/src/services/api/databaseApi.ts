@@ -1,6 +1,6 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
-import { Database } from '../../types/Database.ts'
+import { CreateDatabaseRequest, Database } from '../../types/Database.ts'
 import { QueryRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 import { ChatHistoryItem } from '../../types/Chat.ts'
@@ -22,6 +22,14 @@ const databaseApi = {
    */
   getById(id: string): Promise<AxiosResponse<Database>> {
     return this.API.get(this.DOMAIN + '/' + id)
+  },
+
+  /**
+   * Create new database.
+   * @param database
+   */
+  create(database: CreateDatabaseRequest): Promise<AxiosResponse<Database>> {
+    return this.API.post(this.DOMAIN, database)
   },
 
   /**

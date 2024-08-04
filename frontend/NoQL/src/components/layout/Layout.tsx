@@ -40,7 +40,7 @@ export function Layout() {
       />
 
       <main className={styles.main}>
-        <div>
+        <div style={{width: '100%'}}>
           <Outlet />
         </div>
       </main>
