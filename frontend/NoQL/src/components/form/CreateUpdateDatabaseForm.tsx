@@ -74,7 +74,10 @@ export function CreateUpdateDatabaseForm(
   ] = useState<boolean>(false)
 
   function handleClose() {
-    reset(defaultValues)
+    if (action === 'create') {
+      reset(defaultValues)
+    }
+
     if (onClose) {
       onClose()
     }
