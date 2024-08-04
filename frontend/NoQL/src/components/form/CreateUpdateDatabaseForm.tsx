@@ -2,7 +2,7 @@ import { Button, MenuItem, TextField } from '@mui/material'
 import styles from '../../pages/dashboard/Dashboard.module.css'
 import { Controller, useForm } from 'react-hook-form'
 import { Select } from '@mui/material-next'
-import { CreateDatabaseRequest, Database, DatabaseEngine } from '../../types/Database.ts'
+import { CreateDatabaseRequest, Database, DatabaseEngine, UpdateDatabaseRequest } from '../../types/Database.ts'
 import { LoadingButton } from '@mui/lab'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
@@ -11,8 +11,11 @@ import { showErrorMessage } from '../snackbar/GlobalSnackbar.helpers.ts'
 import { AxiosResponse } from 'axios'
 
 interface CreateUpdateDatabaseProps {
+  action: 'create' | 'update';
   onClose: () => void;
-  submit: (data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>;
+  submit:
+    ((data: CreateDatabaseRequest) => Promise<AxiosResponse<Database, any>>) |
+    ((data: UpdateDatabaseRequest) => Promise<AxiosResponse<Database, any>>);
 }
 
 export function CreateUpdateDatabaseForm({ onClose, submit }: CreateUpdateDatabaseProps) {

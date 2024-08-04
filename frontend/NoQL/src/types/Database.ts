@@ -20,10 +20,24 @@ interface CreateDatabaseRequest {
   engine: DatabaseEngine
 }
 
+interface UpdateDatabaseRequest {
+  name: string
+  host: string
+  port: number
+  database: string
+  userName: string
+  password: string
+}
+
 enum DatabaseEngine {
   POSTGRES,
   MYSQL
 }
 
-export type { Database, CreateDatabaseRequest }
 export { DatabaseEngine }
+
+export type {
+  Database,
+  CreateDatabaseRequest,
+  UpdateDatabaseRequest
+}

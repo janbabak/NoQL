@@ -20,6 +20,7 @@ export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProp
 
         <DialogContent>
           <CreateUpdateDatabaseForm
+            action="create"
             onClose={onClose}
             submit={databaseApi.create}
           />
