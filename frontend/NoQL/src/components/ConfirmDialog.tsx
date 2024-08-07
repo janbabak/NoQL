@@ -7,7 +7,7 @@ interface ConfirmDialogProps {
   title: string,
   open: boolean,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  confirm: () => Promise<void> | void,
+  confirm: () => (Promise<void> | void),
   deleteButtonLoading?: boolean,
 }
 
