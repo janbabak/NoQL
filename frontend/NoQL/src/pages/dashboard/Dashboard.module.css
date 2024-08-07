@@ -2,7 +2,13 @@
     margin: 1rem 0;
 }
 
-.databaseCardFirstRow {
+.databaseCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.databaseCardHeadingAndTag {
     display: flex;
     gap: 1rem;
     margin: .5rem 0;

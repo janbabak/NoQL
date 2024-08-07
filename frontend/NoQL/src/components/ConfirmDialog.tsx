@@ -1,12 +1,14 @@
 import { TransitionProps } from '@mui/material/transitions'
 import { Button, Dialog, DialogActions, DialogTitle, Slide } from '@mui/material'
 import React from 'react'
+import { LoadingButton } from '@mui/lab'
 
 interface ConfirmDialogProps {
   title: string,
   open: boolean,
   setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  confirm: () => void,
+  confirm: () => (Promise<void> | void),
+  deleteButtonLoading?: boolean,
 }
 
 const Transition = React.forwardRef(function Transition(
@@ -23,7 +25,8 @@ export function ConfirmDialog(
     title,
     open,
     setOpen,
-    confirm
+    confirm,
+    deleteButtonLoading,
   }: ConfirmDialogProps
 ) {
 
@@ -43,12 +46,14 @@ export function ConfirmDialog(
 
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={(): void => {
-          confirm()
-          handleClose()
-        }}>
+        <LoadingButton
+          loading={deleteButtonLoading}
+          onClick={async () => {
+            await confirm()
+            handleClose()
+          }}>
           Delete
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   )

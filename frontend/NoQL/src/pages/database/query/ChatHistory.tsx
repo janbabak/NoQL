@@ -18,6 +18,7 @@ import chatApi from '../../../services/api/chatApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { setChat } from '../../../state/chat/chatSlice.ts'
 import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
+import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
@@ -85,6 +86,11 @@ export function ChatHistory(
     setChatToRenameId
   ] = useState<string | null>(null)
 
+  const [
+    deleteChatLoading,
+    setDeleteChatLoading
+  ] = useState<boolean>(false)
+
   const renameInputRef: React.MutableRefObject<HTMLInputElement | undefined> = useRef()
 
   // opens delete/rename menu
@@ -102,14 +108,21 @@ export function ChatHistory(
 
   async function confirmDeleteChat(): Promise<void> {
     if (chatToEdit) {
-      await chatApi.deleteChat(chatToEdit.id)
-      // when last item is deleted
-      let newActiveChatIndex = activeChatIndex
-      if (activeChatIndex === chatHistory.length - 1) {
-        newActiveChatIndex = activeChatIndex - 1
-        dispatch(setActiveChatIndex(newActiveChatIndex))
+      setDeleteChatLoading(true)
+      try {
+        await chatApi.deleteChat(chatToEdit.id)
+        // when last item is deleted
+        let newActiveChatIndex = activeChatIndex
+        if (activeChatIndex === chatHistory.length - 1) {
+          newActiveChatIndex = activeChatIndex - 1
+          dispatch(setActiveChatIndex(newActiveChatIndex))
+        }
+        await loadChatHistoryAndChatAndResult(newActiveChatIndex)
+      } catch (error: unknown) {
+        showErrorWithMessageAndError(dispatch, 'Failed to delete chat', error)
+      } finally {
+        setDeleteChatLoading(false)
       }
-      await loadChatHistoryAndChatAndResult(newActiveChatIndex)
     }
   }
 
@@ -208,6 +221,7 @@ export function ChatHistory(
       open={confirmDialogOpen}
       setOpen={setConfirmDialogOpen}
       confirm={confirmDeleteChat}
+      deleteButtonLoading={deleteChatLoading}
     />
 
   return (
