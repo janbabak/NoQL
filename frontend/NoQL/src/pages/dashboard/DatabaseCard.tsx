@@ -39,7 +39,7 @@ export function DatabaseCard(
             <Chip label={database.engine} color="error" />
           </span>
 
-          <IconButton aria-label="delete" onClick={() => setDialogOpen(true)}>
+          <IconButton aria-label={`delete database ${database.name}`} onClick={() => setDialogOpen(true)}>
             <DeleteRoundedIcon />
           </IconButton>
 
