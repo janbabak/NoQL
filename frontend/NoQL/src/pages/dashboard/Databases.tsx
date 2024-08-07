@@ -48,6 +48,23 @@ export function Databases() {
     }
   }
 
+  const [
+    deleteDatabaseLoading,
+    setDeleteDatabaseLoading
+  ] = useState<boolean>(false)
+
+  async function deleteDatabase(databaseId: string): Promise<void> {
+    setDeleteDatabaseLoading(true)
+    try {
+      await databaseApi.delete(databaseId)
+    } catch (error: unknown) {
+      showErrorWithMessageAndError(dispatch, 'Failed to delete database', error)
+    } finally {
+      setDeleteDatabaseLoading(false)
+    }
+    void loadDatabases()
+  }
+
   function openCreateDatabaseDialog(): void {
     setCreateDatabaseDialogOpen(true)
   }
@@ -60,7 +77,13 @@ export function Databases() {
   const DatabasesList =
     <ul>{
       databases.map((db: Database) =>
-        <DatabaseCard database={db} key={db.id} className={styles.databaseCard} />)
+        <DatabaseCard
+          database={db}
+          key={db.id}
+          className={styles.databaseCard}
+          deleteDatabase={deleteDatabase}
+          deleteDatabaseLoading={deleteDatabaseLoading}
+        />)
     }</ul>
 
   return (

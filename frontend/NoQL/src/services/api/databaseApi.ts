@@ -42,6 +42,14 @@ const databaseApi = {
   },
 
   /**
+   * Delete database by id.
+   * @param id database identifier
+   */
+  delete(id: string): Promise<AxiosResponse<void>> {
+    return this.API.delete(this.DOMAIN + '/' + id)
+  },
+
+  /**
    * Get database structure by id
    * @param id database identifier
    */
