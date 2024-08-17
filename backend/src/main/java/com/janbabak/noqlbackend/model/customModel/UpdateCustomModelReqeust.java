@@ -3,11 +3,13 @@ package com.janbabak.noqlbackend.model.customModel;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateCustomModelReqeust {
