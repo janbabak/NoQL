@@ -81,7 +81,7 @@ public class LlamaApiService implements QueryApi {
      * @throws BadRequestException unsupported model
      */
     void validateRequest(QueryRequest queryRequest) throws BadRequestException {
-        if (queryRequest.getModel() == null || !queryRequest.getModel().getModel().startsWith("llama")) {
+        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("llama")) {
             log.error("Unsupported model: {}", queryRequest.getModel());
             throw new BadRequestException("Only Llama models are supported.");
         }

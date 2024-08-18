@@ -1,0 +1,90 @@
+openapi: 3.0.3
+info:
+  title: Custom Model API
+  version: 1.0.0
+  description: Custom model must implement this API in order to be used by NoQL.
+  contact:
+    name: NoQL Team
+    email: babakhonza@gmail.com
+paths:
+  /query:
+    post:
+      summary: Query custom model
+      description: Query custom model with the given query.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+components:
+  schemas:
+
+    QueryRequest:
+      type: object
+      properties:
+        model:
+          type: string
+          nullable: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlmMessage'
+
+    LlmMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+            - 'user'
+            - 'system'
+            - 'assistant'
+          example: 'user'
+        content:
+          type: string
+          example: 'Find all the books written by J.K. Rowling.'
+
+    QueryResponse:
+      type: object
+      properties:
+        model:
+          type: string
+          example: 'my custom model'
+        usage:
+          $ref: '#/components/schemas/Usage'
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+
+    Usage:
+      type: object
+      properties:
+        prompt_tokens:
+          type: integer
+          example: 50
+        completion_tokens:
+          type: integer
+          example: 35
+        total_tokens:
+          type: integer
+          example: 85
+
+    Choice:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/LlmMessage'
+        finish_reason:
+          type: string
+        index:
+          type: integer
+          example: 4

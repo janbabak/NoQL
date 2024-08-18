@@ -14,7 +14,7 @@ class LlmApiServiceFactoryTest {
     @DisplayName("Test get query API service based on the model.")
     void testGetQueryApiService(LlmModel model, Class<?> expected) {
         // when
-        QueryApi queryApiService = LlmApiServiceFactory.getQueryApiService(model);
+        QueryApi queryApiService = LlmApiServiceFactory.getQueryApiService(model.toString());
 
         // then
         assertInstanceOf(expected, queryApiService);

@@ -21,5 +21,5 @@ public class QueryRequest {
     private String query; // new query to be added to the chat
 
     @NotNull
-    private LlmModel model; // model to be used for the translation
+    private String model; // model to be used for the translation, e.g. GPT-4 or id of custom model
 }

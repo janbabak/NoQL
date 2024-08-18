@@ -26,7 +26,7 @@ public class LlamaRequest {
             String systemQuery,
             List<String> errors) {
 
-        this.model = queryRequest.getModel().getModel();
+        this.model = queryRequest.getModel();
         this.messages = new ArrayList<>();
 
         this.messages.add(new LlmMessage(Role.system, systemQuery));

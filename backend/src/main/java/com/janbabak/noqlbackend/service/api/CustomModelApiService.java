@@ -1,30 +1,38 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.gpt.GptRequest;
-import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import com.janbabak.noqlbackend.model.query.customModel.CustomModelRequest;
+import com.janbabak.noqlbackend.model.query.customModel.CustomModelResponse;
+import com.janbabak.noqlbackend.service.CustomModelService;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+/**
+ * Service responsible for sending queries to custom models.
+ */
 @Slf4j
 @Service
-@NoArgsConstructor
-public class GptApiService implements QueryApi {
+public class CustomModelApiService implements QueryApi {
 
-    @SuppressWarnings("all")
-    private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
-    private final String token = System.getenv("API_KEY");
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @Autowired
+    private CustomModelService customModelService;
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -34,30 +42,32 @@ public class GptApiService implements QueryApi {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
-     * @throws LLMException when LLM request fails.
+     * @throws LLMException        when LLM request fails.
      * @throws BadRequestException when queryRequest is not valid
+     * @throws EntityNotFoundException when model is not found
      */
     @Override
     public String queryModel(
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException, BadRequestException {
+            List<String> errors) throws LLMException, BadRequestException, EntityNotFoundException {
 
-        log.info("Chat with GPT API.");
+        log.info("Chat with custom model API.");
 
-        validateRequest(queryRequest);
+        UUID modelId = validateRequest(queryRequest);
+
+        CustomModel model = customModelService.findById(modelId);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<GptRequest> request = new HttpEntity<>(
-                new GptRequest(chatHistory, queryRequest, systemQuery, errors), headers);
+        HttpEntity<CustomModelRequest> request = new HttpEntity<>(
+                new CustomModelRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
-                GPT_URL, HttpMethod.POST, request, GptResponse.class);
+        ResponseEntity<CustomModelResponse> responseEntity = restTemplate.exchange(
+                model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
@@ -77,16 +87,11 @@ public class GptApiService implements QueryApi {
         return null;
     }
 
-    /**
-     * Validate request
-     *
-     * @param queryRequest users request
-     * @throws BadRequestException unsupported model
-     */
-    void validateRequest(QueryRequest queryRequest) throws BadRequestException {
-        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("gpt")) {
-            log.error("Model is missing in the request.");
-            throw new BadRequestException("Model is missing in the request.");
+    private UUID validateRequest(QueryRequest queryRequest) throws BadRequestException {
+        try {
+            return UUID.fromString(queryRequest.getModel());
+        } catch (Exception e) {
+            throw new BadRequestException("Wrong model id");
         }
     }
 }

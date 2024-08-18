@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
@@ -28,5 +29,5 @@ public interface QueryApi {
             QueryRequest queryRequest,
             String systemQuery,
             List<String> errors
-    ) throws LLMException, BadRequestException;
+    ) throws LLMException, BadRequestException, EntityNotFoundException;
 }

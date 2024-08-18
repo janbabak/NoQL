@@ -99,7 +99,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         databaseService.create(mySqlDatabase);
 
         apiServiceMock
-                .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
+                .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o.toString()))
                 .thenReturn(queryApi);
     }
 

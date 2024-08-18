@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.Entity;
@@ -41,4 +42,9 @@ public class CustomModel {
     @NotNull(groups = FirstValidationGroup.class)
     @Min(value = 1, groups = SecondValidationGroup.class)
     private Integer port;
+
+    @JsonIgnore
+    public String getUrl() {
+        return host + ":" + port;
+    }
 }

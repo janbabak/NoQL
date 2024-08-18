@@ -13,11 +13,7 @@ public class PublicApi {
 
     private final GptApiService gptApiService;
 
-    @GetMapping
-    public String hello() {
-        return "Hello from custom model!";
-    }
-
+    // TODO: response query response
     @PostMapping("/query")
     public Object query(@RequestBody ModelRequest request) {
         return gptApiService.queryModel(request);
