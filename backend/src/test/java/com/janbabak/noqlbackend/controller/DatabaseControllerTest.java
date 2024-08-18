@@ -148,7 +148,7 @@ class DatabaseControllerTest {
     }
 
     /**
-     * @return request, response, and success
+     * @return request, created database, response, and success
      */
     Object[][] createDatabaseDataProvider() {
         return new Object[][]{
@@ -284,7 +284,7 @@ class DatabaseControllerTest {
     }
 
     /**
-     * @return request, response, and success flag
+     * @return request, updated database, response, and success flag
      */
     Object[][] updateDatabaseDataProvider() {
         return new Object[][]{
