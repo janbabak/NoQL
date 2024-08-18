@@ -5,6 +5,7 @@ import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.service.CustomModelService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,8 +68,7 @@ public class CustomModelController {
      */
     @PutMapping("/{customModelId}")
     @ResponseStatus(HttpStatus.OK)
-    public CustomModel update(@PathVariable UUID customModelId,
-                              @Validated(ValidationSequence.class) @RequestBody UpdateCustomModelReqeust request)
+    public CustomModel update(@PathVariable UUID customModelId, @Valid @RequestBody UpdateCustomModelReqeust request)
             throws EntityNotFoundException {
 
         return customModelService.update(customModelId, request);

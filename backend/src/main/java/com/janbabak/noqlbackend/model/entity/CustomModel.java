@@ -35,6 +35,7 @@ public class CustomModel {
     private String name;
 
     @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
     private String host;
 
     @NotNull(groups = FirstValidationGroup.class)

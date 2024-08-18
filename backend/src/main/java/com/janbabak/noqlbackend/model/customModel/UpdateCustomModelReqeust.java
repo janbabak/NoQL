@@ -19,6 +19,7 @@ public class UpdateCustomModelReqeust {
     private String name;
 
     @Nullable
+    @Length(min = 1, max = 253)
     private String host;
 
     @Nullable
