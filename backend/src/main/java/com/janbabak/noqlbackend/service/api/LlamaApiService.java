@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -55,8 +56,14 @@ public class LlamaApiService implements QueryApi {
         HttpEntity<LlamaRequest> request = new HttpEntity<>(
                 new LlamaRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<LlamaResponse> responseEntity = restTemplate.exchange(
-                LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
+        ResponseEntity<LlamaResponse> responseEntity;
+
+        try {
+            responseEntity = restTemplate.exchange(LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error while calling Llama API. {}", e.getMessage());
+            throw new LLMException("Error while calling Llama API, try it latter.");
+        }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()

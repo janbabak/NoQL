@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class GptApiService implements QueryApi {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
-     * @throws LLMException when LLM request fails.
+     * @throws LLMException        when LLM request fails.
      * @throws BadRequestException when queryRequest is not valid
      */
     @Override
@@ -55,8 +56,14 @@ public class GptApiService implements QueryApi {
         HttpEntity<GptRequest> request = new HttpEntity<>(
                 new GptRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<GptResponse> responseEntity = restTemplate.exchange(
-                GPT_URL, HttpMethod.POST, request, GptResponse.class);
+        ResponseEntity<GptResponse> responseEntity;
+
+        try {
+            responseEntity = restTemplate.exchange(GPT_URL, HttpMethod.POST, request, GptResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error while calling Llama API. {}", e.getMessage());
+            throw new LLMException("Error while calling Llama API, try it latter.");
+        }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()

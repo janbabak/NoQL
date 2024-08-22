@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -38,8 +39,8 @@ public class CustomModelApiService implements QueryApi {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
-     * @throws LLMException        when LLM request fails.
-     * @throws BadRequestException when queryRequest is not valid
+     * @throws LLMException            when LLM request fails.
+     * @throws BadRequestException     when queryRequest is not valid
      * @throws EntityNotFoundException when model is not found
      */
     @Override
@@ -62,8 +63,14 @@ public class CustomModelApiService implements QueryApi {
         HttpEntity<CustomModelRequest> request = new HttpEntity<>(
                 new CustomModelRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<CustomModelResponse> responseEntity = restTemplate.exchange(
-                model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
+        ResponseEntity<CustomModelResponse> responseEntity;
+
+        try {
+            responseEntity = restTemplate.exchange(model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
+        } catch (RestClientException e) {
+            log.error("Error while calling Llama API. {}", e.getMessage());
+            throw new LLMException("Error while calling Llama API, try it latter.");
+        }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
