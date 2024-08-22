@@ -8,9 +8,9 @@ import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.customModel.CustomModelRequest;
 import com.janbabak.noqlbackend.model.query.customModel.CustomModelResponse;
 import com.janbabak.noqlbackend.service.CustomModelService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -24,12 +24,11 @@ import java.util.UUID;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CustomModelApiService implements QueryApi {
 
+    private final CustomModelService customModelService;
     private final RestTemplate restTemplate = new RestTemplate();
-
-    @Autowired
-    private CustomModelService customModelService;
 
     /**
      * Send queries in chat form the model and retrieve a response.

@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.model.query;
 
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

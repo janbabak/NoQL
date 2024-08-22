@@ -18,7 +18,11 @@ public class CustomModelRequest extends GptRequest {
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      */
-    public CustomModelRequest(List<ChatQueryWithResponse> chatHistory, QueryRequest queryRequest, String systemQuery, List<String> errors) {
+    public CustomModelRequest(List<ChatQueryWithResponse> chatHistory,
+                              QueryRequest queryRequest,
+                              String systemQuery,
+                              List<String> errors) {
+
         super(chatHistory, queryRequest, systemQuery, errors);
     }
 }
