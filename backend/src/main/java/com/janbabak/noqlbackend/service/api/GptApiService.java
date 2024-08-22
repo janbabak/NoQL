@@ -5,7 +5,6 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.gpt.GptRequest;
 import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
