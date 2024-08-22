@@ -9,7 +9,6 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
@@ -23,7 +22,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,13 +58,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @MockBean
     private PlotService plotService;
 
+    @MockBean
+    LlmApiServiceFactory llmApiServiceFactory;
+
     @Autowired
     private DatabaseEntityService databaseService;
 
     @Autowired
     private ChatService chatService;
-
-    MockedStatic<LlmApiServiceFactory> apiServiceMock = Mockito.mockStatic(LlmApiServiceFactory.class);
 
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
@@ -97,10 +96,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         databaseService.create(postgresDatabase);
         databaseService.create(mySqlDatabase);
-
-        apiServiceMock
-                .when(() -> LlmApiServiceFactory.getQueryApiService(LlmModel.GPT_4o))
-                .thenReturn(queryApi);
     }
 
     @AfterAll
@@ -110,8 +105,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         databaseService.deleteById(postgresDatabase.getId());
         databaseService.deleteById(mySqlDatabase.getId());
-
-        apiServiceMock.close();
     }
 
     @ParameterizedTest
@@ -331,6 +324,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         }
 
         // when
+        when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
 
         doNothing().when(plotService).generatePlot(any(), any(), any());
@@ -369,7 +363,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         true, // plot result
                         List.of(), // messages
                         // query request
-                        new QueryRequest(null, "plot sex of users older than 24", LlmModel.GPT_4o),
+                        new QueryRequest(null, "plot sex of users older than 24", "gpt-4o"),
                         // LLM response
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
                         // expected response
@@ -402,7 +396,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                             "pythonCode": ""
                                         }""")),
                         // query request
-                        new QueryRequest(null, "sort them in descending order", LlmModel.GPT_4o),
+                        new QueryRequest(null, "sort them in descending order", "gpt-4o"),
                         // language=JSON LLM response
                         """
                         {

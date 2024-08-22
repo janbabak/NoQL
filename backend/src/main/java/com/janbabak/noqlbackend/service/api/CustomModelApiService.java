@@ -1,11 +1,14 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.llama.LlamaRequest;
-import com.janbabak.noqlbackend.model.query.llama.LlamaResponse;
-import lombok.NoArgsConstructor;
+import com.janbabak.noqlbackend.model.query.customModel.CustomModelRequest;
+import com.janbabak.noqlbackend.model.query.customModel.CustomModelResponse;
+import com.janbabak.noqlbackend.service.CustomModelService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
@@ -15,51 +18,55 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
+/**
+ * Service responsible for sending queries to custom models.
+ */
 @Slf4j
 @Service
-@NoArgsConstructor
-public class LlamaApiService implements QueryApi {
+@RequiredArgsConstructor
+public class CustomModelApiService implements QueryApi {
 
-    @SuppressWarnings("all")
-    private final String LLAMA_API_URL = "https://api.llama-api.com/chat/completions";
-    private final String token = System.getenv("LLAMA_AUTH_TOKEN");
+    private final CustomModelService customModelService;
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Send queries in chat form the model and retrieve a response.
      *
      * @param chatHistory  chat history
-     * @param queryRequest users query, model...
+     * @param queryRequest users query and model
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
-     * @throws LLMException when LLM request fails.
-     * @throws BadRequestException when queryRequest is not valid
+     * @throws LLMException            when LLM request fails.
+     * @throws BadRequestException     when queryRequest is not valid
+     * @throws EntityNotFoundException when model is not found
      */
     @Override
     public String queryModel(
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException, BadRequestException {
+            List<String> errors) throws LLMException, BadRequestException, EntityNotFoundException {
 
-        log.info("Chat with Llama API");
+        log.info("Chat with custom model API.");
 
-        validateRequest(queryRequest);
+        UUID modelId = validateRequest(queryRequest);
+
+        CustomModel model = customModelService.findById(modelId);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<LlamaRequest> request = new HttpEntity<>(
-                new LlamaRequest(chatHistory, queryRequest, systemQuery, errors), headers);
+        HttpEntity<CustomModelRequest> request = new HttpEntity<>(
+                new CustomModelRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<LlamaResponse> responseEntity;
+        ResponseEntity<CustomModelResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.exchange(LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
+            responseEntity = restTemplate.exchange(model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling Llama API. {}", e.getMessage());
             throw new LLMException("Error while calling Llama API, try it latter.");
@@ -71,28 +78,23 @@ public class LlamaApiService implements QueryApi {
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            log.error("Bad request to the Llama model, status_code={}, response={}.",
+            log.error("Bad request to the GPT model, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Bad request to the Llama model, we are working on it.");
+            throw new LLMException("Bad request to the GPT model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
-            log.error("Error on Llama side, status_code={}, response={}.",
+            log.error("Error on GPT side, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Error on Llama side, try it latter");
+            throw new LLMException("Error on GPT side, try it latter");
         }
         return null;
     }
 
-    /**
-     * Validate request
-     *
-     * @param queryRequest users request
-     * @throws BadRequestException unsupported model
-     */
-    void validateRequest(QueryRequest queryRequest) throws BadRequestException {
-        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("llama")) {
-            log.error("Unsupported model: {}", queryRequest.getModel());
-            throw new BadRequestException("Only Llama models are supported.");
+    private UUID validateRequest(QueryRequest queryRequest) throws BadRequestException {
+        try {
+            return UUID.fromString(queryRequest.getModel());
+        } catch (Exception e) {
+            throw new BadRequestException("Wrong model id");
         }
     }
 }

@@ -29,7 +29,7 @@ public class GptRequest {
             String systemQuery,
             List<String> errors) {
 
-        this.model = queryRequest.getModel().getModel();
+        this.model = queryRequest.getModel();
         this.messages = new ArrayList<>();
 
         // system instructions
