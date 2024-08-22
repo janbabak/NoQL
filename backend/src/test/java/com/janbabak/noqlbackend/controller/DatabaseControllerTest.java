@@ -12,7 +12,6 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.TableDto;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -446,7 +445,7 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", LlmModel.GPT_4o);
+        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
         QueryResponse response = QueryResponse.builder()
                 .totalCount(10L)
                 .errorMessage(null)

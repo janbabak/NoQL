@@ -9,7 +9,6 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -438,7 +437,7 @@ class QueryServiceTest {
     void testExecuteChatDatabaseNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", LlmModel.GPT_4o);
+        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
 
         // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());

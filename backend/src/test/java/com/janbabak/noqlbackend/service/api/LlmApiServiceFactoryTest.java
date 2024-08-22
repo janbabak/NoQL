@@ -1,20 +1,25 @@
 package com.janbabak.noqlbackend.service.api;
 
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class LlmApiServiceFactoryTest {
+
+    @Autowired
+    private LlmApiServiceFactory llmApiServiceFactory;
 
     @ParameterizedTest
     @MethodSource("testGetQueryApiServiceDataProvider")
     @DisplayName("Test get query API service based on the model.")
-    void testGetQueryApiService(LlmModel model, Class<?> expected) {
+    void testGetQueryApiService(String model, Class<?> expected) {
         // when
-        QueryApi queryApiService = LlmApiServiceFactory.getQueryApiService(model.toString());
+        QueryApi queryApiService = llmApiServiceFactory.getQueryApiService(model);
 
         // then
         assertInstanceOf(expected, queryApiService);
@@ -23,31 +28,31 @@ class LlmApiServiceFactoryTest {
     static Object[][] testGetQueryApiServiceDataProvider() {
         return new Object[][]{
                 {
-                        LlmModel.GPT_4o,
+                        "gpt-4o",
                         GptApiService.class
                 },
                 {
-                        LlmModel.GPT_4,
+                        "gpt-4",
                         GptApiService.class
                 },
                 {
-                        LlmModel.GPT_4_TURBO,
+                        "gpt-4-turbo",
                         GptApiService.class
                 },
                 {
-                        LlmModel.GPT_4_32K,
+                        "gpt-4-32k",
                         GptApiService.class
                 },
                 {
-                        LlmModel.GPT_3_5_TURBO,
+                        "gpt-3.5-turbo",
                         GptApiService.class
                 },
                 {
-                        LlmModel.LLAMA3_70B,
+                        "llama3-70b",
                         LlamaApiService.class
                 },
                 {
-                        LlmModel.LLAMA3_13B_CHAT,
+                        "llama-13b-chat",
                         LlamaApiService.class
                 }
         };

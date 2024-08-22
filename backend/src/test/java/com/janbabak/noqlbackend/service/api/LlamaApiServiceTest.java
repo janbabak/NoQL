@@ -1,7 +1,6 @@
 package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,8 +21,8 @@ class LlamaApiServiceTest {
 
     static QueryRequest[] validRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.LLAMA3_70B),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.LLAMA3_13B_CHAT),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama3-70b"),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama-13b-chat"),
         };
     }
 
@@ -35,11 +34,11 @@ class LlamaApiServiceTest {
 
     static QueryRequest[] badRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.GPT_4o),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.GPT_4),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.GPT_4_TURBO),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.GPT_4_32K),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", LlmModel.GPT_3_5_TURBO)
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4o"),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4"),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4-turbo"),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4-32k"),
+                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-3.5-turbo")
         };
     }
 }
