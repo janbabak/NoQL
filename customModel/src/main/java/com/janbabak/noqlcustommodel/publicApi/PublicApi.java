@@ -13,9 +13,8 @@ public class PublicApi {
 
     private final GptApiService gptApiService;
 
-    // TODO: response query response
     @PostMapping("/query")
-    public Object query(@RequestBody ModelRequest request) {
+    public ModelResponse query(@RequestBody ModelRequest request) {
         return gptApiService.queryModel(request);
     }
 }
