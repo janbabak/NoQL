@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
+@Service
 @NoArgsConstructor
 public class LlamaApiService implements QueryApi {
 

@@ -45,6 +45,6 @@ public class CustomModel {
 
     @JsonIgnore
     public String getUrl() {
-        return host + ":" + port;
+        return host + ":" + port + "/query";
     }
 }

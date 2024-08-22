@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin
 @RequiredArgsConstructor
 public class PublicApi {

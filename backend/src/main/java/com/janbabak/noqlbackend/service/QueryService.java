@@ -51,6 +51,7 @@ public class QueryService {
 
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
+    private final LlmApiServiceFactory llmApiServiceFactory;
     private final Settings settings;
     private final ChatService chatService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
@@ -386,7 +387,7 @@ public class QueryService {
                 chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
         String llmResponseJson = "";
 
-        QueryApi queryApi = LlmApiServiceFactory.getQueryApiService(queryRequest.getModel());
+        QueryApi queryApi = llmApiServiceFactory.getQueryApiService(queryRequest.getModel());
 
         for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
             llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
