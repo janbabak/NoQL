@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { CustomModelCard } from './CustomModelCard.tsx'
 import styles from './CustomModel.module.css'
+import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 
 export function CustomModels() {
 
@@ -69,7 +70,9 @@ export function CustomModels() {
 
   return (
     <>
-      {modelsLoading ? 'Loading...' : CustomModelsList}
+      {modelsLoading
+        ? <SkeletonStack height={104} />
+        : CustomModelsList}
     </>
   )
 }
