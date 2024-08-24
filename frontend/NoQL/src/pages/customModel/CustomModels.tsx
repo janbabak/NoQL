@@ -38,6 +38,23 @@ export function CustomModels() {
     }
   }
 
+  const [
+    deleteModelLoading,
+    setDeleteModelLoading
+  ] = useState<boolean>(false)
+
+  async function deleteModel(modelId: string): Promise<void> {
+    setDeleteModelLoading(true)
+    try {
+      await customModelApi.delete(modelId)
+    } catch (error: unknown) {
+      showErrorWithMessageAndError(dispatch, 'Failed to delete custom model', error)
+    } finally {
+      setDeleteModelLoading(false)
+    }
+    void loadModels()
+  }
+
   const CustomModelsList =
     <ul>{
       models.map((model: CustomModel) =>
@@ -45,6 +62,8 @@ export function CustomModels() {
           customModel={model}
           key={model.id}
           className={styles.customModelCard}
+          deleteCustomModel={deleteModel}
+          deleteCustomModelLoading={deleteModelLoading}
         />)
     }</ul>
 

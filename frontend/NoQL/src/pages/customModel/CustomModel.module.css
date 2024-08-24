@@ -1,3 +1,9 @@
 .customModelCard {
     margin: 1rem 0;
 }
+
+.customModelCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
