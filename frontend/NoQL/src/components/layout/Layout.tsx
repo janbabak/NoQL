@@ -6,6 +6,7 @@ import { NavigationDrawer } from '../navigationDrawer/NavigationDrawer.tsx'
 import { useState } from 'react'
 import styles from './Layout.module.css';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
 export function Layout() {
   const [
@@ -19,9 +20,9 @@ export function Layout() {
       icon: <DashboardIcon />,
       href: '/'
     },{
-      text: 'Dashboard',
-      icon: <DashboardIcon />,
-      href: '/'
+      text: 'Custom models',
+      icon: <PsychologyIcon />,
+      href: '/customModels'
     },
   ]
 
