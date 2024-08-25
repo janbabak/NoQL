@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.service.CustomModelService;
@@ -31,6 +32,16 @@ public class CustomModelController {
     @ResponseStatus(HttpStatus.OK)
     public List<CustomModel> getAll() {
         return customModelService.findAll();
+    }
+
+    /**
+     * Get all custom model ids plus not custom models like gpt, ...
+     * @return ids of all models
+     */
+    @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ModelOption> getAllModelIds() {
+        return customModelService.getAllModels();
     }
 
     /**

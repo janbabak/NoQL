@@ -2,8 +2,10 @@ package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.CustomModelRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,6 +82,35 @@ class CustomModelServiceTest {
         // then
         assertEquals(2, actual.size());
         assertEquals(customModels, actual);
+    }
+
+    @Test
+    @DisplayName("Test get all models")
+    void testGetAllModels() {
+        // given
+        CustomModel customModel1 = CustomModel.builder()
+                .id(UUID.randomUUID())
+                .name("Local model")
+                .host("localhost")
+                .port(8085)
+                .build();
+
+        CustomModel customModel2 = CustomModel.builder()
+                .id(UUID.randomUUID())
+                .name("CVUT model")
+                .host("https://www.cvut.cz/llm")
+                .port(8080)
+                .build();
+
+        List<CustomModel> customModels = List.of(customModel1, customModel2);
+
+        // when
+        when(customModelRepository.findAll()).thenReturn(customModels);
+
+        List<ModelOption> actual = customModelService.getAllModels();
+
+        // then
+        assertEquals(LlmModel.values().length + customModels.size(), actual.size());
     }
 
     @Test

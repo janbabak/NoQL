@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.service.CustomModelService;
 import org.junit.jupiter.api.DisplayName;
@@ -66,6 +67,30 @@ class CustomModelControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(customModels)));
+    }
+
+    @Test
+    @DisplayName("Get all models")
+    void testGetAllModels() throws Exception {
+        // given
+        List<ModelOption> allModels = List.of(
+                ModelOption.builder()
+                        .label("GPT 4")
+                        .value("gpt-4")
+                        .build(),
+                ModelOption.builder()
+                        .label("My custom model")
+                        .value("6678fc72-1a55-4146-b74b-b3f5aac677df")
+                        .build());
+
+        // when
+        when(customModelService.getAllModels()).thenReturn(allModels);
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/all"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(toJson(allModels)));
     }
 
     @Test

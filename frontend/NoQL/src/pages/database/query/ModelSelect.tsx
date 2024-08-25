@@ -1,39 +1,60 @@
-import { FormControl, MenuItem } from '@mui/material'
+import { FormControl, LinearProgress, MenuItem } from '@mui/material'
 import { Select, SelectChangeEvent } from '@mui/material-next'
-import { LlmModel } from '../../../types/Query.ts'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './Query.module.css'
+import { ModelOption } from '../../../types/CustomModel.ts'
+import customModelApi from '../../../services/api/customModelApi.ts'
+import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from '../../../state/store.ts'
 
 interface ModelSelectProps {
-  model: LlmModel,
-  setModel: React.Dispatch<React.SetStateAction<LlmModel>>
+  model: string,
+  setModel: React.Dispatch<React.SetStateAction<string>>
 }
 
 export function ModelSelect({ model, setModel }: ModelSelectProps) {
 
-  function selectModel(event: SelectChangeEvent<LlmModel>) {
-    setModel(event.target.value as LlmModel)
+  const [
+    modelOptions,
+    setModelOptions
+  ] = useState<ModelOption[]>([
+    // fallback if not loaded from backend
+    { label: 'GPT 4o', value: "gpt-4o" },
+    { label: 'GPT 4', value: "gpt-4" },
+    { label: 'GPT 4 Turbo', value: "gpt-4-turbo" },
+    { label: 'GPT 4 32k', value: "gpt-4-32k" },
+    { label: 'GPT 3.5 Turbo', value: "gpt-3.5-turbo" },
+    { label: 'Llama3 70B', value: "llama3-70b" },
+    { label: 'Llama3 13B Chat', value: "llama-13b-chat" }
+  ])
+
+  const [
+    modelOptionsLoading,
+    setModelOptionsLoading
+  ] = useState<boolean>(false)
+
+  const dispatch: AppDispatch = useDispatch()
+
+  useEffect(() => {
+    void loadModelOptions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function loadModelOptions(): Promise<void> {
+    setModelOptionsLoading(true)
+    try {
+      const response = await customModelApi.getAllModels()
+      setModelOptions(response.data)
+    } catch (error: unknown) {
+      showErrorWithMessageAndError(dispatch, 'Failed to load models', error)
+    } finally {
+      setModelOptionsLoading(false)
+    }
   }
 
-  function mapModelToLabel(model: string): string {
-    switch (model) {
-      case LlmModel.GPT_4o:
-        return 'GPT 4o'
-      case LlmModel.GPT_4:
-        return 'GPT 4'
-      case LlmModel.GPT_4_TURBO:
-        return 'GPT 4 Turbo'
-      case LlmModel.GPT_4_32K:
-        return 'GPT 4 32k'
-      case LlmModel.GPT_3_5_TURBO:
-        return 'GPT 3.5 Turbo'
-      case LlmModel.LLAMA3_70B:
-        return 'Llama3 70B'
-      case LlmModel.LLAMA3_13B_CHAT:
-        return 'Llama3 13B Chat'
-      default:
-        return ''
-    }
+  function selectModel(event: SelectChangeEvent): void {
+    setModel(event.target.value)
   }
 
   return (
@@ -45,11 +66,16 @@ export function ModelSelect({ model, setModel }: ModelSelectProps) {
           size='small'
           className={styles.modelSelect}
         >
-          {Object.keys(LlmModel)
-            .filter((key: string) => isNaN(Number(key)))
-            .map((model: string) => {
-              return <MenuItem key={model} value={model}>{mapModelToLabel(model)}</MenuItem>
-            })}
+          {modelOptions.map((modelOption: ModelOption) => {
+            return (
+            <MenuItem
+                key={modelOption.value}
+                value={modelOption.value}
+            >
+              {modelOption.label}
+            </MenuItem>)
+          })}
+          {modelOptionsLoading && <LinearProgress /> }
         </Select>
       </FormControl>
     </div>

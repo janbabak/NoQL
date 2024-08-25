@@ -5,7 +5,7 @@ import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
-import { LlmModel, QueryResponse } from '../../../types/Query.ts'
+import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
@@ -56,7 +56,7 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
   const [
     model,
     setModel
-  ] = useState<LlmModel>(LlmModel.GPT_4o)
+  ] = useState<string>("gpt-4o")
 
   const [
     pageLoading,

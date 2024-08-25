@@ -2,12 +2,15 @@ package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.repository.CustomModelRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +46,24 @@ public class CustomModelService {
         log.info("Get all custom models.");
 
         return customModelRepository.findAll();
+    }
+
+    /**
+     * Get all custom model ids plus not custom models like gpt, ...
+     * @return model ids
+     */
+    public List<ModelOption> getAllModels() {
+        // add default models
+        List<ModelOption> models = new java.util.ArrayList<>(Arrays.stream(LlmModel.values())
+                        .map(model -> new ModelOption(model.getLabel(), model.getModel()))
+                        .toList());
+
+        // add custom models
+        models.addAll(customModelRepository.findAll().stream()
+                .map(ModelOption::new)
+                .toList());
+
+        return models;
     }
 
     /**
