@@ -1,6 +1,6 @@
 import { CreateUpdateCustomModelRequest, CustomModel } from '../../types/CustomModel.ts'
 import { AxiosResponse } from 'axios'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { AppDispatch } from '../../state/store.ts'
@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux'
 import { Button, TextField } from '@mui/material'
 import styles from '../dashboard/Dashboard.module.css'
 import { LoadingButton } from '@mui/lab'
+import customModelApi from '../../services/api/customModelApi.ts'
 
 interface CreateUpdateModelFormProps {
   action: 'create' | 'update';
@@ -30,10 +31,26 @@ export function CreateUpdateModelForm(
     port: 8080
   }
 
+  // load model data if action is update
+  useEffect((): void => {
+    if (action === 'update' && modelId) {
+
+      customModelApi.getById(modelId)
+        .then((response): void => {
+          const model = response.data
+          form.reset({
+            name: model.name,
+            host: model.host,
+            port: model.port
+          })
+        })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelId])
+
   const form = useForm<CreateUpdateCustomModelRequest>({ defaultValues: defaultValues })
 
   const {
-    control,
     register,
     handleSubmit,
     formState,

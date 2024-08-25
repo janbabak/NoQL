@@ -14,6 +14,14 @@ const customModelApi = {
   },
 
   /**
+   * Get custom model by id.
+   * @param id
+   */
+  getById(id: string): Promise<AxiosResponse<CustomModel>> {
+    return this.API.get(this.DOMAIN + '/' + id)
+  },
+
+  /**
    * Create new custom model.
    */
   create(customModel: CreateUpdateCustomModelRequest): Promise<AxiosResponse<CustomModel>> {
@@ -21,11 +29,20 @@ const customModelApi = {
   },
 
   /**
+   * Update custom model.
+   * @param id custom model identifier
+   * @param customModel fields to update
+   */
+  update(id: string, customModel: CreateUpdateCustomModelRequest): Promise<AxiosResponse<CustomModel>> {
+    return this.API.put(this.DOMAIN + '/' + id, customModel)
+  },
+
+  /**
    * Delete custom model by id.
    */
   delete(id: string): Promise<AxiosResponse<void>> {
     return this.API.delete(this.DOMAIN + '/' + id)
-  },
+  }
 }
 
 export default customModelApi
