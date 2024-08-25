@@ -360,6 +360,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Settings'
+
+  /model:
+    get:
+      tags:
+        - Model
+      summary: Get all custom models
+      responses:
+        '200':
+          description: A list of custom models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomModel'
+
+    post:
+      tags:
+        - Model
+      summary: Create a new custom model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomModel'
+      responses:
+        '201':
+          description: Created custom model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomModel'
+        '400':
+          description: Invalid input
+
+  /model/all:
+    get:
+      tags:
+        - Model
+      summary: Get all models including default models like GPT, ...
+      responses:
+        '200':
+          description: A list of models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelOption'
+
+  /model/{modelId}:
+    get:
+      tags:
+        - Model
+      summary: Get a custom model by ID
+      parameters:
+        - $ref: '#/components/parameters/modelId'
+      responses:
+        '200':
+          description: A custom model of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomModel'
+        '404':
+          description: Custom model of specified ID not found
+
+    put:
+      tags:
+        - Model
+      summary: Update a custom model by ID
+      parameters:
+        - $ref: '#/components/parameters/modelId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomModel'
+      responses:
+        '200':
+          description: Updated custom model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomModel'
+        '404':
+          description: Custom model of specified ID not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - Model
+      summary: Delete a custom model by ID
+      parameters:
+        - $ref: '#/components/parameters/modelId'
+      responses:
+        '204':
+          description: No content
+
 components:
   schemas:
 
@@ -737,6 +839,63 @@ components:
           format: int32
           example: 3
 
+    CustomModel:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          example: "My custom model"
+        host:
+          type: string
+          example: "localhost"
+        port:
+          type: integer
+          example: 8080
+
+    CreateCustomModel:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "My custom model"
+          nullable: false
+        host:
+          type: string
+          example: "localhost"
+          nullable: false
+        port:
+          type: integer
+          example: 8080
+          nullable: false
+
+    UpdateCustomModel:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "My custom model"
+          nullable: true
+        host:
+          type: string
+          example: "localhost"
+          nullable: true
+        port:
+          type: integer
+          example: 8080
+          nullable: true
+
+    ModelOption:
+      type: object
+      properties:
+        label:
+          type: string
+          example: "GPT 4"
+        value:
+          type: string
+          example: "gpt-4"
+
   parameters:
 
     databaseId:
@@ -789,3 +948,11 @@ components:
         default: 0
         minimum: 0
         maximum: 100
+
+    modelId:
+      name: modelId
+      in: path
+      required: true
+      description: ID of the model
+      schema:
+        $ref: '#/components/schemas/UUID'
