@@ -74,7 +74,6 @@ export function CustomModelsPage() {
     void loadModels()
   }
 
-
   const CustomModelsList =
     <ul>{
       models.map((model: CustomModel) =>
@@ -105,7 +104,7 @@ export function CustomModelsPage() {
       {Header}
 
       {modelsLoading
-        ? <SkeletonStack height={104} />
+        ? <SkeletonStack height={104} style={{margin: '1rem 0'}}/>
         : CustomModelsList}
 
       <CreateModelDialog

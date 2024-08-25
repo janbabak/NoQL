@@ -31,19 +31,18 @@ export function CustomModelCard(
 
   return (
     <Card elevation={3} style={style} className={className}>
-      <CardActionArea component={Link} to={customModel.id}>
-        <CardContent>
-          <div className={styles.customModelCardHeader}>
+      <div className={styles.customModelCardContainer}>
+        <CardActionArea component={Link} to={customModel.id}>
+          <CardContent>
             <Typography variant="h6" component="h3">{customModel.name}</Typography>
-            <IconButton aria-label={`delete database ${customModel.name}`} onClick={() => setDialogOpen(true)}>
-              <DeleteRoundedIcon />
-            </IconButton>
-          </div>
+            <Typography>{customModel.host}:{customModel.port}</Typography>
 
-          <Typography>{customModel.host}:{customModel.port}</Typography>
-
-        </CardContent>
-      </CardActionArea>
+          </CardContent>
+        </CardActionArea>
+        <IconButton aria-label={`delete database ${customModel.name}`} onClick={() => setDialogOpen(true)}>
+          <DeleteRoundedIcon />
+        </IconButton>
+      </div>
 
       <ConfirmDialog
         title={`Delete custom model "${customModel.name}"?`}

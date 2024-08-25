@@ -2,8 +2,9 @@
     margin: 1rem 0;
 }
 
-.customModelCardHeader {
+.customModelCardContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-right: 1rem;
 }
