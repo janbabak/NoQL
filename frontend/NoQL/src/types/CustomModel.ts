@@ -11,7 +11,13 @@ interface CreateUpdateCustomModelRequest {
   port: number
 }
 
+interface ModelOption {
+  label: string
+  value: string
+}
+
 export type {
   CustomModel,
-  CreateUpdateCustomModelRequest
+  CreateUpdateCustomModelRequest,
+  ModelOption,
 }

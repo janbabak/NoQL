@@ -33,7 +33,7 @@ export function CustomModelsPage() {
   async function loadModels(): Promise<void> {
     setModelsLoading(true)
     try {
-      const response = await customModelApi.getAll()
+      const response = await customModelApi.getAllCustomModels()
       setModels(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to load custom models', error)

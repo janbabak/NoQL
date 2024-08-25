@@ -55,7 +55,7 @@ public class CustomModelService {
     public List<ModelOption> getAllModels() {
         // add default models
         List<ModelOption> models = new java.util.ArrayList<>(Arrays.stream(LlmModel.values())
-                        .map(model -> new ModelOption(model.getModel(), model.getLabel()))
+                        .map(model -> new ModelOption(model.getLabel(), model.getModel()))
                         .toList());
 
         // add custom models

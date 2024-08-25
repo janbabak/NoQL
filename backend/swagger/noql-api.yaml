@@ -849,7 +849,7 @@ components:
           example: "My custom model"
         host:
           type: string
-          example: "localhost"
+          example: "http://localhost"
         port:
           type: integer
           example: 8080
@@ -863,7 +863,7 @@ components:
           nullable: false
         host:
           type: string
-          example: "localhost"
+          example: "http://localhost"
           nullable: false
         port:
           type: integer
