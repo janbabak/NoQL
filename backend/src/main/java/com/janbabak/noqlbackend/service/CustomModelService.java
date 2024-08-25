@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,13 +53,15 @@ public class CustomModelService {
      * @return model ids
      */
     public List<ModelOption> getAllModels() {
-        List<ModelOption> models = new java.util.ArrayList<>(customModelRepository.findAll().stream()
+        // add default models
+        List<ModelOption> models = new java.util.ArrayList<>(Arrays.stream(LlmModel.values())
+                        .map(model -> new ModelOption(model.getModel(), model.getLabel()))
+                        .toList());
+
+        // add custom models
+        models.addAll(customModelRepository.findAll().stream()
                 .map(ModelOption::new)
                 .toList());
-
-        for (LlmModel model : LlmModel.values()) {
-            models.add(new ModelOption(model.getModel(), model.getLabel()));
-        }
 
         return models;
     }
