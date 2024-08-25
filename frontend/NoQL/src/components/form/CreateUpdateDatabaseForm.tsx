@@ -39,7 +39,7 @@ export function CreateUpdateDatabaseForm(
   }
 
   // load database data if action is update
-  useEffect(() => {
+  useEffect((): void => {
     if (action === 'update' && databaseId) {
 
       databaseApi.getById(databaseId)
