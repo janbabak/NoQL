@@ -1,6 +1,6 @@
 import Api from './api.ts'
 import { AxiosResponse } from 'axios'
-import { CustomModel } from '../../types/CustomModel.ts'
+import { CreateUpdateCustomModelRequest, CustomModel } from '../../types/CustomModel.ts'
 
 const customModelApi = {
   API: Api.getInstance(),
@@ -11,6 +11,13 @@ const customModelApi = {
    */
   getAll(): Promise<AxiosResponse<CustomModel[]>> {
     return this.API.get(this.DOMAIN)
+  },
+
+  /**
+   * Create new custom model.
+   */
+  create(customModel: CreateUpdateCustomModelRequest): Promise<AxiosResponse<CustomModel>> {
+    return this.API.post(this.DOMAIN, customModel)
   },
 
   /**

@@ -5,4 +5,13 @@ interface CustomModel {
   port: number
 }
 
-export type { CustomModel }
+interface CreateUpdateCustomModelRequest {
+  name: string
+  host: string
+  port: number
+}
+
+export type {
+  CustomModel,
+  CreateUpdateCustomModelRequest
+}

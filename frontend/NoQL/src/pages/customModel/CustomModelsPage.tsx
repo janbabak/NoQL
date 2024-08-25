@@ -9,6 +9,7 @@ import styles from './CustomModel.module.css'
 import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 import { Button, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
+import { CreateModelDialog } from './CreateModelDialog.tsx'
 
 export function CustomModelsPage() {
 
@@ -86,22 +87,31 @@ export function CustomModelsPage() {
         />)
     }</ul>
 
+  const Header =
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <Typography variant="h2" component="h1">Custom models</Typography>
+      <div>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={openCreateModelDialog}>
+          Create
+        </Button>
+      </div>
+    </div>
+
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <Typography variant="h2" component="h1">Custom models</Typography>
-        <div>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={openCreateModelDialog}>
-            Create
-          </Button>
-        </div>
-      </div>
+      {Header}
+
       {modelsLoading
         ? <SkeletonStack height={104} />
         : CustomModelsList}
+
+      <CreateModelDialog
+        open={createModelDialogOpen}
+        onClose={closeCreateModelDialog}
+      />
     </>
   )
 }
