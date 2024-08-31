@@ -53,6 +53,8 @@ dependencies {
 	testImplementation "org.testcontainers:junit-jupiter:1.19.8"
 	testImplementation "org.testcontainers:postgresql:1.19.8"
 	testImplementation "org.testcontainers:mysql:1.19.8"
+	testImplementation 'org.springframework.security:spring-security-test:6.3.3'
+
 }
 
 tasks.named('test') {

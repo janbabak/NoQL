@@ -12,6 +12,7 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.TableDto;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -23,7 +24,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DatabaseController.class)
+@Import(JwtService.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseControllerTest {
 
@@ -72,6 +76,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get all databases")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetAllDatabases() throws Exception {
         // given
         Database localMysql = Database.builder()
@@ -99,6 +104,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database by id")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseById() throws Exception {
         // when
         when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
@@ -112,6 +118,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database by id not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseByIdNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -128,6 +135,7 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
             throws Exception {
 
@@ -261,6 +269,7 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Update database")
     @MethodSource("updateDatabaseDataProvider")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testUpdateDatabase(String request, Database updatedDatabase, String response, Boolean success)
             throws Exception {
 
@@ -427,6 +436,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Delete database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testDeleteDatabaseById() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -439,6 +449,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute chat")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteChat() throws Exception {
 
         // given
@@ -479,6 +490,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute chat bad request")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteChatBadRequest() throws Exception {
         // given
         Integer pageSize = 2;
@@ -506,6 +518,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Load chat result")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testLoadChatResult() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -545,6 +558,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute query-language query")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteQueryLanguageQuery() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -587,6 +601,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database structure")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseStructure() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -615,6 +630,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database structure not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseStructureNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -630,6 +646,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get crate script")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetCreateScript() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -665,6 +682,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get crate script database not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseCreateScriptNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -680,6 +698,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get chats of database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void getChatsOfDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -699,6 +718,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get chats of not existing database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void getChatsOfNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();

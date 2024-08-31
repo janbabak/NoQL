@@ -1,11 +1,14 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.model.Settings;
+import com.janbabak.noqlbackend.service.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SettingsController.class)
+@Import(JwtService.class)
 class SettingsControllerTest {
 
     @Autowired
@@ -24,6 +28,7 @@ class SettingsControllerTest {
 
     @Test
     @DisplayName("Get settings")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void getSettings() throws Exception {
         // when
         when(settings.getMaxPageSize()).thenReturn(50);
