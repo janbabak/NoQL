@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import com.janbabak.noqlbackend.model.Role;
+import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,16 +38,13 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-//    public User(RegisterRequest request, PasswordEncoder passwordEncoder) {
-//        firstName = request.getFirstName();
-//        lastName = request.getLastName();
-//        email = request.getEmail();
-//        password = passwordEncoder.encode(request.getPassword());
-//        role = Role.USER;
-//        currency = request.getCurrency();
-//    }
-
-
+    public User(RegisterRequest request, PasswordEncoder passwordEncoder) {
+        firstName = request.getFirstName();
+        lastName = request.getLastName();
+        email = request.getEmail();
+        password = passwordEncoder.encode(request.getPassword());
+        role = Role.USER;
+    }
 
     /**
      * Get list of granted authorities (roles).
