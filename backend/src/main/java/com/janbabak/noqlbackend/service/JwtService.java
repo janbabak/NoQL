@@ -17,12 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
-//    @Value("${application.security.jwt.secret-key}") // TODO: load from application properties
-    private String secretKey = "secretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahojsecretahoj";
-//    @Value("${application.security.jwt.expiration}")
-    private long jwtExpiration = 1000 * 60 * 60 * 24;
-//    @Value("${application.security.jwt.refresh-token.expiration}")
-    private long refreshExpiration = 1000 * 60 * 60 * 24 * 30;
+    @Value("${app.security.jwt.secretKey}")
+    private String secretKey;
+
+    @Value("${app.security.jwt.expiration}")
+    private long jwtExpiration;
+
+    @Value("${app.security.jwt.refreshTokenExpiration}")
+    private long refreshExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
