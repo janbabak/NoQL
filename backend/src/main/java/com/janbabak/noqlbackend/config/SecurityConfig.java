@@ -32,23 +32,28 @@ public class SecurityConfig {
     private final String[] noAuthPaths = {
             "/",
             "/auth/**",
+            "static/images/**",
     };
 
     //paths, which require role ADMIN
     private final String[] adminPaths = {};
 
-    //enables cors for front end
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setExposedHeaders(List.of("Authorization", "content-type"));
-        configuration.setAllowedHeaders(List.of("Authorization", "content-type"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    //enables cors for front end
+//    @Bean
+//    CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:5173"));
+//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+//        configuration.setAllowedHeaders(List.of("Authorization", "content-type"));
+//        configuration.setExposedHeaders(List.of("Authorization", "content-type"));
+//
+//        // If you need to allow credentials
+//        configuration.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
