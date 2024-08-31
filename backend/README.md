@@ -23,6 +23,12 @@
 
 - `TRANSLATION_RETRIES` - (required) Number of retries when translated query fails due to a syntax error
 
+**Security**
+
+- `JWT_SECRET` - (required) Secret key for JWT token generation (at least 512 bits)
+- `JWT_EXPIRATION` - Expiration time of JWT token in seconds. (Default is 1 day)
+- `JWT_REFRESH_EXPIRATION` - Expiration time of JWT refresh token in seconds. (Default is 7 days)
+
 ## Gradle properties
 
 - `showLogs` - Show logs of tests in the console. Default is `false`.
