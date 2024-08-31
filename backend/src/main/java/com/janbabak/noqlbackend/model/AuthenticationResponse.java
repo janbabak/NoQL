@@ -9,4 +9,3 @@ public record AuthenticationResponse(
         String token,
         @NotNull User user) {
 }
-

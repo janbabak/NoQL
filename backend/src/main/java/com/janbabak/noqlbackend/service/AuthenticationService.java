@@ -15,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.USER;
@@ -24,13 +23,9 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
-
     private final AuthenticationManager authenticationManager;
-
     private final AuthenticationFacadeInterface authenticationFacadeInterface;
 
     /**
@@ -44,9 +39,8 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException(request.getEmail());
         }
 
-        var user = new User(request, passwordEncoder);
-        user = userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        User user = userRepository.save(new User(request, passwordEncoder));
+        String jwtToken = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -61,15 +55,10 @@ public class AuthenticationService {
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-
-        var jwtToken = jwtService.generateToken(user);
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        String jwtToken = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -84,15 +73,14 @@ public class AuthenticationService {
      * @throws EntityNotFoundException User of specified id doesn't exist.
      */
     public User checkIfRequestingSelf(UUID id) throws EntityNotFoundException {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            throw new EntityNotFoundException(USER, id);
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(USER, id));
+
         if (authenticationFacadeInterface.getAuthentication() == null
-                || !optionalUser.get().getEmail().equals(authenticationFacadeInterface.getAuthentication().getName())) {
+                || !user.getEmail().equals(authenticationFacadeInterface.getAuthentication().getName())) {
             throw new AccessDeniedException("Access denied.");
         }
-        return optionalUser.get();
+        return user;
     }
 
     /**
@@ -108,7 +96,7 @@ public class AuthenticationService {
     /**
      * If authenticated user hasn't role ADMIN and id doesn't correspond to id, throw Access denied exception.
      * @param id id to check
-     * @throws EntityNotFoundException .
+     * @throws EntityNotFoundException User of specified id doesn't exist.
      */
     public void ifNotAdminOrSelfRequestThrowAccessDenied(UUID id) throws EntityNotFoundException {
         if (isNotAdminOrSelfRequest(id)) {
@@ -118,7 +106,7 @@ public class AuthenticationService {
 
     /**
      * Return if authenticated user has role ADMIN.
-     * @return true if has, otherwise false
+     * @return true if he/she has, otherwise false
      */
     public boolean isAdmin() {
         return authenticationFacadeInterface.isAdmin();

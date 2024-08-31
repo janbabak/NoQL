@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users") // to avoid conflict with SQL reserved word "user"
 @Data
 @Builder
 @AllArgsConstructor

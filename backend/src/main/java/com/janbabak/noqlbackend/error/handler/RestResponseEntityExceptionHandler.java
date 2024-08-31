@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import software.amazon.awssdk.services.elasticache.model.UserAlreadyExistsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class RestResponseEntityExceptionHandler {
      * @param e exception
      * @return error message
      */
-    @ExceptionHandler({DatabaseConnectionException.class})
+    @ExceptionHandler({DatabaseConnectionException.class, UserAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleDatabaseConnectionException(Exception e) {
         return e.getMessage();
