@@ -5,7 +5,6 @@ import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.service.CustomModelService;
 import com.janbabak.noqlbackend.service.JwtService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -26,6 +25,7 @@ import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -111,7 +111,7 @@ class CustomModelControllerTest {
         mockMvc.perform(get(ROOT_URL + "/{localModelId}", localModel.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(toJson(localModel)));
+                .andExpect(content().json(toJson(localModel), true));
     }
 
     @Test
@@ -130,10 +130,10 @@ class CustomModelControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Disabled // TODO: Fix this test
     @ParameterizedTest
     @MethodSource("createCustomModelDataProvider")
     @DisplayName("Create custom model")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testCreateCustomModel(String request, CustomModel createdModel, String response, Boolean success)
             throws Exception {
 
@@ -146,7 +146,8 @@ class CustomModelControllerTest {
         mockMvc.perform(post(ROOT_URL)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -233,7 +234,6 @@ class CustomModelControllerTest {
         };
     }
 
-    @Disabled // TODO: Fix this test
     @ParameterizedTest
     @MethodSource("updatedCustomModelDataProvider")
     @DisplayName("Update custom model")
@@ -253,7 +253,8 @@ class CustomModelControllerTest {
         mockMvc.perform(put(ROOT_URL + "/{localModelId}", customModelId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isOk() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -263,7 +264,7 @@ class CustomModelControllerTest {
      * @return request, updated model, response, and success
      */
     Object[][] updatedCustomModelDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 {
                         // language=JSON
                         """
@@ -340,7 +341,6 @@ class CustomModelControllerTest {
         };
     }
 
-    @Disabled // TODO: Fix this test
     @Test
     @DisplayName("Delete custom model by id")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
@@ -349,7 +349,8 @@ class CustomModelControllerTest {
         UUID customModelId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{localModelId}", customModelId))
+        mockMvc.perform(delete(ROOT_URL + "/{localModelId}", customModelId)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }

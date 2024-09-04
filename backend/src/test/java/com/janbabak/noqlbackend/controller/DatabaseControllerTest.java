@@ -16,7 +16,6 @@ import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -38,6 +37,7 @@ import static com.janbabak.noqlbackend.service.utils.JsonUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -133,7 +133,6 @@ class DatabaseControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Disabled // TODO: Fix this test
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
@@ -150,7 +149,8 @@ class DatabaseControllerTest {
         mockMvc.perform(post(ROOT_URL)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -268,7 +268,6 @@ class DatabaseControllerTest {
         };
     }
 
-    @Disabled // TODO: Fix this test
     @ParameterizedTest
     @DisplayName("Update database")
     @MethodSource("updateDatabaseDataProvider")
@@ -288,7 +287,8 @@ class DatabaseControllerTest {
         mockMvc.perform(put(ROOT_URL + "/{databaseId}", databaseId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isOk() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -437,7 +437,6 @@ class DatabaseControllerTest {
         };
     }
 
-    @Disabled // TODO: Fix this test
     @Test
     @DisplayName("Delete database")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
@@ -446,12 +445,12 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId))
+        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
-    @Disabled // TODO: Fix this test
     @Test
     @DisplayName("Execute chat")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
@@ -467,8 +466,7 @@ class DatabaseControllerTest {
                 .errorMessage(null)
                 .data(new QueryResponse.RetrievedData(
                         List.of("name", "email", "age"),
-                        List.of(
-                                List.of("John", "john@gmail.com", "26"),
+                        List.of(List.of("John", "john@gmail.com", "26"),
                                 List.of("Lenny", "lenny@gmail.com", "65"))))
                 .chatQueryWithResponse(ChatQueryWithResponseDto.builder()
                         .id(UUID.randomUUID())
@@ -487,13 +485,13 @@ class DatabaseControllerTest {
                         .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
     }
 
-    @Disabled // TODO: Fix this test
     @Test
     @DisplayName("Execute chat bad request")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
@@ -516,7 +514,8 @@ class DatabaseControllerTest {
                         .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -562,7 +561,6 @@ class DatabaseControllerTest {
                 .andExpect(content().json(toJson(response), true));
     }
 
-    @Disabled // TODO: Fix this test
     @Test
     @DisplayName("Execute query-language query")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
@@ -600,7 +598,8 @@ class DatabaseControllerTest {
                                 .param("pageSize", pageSize.toString())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.TEXT_PLAIN)
-                                .content(query))
+                                .content(query)
+                                .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
