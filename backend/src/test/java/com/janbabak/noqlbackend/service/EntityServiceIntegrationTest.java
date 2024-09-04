@@ -6,25 +6,29 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
+import com.janbabak.noqlbackend.model.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
+import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
  */
 @ActiveProfiles("test")
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EntityServiceIntegrationTest {
 
     @Autowired
@@ -53,10 +58,13 @@ public class EntityServiceIntegrationTest {
     @Autowired
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
     private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
             Mockito.mockStatic(DatabaseServiceFactory.class);
 
-    private final DatabaseDAO databaseDaoMock = new DatabaseDAO() {
+    private final DatabaseDAO databaseDaoMock = new DatabaseDAO() { // TODO: why not use regular mock???
 
         @Override
         public ResultSetWrapper getSchemasTablesColumns() {
@@ -78,6 +86,27 @@ public class EntityServiceIntegrationTest {
         }
     };
 
+    private User testUser;
+
+    @BeforeAll
+    void setUp() throws UserAlreadyExistsException {
+        RegisterRequest registerRequest = RegisterRequest.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@gmail.com")
+                .password("password")
+                .build();
+
+        AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
+
+        testUser = authenticationResponse.user();
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                testUser, null, testUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    }
+
     @AfterEach
     void tearDown() {
         databaseServiceFactoryMock.close(); // deregister the mock in current thread
@@ -88,7 +117,7 @@ public class EntityServiceIntegrationTest {
     @DisplayName("Test create, modify, and delete objects")
     void testCreateModifyAndDeleteObjectDatabase() throws DatabaseConnectionException, EntityNotFoundException {
         // create objects
-        List<Database> databases = null;//createDatabases();
+        List<Database> databases = createDatabases();
         Database postgres = databases.get(0);
         Database mysql = databases.get(1);
 
@@ -117,39 +146,39 @@ public class EntityServiceIntegrationTest {
      * @return list of created databases (postgres and mysql)
      * @throws DatabaseConnectionException should not happen
      */
-//    List<Database> createDatabases() throws DatabaseConnectionException {
-//        Database postgres = Database.builder()
-//                .name("Local Postgres")
-//                .engine(DatabaseEngine.POSTGRES)
-//                .port(5432)
-//                .chats(new ArrayList<>())
-//                .host("localhost")
-//                .userName("jan")
-//                .password("jan-password")
-//                .build();
-//
-//        Database mysql = Database.builder()
-//                .name("Local Postgres")
-//                .engine(DatabaseEngine.MYSQL)
-//                .port(3306)
-//                .chats(new ArrayList<>())
-//                .host("https://janbabak.com")
-//                .userName("babak")
-//                .password("secret")
-//                .build();
-//
-//        databaseServiceFactoryMock
-//                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
-//                .thenReturn(databaseDaoMock);
-//
-//        Database createdPostgres = databaseService.create(postgres);
-//        Database createdMsql = databaseService.create(mysql);
-//
-//        // verify that the databases were created
-//        assertEquals(2, databaseService.findAll().size());
-//
-//        return List.of(createdPostgres, createdMsql);
-//    }
+    List<Database> createDatabases() throws DatabaseConnectionException, EntityNotFoundException {
+        CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
+                .name("Local Postgres")
+                .engine(DatabaseEngine.POSTGRES)
+                .port(5432)
+                .host("localhost")
+                .userName("jan")
+                .password("jan-password")
+                .userId(testUser.getId())
+                .build();
+
+        CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
+                .name("Local Postgres")
+                .engine(DatabaseEngine.MYSQL)
+                .port(3306)
+                .host("https://janbabak.com")
+                .userName("babak")
+                .password("secret")
+                .userId(testUser.getId())
+                .build();
+
+        databaseServiceFactoryMock
+                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
+                .thenReturn(databaseDaoMock);
+
+        Database createdPostgres = databaseService.create(createPostgresRequest);
+        Database createdMsql = databaseService.create(createMysqlRequest);
+
+        // verify that the databases were created
+        assertEquals(2, databaseService.findAll().size());
+
+        return List.of(createdPostgres, createdMsql);
+    }
 
     /**
      * Create three chats in a database and verify that they were created.

@@ -15,3 +15,16 @@ spring:
 logging:
   level:
     root: info
+
+app:
+  settings:
+    pagination:
+      maxPageSize: "${PAGINATION_MAX_PAGE_SIZE:50}"
+      defaultPageSize: "${PAGINATION_DEFAULT_PAGE_SIZE:10}"
+    translationRetries: "${TRANSLATION_RETRIES:3}"
+    plotServiceContainerName: "${PLOT_SERVICE_CONTAINER_NAME:plot-service}"
+  security:
+    jwt:
+      secretKey: "${JWT_SECRET:secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret}"
+      expiration: "${JWT_EXPIRATION:86400}"
+      refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
