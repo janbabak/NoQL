@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.controller;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
 import com.janbabak.noqlbackend.model.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.AuthenticationResponse;
@@ -22,10 +23,13 @@ public class AuthenticationController {
      * Authenticate existing user.
      * @param request request with username and password
      * @return response with user data and JWT token
+     * @throws EntityNotFoundException User with this username not found.
      */
     @PostMapping("/authenticate")
     @ResponseStatus(HttpStatus.OK)
-    public AuthenticationResponse authenticate(@RequestBody @Valid AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(@RequestBody @Valid AuthenticationRequest request)
+            throws EntityNotFoundException {
+
         return authenticationService.authenticate(request);
     }
 

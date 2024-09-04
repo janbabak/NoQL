@@ -53,11 +53,13 @@ public class AuthenticationService {
      * @param request request with username and password
      * @return response with user data and JWT token
      */
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public AuthenticationResponse authenticate(AuthenticationRequest request) throws EntityNotFoundException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new EntityNotFoundException(USER, request.getEmail()));
+
         String jwtToken = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder()
@@ -78,7 +80,7 @@ public class AuthenticationService {
 
         if (authenticationFacadeInterface.getAuthentication() == null
                 || !user.getEmail().equals(authenticationFacadeInterface.getAuthentication().getName())) {
-            throw new AccessDeniedException("Access denied.");
+            return null;
         }
         return user;
     }
@@ -89,23 +91,23 @@ public class AuthenticationService {
      * @return true if is ADMIN or id is same as id of authenticated user
      * @throws EntityNotFoundException User of specified id doesn't exist.
      */
-    public boolean isNotAdminOrSelfRequest(UUID id) throws EntityNotFoundException {
-        return !authenticationFacadeInterface.isAdmin() && checkIfRequestingSelf(id) == null;
+    public boolean isAdminOrSelfRequest(UUID id) throws EntityNotFoundException {
+        return authenticationFacadeInterface.isAdmin() || checkIfRequestingSelf(id) != null;
     }
 
     /**
-     * If authenticated user hasn't role ADMIN and id doesn't correspond to id, throw Access denied exception.
-     * @param id id to check
+     * If authenticated user hasn't role ADMIN and id that doesn't correspond to id, throw Access denied exception.
+     * @param id id to compare with user's id
      * @throws EntityNotFoundException User of specified id doesn't exist.
      */
     public void ifNotAdminOrSelfRequestThrowAccessDenied(UUID id) throws EntityNotFoundException {
-        if (isNotAdminOrSelfRequest(id)) {
+        if (!isAdminOrSelfRequest(id)) {
             throw new AccessDeniedException("Access denied.");
         }
     }
 
     /**
-     * Return if authenticated user has role ADMIN.
+     * Check if authenticated user has role ADMIN.
      * @return true if he/she has, otherwise false
      */
     public boolean isAdmin() {

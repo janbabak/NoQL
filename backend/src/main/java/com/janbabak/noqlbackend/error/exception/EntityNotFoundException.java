@@ -17,6 +17,10 @@ public class EntityNotFoundException extends Exception {
         super(entity.label + " of id: \"" + id + "\" not found.");
     }
 
+    public EntityNotFoundException(Entity entity, String id) {
+        super(entity.label + " of identifier: \"" + id + "\" not found.");
+    }
+
     /**
      * Entity that has not been found.
      */
