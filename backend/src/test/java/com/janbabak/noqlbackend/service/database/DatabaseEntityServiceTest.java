@@ -4,11 +4,14 @@ import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
+import com.janbabak.noqlbackend.service.AuthenticationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,12 +36,23 @@ class DatabaseEntityServiceTest {
     @Mock
     private DatabaseRepository databaseRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    @SuppressWarnings("unused") // used in the databaseEntityService
+    private AuthenticationService authenticationService;
+
     private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
             Mockito.mockStatic(DatabaseServiceFactory.class);
 
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @AfterEach
     void tearDown() {
-        databaseServiceFactoryMock.close(); // deregister the mock in current thread
+        databaseServiceFactoryMock.close(); // deregister the mock in the current thread
     }
 
     private final DatabaseDAO databaseDaoMock = new DatabaseDAO() {
@@ -115,6 +129,7 @@ class DatabaseEntityServiceTest {
         Database database = Database.builder()
                 .id(databaseId)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         // when
@@ -152,12 +167,14 @@ class DatabaseEntityServiceTest {
                 .id(UUID.randomUUID())
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         Database database2 = Database.builder()
                 .id(UUID.randomUUID())
                 .engine(DatabaseEngine.MYSQL)
                 .name("remote mysql")
+                .user(testUser)
                 .build();
 
         List<Database> databases = List.of(database1, database2);
@@ -173,21 +190,28 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test create database")
-    void testCreateDatabase() throws DatabaseConnectionException {
+    void testCreateDatabase() throws DatabaseConnectionException, EntityNotFoundException {
         // given
+        CreateDatabaseRequest request = CreateDatabaseRequest.builder()
+                .engine(DatabaseEngine.POSTGRES)
+                .name("local postgres")
+                .userId(testUser.getId())
+                .build();
         Database database = Database.builder()
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         // when
         when(databaseRepository.save(database)).thenReturn(database);
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(database))
                 .thenReturn(databaseDaoMock);
 
-        Database actual = databaseEntityService.create(database);
+        Database actual = databaseEntityService.create(request);
 
         // then
         ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
@@ -200,20 +224,27 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test create database connection failed")
     void testCreateDatabaseConnectionFailed() throws DatabaseConnectionException {
         // given
+        CreateDatabaseRequest request = CreateDatabaseRequest.builder()
+                .engine(DatabaseEngine.POSTGRES)
+                .name("local postgres")
+                .userId(testUser.getId())
+                .build();
         Database database = Database.builder()
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         // when
         PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(database))
                 .thenReturn(postgresDao);
 
         // then
-        assertThrows(DatabaseConnectionException.class, () -> databaseEntityService.create(database));
+        assertThrows(DatabaseConnectionException.class, () -> databaseEntityService.create(request));
     }
 
     @Test
@@ -227,6 +258,7 @@ class DatabaseEntityServiceTest {
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .port(5432)
+                .user(testUser)
                 .build();
 
         UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
@@ -239,6 +271,7 @@ class DatabaseEntityServiceTest {
                 .engine(DatabaseEngine.MYSQL)
                 .name("remote postgres")
                 .port(5432)
+                .user(testUser)
                 .build();
 
         // when
@@ -288,6 +321,7 @@ class DatabaseEntityServiceTest {
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .port(5432)
+                .user(testUser)
                 .build();
 
         UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
@@ -383,7 +417,7 @@ class DatabaseEntityServiceTest {
         // language=SQL
         String expectedCreateScript = """
                 CREATE SCHEMA IF NOT EXISTS public;
-                
+
                 CREATE TABLE IF NOT EXISTS public.user
                 (
                     id integer,

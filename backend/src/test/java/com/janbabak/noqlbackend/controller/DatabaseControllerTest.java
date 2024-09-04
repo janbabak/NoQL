@@ -10,6 +10,7 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.SchemaDto;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.TableDto;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.service.JwtService;
@@ -63,6 +64,10 @@ class DatabaseControllerTest {
 
     private final String ROOT_URL = "/database";
 
+    private final User testUser = User.builder()
+            .id(UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"))
+            .build();
+
     private final Database localPostgres = Database.builder()
             .id(UUID.randomUUID())
             .name("Local Postgres")
@@ -73,6 +78,7 @@ class DatabaseControllerTest {
             .password("password")
             .chats(new ArrayList<>())
             .engine(DatabaseEngine.POSTGRES)
+            .user(testUser)
             .build();
 
     @Test
@@ -90,6 +96,7 @@ class DatabaseControllerTest {
                 .password("password")
                 .chats(new ArrayList<>())
                 .engine(DatabaseEngine.MYSQL)
+                .user(testUser)
                 .build();
         List<Database> databases = List.of(localPostgres, localMysql);
 
@@ -171,7 +178,8 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                     }""",
                         Database.builder()
                                 .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
@@ -182,6 +190,7 @@ class DatabaseControllerTest {
                                 .userName("user")
                                 .password("password")
                                 .engine(DatabaseEngine.POSTGRES)
+                                .user(testUser)
                                 .build(),
                         // language=JSON
                         """
@@ -194,7 +203,8 @@ class DatabaseControllerTest {
                         "userName":"user",
                         "password":"password",
                         "engine":"POSTGRES",
-                        "isSQL": true
+                        "isSQL": true,
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                     }""",
                         true,
                 },
@@ -208,7 +218,8 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                     }""",
                         null,
                         // language=JSON
@@ -228,7 +239,8 @@ class DatabaseControllerTest {
                         "database": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                         "userName":"user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user_user user user",
                         "password":"password_password_password_password_password_password_password_password_password _password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password password_password_password_password_password_password_password_password_password_password",
-                        "engine":"POSTGRES"
+                        "engine":"POSTGRES",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                     }""",
                         null,
                         // language=JSON
@@ -314,6 +326,7 @@ class DatabaseControllerTest {
                                 .userName("user")
                                 .password("password")
                                 .engine(DatabaseEngine.POSTGRES)
+                                .user(testUser)
                                 .build(),
                         // language=JSON
                         """
@@ -326,6 +339,7 @@ class DatabaseControllerTest {
                         "userName":"user",
                         "password":"password",
                         "engine":"POSTGRES",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02",
                         "isSQL": true
                     }""",
                         true,
@@ -351,6 +365,7 @@ class DatabaseControllerTest {
                                 .userName("Updated user")
                                 .password("Updated password")
                                 .engine(DatabaseEngine.MYSQL)
+                                .user(testUser)
                                 .build(),
                         // language=JSON
                         """
@@ -363,6 +378,7 @@ class DatabaseControllerTest {
                         "userName":"Updated user",
                         "password":"Updated password",
                         "engine":"MYSQL",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02",
                         "isSQL": true
                     }""",
                         true,
@@ -377,8 +393,9 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES"
-                    }""",
+                        "engine":"POSTGRES",
+                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
+                    }""", // TODO: userId null error
                         null,
                         // language=JSON
                         """

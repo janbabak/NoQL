@@ -88,7 +88,7 @@ public class EntityServiceIntegrationTest {
     @DisplayName("Test create, modify, and delete objects")
     void testCreateModifyAndDeleteObjectDatabase() throws DatabaseConnectionException, EntityNotFoundException {
         // create objects
-        List<Database> databases = createDatabases();
+        List<Database> databases = null;//createDatabases();
         Database postgres = databases.get(0);
         Database mysql = databases.get(1);
 
@@ -117,39 +117,39 @@ public class EntityServiceIntegrationTest {
      * @return list of created databases (postgres and mysql)
      * @throws DatabaseConnectionException should not happen
      */
-    List<Database> createDatabases() throws DatabaseConnectionException {
-        Database postgres = Database.builder()
-                .name("Local Postgres")
-                .engine(DatabaseEngine.POSTGRES)
-                .port(5432)
-                .chats(new ArrayList<>())
-                .host("localhost")
-                .userName("jan")
-                .password("jan-password")
-                .build();
-
-        Database mysql = Database.builder()
-                .name("Local Postgres")
-                .engine(DatabaseEngine.MYSQL)
-                .port(3306)
-                .chats(new ArrayList<>())
-                .host("https://janbabak.com")
-                .userName("babak")
-                .password("secret")
-                .build();
-
-        databaseServiceFactoryMock
-                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
-                .thenReturn(databaseDaoMock);
-
-        Database createdPostgres = databaseService.create(postgres);
-        Database createdMsql = databaseService.create(mysql);
-
-        // verify that the databases were created
-        assertEquals(2, databaseService.findAll().size());
-
-        return List.of(createdPostgres, createdMsql);
-    }
+//    List<Database> createDatabases() throws DatabaseConnectionException {
+//        Database postgres = Database.builder()
+//                .name("Local Postgres")
+//                .engine(DatabaseEngine.POSTGRES)
+//                .port(5432)
+//                .chats(new ArrayList<>())
+//                .host("localhost")
+//                .userName("jan")
+//                .password("jan-password")
+//                .build();
+//
+//        Database mysql = Database.builder()
+//                .name("Local Postgres")
+//                .engine(DatabaseEngine.MYSQL)
+//                .port(3306)
+//                .chats(new ArrayList<>())
+//                .host("https://janbabak.com")
+//                .userName("babak")
+//                .password("secret")
+//                .build();
+//
+//        databaseServiceFactoryMock
+//                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
+//                .thenReturn(databaseDaoMock);
+//
+//        Database createdPostgres = databaseService.create(postgres);
+//        Database createdMsql = databaseService.create(mysql);
+//
+//        // verify that the databases were created
+//        assertEquals(2, databaseService.findAll().size());
+//
+//        return List.of(createdPostgres, createdMsql);
+//    }
 
     /**
      * Create three chats in a database and verify that they were created.

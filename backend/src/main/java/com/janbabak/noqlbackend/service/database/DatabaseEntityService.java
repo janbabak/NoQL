@@ -1,11 +1,14 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
+import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
+import com.janbabak.noqlbackend.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,8 @@ import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.E
 public class DatabaseEntityService {
 
     private final DatabaseRepository databaseRepository;
+    private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
     /**
      * Find database by id.
@@ -32,12 +37,17 @@ public class DatabaseEntityService {
      * @param databaseId database identifier
      * @return database
      * @throws EntityNotFoundException database of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public Database findById(UUID databaseId) throws EntityNotFoundException {
         log.info("Get database by id={}.", databaseId);
 
-        return databaseRepository.findById(databaseId)
+        Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
+
+        return database;
     }
 
     /**
@@ -54,12 +64,29 @@ public class DatabaseEntityService {
     /**
      * Create new database object - persist it.
      *
-     * @param database object to be saved
+     * @param request database data
      * @return saved object with id
      * @throws DatabaseConnectionException if connection to the database failed.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
-    public Database create(Database database) throws DatabaseConnectionException {
+    public Database create(CreateDatabaseRequest request) throws DatabaseConnectionException, EntityNotFoundException {
         log.info("Create new database.");
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(request.getUserId());
+
+        User user = userRepository.findById(request.getUserId()).orElseThrow(
+                () -> new EntityNotFoundException(EntityNotFoundException.Entity.USER, request.getUserId()));
+
+        Database database = Database.builder()
+                .name(request.getName())
+                .host(request.getHost())
+                .port(request.getPort())
+                .database(request.getDatabase())
+                .userName(request.getUserName())
+                .password(request.getPassword())
+                .engine(request.getEngine())
+                .user(user)
+                .build();
 
         DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
 
@@ -80,8 +107,11 @@ public class DatabaseEntityService {
 
         log.info("Update database of id={}.", databaseId);
 
+
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         if (data.getName() != null) database.setName(data.getName());
         if (data.getHost() != null) database.setHost(data.getHost());

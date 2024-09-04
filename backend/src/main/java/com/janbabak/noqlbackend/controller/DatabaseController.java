@@ -63,12 +63,14 @@ public class DatabaseController {
      *
      * @param request database object (without id)
      * @return created object with its id.
-     * @throws DatabaseConnectionException connection to the database failed (wrong credential, unavailable, etc.)
+     * @throws DatabaseConnectionException                               connection to the database failed (wrong credential, unavailable, etc.)
+     * @throws EntityNotFoundException                                   user not found
+     * @throws org.springframework.security.access.AccessDeniedException user is not admin or doesn't belong to userId
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@Validated(ValidationSequence.class) @RequestBody Database request)
-            throws DatabaseConnectionException {
+    public Database create(@Validated(ValidationSequence.class) @RequestBody CreateDatabaseRequest request)
+            throws DatabaseConnectionException, EntityNotFoundException {
         return databaseService.create(request);
     }
 
