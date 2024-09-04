@@ -17,3 +17,8 @@ app:
       defaultPageSize: "${PAGINATION_DEFAULT_PAGE_SIZE:10}"
     translationRetries: "${TRANSLATION_RETRIES:3}"
     plotServiceContainerName: "${PLOT_SERVICE_CONTAINER_NAME:plot-service}"
+  security:
+    jwt:
+      secretKey: "${JWT_SECRET:secret}"
+      expiration: "${JWT_EXPIRATION:86400}"
+      refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"

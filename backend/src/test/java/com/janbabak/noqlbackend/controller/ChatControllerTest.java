@@ -3,13 +3,16 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -17,12 +20,14 @@ import java.util.UUID;
 import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ChatController.class)
+@Import({JwtService.class})
 class ChatControllerTest {
 
     @Autowired
@@ -35,6 +40,7 @@ class ChatControllerTest {
 
     @Test
     @DisplayName("Create chat")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testCreateChat() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -61,7 +67,8 @@ class ChatControllerTest {
         mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", databaseId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().json(responseContent));
@@ -69,6 +76,7 @@ class ChatControllerTest {
 
     @Test
     @DisplayName("Create chat in not existing database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testCreateChatNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -80,13 +88,15 @@ class ChatControllerTest {
         mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", databaseId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("Get chat by id")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -107,6 +117,7 @@ class ChatControllerTest {
 
     @Test
     @DisplayName("Get chat by id not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetChatByIdNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -122,18 +133,21 @@ class ChatControllerTest {
 
     @Test
     @DisplayName("Delete chat by id")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testDeleteChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{chatId}", chatId))
+        mockMvc.perform(delete(ROOT_URL + "/{chatId}", chatId)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Rename chat by id")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testRenameChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -141,13 +155,15 @@ class ChatControllerTest {
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
-                        .param("name", name))
+                        .param("name", name)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Rename chat not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testRenameChatNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -158,13 +174,15 @@ class ChatControllerTest {
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
-                        .param("name", name))
+                        .param("name", name)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("Delete chat by id too long name")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testDeleteChatByIdTooLongName() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -172,13 +190,15 @@ class ChatControllerTest {
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
-                        .param("name", name))
+                        .param("name", name)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Delete chat by id empty name")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testDeleteChatByIdEmptyName() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -186,13 +206,15 @@ class ChatControllerTest {
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
-                        .param("name", name))
+                        .param("name", name)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("Add message to chat")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testAddMessageToChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -215,13 +237,15 @@ class ChatControllerTest {
         // then
         mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isCreated());
     }
 
     @Test
     @DisplayName("Add message to chat not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testAddMessageToChatNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -243,7 +267,8 @@ class ChatControllerTest {
         // then
         mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }

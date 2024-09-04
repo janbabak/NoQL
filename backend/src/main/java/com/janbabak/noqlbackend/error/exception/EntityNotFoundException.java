@@ -17,13 +17,18 @@ public class EntityNotFoundException extends Exception {
         super(entity.label + " of id: \"" + id + "\" not found.");
     }
 
+    public EntityNotFoundException(Entity entity, String id) {
+        super(entity.label + " of identifier: \"" + id + "\" not found.");
+    }
+
     /**
      * Entity that has not been found.
      */
     public enum Entity {
         DATABASE("Database"),
         CHAT("Chat"),
-        CUSTOM_MODEL("Custom Model");
+        CUSTOM_MODEL("Custom Model"),
+        USER("User");
 
         public final String label;
 

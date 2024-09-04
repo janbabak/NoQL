@@ -12,6 +12,7 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructureDto.TableDto;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -23,7 +24,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -34,12 +37,14 @@ import static com.janbabak.noqlbackend.service.utils.JsonUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DatabaseController.class)
+@Import(JwtService.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseControllerTest {
 
@@ -72,6 +77,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get all databases")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetAllDatabases() throws Exception {
         // given
         Database localMysql = Database.builder()
@@ -99,6 +105,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database by id")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseById() throws Exception {
         // when
         when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
@@ -112,6 +119,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database by id not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseByIdNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -128,6 +136,7 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
             throws Exception {
 
@@ -140,7 +149,8 @@ class DatabaseControllerTest {
         mockMvc.perform(post(ROOT_URL)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -261,6 +271,7 @@ class DatabaseControllerTest {
     @ParameterizedTest
     @DisplayName("Update database")
     @MethodSource("updateDatabaseDataProvider")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testUpdateDatabase(String request, Database updatedDatabase, String response, Boolean success)
             throws Exception {
 
@@ -276,7 +287,8 @@ class DatabaseControllerTest {
         mockMvc.perform(put(ROOT_URL + "/{databaseId}", databaseId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(request)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(success ? status().isOk() : status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -427,18 +439,21 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Delete database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testDeleteDatabaseById() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
 
         // then
-        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId))
+        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId)
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("Execute chat")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteChat() throws Exception {
 
         // given
@@ -451,8 +466,7 @@ class DatabaseControllerTest {
                 .errorMessage(null)
                 .data(new QueryResponse.RetrievedData(
                         List.of("name", "email", "age"),
-                        List.of(
-                                List.of("John", "john@gmail.com", "26"),
+                        List.of(List.of("John", "john@gmail.com", "26"),
                                 List.of("Lenny", "lenny@gmail.com", "65"))))
                 .chatQueryWithResponse(ChatQueryWithResponseDto.builder()
                         .id(UUID.randomUUID())
@@ -471,7 +485,8 @@ class DatabaseControllerTest {
                         .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -479,6 +494,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute chat bad request")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteChatBadRequest() throws Exception {
         // given
         Integer pageSize = 2;
@@ -498,7 +514,8 @@ class DatabaseControllerTest {
                         .param("pageSize", pageSize.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request)))
+                        .content(toJson(request))
+                        .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(response, true));
@@ -506,6 +523,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Load chat result")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testLoadChatResult() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -545,6 +563,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute query-language query")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testExecuteQueryLanguageQuery() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -579,7 +598,8 @@ class DatabaseControllerTest {
                                 .param("pageSize", pageSize.toString())
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.TEXT_PLAIN)
-                                .content(query))
+                                .content(query)
+                                .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -587,6 +607,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database structure")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseStructure() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -615,6 +636,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database structure not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseStructureNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -630,6 +652,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get crate script")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetCreateScript() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -665,6 +688,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get crate script database not found")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseCreateScriptNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -680,6 +704,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get chats of database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void getChatsOfDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -699,6 +724,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get chats of not existing database")
+    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void getChatsOfNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
