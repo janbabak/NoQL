@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.error.exception;
 
+@SuppressWarnings("unused")
 public class UserAlreadyExistsException extends Exception {
     public UserAlreadyExistsException() {
     }
