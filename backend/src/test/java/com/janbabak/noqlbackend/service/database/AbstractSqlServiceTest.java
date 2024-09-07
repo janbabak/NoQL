@@ -1,8 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
@@ -78,7 +76,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
 
     @BeforeAll
     @Override
-    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
+    protected void setUp() throws Exception {
         super.setUp();
         SqlDatabaseService databaseService = getSqlService(getDatabase());
         databaseStructure = databaseService.retrieveSchema();

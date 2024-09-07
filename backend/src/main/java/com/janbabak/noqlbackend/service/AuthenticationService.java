@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final AuthenticationFacadeInterface authenticationFacadeInterface;
+    public final AuthenticationFacadeInterface authenticationFacadeInterface;
 
     /**
      * Register new user, create new user.
@@ -128,5 +129,16 @@ public class AuthenticationService {
         if (!isAdmin()) {
             throw new AccessDeniedException("Admin ROLE required.");
         }
+    }
+
+    /**
+     * Authenticate user to the spring security context.
+     *
+     * @param user user to authenticate
+     */
+    public static void authenticateUser(User user) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

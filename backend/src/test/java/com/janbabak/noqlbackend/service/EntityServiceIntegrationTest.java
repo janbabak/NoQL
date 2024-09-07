@@ -25,8 +25,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -91,23 +89,12 @@ public class EntityServiceIntegrationTest {
         testUser = authenticationService.register(registerUserRequest, Role.USER).user();
         testAdmin = authenticationService.register(registerAdminRequest, Role.ADMIN).user();
 
-        authenticateUser(testUser);
+        AuthenticationService.authenticateUser(testUser);
     }
 
     @AfterEach
     void tearDown() {
         databaseServiceFactoryMock.close(); // deregister the mock in current thread
-    }
-
-    /**
-     * Authenticate user to spring context.
-     *
-     * @param user user to authenticate
-     */
-    private void authenticateUser(User user) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                user, null, user.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 
@@ -185,13 +172,13 @@ public class EntityServiceIntegrationTest {
         Database createdPostgres = databaseService.create(createPostgresRequest);
         Database createdMsql = databaseService.create(createMysqlRequest);
 
-        authenticateUser(testAdmin);
+        AuthenticationService.authenticateUser(testAdmin);
         Database createdAdminMysql = databaseService.create(createAdminMysqlRequest);
 
         assertEquals(3, databaseService.findAll().size());
         assertEquals(1, databaseService.findAll(testAdmin.getId()).size());
 
-        authenticateUser(testUser);
+        AuthenticationService.authenticateUser(testUser);
 
         assertEquals(2, databaseService.findAll(testUser.getId()).size());
 
@@ -346,7 +333,7 @@ public class EntityServiceIntegrationTest {
         // testUser is not owner of the database
         assertThrows(AccessDeniedException.class, () -> databaseService.deleteById(databaseId));
 
-        authenticateUser(testAdmin);
+        AuthenticationService.authenticateUser(testAdmin);
         databaseService.deleteById(databaseId);
     }
 }

@@ -30,7 +30,7 @@ public class DatabaseEntityService {
 
     private final DatabaseRepository databaseRepository;
     private final UserRepository userRepository;
-    private final AuthenticationService authenticationService;
+    public final AuthenticationService authenticationService;
 
     /**
      * Find database by id.

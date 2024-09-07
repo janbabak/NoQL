@@ -61,7 +61,7 @@ public class LocalDatabaseTest {
     }
 
     @BeforeAll
-    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
+    protected void setUp() throws Exception {
         postgresDatabase = createDatabase(postgresContainer, DatabaseEngine.POSTGRES);
         postgresDAO = new PostgresDAO(postgresDatabase);
 
