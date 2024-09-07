@@ -29,6 +29,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -119,8 +120,9 @@ public class EntityServiceIntegrationTest {
         Database mysql = databases.get(1);
         Database adminMysql = databases.get(2);
 
-        List<ChatDto> postgresChats = createChats(postgres);
-        List<ChatDto> mysqlChats = createChats(mysql);
+        List<ChatDto> postgresChats = createChats(postgres, 3);
+        List<ChatDto> mysqlChats = createChats(mysql, 3);
+        createChats(adminMysql, 2);
 
         addMessagesToChat(postgresChats.get(0).getId(), 3);
         addMessagesToChat(postgresChats.get(1).getId(), 1);
@@ -200,18 +202,20 @@ public class EntityServiceIntegrationTest {
      * Create three chats in a database and verify that they were created.
      *
      * @param database database to create chats in
+     * @param count   number of chats to create
      * @return list of crated chats
      * @throws EntityNotFoundException should not happen
      */
-    List<ChatDto> createChats(Database database) throws EntityNotFoundException {
-        ChatDto chat1 = chatService.create(database.getId());
-        ChatDto chat2 = chatService.create(database.getId());
-        ChatDto chat3 = chatService.create(database.getId());
+    List<ChatDto> createChats(Database database, int count) throws EntityNotFoundException {
+        List<ChatDto> chats = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            chats.add(chatService.create(database.getId()));
+        }
 
         // verify that the chats were created
-        assertEquals(3, chatService.findChatsByDatabaseId(database.getId()).size());
+        assertEquals(count, chatService.findChatsByDatabaseId(database.getId()).size());
 
-        return List.of(chat1, chat2, chat3);
+        return chats;
     }
 
     /**
@@ -286,14 +290,14 @@ public class EntityServiceIntegrationTest {
      * @param chatId chat identifier
      */
     void deleteChat(UUID chatId) throws EntityNotFoundException {
-        assertEquals(6, chatRepository.findAll().size());
+        assertEquals(8, chatRepository.findAll().size());
         assertEquals(14, chatQueryWithResponseRepository.findAll().size());
         assertNotNull(chatService.findById(chatId));
 
         chatService.deleteChatById(chatId);
 
         assertThrows(EntityNotFoundException.class, () -> chatService.findById(chatId));
-        assertEquals(5, chatRepository.findAll().size());
+        assertEquals(7, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertEquals(2, databaseService.findAll(testUser.getId()).size());
     }
@@ -307,7 +311,7 @@ public class EntityServiceIntegrationTest {
      */
     void deleteMysql(UUID databaseId) throws EntityNotFoundException {
         assertEquals(2, databaseService.findAll(testUser.getId()).size());
-        assertEquals(5, chatRepository.findAll().size());
+        assertEquals(7, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertNotNull(databaseService.findById(databaseId));
 
@@ -315,7 +319,7 @@ public class EntityServiceIntegrationTest {
 
         assertThrows(EntityNotFoundException.class, () -> databaseService.findById(databaseId));
         assertEquals(1, databaseService.findAll(testUser.getId()).size());
-        assertEquals(2, chatRepository.findAll().size());
+        assertEquals(4, chatRepository.findAll().size());
         assertEquals(5, chatQueryWithResponseRepository.findAll().size());
     }
 
@@ -328,7 +332,7 @@ public class EntityServiceIntegrationTest {
         databaseService.deleteById(databaseId);
 
         assertEquals(0, databaseService.findAll(testUser.getId()).size());
-        assertEquals(0, chatRepository.findAll().size());
+        assertEquals(2, chatRepository.findAll().size());
         assertEquals(0, chatQueryWithResponseRepository.findAll().size());
     }
 

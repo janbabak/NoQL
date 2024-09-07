@@ -52,6 +52,7 @@ public class User implements UserDetails {
         databases = new ArrayList<>();
     }
 
+    @SuppressWarnings("unused")
     public void addDatabase(Database database) {
         for (Database db : databases) {
             if (db.getId().equals(database.getId())) {
