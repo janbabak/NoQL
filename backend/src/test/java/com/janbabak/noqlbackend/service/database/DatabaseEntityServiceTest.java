@@ -362,6 +362,11 @@ class DatabaseEntityServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(Database.builder()
+                .id(UUID.randomUUID())
+                .user(testUser)
+                .build()));
+
         // when
         databaseEntityService.deleteById(databaseId);
 

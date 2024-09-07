@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
 import com.janbabak.noqlbackend.model.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.AuthenticationService;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ public class AuthenticationController {
 
     /**
      * Authenticate existing user.
+     *
      * @param request request with username and password
      * @return response with user data and JWT token
      * @throws EntityNotFoundException User with this username not found.
@@ -34,7 +36,8 @@ public class AuthenticationController {
     }
 
     /**
-     * Register new user, create new user.
+     * Register new user, create new user with USER role.
+     *
      * @param request user data
      * @return response with new user data and JWT token
      * @throws UserAlreadyExistsException User with this username already exists.
@@ -43,6 +46,6 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.CREATED)
     public AuthenticationResponse register(@RequestBody @Valid RegisterRequest request)
             throws UserAlreadyExistsException {
-        return authenticationService.register(request);
+        return authenticationService.register(request, Role.USER);
     }
 }

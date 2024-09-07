@@ -76,7 +76,7 @@ class AuthenticationServiceTest {
         when(jwtService.generateToken(user)).thenReturn(jwt);
 
         // when
-        AuthenticationResponse actual = authenticationService.register(registerRequest);
+        AuthenticationResponse actual = authenticationService.register(registerRequest, Role.USER);
 
         // then
         assertEquals(authenticationResponse, actual);
@@ -101,7 +101,8 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
         // then
-        assertThrows(UserAlreadyExistsException.class, () -> authenticationService.register(registerRequest));
+        assertThrows(UserAlreadyExistsException.class,
+                () -> authenticationService.register(registerRequest, Role.USER));
     }
 
     @Test

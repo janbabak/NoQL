@@ -129,7 +129,7 @@ class AuthenticationControllerTest {
                         "role": "USER"
                     }
                 }""";
-        given(authenticationService.register(request))
+        given(authenticationService.register(request, Role.USER))
                 .willReturn(response);
 
         // then

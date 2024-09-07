@@ -97,10 +97,11 @@ public class DatabaseController {
      * Delete database by id
      *
      * @param id database identifier
+     * @throws EntityNotFoundException user from database not found
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable UUID id) {
+    public void deleteById(@PathVariable UUID id) throws EntityNotFoundException {
         databaseService.deleteById(id);
     }
 

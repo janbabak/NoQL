@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
@@ -56,7 +57,7 @@ public class DatabaseEntityService {
      * @return list of databases
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin
      */
-    public List<Database> findAll() throws EntityNotFoundException {
+    public List<Database> findAll() {
         return findAll(null);
     }
 
@@ -68,9 +69,8 @@ public class DatabaseEntityService {
      *               User can see only his databases. Admin can see all.
      * @return list of databases
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
-     * @throws EntityNotFoundException                                   if user not found
      */
-    public List<Database> findAll(UUID userId) throws EntityNotFoundException {
+    public List<Database> findAll(UUID userId) {
         log.info("Get all databases.");
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -153,7 +153,12 @@ public class DatabaseEntityService {
     public void deleteById(UUID databaseId) {
         log.info("Delete database by id={}.", databaseId);
 
-        databaseRepository.deleteById(databaseId);
+        Optional<Database> database = databaseRepository.findById(databaseId);
+
+        if (database.isPresent()){
+            authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.get().getUserId());
+            databaseRepository.deleteById(databaseId);
+        }
     }
 
     /**

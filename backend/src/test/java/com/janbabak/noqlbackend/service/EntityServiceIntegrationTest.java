@@ -7,7 +7,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
-import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
@@ -25,6 +25,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
@@ -88,28 +89,44 @@ public class EntityServiceIntegrationTest {
 
     private User testUser;
 
+    private User testAdmin;
+
     @BeforeAll
     void setUp() throws UserAlreadyExistsException {
-        RegisterRequest registerRequest = RegisterRequest.builder()
+        RegisterRequest registerUserRequest = RegisterRequest.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
                 .password("password")
                 .build();
 
-        AuthenticationResponse authenticationResponse = authenticationService.register(registerRequest);
+        RegisterRequest registerAdminRequest = RegisterRequest.builder()
+                .firstName("admin")
+                .lastName("admin")
+                .email("admin.admin@gmail.com")
+                .password("password")
+                .build();
 
-        testUser = authenticationResponse.user();
+        testUser = authenticationService.register(registerUserRequest, Role.USER).user();
+        testAdmin = authenticationService.register(registerAdminRequest, Role.ADMIN).user();
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                testUser, null, testUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        authenticateUser(testUser);
     }
 
     @AfterEach
     void tearDown() {
         databaseServiceFactoryMock.close(); // deregister the mock in current thread
+    }
+
+    /**
+     * Authenticate user to spring context.
+     *
+     * @param user user to authenticate
+     */
+    private void authenticateUser(User user) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
 
@@ -120,6 +137,7 @@ public class EntityServiceIntegrationTest {
         List<Database> databases = createDatabases();
         Database postgres = databases.get(0);
         Database mysql = databases.get(1);
+        Database adminMysql = databases.get(2);
 
         List<ChatDto> postgresChats = createChats(postgres);
         List<ChatDto> mysqlChats = createChats(mysql);
@@ -138,6 +156,7 @@ public class EntityServiceIntegrationTest {
         deleteChat(postgresChats.get(0).getId());
         deleteMysql(mysql.getId());
         deletePostgres(postgres.getId());
+        deleteAdminMysql(adminMysql.getId());
     }
 
     /**
@@ -167,6 +186,16 @@ public class EntityServiceIntegrationTest {
                 .userId(testUser.getId())
                 .build();
 
+        CreateDatabaseRequest createAdminMysqlRequest = CreateDatabaseRequest.builder()
+                .name("Local Postgres")
+                .engine(DatabaseEngine.MYSQL)
+                .port(3306)
+                .host("https://janbabak.com")
+                .userName("babak")
+                .password("secret")
+                .userId(testAdmin.getId())
+                .build();
+
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
                 .thenReturn(databaseDaoMock);
@@ -174,10 +203,17 @@ public class EntityServiceIntegrationTest {
         Database createdPostgres = databaseService.create(createPostgresRequest);
         Database createdMsql = databaseService.create(createMysqlRequest);
 
-        // verify that the databases were created
-        assertEquals(2, databaseService.findAll().size());
+        authenticateUser(testAdmin);
+        Database createdAdminMysql = databaseService.create(createAdminMysqlRequest);
 
-        return List.of(createdPostgres, createdMsql);
+        assertEquals(3, databaseService.findAll().size());
+        assertEquals(1, databaseService.findAll(testAdmin.getId()).size());
+
+        authenticateUser(testUser);
+
+        assertEquals(2, databaseService.findAll(testUser.getId()).size());
+
+        return List.of(createdPostgres, createdMsql, createdAdminMysql);
     }
 
     /**
@@ -279,7 +315,7 @@ public class EntityServiceIntegrationTest {
         assertThrows(EntityNotFoundException.class, () -> chatService.findById(chatId));
         assertEquals(5, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
-        assertEquals(2, databaseService.findAll().size());
+        assertEquals(2, databaseService.findAll(testUser.getId()).size());
     }
 
     /**
@@ -290,7 +326,7 @@ public class EntityServiceIntegrationTest {
      * @throws EntityNotFoundException should not happen
      */
     void deleteMysql(UUID databaseId) throws EntityNotFoundException {
-        assertEquals(2, databaseService.findAll().size());
+        assertEquals(2, databaseService.findAll(testUser.getId()).size());
         assertEquals(5, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertNotNull(databaseService.findById(databaseId));
@@ -298,7 +334,7 @@ public class EntityServiceIntegrationTest {
         databaseService.deleteById(databaseId);
 
         assertThrows(EntityNotFoundException.class, () -> databaseService.findById(databaseId));
-        assertEquals(1, databaseService.findAll().size());
+        assertEquals(1, databaseService.findAll(testUser.getId()).size());
         assertEquals(2, chatRepository.findAll().size());
         assertEquals(5, chatQueryWithResponseRepository.findAll().size());
     }
@@ -311,8 +347,23 @@ public class EntityServiceIntegrationTest {
     void deletePostgres(UUID databaseId) throws EntityNotFoundException {
         databaseService.deleteById(databaseId);
 
-        assertEquals(0, databaseService.findAll().size());
+        assertEquals(0, databaseService.findAll(testUser.getId()).size());
         assertEquals(0, chatRepository.findAll().size());
         assertEquals(0, chatQueryWithResponseRepository.findAll().size());
+    }
+
+    /**
+     * Delete database by id and verify that it was deleted and related chats and messages were deleted
+     * and other objects were not.
+     *
+     * @param databaseId database identifier
+     * @throws EntityNotFoundException should not happen
+     */
+    void deleteAdminMysql(UUID databaseId) throws EntityNotFoundException {
+        // testUser is not owner of the database
+        assertThrows(AccessDeniedException.class, () -> databaseService.deleteById(databaseId));
+
+        authenticateUser(testAdmin);
+        databaseService.deleteById(databaseId);
     }
 }
