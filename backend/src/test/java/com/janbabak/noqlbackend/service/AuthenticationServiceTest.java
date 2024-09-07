@@ -147,7 +147,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check if requesting self")
-    void checkIfRequestingSelf() throws EntityNotFoundException {
+    void checkIfRequestingSelf() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         String email = "john.doe@yahoo.com";
@@ -172,7 +172,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check if requesting self fails")
-    void checkIfRequestingSelfFails() throws EntityNotFoundException {
+    void checkIfRequestingSelfFails() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         User user = User.builder()
@@ -193,7 +193,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check if user is admin or self request - is self request")
-    void isAdminOrSelfRequestTestIsSelfRequest() throws EntityNotFoundException {
+    void isAdminOrSelfRequestTestIsSelfRequest() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         String email = "john.doe@yahoo.com";
@@ -219,7 +219,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check if user is admin or self request - is admin")
-    void isAdminOrSelfRequestTestIsAdmin() throws EntityNotFoundException {
+    void isAdminOrSelfRequestTestIsAdmin() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         when(authenticationFacadeInterface.isAdmin()).thenReturn(true);
@@ -233,7 +233,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check if user is admin or self request - is nothing")
-    void isAdminOrSelfRequestTestIsNothing() throws EntityNotFoundException {
+    void isAdminOrSelfRequestTestIsNothing() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         String email = "john.doe@yahoo.com";
@@ -259,7 +259,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is self request")
-    void ifNotAdminOrSelfRequestThrowAccessDeniedIsSelfRequest() throws EntityNotFoundException {
+    void ifNotAdminOrSelfRequestThrowAccessDeniedIsSelfRequest() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         String email = "john.doe@yahoo.com";
@@ -282,7 +282,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is  admin")
-    void ifNotAdminOrSelfRequestThrowAccessDeniedIsAdmin() throws EntityNotFoundException {
+    void ifNotAdminOrSelfRequestThrowAccessDeniedIsAdmin() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         when(authenticationFacadeInterface.isAdmin()).thenReturn(true);

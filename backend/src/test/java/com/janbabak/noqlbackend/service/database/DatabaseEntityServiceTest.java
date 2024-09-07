@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 import java.util.Map;
@@ -162,7 +161,7 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test find all databases")
-    void testFindAllDatabases() throws EntityNotFoundException {
+    void testFindAllDatabases() {
         // given
         Database database1 = Database.builder()
                 .id(UUID.randomUUID())

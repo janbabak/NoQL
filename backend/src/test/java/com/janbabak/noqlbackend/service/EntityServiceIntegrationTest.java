@@ -324,7 +324,7 @@ public class EntityServiceIntegrationTest {
      *
      * @param databaseId database identifier
      */
-    void deletePostgres(UUID databaseId) throws EntityNotFoundException {
+    void deletePostgres(UUID databaseId) {
         databaseService.deleteById(databaseId);
 
         assertEquals(0, databaseService.findAll(testUser.getId()).size());
@@ -337,9 +337,8 @@ public class EntityServiceIntegrationTest {
      * and other objects were not.
      *
      * @param databaseId database identifier
-     * @throws EntityNotFoundException should not happen
      */
-    void deleteAdminMysql(UUID databaseId) throws EntityNotFoundException {
+    void deleteAdminMysql(UUID databaseId) {
         // testUser is not owner of the database
         assertThrows(AccessDeniedException.class, () -> databaseService.deleteById(databaseId));
 

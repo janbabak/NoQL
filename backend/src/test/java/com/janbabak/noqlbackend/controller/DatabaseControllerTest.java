@@ -225,7 +225,7 @@ class DatabaseControllerTest {
                         // language=JSON
                         """
                     {
-                        "port": "must be greater than or equal to 1",
+                        "port": "must be greater than or equal to 1"
                     }""",
                         false,
                 },
@@ -400,7 +400,7 @@ class DatabaseControllerTest {
                         // language=JSON
                         """
                     {
-                        "port": "must be greater than or equal to 1",
+                        "port": "must be greater than or equal to 1"
                     }""",
                         false,
                 },
