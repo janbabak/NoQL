@@ -36,7 +36,7 @@ public class DatabaseEntityService {
      *
      * @param databaseId database identifier
      * @return database
-     * @throws EntityNotFoundException database of specified id not found.
+     * @throws EntityNotFoundException                                   database of specified id not found.
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public Database findById(UUID databaseId) throws EntityNotFoundException {
@@ -51,14 +51,33 @@ public class DatabaseEntityService {
     }
 
     /**
-     * Find all databases.
+     * Find all databases (from all users)
      *
      * @return list of databases
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin
      */
-    public List<Database> findAll() {
+    public List<Database> findAll() throws EntityNotFoundException {
+        return findAll(null);
+    }
+
+
+    /**
+     * Find all databases with filter.
+     *
+     * @param userId user identifier - filter by user id. When null - return all databases.
+     *               User can see only his databases. Admin can see all.
+     * @return list of databases
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
+     * @throws EntityNotFoundException                                   if user not found
+     */
+    public List<Database> findAll(UUID userId) throws EntityNotFoundException {
         log.info("Get all databases.");
 
-        return databaseRepository.findAll();
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
+
+        return userId == null
+                ? databaseRepository.findAll()
+                : databaseRepository.filterByUserId(userId);
     }
 
     /**
@@ -66,7 +85,7 @@ public class DatabaseEntityService {
      *
      * @param request database data
      * @return saved object with id
-     * @throws DatabaseConnectionException if connection to the database failed.
+     * @throws DatabaseConnectionException                               if connection to the database failed.
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public Database create(CreateDatabaseRequest request) throws DatabaseConnectionException, EntityNotFoundException {
@@ -97,16 +116,16 @@ public class DatabaseEntityService {
      * Update not null parameters of database.
      *
      * @param databaseId identifier of the database object to update
-     * @param data new data
+     * @param data       new data
      * @return updated object
-     * @throws EntityNotFoundException     database of specified id not found.
-     * @throws DatabaseConnectionException connection to the updated database failed.
+     * @throws EntityNotFoundException                                   database of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
+     * @throws DatabaseConnectionException                               connection to the updated database failed.
      */
     public Database update(UUID databaseId, UpdateDatabaseRequest data)
             throws EntityNotFoundException, DatabaseConnectionException {
 
         log.info("Update database of id={}.", databaseId);
-
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
@@ -142,9 +161,10 @@ public class DatabaseEntityService {
      *
      * @param databaseId database identifier
      * @return database structure
-     * @throws EntityNotFoundException     database of specific id not found
-     * @throws DatabaseConnectionException connection to the database failed
-     * @throws DatabaseExecutionException  syntax error, ...
+     * @throws EntityNotFoundException                                   database of specific id not found
+     * @throws DatabaseConnectionException                               connection to the database failed
+     * @throws DatabaseExecutionException                                syntax error, ...
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
@@ -152,22 +172,28 @@ public class DatabaseEntityService {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
+
         return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
     }
 
     /**
      * Get generated database create script by database id.
+     *
      * @param databaseId database identifier
      * @return create script
-     * @throws EntityNotFoundException database of specific id not found
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException syntax error, ...
+     * @throws EntityNotFoundException                                   database of specific id not found
+     * @throws DatabaseConnectionException                               cannot establish connection with the database
+     * @throws DatabaseExecutionException                                syntax error, ...
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public String getDatabaseCreateScriptByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
     }

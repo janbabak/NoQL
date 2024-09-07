@@ -37,12 +37,15 @@ public class DatabaseController {
     /**
      * Get all databases.
      *
+     * @param userId user identifier
      * @return list of databases
+     * @throws EntityNotFoundException if user not found
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Database> getAll() {
-        return databaseService.findAll();
+    public List<Database> getAll(@RequestParam(required = false) UUID userId) throws EntityNotFoundException {
+        var res = databaseService.findAll(userId);
+        return res;
     }
 
     /**

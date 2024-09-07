@@ -101,7 +101,7 @@ class DatabaseControllerTest {
         List<Database> databases = List.of(localPostgres, localMysql);
 
         // when
-        when(databaseService.findAll()).thenReturn(databases);
+        when(databaseService.findAll(null)).thenReturn(databases);
 
         // then
         mockMvc.perform(get(ROOT_URL))

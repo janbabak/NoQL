@@ -308,7 +308,7 @@ public class EntityServiceIntegrationTest {
      *
      * @param databaseId database identifier
      */
-    void deletePostgres(UUID databaseId) {
+    void deletePostgres(UUID databaseId) throws EntityNotFoundException {
         databaseService.deleteById(databaseId);
 
         assertEquals(0, databaseService.findAll().size());

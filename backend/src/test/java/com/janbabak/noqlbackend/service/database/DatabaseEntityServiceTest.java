@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test find database by id")
-    void testFindDatabaseById() throws EntityNotFoundException {
+    void testFindDatabaseBy() throws EntityNotFoundException {
         // given
         UUID databaseId = UUID.randomUUID();
 
@@ -161,7 +162,7 @@ class DatabaseEntityServiceTest {
 
     @Test
     @DisplayName("Test find all databases")
-    void testFindAllDatabases() {
+    void testFindAllDatabases() throws EntityNotFoundException {
         // given
         Database database1 = Database.builder()
                 .id(UUID.randomUUID())
@@ -177,15 +178,27 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        List<Database> databases = List.of(database1, database2);
+        Database database3 = Database.builder()
+                .id(UUID.randomUUID())
+                .engine(DatabaseEngine.MYSQL)
+                .name("remote mysql")
+                .user(User.builder().id(UUID.randomUUID()).firstName("Different user").build())
+                .build();
+
+        List<Database> databases = List.of(database1, database2, database3);
+        List<Database> databasesOfTestUser = List.of(database1, database2);
 
         // when
         when(databaseRepository.findAll()).thenReturn(databases);
-        List<Database> actual = databaseEntityService.findAll();
+        when(databaseRepository.filterByUserId(eq(testUser.getId()))).thenReturn(databasesOfTestUser);
+        List<Database> actualAll = databaseEntityService.findAll();
+        List<Database> actualTestUserDatabases = databaseEntityService.findAll(testUser.getId());
 
         // then
-        assertEquals(2, actual.size());
-        assertEquals(databases, actual);
+        assertEquals(3, actualAll.size());
+        assertEquals(databases, actualAll);
+        assertEquals(2, actualTestUserDatabases.size());
+        assertEquals(databasesOfTestUser, actualTestUserDatabases);
     }
 
     @Test
@@ -370,6 +383,7 @@ class DatabaseEntityServiceTest {
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
@@ -412,6 +426,7 @@ class DatabaseEntityServiceTest {
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
+                .user(testUser)
                 .build();
 
         // language=SQL
