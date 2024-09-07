@@ -1,7 +1,6 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
-import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -35,6 +34,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test services that work with ORM entities.
@@ -65,27 +65,7 @@ public class EntityServiceIntegrationTest {
     private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
             Mockito.mockStatic(DatabaseServiceFactory.class);
 
-    private final DatabaseDAO databaseDaoMock = new DatabaseDAO() { // TODO: why not use regular mock???
-
-        @Override
-        public ResultSetWrapper getSchemasTablesColumns() {
-            return null;
-        }
-
-        @Override
-        public ResultSetWrapper getForeignKeys() {
-            return null;
-        }
-
-        @Override
-        public void testConnection() {
-        } // do nothing
-
-        @Override
-        protected String createConnectionUrl() {
-            return "";
-        }
-    };
+    private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
 
     private User testUser;
 

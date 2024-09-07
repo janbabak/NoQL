@@ -51,6 +51,6 @@ public class CreateDatabaseRequest {
     @NotNull(groups = FirstValidationGroup.class)
     private DatabaseEngine engine;
 
-    @NotNull
+    @NotNull(groups = FirstValidationGroup.class)
     private UUID userId;
 }

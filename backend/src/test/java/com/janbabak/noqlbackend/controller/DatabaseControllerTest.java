@@ -225,7 +225,7 @@ class DatabaseControllerTest {
                         // language=JSON
                         """
                     {
-                        "port": "must be greater than or equal to 1"
+                        "port": "must be greater than or equal to 1",
                     }""",
                         false,
                 },
@@ -273,7 +273,8 @@ class DatabaseControllerTest {
                           "host": "must not be blank",
                           "database": "must not be blank",
                           "userName": "must not be blank",
-                          "password": "must not be blank"
+                          "password": "must not be blank",
+                          "userId": "must not be null"
                       }""",
                         false
                 }
@@ -393,14 +394,13 @@ class DatabaseControllerTest {
                         "database":"database",
                         "userName":"user",
                         "password":"password",
-                        "engine":"POSTGRES",
-                        "userId": "af11c153-2948-4922-bca7-3e407a40da02"
-                    }""", // TODO: userId null error
+                        "engine":"POSTGRES"
+                    }""",
                         null,
                         // language=JSON
                         """
                     {
-                        "port": "must be greater than or equal to 1"
+                        "port": "must be greater than or equal to 1",
                     }""",
                         false,
                 },
