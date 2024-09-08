@@ -27,6 +27,7 @@ public class ChatController {
      * @param databaseId database identifier
      * @return created object with its id.
      * @throws EntityNotFoundException database of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -40,6 +41,7 @@ public class ChatController {
      * @param chatId chat identifier
      * @return chat
      * @throws EntityNotFoundException chat of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @GetMapping("/{chatId}")
     public ChatDto getById(@PathVariable UUID chatId) throws EntityNotFoundException {
@@ -50,6 +52,7 @@ public class ChatController {
      * Delete chat by id.
      *
      * @param chatId chat identifier
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @DeleteMapping("/{chatId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -62,7 +65,8 @@ public class ChatController {
      *
      * @param chatId chat identifier
      * @param name   new name
-     * @throws EntityNotFoundException chat of specified id not found.
+     * @throws EntityNotFoundException                                   chat of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @PutMapping("/{chatId}/name")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -76,7 +80,8 @@ public class ChatController {
      *
      * @param chatId  chat identifier
      * @param request message
-     * @throws EntityNotFoundException chat of specified id not found.
+     * @throws EntityNotFoundException                                   chat of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @PostMapping("/{chatId}/messages")
     @ResponseStatus(HttpStatus.CREATED)

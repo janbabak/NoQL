@@ -29,7 +29,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    public final AuthenticationFacadeInterface authenticationFacadeInterface;
+    private final AuthenticationFacadeInterface authenticationFacadeInterface;
 
     /**
      * Register new user, create new user.

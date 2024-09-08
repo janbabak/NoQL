@@ -10,6 +10,8 @@ import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
+import com.janbabak.noqlbackend.service.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +49,14 @@ class ChatServiceTest {
     @Mock
     private PlotService plotService;
 
+    @Mock
+    @SuppressWarnings("unused") // used in the ChatService
+    private AuthenticationService authenticationService;
+
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @Test
     @DisplayName("Test find chat by id")
     void testFindChatById() throws EntityNotFoundException {
@@ -57,6 +67,7 @@ class ChatServiceTest {
                 .id(chatId)
                 .name("Test chat")
                 .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser).build())
                 .build();
 
         ChatDto expected = new ChatDto(chatId, "Test chat", new ArrayList<>(), null);
@@ -94,6 +105,7 @@ class ChatServiceTest {
         Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
+                .user(testUser)
                 .build();
 
         Chat chat1 = Chat.builder()
@@ -150,6 +162,7 @@ class ChatServiceTest {
         Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
+                .user(testUser)
                 .build();
 
         Chat chat = Chat.builder()
@@ -193,6 +206,7 @@ class ChatServiceTest {
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser).build())
                 .build();
 
         CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
@@ -227,6 +241,7 @@ class ChatServiceTest {
                 .id(chatId)
                 .name("New chat")
                 .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser).build())
                 .build();
 
         CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
@@ -285,6 +300,7 @@ class ChatServiceTest {
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser).build())
                 .build();
 
         // when
@@ -309,6 +325,7 @@ class ChatServiceTest {
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser).build())
                 .build();
 
         // when
@@ -341,6 +358,11 @@ class ChatServiceTest {
     void testDeleteChatById() {
         // given
         UUID chatId = UUID.randomUUID();
+
+        when(chatRepository.findById(chatId)).thenReturn(Optional.of(Chat.builder()
+                .id(chatId)
+                .database(Database.builder().user(testUser).build())
+                .build()));
 
         // when
         chatService.deleteChatById(chatId);

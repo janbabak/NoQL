@@ -13,6 +13,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.service.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
@@ -38,6 +40,7 @@ public class ChatService {
     private final ChatQueryWithResponseRepository messageRepository;
     private final DatabaseRepository databaseRepository;
     private final PlotService plotService;
+    private final AuthenticationService authenticationService;
     private final String NEW_CHAT_NAME = "New chat";
     private final int CHAT_NAME_MAX_LENGTH = 32;
 
@@ -46,13 +49,16 @@ public class ChatService {
      *
      * @param chatId chat identifier
      * @return chat
-     * @throws EntityNotFoundException chat of specified id not found
+     * @throws EntityNotFoundException                                   chat of specified id not found
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
     public ChatDto findById(UUID chatId) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+
+        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
 
         return new ChatDto(
                 chat.getId(),
@@ -84,11 +90,14 @@ public class ChatService {
      *
      * @param databaseId database identifier
      * @return list of chats
-     * @throws EntityNotFoundException database of specified identifier not found.
+     * @throws EntityNotFoundException                                   database of specified identifier not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
     public List<ChatHistoryItem> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.checkIfRequestingSelf(database.getUser().getId());
 
         return chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)
                 .stream()
@@ -105,12 +114,15 @@ public class ChatService {
      *
      * @param databaseId identifier of the associated db
      * @return saved object with id
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
     public ChatDto create(UUID databaseId) throws EntityNotFoundException {
         log.info("Create new chat.");
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.checkIfRequestingSelf(database.getUser().getId());
 
         Chat chat = Chat.builder()
                 .name(NEW_CHAT_NAME)
@@ -129,13 +141,16 @@ public class ChatService {
      * @param chatId  chat identifier
      * @param request message with response
      * @return created message with response
-     * @throws EntityNotFoundException chat of specified id not found.
+     * @throws EntityNotFoundException                                   chat of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
     public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+
+        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
 
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
@@ -162,10 +177,14 @@ public class ChatService {
      *
      * @param chatId chat identifier
      * @param name   new name
-     * @throws EntityNotFoundException chat of specified id not found.
+     * @throws EntityNotFoundException                                   chat of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     public void renameChat(UUID chatId, String name) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+
+        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
+
         chat.setName(name.length() < CHAT_NAME_MAX_LENGTH ? name : name.substring(0, CHAT_NAME_MAX_LENGTH));
         chatRepository.save(chat);
     }
@@ -174,9 +193,15 @@ public class ChatService {
      * Delete chat by id and associated graph if it exists.
      *
      * @param chatId chat identifier
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     public void deleteChatById(UUID chatId) {
-        chatRepository.deleteById(chatId);
-        plotService.deletePlot(chatId);
+        Optional<Chat> chat = chatRepository.findById(chatId);
+
+        if (chat.isPresent()) {
+            authenticationService.checkIfRequestingSelf(chat.get().getDatabase().getUser().getId());
+            chatRepository.deleteById(chatId);
+            plotService.deletePlot(chatId);
+        }
     }
 }
