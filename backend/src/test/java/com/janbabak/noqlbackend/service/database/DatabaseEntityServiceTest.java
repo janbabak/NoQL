@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
-import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -43,6 +42,8 @@ class DatabaseEntityServiceTest {
     @SuppressWarnings("unused") // used in the databaseEntityService
     private AuthenticationService authenticationService;
 
+    private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
+
     private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
             Mockito.mockStatic(DatabaseServiceFactory.class);
 
@@ -55,27 +56,6 @@ class DatabaseEntityServiceTest {
         databaseServiceFactoryMock.close(); // deregister the mock in the current thread
     }
 
-    private final DatabaseDAO databaseDaoMock = new DatabaseDAO() {
-
-        @Override
-        public ResultSetWrapper getSchemasTablesColumns() {
-            return null;
-        }
-
-        @Override
-        public ResultSetWrapper getForeignKeys() {
-            return null;
-        }
-
-        @Override
-        public void testConnection() {
-        } // do nothing
-
-        @Override
-        protected String createConnectionUrl() {
-            return "";
-        }
-    };
 
     private final SqlDatabaseStructure databaseStructure = new SqlDatabaseStructure(Map.of(
             "public", new SqlDatabaseStructure.Schema("public", Map.of(
