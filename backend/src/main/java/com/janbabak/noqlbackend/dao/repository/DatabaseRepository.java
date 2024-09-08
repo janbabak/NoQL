@@ -15,6 +15,11 @@ import java.util.UUID;
 @Repository
 public interface DatabaseRepository extends JpaRepository<Database, UUID> {
 
+    /**
+     * Get all databases owned by user
+     * @param userId user id
+     * @return databases filtered by user id
+     */
     @Query("SELECT d FROM Database d WHERE d.user.id = :userId")
-    List<Database> filterByUserId(@Param("userId") UUID userId);
+    List<Database> findAllByUserId(@Param("userId") UUID userId);
 }

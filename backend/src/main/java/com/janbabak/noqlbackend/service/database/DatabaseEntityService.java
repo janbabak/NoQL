@@ -77,7 +77,7 @@ public class DatabaseEntityService {
 
         return userId == null
                 ? databaseRepository.findAll()
-                : databaseRepository.filterByUserId(userId);
+                : databaseRepository.findAllByUserId(userId);
     }
 
     /**

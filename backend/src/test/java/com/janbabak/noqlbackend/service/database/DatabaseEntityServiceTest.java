@@ -168,7 +168,7 @@ class DatabaseEntityServiceTest {
         List<Database> databasesOfTestUser = List.of(database1, database2);
 
         when(databaseRepository.findAll()).thenReturn(databases);
-        when(databaseRepository.filterByUserId(eq(testUser.getId()))).thenReturn(databasesOfTestUser);
+        when(databaseRepository.findAllByUserId(eq(testUser.getId()))).thenReturn(databasesOfTestUser);
 
         // when
         List<Database> actualAll = databaseEntityService.findAll();
