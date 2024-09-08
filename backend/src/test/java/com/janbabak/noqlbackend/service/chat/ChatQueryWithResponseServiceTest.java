@@ -60,9 +60,10 @@ class ChatQueryWithResponseServiceTest {
                                 { "databaseQuery": "find user Jana", "generatePlot": false, "pythonCode": null }""")
                         .build());
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(chatQueryWithResponseRepository.findAllByChatOrderByTimestamp(chat)).thenReturn(chatQueryWithResponses);
+
+        // when
         List<ChatQueryWithResponse> actual = chatQueryWithResponseService.getMessagesFromChat(chatId);
 
         // then
@@ -75,7 +76,6 @@ class ChatQueryWithResponseServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then

@@ -112,8 +112,9 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+
+        // when
         Database actual = databaseEntityService.findById(databaseId);
 
         // then
@@ -129,7 +130,6 @@ class DatabaseEntityServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
@@ -167,9 +167,10 @@ class DatabaseEntityServiceTest {
         List<Database> databases = List.of(database1, database2, database3);
         List<Database> databasesOfTestUser = List.of(database1, database2);
 
-        // when
         when(databaseRepository.findAll()).thenReturn(databases);
         when(databaseRepository.filterByUserId(eq(testUser.getId()))).thenReturn(databasesOfTestUser);
+
+        // when
         List<Database> actualAll = databaseEntityService.findAll();
         List<Database> actualTestUserDatabases = databaseEntityService.findAll(testUser.getId());
 
@@ -195,14 +196,13 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        // when
         when(databaseRepository.save(database)).thenReturn(database);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(database))
                 .thenReturn(databaseDaoMock);
 
+        // when
         Database actual = databaseEntityService.create(request);
 
         // then
@@ -227,7 +227,6 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        // when
         PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -266,14 +265,13 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(databaseRepository.save(database)).thenReturn(updatedDatabase);
-
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(database))
                 .thenReturn(databaseDaoMock);
 
+        // when
         Database actual = databaseEntityService.update(databaseId, updateDatabaseRequest);
 
         // then
@@ -294,7 +292,6 @@ class DatabaseEntityServiceTest {
                 .engine(DatabaseEngine.MYSQL)
                 .build();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
@@ -322,7 +319,6 @@ class DatabaseEntityServiceTest {
                 .engine(DatabaseEngine.MYSQL)
                 .build();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
@@ -372,12 +368,12 @@ class DatabaseEntityServiceTest {
 
         PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(DatabaseServiceFactory.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
         when(DatabaseServiceFactory.getDatabaseService(database)).thenReturn(postgresServiceMock);
         when(postgresServiceMock.retrieveSchema()).thenReturn(databaseStructure);
 
+        // when
         DatabaseStructureDto actual = databaseEntityService.getDatabaseStructureByDatabaseId(databaseId);
 
         // then
@@ -428,13 +424,13 @@ class DatabaseEntityServiceTest {
         PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
         SqlDatabaseStructure sqlDatabaseStructureMock = Mockito.mock(SqlDatabaseStructure.class);
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(DatabaseServiceFactory.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
         when(DatabaseServiceFactory.getDatabaseService(database)).thenReturn(postgresServiceMock);
         when(postgresServiceMock.retrieveSchema()).thenReturn(sqlDatabaseStructureMock);
         when(sqlDatabaseStructureMock.generateCreateScript()).thenReturn(expectedCreateScript);
 
+        // when
         String actual = databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId);
 
         // then
@@ -447,7 +443,6 @@ class DatabaseEntityServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then

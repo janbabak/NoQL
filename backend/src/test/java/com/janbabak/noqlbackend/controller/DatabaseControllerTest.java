@@ -100,7 +100,6 @@ class DatabaseControllerTest {
                 .build();
         List<Database> databases = List.of(localPostgres, localMysql);
 
-        // when
         when(databaseService.findAll(null)).thenReturn(databases);
 
         // then
@@ -114,7 +113,6 @@ class DatabaseControllerTest {
     @DisplayName("Get database by id")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetDatabaseById() throws Exception {
-        // when
         when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
 
         // then
@@ -131,7 +129,6 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseService.findById(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -147,7 +144,6 @@ class DatabaseControllerTest {
     void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
             throws Exception {
 
-        // when
         if (success) {
             when(databaseService.create(any())).thenReturn(createdDatabase);
         }
@@ -291,7 +287,6 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
-        // when
         if (success) {
             when(databaseService.update(eq(databaseId), any())).thenReturn(updatedDatabase);
         }
@@ -494,7 +489,6 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        // when
         when(queryService.executeChat(databaseId, request, pageSize)).thenReturn(response);
 
         // then
@@ -564,7 +558,6 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        // when
         when(queryService.loadChatResult(databaseId, chatId, page, pageSize)).thenReturn(response);
 
         // then
@@ -605,7 +598,6 @@ class DatabaseControllerTest {
                                         "2024-05-26 07:52:41.545865", "Some town", "456 Oak Ave", "NY"))))
                 .build();
 
-        // when
         when(queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize)).thenReturn(response);
 
         // then
@@ -641,7 +633,6 @@ class DatabaseControllerTest {
                                         new Column("id", "integer", true)
                                 ))))));
 
-        // when
         when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenReturn(databaseStructure);
 
         // then
@@ -658,7 +649,6 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -693,7 +683,6 @@ class DatabaseControllerTest {
                 	name CHARACTER VARYING
                 );""";
 
-        // when
         when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenReturn(createScript);
 
         // then
@@ -710,7 +699,6 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -729,7 +717,6 @@ class DatabaseControllerTest {
                 new ChatHistoryItem(UUID.randomUUID(), "oldest user"),
                 new ChatHistoryItem(UUID.randomUUID(), "New chat"));
 
-        // when
         when(chatService.findChatsByDatabaseId(databaseId)).thenReturn(response);
 
         // then
@@ -746,7 +733,6 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(chatService.findChatsByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then

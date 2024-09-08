@@ -20,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ChatServiceTest {
@@ -57,6 +57,11 @@ class ChatServiceTest {
             .id(UUID.randomUUID())
             .build();
 
+    private final User testUser2 = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
+
     @Test
     @DisplayName("Test find chat by id")
     void testFindChatById() throws EntityNotFoundException {
@@ -72,8 +77,9 @@ class ChatServiceTest {
 
         ChatDto expected = new ChatDto(chatId, "Test chat", new ArrayList<>(), null);
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        // when
         ChatDto actual = chatService.findById(chatId);
 
         // then
@@ -84,12 +90,32 @@ class ChatServiceTest {
     }
 
     @Test
+    @DisplayName("Test find chat by id - user is not owner of the chat")
+    void testFindChatByIdUserIsNotOwner() {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        Chat chat = Chat.builder()
+                .id(chatId)
+                .name("Test chat")
+                .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser2).build())
+                .build();
+
+        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.findById(chatId));
+    }
+
+    @Test
     @DisplayName("Test find chat by id not found")
     void testFindChatByIdNotFound() {
         // given
         UUID chatId = UUID.randomUUID();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
@@ -128,9 +154,10 @@ class ChatServiceTest {
                 new ChatHistoryItem(chat1.getId(), "Find the oldest user"),
                 new ChatHistoryItem(chat2.getId(), "find emails of all users"));
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)).thenReturn(chats);
+
+        // when
         List<ChatHistoryItem> actual = chatService.findChatsByDatabaseId(databaseId);
 
         // then
@@ -141,12 +168,31 @@ class ChatServiceTest {
     }
 
     @Test
+    @DisplayName("Test find chats by database id - user is not database owner")
+    void testFindChatsByDatabaseIdUserIsNotOwner() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        Database database = Database.builder()
+                .id(databaseId)
+                .name("Test database")
+                .user(testUser2)
+                .build();
+
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.findChatsByDatabaseId(databaseId));
+    }
+
+    @Test
     @DisplayName("Test find chats by database id not found")
     void testFindChatsByDatabaseIdNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
@@ -174,13 +220,34 @@ class ChatServiceTest {
 
         ChatDto expected = new ChatDto(chat.getId(), "New chat", new ArrayList<>(), null);
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.save(any())).thenReturn(chat);
+
+        // when
         ChatDto actual = chatService.create(databaseId);
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Test create chat - user is not owner of the database")
+    void testCreateUserIsNotOwner() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        Database database = Database.builder()
+                .id(databaseId)
+                .name("Test database")
+                .user(testUser2)
+                .build();
+
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.create(databaseId));
     }
 
     @Test
@@ -189,7 +256,6 @@ class ChatServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
@@ -222,13 +288,40 @@ class ChatServiceTest {
                 .llmResponse(request.getLlmResult())
                 .build();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(messageRepository.save(any())).thenReturn(expected);
+
+        // when
         ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
 
         // then
         assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Test add message to chat - user is not owner of the chat")
+    void testAddMessageToChatUserIsNotOwner() {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        Chat chat = Chat.builder()
+                .id(chatId)
+                .name("Visualize age of users")
+                .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser2).build())
+                .build();
+
+        CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
+                "Visualize age of users",
+                // language=JSON
+                """
+                        { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
+
+        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.addMessageToChat(chatId, request));
     }
 
     @Test
@@ -257,9 +350,10 @@ class ChatServiceTest {
                 .llmResponse(request.getLlmResult())
                 .build();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
         when(messageRepository.save(any())).thenReturn(expected);
+
+        // when
         ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
 
         // then
@@ -281,7 +375,6 @@ class ChatServiceTest {
                 """
                         { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
@@ -303,14 +396,38 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        // when
         chatService.renameChat(chatId, newName);
 
         // then
         ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
         verify(chatRepository).save(chatCaptor.capture());
         assertEquals(newName, chatCaptor.getValue().getName());
+    }
+
+    @Test
+    @DisplayName("Test rename chat - user is not owner of the chat")
+    void testRenameChatUserIsNotOwner() {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        String newName = "User's age distribution";
+
+        Chat chat = Chat.builder()
+                .id(chatId)
+                .name("Visualize age of users")
+                .messages(new ArrayList<>())
+                .database(Database.builder().user(testUser2).build())
+                .build();
+
+        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.renameChat(chatId, newName));
     }
 
     @Test
@@ -328,8 +445,9 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+
+        // when
         chatService.renameChat(chatId, newName);
 
         // then
@@ -346,7 +464,6 @@ class ChatServiceTest {
 
         String newName = "User's age distribution";
 
-        // when
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
@@ -374,5 +491,22 @@ class ChatServiceTest {
         verify(plotService).deletePlot(plotIdCaptor.capture());
         assertEquals(chatId, repositoryIdCaptor.getValue());
         assertEquals(chatId, plotIdCaptor.getValue());
+    }
+
+    @Test
+    @DisplayName("Test delete chat by id - user is not owner of the chat")
+    void testDeleteChatByIdUserIsNotOwner() {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        when(chatRepository.findById(chatId)).thenReturn(Optional.of(Chat.builder()
+                .id(chatId)
+                .database(Database.builder().user(testUser2).build())
+                .build()));
+        doThrow(new AccessDeniedException("Access Denied"))
+                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> chatService.deleteChatById(chatId));
     }
 }

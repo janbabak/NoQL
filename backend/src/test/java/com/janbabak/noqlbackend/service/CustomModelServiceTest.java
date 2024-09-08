@@ -44,8 +44,9 @@ class CustomModelServiceTest {
                 .port(8085)
                 .build();
 
-        // when
         when(customModelRepository.findById(customModelId)).thenReturn(Optional.of(customModel));
+
+        // when
         CustomModel actual = customModelService.findById(customModelId);
 
         // then
@@ -75,8 +76,9 @@ class CustomModelServiceTest {
 
         List<CustomModel> customModels = List.of(customModel1, customModel2);
 
-        // when
         when(customModelRepository.findAll()).thenReturn(customModels);
+
+        // when
         List<CustomModel> actual = customModelService.findAll();
 
         // then
@@ -104,9 +106,9 @@ class CustomModelServiceTest {
 
         List<CustomModel> customModels = List.of(customModel1, customModel2);
 
-        // when
         when(customModelRepository.findAll()).thenReturn(customModels);
 
+        // when
         List<ModelOption> actual = customModelService.getAllModels();
 
         // then
@@ -123,8 +125,9 @@ class CustomModelServiceTest {
                 .port(8085)
                 .build();
 
-        // when
         when(customModelRepository.save(customModel)).thenReturn(customModel);
+
+        // when
         CustomModel actual = customModelService.create(customModel);
 
         // then
@@ -160,10 +163,10 @@ class CustomModelServiceTest {
                 .port(8080)
                 .build();
 
-        // when
         when(customModelRepository.findById(customModelId)).thenReturn(Optional.of(customModel));
         when(customModelRepository.save(customModel)).thenReturn(updatedCustomModel);
 
+        // when
         CustomModel actual = customModelService.update(customModelId, updateCustomModelReqeust);
 
         // then

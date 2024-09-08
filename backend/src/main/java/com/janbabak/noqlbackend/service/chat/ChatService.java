@@ -58,7 +58,7 @@ public class ChatService {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
-        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
         return new ChatDto(
                 chat.getId(),
@@ -97,7 +97,7 @@ public class ChatService {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        authenticationService.checkIfRequestingSelf(database.getUser().getId());
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUser().getId());
 
         return chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)
                 .stream()
@@ -122,7 +122,7 @@ public class ChatService {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        authenticationService.checkIfRequestingSelf(database.getUser().getId());
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUser().getId());
 
         Chat chat = Chat.builder()
                 .name(NEW_CHAT_NAME)
@@ -150,7 +150,7 @@ public class ChatService {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
-        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
@@ -183,7 +183,7 @@ public class ChatService {
     public void renameChat(UUID chatId, String name) throws EntityNotFoundException {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
-        authenticationService.checkIfRequestingSelf(chat.getDatabase().getUser().getId());
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
         chat.setName(name.length() < CHAT_NAME_MAX_LENGTH ? name : name.substring(0, CHAT_NAME_MAX_LENGTH));
         chatRepository.save(chat);
@@ -199,7 +199,7 @@ public class ChatService {
         Optional<Chat> chat = chatRepository.findById(chatId);
 
         if (chat.isPresent()) {
-            authenticationService.checkIfRequestingSelf(chat.get().getDatabase().getUser().getId());
+            authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.get().getDatabase().getUser().getId());
             chatRepository.deleteById(chatId);
             plotService.deletePlot(chatId);
         }

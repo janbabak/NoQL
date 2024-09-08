@@ -32,7 +32,6 @@ class SettingsControllerTest {
     @DisplayName("Get settings with ADMIN role")
     @WithMockUser(roles = "ADMIN")
     void getSettings() throws Exception {
-        // when
         when(settings.getMaxPageSize()).thenReturn(50);
         when(settings.getDefaultPageSize()).thenReturn(10);
         when(settings.getTranslationRetries()).thenReturn(3);

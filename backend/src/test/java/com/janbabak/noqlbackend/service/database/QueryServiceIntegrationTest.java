@@ -23,6 +23,7 @@ import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -150,6 +151,11 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         databaseService.deleteById(postgresDatabase.getId());
         databaseService.deleteById(mySqlDatabase.getId());
+    }
+
+    @BeforeEach
+    protected void beforeEach() {
+        AuthenticationService.authenticateUser(testUser);
     }
 
     @ParameterizedTest
@@ -367,12 +373,11 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             chatService.addMessageToChat(chat.getId(), message);
         }
 
-        // when
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-
         doNothing().when(plotService).generatePlot(any(), any(), any());
 
+        // when
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually

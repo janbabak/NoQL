@@ -107,10 +107,14 @@ public class EntityServiceIntegrationTest {
         Database mysql = databases.get(1);
         Database adminMysql = databases.get(2);
 
+        AuthenticationService.authenticateUser(testUser);
         List<ChatDto> postgresChats = createChats(postgres, 3);
         List<ChatDto> mysqlChats = createChats(mysql, 3);
+
+        AuthenticationService.authenticateUser(testAdmin);
         createChats(adminMysql, 2);
 
+        AuthenticationService.authenticateUser(testUser);
         addMessagesToChat(postgresChats.get(0).getId(), 3);
         addMessagesToChat(postgresChats.get(1).getId(), 1);
         addMessagesToChat(postgresChats.get(2).getId(), 4);
