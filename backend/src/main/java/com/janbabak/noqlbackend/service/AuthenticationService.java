@@ -6,15 +6,18 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
 import com.janbabak.noqlbackend.model.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.USER;
@@ -30,16 +33,18 @@ public class AuthenticationService {
 
     /**
      * Register new user, create new user.
+     *
      * @param request user data
+     * @param role    role of new user
      * @return response with new user data and JWT token
      * @throws UserAlreadyExistsException User with this username already exists.
      */
-    public AuthenticationResponse register(RegisterRequest request) throws UserAlreadyExistsException {
+    public AuthenticationResponse register(RegisterRequest request, Role role) throws UserAlreadyExistsException {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException(request.getEmail());
         }
 
-        User user = userRepository.save(new User(request, passwordEncoder));
+        User user = userRepository.save(new User(request, passwordEncoder, role));
         String jwtToken = jwtService.generateToken(user);
 
         return AuthenticationResponse.builder()
@@ -48,8 +53,10 @@ public class AuthenticationService {
                 .build();
     }
 
+
     /**
      * Authenticate existing user.
+     *
      * @param request request with username and password
      * @return response with user data and JWT token
      */
@@ -70,37 +77,37 @@ public class AuthenticationService {
 
     /**
      * Check if id corresponds to authenticated user.
+     *
      * @param id id to check
      * @return user if id is same as id of authenticated user, otherwise null
-     * @throws EntityNotFoundException User of specified id doesn't exist.
      */
-    public User checkIfRequestingSelf(UUID id) throws EntityNotFoundException {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(USER, id));
+    public User checkIfRequestingSelf(UUID id) {
+        Optional<User> user = userRepository.findById(id);
 
-        if (authenticationFacadeInterface.getAuthentication() == null
-                || !user.getEmail().equals(authenticationFacadeInterface.getAuthentication().getName())) {
+        if (user.isEmpty()
+                || authenticationFacadeInterface.getAuthentication() == null
+                || !user.get().getEmail().equals(authenticationFacadeInterface.getAuthentication().getName())) {
             return null;
         }
-        return user;
+        return user.get();
     }
 
     /**
      * Check if authenticated user has role ADMIN or id corresponds to authenticate user.
+     *
      * @param id id to check
      * @return true if is ADMIN or id is same as id of authenticated user
-     * @throws EntityNotFoundException User of specified id doesn't exist.
      */
-    public boolean isAdminOrSelfRequest(UUID id) throws EntityNotFoundException {
+    public boolean isAdminOrSelfRequest(UUID id) {
         return authenticationFacadeInterface.isAdmin() || checkIfRequestingSelf(id) != null;
     }
 
     /**
      * If authenticated user hasn't role ADMIN and id that doesn't correspond to id, throw Access denied exception.
+     *
      * @param id id to compare with user's id
-     * @throws EntityNotFoundException User of specified id doesn't exist.
      */
-    public void ifNotAdminOrSelfRequestThrowAccessDenied(UUID id) throws EntityNotFoundException {
+    public void ifNotAdminOrSelfRequestThrowAccessDenied(UUID id) {
         if (!isAdminOrSelfRequest(id)) {
             throw new AccessDeniedException("Access denied.");
         }
@@ -108,6 +115,7 @@ public class AuthenticationService {
 
     /**
      * Check if authenticated user has role ADMIN.
+     *
      * @return true if he/she has, otherwise false
      */
     public boolean isAdmin() {
@@ -121,5 +129,16 @@ public class AuthenticationService {
         if (!isAdmin()) {
             throw new AccessDeniedException("Admin ROLE required.");
         }
+    }
+
+    /**
+     * Authenticate user to the spring security context.
+     *
+     * @param user user to authenticate
+     */
+    public static void authenticateUser(User user) {
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                user, null, user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

@@ -21,5 +21,4 @@ public class SettingsController {
     private Settings getSettings() {
         return settings;
     }
-
 }

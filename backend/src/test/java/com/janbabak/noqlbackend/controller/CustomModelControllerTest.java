@@ -65,7 +65,6 @@ class CustomModelControllerTest {
 
         List<CustomModel> customModels = List.of(localModel, gptProxy);
 
-        // when
         when(customModelService.findAll()).thenReturn(customModels);
 
         // then
@@ -90,7 +89,6 @@ class CustomModelControllerTest {
                         .value("6678fc72-1a55-4146-b74b-b3f5aac677df")
                         .build());
 
-        // when
         when(customModelService.getAllModels()).thenReturn(allModels);
 
         // then
@@ -104,7 +102,6 @@ class CustomModelControllerTest {
     @DisplayName("Get custom model by id")
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetCustomModelById() throws Exception {
-        // when
         when(customModelService.findById(localModel.getId())).thenReturn(localModel);
 
         // then
@@ -121,7 +118,6 @@ class CustomModelControllerTest {
         // given
         UUID customModelId = UUID.randomUUID();
 
-        // when
         when(customModelService.findById(customModelId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -137,7 +133,6 @@ class CustomModelControllerTest {
     void testCreateCustomModel(String request, CustomModel createdModel, String response, Boolean success)
             throws Exception {
 
-        // when
         if (success) {
             when(customModelService.create(any())).thenReturn(createdModel);
         }
@@ -244,7 +239,6 @@ class CustomModelControllerTest {
         // given
         UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
-        // when
         if (success) {
             when(customModelService.update(eq(customModelId), any())).thenReturn(updatedModel);
         }

@@ -60,7 +60,6 @@ class ChatControllerTest {
                         }
                         """.formatted(chatId);
 
-        // when
         when(chatService.create(databaseId)).thenReturn(chatDto);
 
         // then
@@ -81,7 +80,6 @@ class ChatControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(chatService.create(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -105,7 +103,6 @@ class ChatControllerTest {
                 .name("Test chat")
                 .build();
 
-        // when
         when(chatService.findById(chatId)).thenReturn(chatDto);
 
         // then
@@ -122,7 +119,6 @@ class ChatControllerTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        // when
         when(chatService.findById(chatId)).thenThrow(EntityNotFoundException.class);
 
         // then
@@ -169,7 +165,6 @@ class ChatControllerTest {
         UUID chatId = UUID.randomUUID();
         String name = "Find all users";
 
-        // when
         doThrow(EntityNotFoundException.class).when(chatService).renameChat(chatId, name);
 
         // then
@@ -230,7 +225,6 @@ class ChatControllerTest {
                                  }""")
                 .build();
 
-        // when
         when(chatService.addMessageToChat(chatId, request)).thenReturn(null);
 
 
@@ -261,7 +255,6 @@ class ChatControllerTest {
                                  }""")
                 .build();
 
-        // when
         when(chatService.addMessageToChat(chatId, request)).thenThrow(EntityNotFoundException.class);
 
         // then

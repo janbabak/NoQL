@@ -72,6 +72,16 @@ public class Database {
             fetch = FetchType.LAZY)
     private List<Chat> chats;
 
+    @JsonIgnore
+    @ManyToOne
+    @NotNull
+    private User user;
+
+    @JsonProperty("userId")
+    public UUID getUserId() {
+        return user.getId();
+    }
+
     /**
      * @return true if database engine is SQL
      */

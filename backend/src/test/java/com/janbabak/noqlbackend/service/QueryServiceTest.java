@@ -7,6 +7,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
+import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import org.apache.coyote.BadRequestException;
@@ -46,6 +47,13 @@ class QueryServiceTest {
     private final Database postgresDatabase;
 
     public QueryServiceTest() {
+        User testUser = User.builder()
+                .id(UUID.randomUUID())
+                .firstName("John")
+                .lastName("Doe")
+                .email("test@gmail.com")
+                .password("password")
+                .build();
         postgresDatabase = new Database(
                 UUID.randomUUID(),
                 "Postgres db",
@@ -55,7 +63,8 @@ class QueryServiceTest {
                 "jan",
                 "4530958340??",
                 DatabaseEngine.POSTGRES,
-                List.of());
+                List.of(),
+                testUser);
     }
 
     @Test
@@ -109,11 +118,12 @@ class QueryServiceTest {
     void testSetPagination(String query, Integer page, Integer pageSize, String expectedQuery)
             throws BadRequestException {
 
-        // when
         when(settings.getMaxPageSize()).thenReturn(50);
         if (pageSize == null) {
             when(settings.getDefaultPageSize()).thenReturn(10);
         }
+
+        // when
         String actualValue = queryService.setPaginationInSqlQuery(query, page, pageSize, postgresDatabase);
 
         // then
@@ -406,7 +416,6 @@ class QueryServiceTest {
         String query = "SELECT * FROM public.user;";
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
@@ -423,9 +432,10 @@ class QueryServiceTest {
         UUID chatId = UUID.randomUUID();
         UUID databaseId = UUID.randomUUID();
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
         when(chatQueryWithResponseRepository.findLatestMessageFromChat(chatId)).thenReturn(Optional.empty());
+
+        // when
         QueryResponse actual = queryService.loadChatResult(databaseId, chatId, 0, 10);
 
         // then
@@ -439,7 +449,6 @@ class QueryServiceTest {
         UUID databaseId = UUID.randomUUID();
         QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
 
-        // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then

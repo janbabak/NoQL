@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import jakarta.persistence.*;
@@ -38,12 +39,27 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public User(RegisterRequest request, PasswordEncoder passwordEncoder) {
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Database> databases;
+
+    public User(RegisterRequest request, PasswordEncoder passwordEncoder, Role role) {
         firstName = request.getFirstName();
         lastName = request.getLastName();
         email = request.getEmail();
         password = passwordEncoder.encode(request.getPassword());
-        role = Role.USER;
+        this.role = role;
+        databases = new ArrayList<>();
+    }
+
+    @SuppressWarnings("unused")
+    public void addDatabase(Database database) {
+        for (Database db : databases) {
+            if (db.getId().equals(database.getId())) {
+                return; // database already in the list
+            }
+        }
+        databases.add(database);
     }
 
     /**

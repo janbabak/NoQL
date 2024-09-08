@@ -2,13 +2,18 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.*;
+import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.user.RegisterRequest;
+import com.janbabak.noqlbackend.service.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
@@ -18,6 +23,7 @@ import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -67,7 +73,12 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @Autowired
     private ChatService chatService;
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
     QueryApi queryApi = Mockito.mock(QueryApi.class);
+
+    private User testUser;
 
     /**
      * Get scripts for initialization of the databases
@@ -91,11 +102,44 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
     @BeforeAll
     @Override
-    protected void setUp() throws DatabaseConnectionException, DatabaseExecutionException {
+    protected void setUp() throws Exception {
         super.setUp();
 
-        databaseService.create(postgresDatabase);
-        databaseService.create(mySqlDatabase);
+        RegisterRequest registerUserRequest = RegisterRequest.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@gmail.com")
+                .password("password")
+                .build();
+
+        testUser = authenticationService.register(registerUserRequest, Role.USER).user();
+
+        AuthenticationService.authenticateUser(testUser);
+
+        CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
+                .name("Postgres database")
+                .host(postgresDatabase.getHost())
+                .port(postgresDatabase.getPort())
+                .database(postgresDatabase.getDatabase())
+                .userName(postgresDatabase.getUserName())
+                .password(postgresDatabase.getPassword())
+                .engine(postgresDatabase.getEngine())
+                .userId(testUser.getId())
+                .build();
+
+        CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
+                .name("Postgres database")
+                .host(mySqlDatabase.getHost())
+                .port(mySqlDatabase.getPort())
+                .database(mySqlDatabase.getDatabase())
+                .userName(mySqlDatabase.getUserName())
+                .password(mySqlDatabase.getPassword())
+                .engine(mySqlDatabase.getEngine())
+                .userId(testUser.getId())
+                .build();
+
+        postgresDatabase = databaseService.create(createPostgresRequest);
+        mySqlDatabase = databaseService.create(createMysqlRequest);
     }
 
     @AfterAll
@@ -103,15 +147,21 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     protected void tearDown() throws DatabaseConnectionException, DatabaseExecutionException {
         super.tearDown();
 
+        AuthenticationService.authenticateUser(testUser);
+
         databaseService.deleteById(postgresDatabase.getId());
         databaseService.deleteById(mySqlDatabase.getId());
+    }
+
+    @BeforeEach
+    protected void beforeEach() {
+        AuthenticationService.authenticateUser(testUser);
     }
 
     @ParameterizedTest
     @MethodSource("databaseDataProvider")
     @DisplayName("Test execute query language query")
-    @SuppressWarnings("all")
-        // IDE can't see the columns
+    @SuppressWarnings("all") // IDE can't see the columns
     void testExecuteQueryLanguageQuery(Database database)
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
@@ -323,12 +373,11 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             chatService.addMessageToChat(chat.getId(), message);
         }
 
-        // when
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-
         doNothing().when(plotService).generatePlot(any(), any(), any());
 
+        // when
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually

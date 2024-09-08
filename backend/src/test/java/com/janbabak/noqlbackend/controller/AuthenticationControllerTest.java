@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
@@ -57,7 +58,8 @@ class AuthenticationControllerTest {
                         "Doe",
                         "john.doe@gmail.com",
                         "40580jkdjfJIJj",
-                        Role.USER));
+                        Role.USER,
+                        new ArrayList<>()));
         // language=JSON
         String responseContent = """
 
@@ -111,8 +113,8 @@ class AuthenticationControllerTest {
                         "Doe",
                         "john.doe@gmail.com",
                         "40580jkdjfJIJj",
-                        Role.USER)
-        );
+                        Role.USER,
+                        new ArrayList<>()));
 
         // language=JSON
         String responseContent = """
@@ -127,7 +129,7 @@ class AuthenticationControllerTest {
                         "role": "USER"
                     }
                 }""";
-        given(authenticationService.register(request))
+        given(authenticationService.register(request, Role.USER))
                 .willReturn(response);
 
         // then

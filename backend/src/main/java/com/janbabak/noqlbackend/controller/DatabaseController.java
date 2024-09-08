@@ -37,12 +37,13 @@ public class DatabaseController {
     /**
      * Get all databases.
      *
+     * @param userId user identifier
      * @return list of databases
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Database> getAll() {
-        return databaseService.findAll();
+    public List<Database> getAll(@RequestParam(required = false) UUID userId) {
+        return databaseService.findAll(userId);
     }
 
     /**
@@ -63,12 +64,14 @@ public class DatabaseController {
      *
      * @param request database object (without id)
      * @return created object with its id.
-     * @throws DatabaseConnectionException connection to the database failed (wrong credential, unavailable, etc.)
+     * @throws DatabaseConnectionException                               connection to the database failed (wrong credential, unavailable, etc.)
+     * @throws EntityNotFoundException                                   user not found
+     * @throws org.springframework.security.access.AccessDeniedException user is not admin or doesn't belong to userId
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Database create(@Validated(ValidationSequence.class) @RequestBody Database request)
-            throws DatabaseConnectionException {
+    public Database create(@Validated(ValidationSequence.class) @RequestBody CreateDatabaseRequest request)
+            throws DatabaseConnectionException, EntityNotFoundException {
         return databaseService.create(request);
     }
 
@@ -92,10 +95,11 @@ public class DatabaseController {
      * Delete database by id
      *
      * @param id database identifier
+     * @throws EntityNotFoundException user from database not found
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable UUID id) {
+    public void deleteById(@PathVariable UUID id) throws EntityNotFoundException {
         databaseService.deleteById(id);
     }
 

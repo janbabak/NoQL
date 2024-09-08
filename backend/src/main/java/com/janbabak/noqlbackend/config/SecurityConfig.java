@@ -31,7 +31,9 @@ public class SecurityConfig {
     };
 
     //paths, which require role ADMIN
-    private final String[] adminPaths = {};
+    private final String[] adminPaths = {
+            "/settings/**",
+    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {

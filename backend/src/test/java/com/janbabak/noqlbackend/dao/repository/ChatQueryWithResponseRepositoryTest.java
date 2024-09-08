@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.model.entity.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +26,9 @@ class ChatQueryWithResponseRepositoryTest {
     @Autowired
     private DatabaseRepository databaseRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @AfterEach
     void afterEach() {
         databaseRepository.deleteAll();
@@ -32,6 +37,17 @@ class ChatQueryWithResponseRepositoryTest {
     @Test
     void testFindLatestMessage() {
         // given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .firstName("John")
+                .lastName("Doe")
+                .email("john@doe@hotmail.com")
+                .password("password")
+                .build();
+
+        userRepository.save(user);
+
+
         Database database = Database.builder()
                 .name("Testing database")
                 .host("localhost")
@@ -41,6 +57,7 @@ class ChatQueryWithResponseRepositoryTest {
                 .password("password")
                 .engine(DatabaseEngine.POSTGRES)
                 .chats(new ArrayList<>())
+                .user(user)
                 .build();
 
         Chat chat1 = Chat.builder()
