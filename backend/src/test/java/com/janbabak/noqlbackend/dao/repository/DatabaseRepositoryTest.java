@@ -3,8 +3,11 @@ package com.janbabak.noqlbackend.dao.repository;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -12,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @DataJpaTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseRepositoryTest {
 
     @Autowired
@@ -19,6 +23,12 @@ class DatabaseRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @AfterAll
+    void tearDown() {
+        databaseRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Filter databases by user id")
