@@ -60,6 +60,72 @@ paths:
         '400':
           description: Invalid input
 
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /user/{userId}:
+    get:
+      tags:
+        - User
+      summary: Get a user by ID
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: A user of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User of specified ID not found
+
+    put:
+      tags:
+        - User
+      summary: Update a user by ID
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User of specified ID not found
+        '400':
+          description: Invalid input
+
+    delete:
+      tags:
+        - User
+      summary: Delete a user by ID
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: No content
+
   /database:
     get:
       tags:
@@ -560,6 +626,31 @@ components:
         role:
           $ref: '#/components/schemas/UserRole'
 
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - nullable: true
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - nullable: true
+            - example: "Doe"
+        email:
+          allOf:
+            - $ref: '#/components/schemas/UserEmail'
+            - nullable: true
+        password:
+          allOf:
+            - $ref: '#/components/schemas/UserPassword'
+            - nullable: true
+        role:
+          allOf:
+            - $ref: '#/components/schemas/UserRole'
+            - nullable: true
+
     NameOfUser:
       description: First or last name of user
       type: string
@@ -1019,6 +1110,14 @@ components:
           example: "gpt-4"
 
   parameters:
+
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: ID of the user
+      schema:
+        $ref: '#/components/schemas/UUID'
 
     databaseId:
       name: databaseId

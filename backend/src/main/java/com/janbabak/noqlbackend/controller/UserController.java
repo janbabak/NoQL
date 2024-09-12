@@ -56,7 +56,7 @@ public class UserController {
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or self request,
      *                                                                   or if role USER tries to set role ADMIN
      */
-    @PostMapping("/{userId}")
+    @PutMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public User updateUser(@PathVariable UUID userId, @RequestBody @Valid UpdateUserRequest request)
             throws EntityNotFoundException {
