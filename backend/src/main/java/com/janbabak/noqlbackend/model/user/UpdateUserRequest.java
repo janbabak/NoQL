@@ -2,26 +2,28 @@ package com.janbabak.noqlbackend.model.user;
 
 import com.janbabak.noqlbackend.model.Role;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class UpdateUserRequest {
 
     @Nullable
+    @Size(min = 1, max = 32)
     private String firstName;
 
     @Nullable
+    @Size(min = 1, max = 32)
     private String lastName;
 
     @Nullable
-    @Column(unique = true)
+    @Size(max = 64)
     private String email;
 
     @Nullable
+    @Size(min = 8, max = 64)
     private String password;
 
     @Nullable
-    @Enumerated(EnumType.STRING)
     private Role role;
 }

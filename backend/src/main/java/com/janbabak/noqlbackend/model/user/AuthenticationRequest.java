@@ -19,6 +19,6 @@ public class AuthenticationRequest {
     private String email;
 
     @NotNull
-    @Size(min = 8, max = 40)
+    @Size(min = 8, max = 64)
     private String password;
 }

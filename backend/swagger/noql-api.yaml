@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.3 # TODO: add 403 requests
 info:
   title: NoQL API
   version: 1.0.0
@@ -17,6 +17,48 @@ tags:
   - name: Settings
     description: Everything about settings
 paths:
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register (create) a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Invalid input
+
+  /auth/authenticate:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Authenticated in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Invalid input
 
   /database:
     get:
@@ -464,6 +506,86 @@ paths:
 
 components:
   schemas:
+
+    RegisterRequest:
+      type: object
+      properties:
+        firstName:
+          $ref: '#/components/schemas/NameOfUser'
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - example: "Doe"
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+
+    AuthenticateRequest:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/JwtToken'
+        user:
+          $ref: '#/components/schemas/User'
+
+    JwtToken:
+      description: JWT authentication token
+      type: string
+      example: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256YUBnbWFpbC5jb20iLCJpYXQiOjE3MjYxNDc0NzMsImV4cCI6MTcyNjIzMzg3M30.yBp1rV0KP2GpT1pQMz6N5AKPfVoCdimdjG4S9JJ0VuaR7p-LRwJMQjzjvlAgSAru6gzhpvBBJIwcFfgE3cXpSA"
+
+    User:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        firstName:
+          $ref: '#/components/schemas/NameOfUser'
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - example: "Doe"
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    NameOfUser:
+      description: First or last name of user
+      type: string
+      minLength: 1
+      maxLength: 32
+      example: "John"
+
+    UserEmail:
+      description: Email of user - used as username
+      type: string
+      format: email
+      maxLength: 64
+      example: "john.doe@gmail.com"
+
+    UserPassword:
+      description: Password of user
+      type: string
+      minLength: 8
+      maxLength: 64
+      example: "password1234"
+
+    UserRole:
+      type: string
+      enum:
+        - ADMIN
+        - USER
 
     Database:
       type: object
