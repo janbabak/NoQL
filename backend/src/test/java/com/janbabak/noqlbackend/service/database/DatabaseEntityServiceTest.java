@@ -10,7 +10,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
-import com.janbabak.noqlbackend.service.AuthenticationService;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,11 +1,11 @@
 package com.janbabak.noqlbackend.controller;
 
-import com.janbabak.noqlbackend.model.AuthenticationRequest;
-import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
+import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
-import com.janbabak.noqlbackend.service.AuthenticationService;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

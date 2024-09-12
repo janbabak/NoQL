@@ -1,14 +1,15 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.user;
 
 import com.janbabak.noqlbackend.authentication.AuthenticationFacadeInterface;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
-import com.janbabak.noqlbackend.model.AuthenticationRequest;
-import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
+import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
+import com.janbabak.noqlbackend.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;

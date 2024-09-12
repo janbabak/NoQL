@@ -8,7 +8,7 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
-import com.janbabak.noqlbackend.service.AuthenticationService;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -127,8 +127,7 @@ public class DatabaseEntityService {
 
         log.info("Update database of id={}.", databaseId);
 
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+        Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
@@ -174,8 +173,7 @@ public class DatabaseEntityService {
     public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+        Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
@@ -195,8 +193,7 @@ public class DatabaseEntityService {
     public String getDatabaseCreateScriptByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+        Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 

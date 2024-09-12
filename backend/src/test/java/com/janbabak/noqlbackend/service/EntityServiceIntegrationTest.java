@@ -19,6 +19,7 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;

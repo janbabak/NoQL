@@ -11,7 +11,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
-import com.janbabak.noqlbackend.service.AuthenticationService;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
