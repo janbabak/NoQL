@@ -1,4 +1,4 @@
-openapi: 3.0.3 # TODO: add 403 requests
+openapi: 3.0.3
 info:
   title: NoQL API
   version: 1.0.0

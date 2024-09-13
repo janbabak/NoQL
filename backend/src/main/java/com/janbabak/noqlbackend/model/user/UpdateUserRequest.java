@@ -3,9 +3,11 @@ package com.janbabak.noqlbackend.model.user;
 import com.janbabak.noqlbackend.model.Role;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class UpdateUserRequest {
 
     @Nullable

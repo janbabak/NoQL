@@ -71,7 +71,7 @@ public class UserService {
         User userToUpdate = findById(userId);
 
         if (data.getFirstName() != null) userToUpdate.setFirstName(data.getFirstName());
-        if (data.getLastName() != null) userToUpdate.setFirstName(data.getLastName());
+        if (data.getLastName() != null) userToUpdate.setLastName(data.getLastName());
         if (data.getPassword() != null) userToUpdate.setPassword(passwordEncoder.encode(data.getPassword()));
         if (data.getEmail() != null) {
             userRepository.findByEmail(data.getEmail()).ifPresent(user -> {

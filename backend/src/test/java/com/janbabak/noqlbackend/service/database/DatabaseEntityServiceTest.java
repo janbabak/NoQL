@@ -266,7 +266,7 @@ class DatabaseEntityServiceTest {
                 .build();
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(databaseRepository.save(database)).thenReturn(updatedDatabase);
+        when(databaseRepository.save(updatedDatabase)).thenReturn(updatedDatabase);
         databaseServiceFactoryMock
                 .when(() -> DatabaseServiceFactory.getDatabaseDAO(database))
                 .thenReturn(databaseDaoMock);
