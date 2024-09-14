@@ -36,10 +36,12 @@ class DatabaseRepositoryTest {
         // given
         User user1 = User.builder()
                 .id(UUID.randomUUID())
+                .email("user1@email.cz")
                 .build();
 
         User user2 = User.builder()
                 .id(UUID.randomUUID())
+                .email("user2@email.cz")
                 .build();
 
         Database database1 = Database.builder()
