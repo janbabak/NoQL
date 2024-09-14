@@ -10,19 +10,157 @@ servers:
   - url: http://localhost:8080
     description: Development server
 tags:
+  - name: Auth
+    description: Everything about authentication and new user registration
+  - name: User
+    description: Everything about users
   - name: Database
     description: Everything about database
   - name: Chat
     description: Everything about chat
   - name: Settings
     description: Everything about settings
+
+security:
+  - BearerAuth: [ ]
+
 paths:
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register (create) a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Invalid input
+
+  /auth/authenticate:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Authenticated in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Invalid input
+
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /user/{userId}:
+    get:
+      tags:
+        - User
+      security:
+        - BearerAuth: [ ]
+      summary: Get a user by ID.
+      description: Role USER can request only his own data. Role ADMIN can request any user data.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: A user of specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Forbidden
+        '404':
+          description: User of specified ID not found
+
+    put:
+      tags:
+        - User
+      security:
+        - BearerAuth: [ ]
+      summary: Update a user by ID
+      description: Update provided non-null fields. Role USER can update only his own data. Role ADMIN can update any user data. Role USER can't update role.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+        '403':
+          description: Forbidden
+        '404':
+          description: User of specified ID not found
+
+    delete:
+      tags:
+        - User
+      security:
+        - BearerAuth: [ ]
+      summary: Delete a user by ID
+      description: Role USER can delete only his own data. Role ADMIN can delete any user data.
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: No content
+        '403':
+          description: Forbidden
 
   /database:
     get:
       tags:
         - Database
-      summary: Get all databases
+      security:
+        - BearerAuth: [ ]
+      summary: Get all databases.
+      description: Role USER can request only his own databases. Role ADMIN can request any database.
+      parameters:
+        - $ref: '#/components/parameters/userIdQuery'
       responses:
         '200':
           description: A list of databases
@@ -32,10 +170,15 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Database'
+        '403':
+          description: Forbidden'
     post:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Create a new database
+      description: Role USER can create only his own databases. Role ADMIN can create any database.
       requestBody:
         required: true
         content:
@@ -51,12 +194,17 @@ paths:
                 $ref: '#/components/schemas/Database'
         '400':
           description: Invalid input
+        '403':
+          description: Forbidden
 
   /database/{databaseId}:
     get:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Get a database by ID
+      description: Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -66,13 +214,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Database'
+        '403':
+          description: Forbidden
         '404':
           description: Database of specified ID not found
     put:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Update a database by ID
-      description: Update provided non-null fields.
+      description: Update provided non-null fields. Role USER can update only his own databases. Role ADMIN can update any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       requestBody:
@@ -88,28 +240,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Database'
-        '404':
-          description: Database of specified ID not found
         '400':
           description: Invalid input
+        '403':
+          description: Forbidden
+        '404':
+          description: Database of specified ID not found
     delete:
       tags:
         - Database
       summary: Delete a database by ID
+      description: Role USER can delete only his own databases. Role ADMIN can delete any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
         '204':
           description: No content
+        '403':
+          description: Forbidden
 
   /database/{databaseId}/query/chat:
     post:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Query a database by chat of messages
       description: >
         Query a database by chat of messages. The LLM translates the natural language query to a database query and
-        returns requested data and/or a plot.
+        returns requested data and/or a plot. Role USER can query only his own databases. Role ADMIN can query any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
         - $ref: '#/components/parameters/pageSize'
@@ -128,16 +287,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QueryResponse'
-        '404':
-          description: Database of specified ID not found
         '400':
           description: Invalid input
+        '403':
+          description: Forbidden
+        '404':
+          description: Database of specified ID not found
 
   /database/{databaseId}/query/loadChatResult:
     post:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Load chat resul of existing chat
+      description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
         - $ref: '#/components/parameters/chatIdQuery'
@@ -152,6 +316,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QueryResponse'
+        '403':
+          description: Forbidden
         '404':
           description: Database of chat of specified ID not found.
 
@@ -159,10 +325,11 @@ paths:
     post:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Query a database by database query language.
       description: >
-        Query a database by database query language. Return retrieved rows of data or error message if the query is
-        invalid.
+        Query a database by database query language. Return retrieved rows of data or error message if the query is invalid. Role USER can query only his own databases. Role ADMIN can query any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
         - $ref: '#/components/parameters/page'
@@ -197,19 +364,22 @@ paths:
                   timestamp: "2024-05-24T18:40:24.649+00:00"
                   errorMessage: null
 
-        '404':
-          description: Database of specified ID not found
         '400':
           description: Invalid input
+        '403':
+          description: Forbidden
+        '404':
+          description: Database of specified ID not found
 
   /database/{databaseId}/structure:
     get:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Get database structure
       description: >
-        Get database structure. Return a list of schemas with tables with columns and types (if the database is SQL) or other
-        form of structure.
+        Get database structure. Return a list of schemas with tables with columns and types (if the database is SQL) or other form of structure. Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -220,6 +390,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SqlDatabaseStructure'
+        '403':
+          description: Forbidden
         '404':
           description: Database of specified ID not found
 
@@ -227,11 +399,14 @@ paths:
     get:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Get database creation script
       description: >
         Get database creation script. Return a script to create the database with all schemas, tables, and columns. This
         script is retrieved by heuristic methods and may not be 100% accurate or syntactically correct. It is used as
-        input from LLM, not for direct execution.
+        input from LLM, not for direct execution. Role USER can request only his own databases. Role ADMIN can request
+        any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -241,6 +416,8 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/DatabaseCreateScript'
+        '403':
+          description: Forbidden
         '404':
           description: Database of specified ID not found
 
@@ -248,8 +425,12 @@ paths:
     get:
       tags:
         - Database
+      security:
+        - BearerAuth: [ ]
       summary: Get all chats of a database.
-      description: Get all chats of a database. Return a list of chats only with their names and identifiers.
+      description: >
+        Get all chats of a database. Return a list of chats only with their names and identifiers.
+        Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -261,6 +442,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ChatHistoryItem'
+        '403':
+          description: Forbidden
         '404':
           description: Database of specified ID not found
 
@@ -268,8 +451,13 @@ paths:
     post:
       tags:
         - Chat
+      security:
+        - BearerAuth: [ ]
       summary: Create new chat
-      description: Create a new chat associated with specified database. Default chat name is "New chat".
+      description: >
+        Create a new chat associated with specified database. Default chat name is "New chat".
+        Role USER can create only chats associated with his own databases. Role ADMIN can create chats associated with
+        any database.
       parameters:
         - $ref: '#/components/parameters/databaseId'
       responses:
@@ -284,6 +472,8 @@ paths:
                 name: "New chat"
                 messages: [ ]
                 modificationDate: "2024-05-24T18:40:24.649+00:00"
+        '403':
+          description: Forbidden
         '404':
           description: Database of specified ID not found
 
@@ -291,7 +481,10 @@ paths:
     get:
       tags:
         - Chat
+      security:
+        - BearerAuth: [ ]
       summary: Get a chat by ID
+      description: Role USER can request only his own chats. Role ADMIN can request any chat.
       parameters:
         - $ref: '#/components/parameters/chatIdPath'
       responses:
@@ -301,23 +494,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Chat'
+        '403':
+          description: Forbidden
         '404':
           description: Chat of specified ID not found
     delete:
       tags:
         - Chat
+      security:
+        - BearerAuth: [ ]
       summary: Delete chat by ID
+      description: Role USER can delete only his own chats. Role ADMIN can delete any chat.
       parameters:
         - $ref: '#/components/parameters/chatIdPath'
       responses:
         '204':
           description: No content
+        '403':
+          description: Forbidden
 
   /chat/{chatId}/name:
     put:
       tags:
         - Chat
+      security:
+        - BearerAuth: [ ]
       summary: Rename chat by ID
+      description: Role USER can rename only his own chats. Role ADMIN can rename any chat.
       parameters:
         - $ref: '#/components/parameters/chatIdPath'
         - name: name
@@ -329,13 +532,19 @@ paths:
       responses:
         '204':
           description: No content
+        '403':
+          description: Forbidden
 
   /chat/{chatId}/messages:
     post:
       tags:
         - Chat
+      security:
+        - BearerAuth: [ ]
       summary: Add message to chat.
-      description: Add message to chat. Used only for development purposes. Does not verify if the message is valid.
+      description: >
+        Add message to chat. Used only for development purposes. Does not verify if the message is valid.
+        Role USER can add messages only to his own chats. Role ADMIN can add messages to any chat.
       parameters:
         - $ref: '#/components/parameters/chatIdPath'
       requestBody:
@@ -347,12 +556,17 @@ paths:
       responses:
         '204':
           description: No content
+        '403':
+          description: Forbidden
 
   /settings:
     get:
       tags:
         - Settings
       summary: Get application settings
+      security:
+        - BearerAuth: [ ]
+      description: Role ADMIN is required.
       responses:
         '200':
           description: Application settings
@@ -360,6 +574,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Settings'
+        '403':
+          description: Forbidden
 
   /model:
     get:
@@ -463,7 +679,118 @@ paths:
           description: No content
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
+
+    RegisterRequest:
+      type: object
+      properties:
+        firstName:
+          $ref: '#/components/schemas/NameOfUser'
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - example: "Doe"
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+
+    AuthenticateRequest:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/JwtToken'
+        user:
+          $ref: '#/components/schemas/User'
+
+    JwtToken:
+      description: JWT authentication token
+      type: string
+      example: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256YUBnbWFpbC5jb20iLCJpYXQiOjE3MjYxNDc0NzMsImV4cCI6MTcyNjIzMzg3M30.yBp1rV0KP2GpT1pQMz6N5AKPfVoCdimdjG4S9JJ0VuaR7p-LRwJMQjzjvlAgSAru6gzhpvBBJIwcFfgE3cXpSA"
+
+    User:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        firstName:
+          $ref: '#/components/schemas/NameOfUser'
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - example: "Doe"
+        email:
+          $ref: '#/components/schemas/UserEmail'
+        password:
+          $ref: '#/components/schemas/UserPassword'
+        role:
+          $ref: '#/components/schemas/UserRole'
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - nullable: true
+        lastName:
+          allOf:
+            - $ref: '#/components/schemas/NameOfUser'
+            - nullable: true
+            - example: "Doe"
+        email:
+          allOf:
+            - $ref: '#/components/schemas/UserEmail'
+            - nullable: true
+        password:
+          allOf:
+            - $ref: '#/components/schemas/UserPassword'
+            - nullable: true
+        role:
+          allOf:
+            - $ref: '#/components/schemas/UserRole'
+            - nullable: true
+
+    NameOfUser:
+      description: First or last name of user
+      type: string
+      minLength: 1
+      maxLength: 32
+      example: "John"
+
+    UserEmail:
+      description: Email of user - used as username
+      type: string
+      format: email
+      maxLength: 64
+      example: "john.doe@gmail.com"
+
+    UserPassword:
+      description: Password of user
+      type: string
+      minLength: 8
+      maxLength: 64
+      example: "password1234"
+
+    UserRole:
+      type: string
+      enum:
+        - ADMIN
+        - USER
 
     Database:
       type: object
@@ -897,6 +1224,22 @@ components:
           example: "gpt-4"
 
   parameters:
+
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: ID of the user
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    userIdQuery:
+      name: userId
+      in: query
+      required: true
+      description: ID of the user - used for filtering
+      schema:
+        $ref: '#/components/schemas/UUID'
 
     databaseId:
       name: databaseId

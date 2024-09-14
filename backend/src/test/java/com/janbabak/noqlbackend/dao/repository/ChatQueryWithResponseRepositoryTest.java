@@ -41,7 +41,7 @@ class ChatQueryWithResponseRepositoryTest {
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
-                .email("john@doe@hotmail.com")
+                .email("john.doe@hotmail.com")
                 .password("password")
                 .build();
 

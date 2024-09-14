@@ -2,11 +2,11 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
-import com.janbabak.noqlbackend.model.AuthenticationRequest;
-import com.janbabak.noqlbackend.model.AuthenticationResponse;
+import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
+import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
-import com.janbabak.noqlbackend.service.AuthenticationService;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

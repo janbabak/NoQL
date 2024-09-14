@@ -1,34 +1,32 @@
 package com.janbabak.noqlbackend.model.user;
 
+import com.janbabak.noqlbackend.model.Role;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class RegisterRequest {
+public class UpdateUserRequest {
 
-    @NotNull
+    @Nullable
     @Size(min = 1, max = 32)
     private String firstName;
 
-    @NotNull
+    @Nullable
     @Size(min = 1, max = 32)
     private String lastName;
 
-    @NotBlank
+    @Nullable
     @Email
-    @Size(max = 64)
     private String email;
 
-    @NotNull
+    @Nullable
     @Size(min = 8, max = 64)
     private String password;
+
+    @Nullable
+    private Role role;
 }
