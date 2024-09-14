@@ -7,6 +7,7 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.JwtService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,7 +41,9 @@ class AuthenticationControllerTest {
     private final String ROOT_URL = "/auth";
 
     @Test
-    @WithMockUser // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    @DisplayName("Authenticate user")
+    @WithMockUser
+        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
     void authenticate() throws Exception {
         // given
         AuthenticationRequest request = new AuthenticationRequest(
@@ -86,11 +89,43 @@ class AuthenticationControllerTest {
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(responseContent));
+                .andExpect(content().json(responseContent, true));
     }
 
     @Test
-    @WithMockUser // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    @DisplayName("Authenticate users - bad request")
+    @WithMockUser
+        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    void authenticateBadRequest() throws Exception {
+        // given
+        // language=JSON
+        String requestContent = """
+                {
+                    "email": "john.doe.gmail.com",
+                    "password": "40580jkdjfJIJj"
+                }""";
+
+        // language=JSON
+        String responseContent = """
+                {
+                    "email":"must be a well-formed email address"
+                }""";
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(requestContent)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(responseContent, true));
+    }
+
+    @Test
+    @DisplayName("Test register new user")
+    @WithMockUser
+        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
     void register() throws Exception {
         // given
         RegisterRequest request = new RegisterRequest(
@@ -142,6 +177,39 @@ class AuthenticationControllerTest {
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(content().json(responseContent));
+                .andExpect(content().json(responseContent, true));
+    }
+
+    @Test
+    @DisplayName("Test register new user")
+    @WithMockUser
+        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    void registerBadRequest() throws Exception {
+        // given
+        // language=JSON
+        String requestContent = """
+                {
+                    "email": "john.doe.gmail.com",
+                    "password": "40580jkdjfJIJj",
+                    "firstName": "too long first name too long first name too long first name too long first name",
+                    "lastName": "too long last name too long last name too long last name too long last name"
+                }""";
+
+        String responseContent = """
+                {
+                    "lastName": "size must be between 1 and 32",
+                    "firstName":"size must be between 1 and 32",
+                    "email":"must be a well-formed email address"
+                }""";
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(requestContent)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(responseContent, true));
     }
 }
