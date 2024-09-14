@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.database;
+package com.janbabak.noqlbackend.model.customModel;
 
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
@@ -15,41 +15,21 @@ import java.util.UUID;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class CreateDatabaseRequest {
+@AllArgsConstructor
+public class CreateCustomModelRequest {
 
-    /**
-     * User-defined name of the database.
-     */
     @NotBlank(groups = FirstValidationGroup.class)
     @Length(min = 1, max = 32, groups = SecondValidationGroup.class)
     private String name;
 
     @NotBlank(groups = FirstValidationGroup.class)
+    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
     private String host;
 
     @NotNull(groups = FirstValidationGroup.class)
     @Min(value = 1, groups = SecondValidationGroup.class)
     private Integer port;
-
-    /**
-     * Name of the database to connect to (used in the connection URL).
-     */
-    @NotBlank(groups = FirstValidationGroup.class)
-    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
-    private String database;
-
-    @NotBlank(groups = FirstValidationGroup.class)
-    @Length(min = 1, max = 128, groups = SecondValidationGroup.class)
-    private String userName;
-
-    @NotBlank(groups = FirstValidationGroup.class)
-    @Length(min = 1, max = 253, groups = SecondValidationGroup.class)
-    private String password;
-
-    @NotNull(groups = FirstValidationGroup.class)
-    private DatabaseEngine engine;
 
     @NotNull(groups = FirstValidationGroup.class)
     private UUID userId; // TODO: add to swagger

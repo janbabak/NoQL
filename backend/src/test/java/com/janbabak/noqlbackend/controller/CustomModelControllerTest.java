@@ -89,7 +89,7 @@ class CustomModelControllerTest {
                         .value("6678fc72-1a55-4146-b74b-b3f5aac677df")
                         .build());
 
-        when(customModelService.getAllModels()).thenReturn(allModels);
+        when(customModelService.getAllModels(any())).thenReturn(allModels); // TODO: userId
 
         // then
         mockMvc.perform(get(ROOT_URL + "/all"))

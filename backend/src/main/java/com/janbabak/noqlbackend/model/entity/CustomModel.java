@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.Entity;
@@ -48,6 +49,11 @@ public class CustomModel {
     @ManyToOne
     @NotNull
     private User user;
+
+    @JsonProperty("userId")
+    public UUID getUserId() {
+        return user.getId();
+    }
 
     @JsonIgnore
     public String getUrl() {

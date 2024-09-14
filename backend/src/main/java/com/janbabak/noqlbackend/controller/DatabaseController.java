@@ -39,6 +39,7 @@ public class DatabaseController {
      *
      * @param userId user identifier
      * @return list of databases
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -51,7 +52,8 @@ public class DatabaseController {
      *
      * @param databaseId database identifier
      * @return database
-     * @throws EntityNotFoundException database of specified id not found.
+     * @throws EntityNotFoundException                                   database of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping("/{databaseId}")
     @ResponseStatus(HttpStatus.OK)
@@ -81,8 +83,9 @@ public class DatabaseController {
      * @param databaseId database identifier
      * @param request    new data
      * @return updated database
-     * @throws EntityNotFoundException     database of specified id not found.
-     * @throws DatabaseConnectionException connection to the updated database failed.
+     * @throws EntityNotFoundException                                   database of specified id not found.
+     * @throws DatabaseConnectionException                               connection to the updated database failed.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @PutMapping("/{databaseId}")
     @ResponseStatus(HttpStatus.OK)
@@ -95,7 +98,8 @@ public class DatabaseController {
      * Delete database by id
      *
      * @param id database identifier
-     * @throws EntityNotFoundException user from database not found
+     * @throws EntityNotFoundException                                   user from database not found
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -110,11 +114,12 @@ public class DatabaseController {
      * @param queryRequest query
      * @param pageSize     number of items in one page
      * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  retrieving database schema failure
-     * @throws EntityNotFoundException     database not found
-     * @throws LLMException                LLM request failed
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws DatabaseConnectionException                               cannot establish connection with the database
+     * @throws DatabaseExecutionException                                retrieving database schema failure
+     * @throws EntityNotFoundException                                   database not found
+     * @throws LLMException                                              LLM request failed
+     * @throws BadRequestException                                       pageSize value is greater than maximum allowed value
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @PostMapping("/{databaseId}/query/chat")
     @ResponseStatus(HttpStatus.OK)
@@ -135,9 +140,10 @@ public class DatabaseController {
      * @param page       page number (fist page is 0)
      * @param pageSize   number of items per page
      * @return result of the latest message from the chat
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
-     * @throws EntityNotFoundException     database or chat not found
+     * @throws DatabaseConnectionException                               cannot establish connection with the database
+     * @throws BadRequestException                                       pageSize value is greater than maximum allowed value
+     * @throws EntityNotFoundException                                   database or chat not found
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping("/{databaseId}/query/loadChatResult")
     @ResponseStatus(HttpStatus.OK)
@@ -161,6 +167,7 @@ public class DatabaseController {
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -178,9 +185,10 @@ public class DatabaseController {
      *
      * @param databaseId database identifier
      * @return database structure
-     * @throws DatabaseConnectionException connection to the database failed
-     * @throws DatabaseExecutionException  syntax error, ...
-     * @throws EntityNotFoundException     database of specific id not found
+     * @throws DatabaseConnectionException                               connection to the database failed
+     * @throws DatabaseExecutionException                                syntax error, ...
+     * @throws EntityNotFoundException                                   database of specific id not found
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping("/{databaseId}/structure")
     @ResponseStatus(HttpStatus.OK)
@@ -194,9 +202,10 @@ public class DatabaseController {
      *
      * @param id identifier
      * @return create script
-     * @throws DatabaseConnectionException connection to the database failed
-     * @throws DatabaseExecutionException  syntax error, ...
-     * @throws EntityNotFoundException     database of specific id not found
+     * @throws DatabaseConnectionException                               connection to the database failed
+     * @throws DatabaseExecutionException                                syntax error, ...
+     * @throws EntityNotFoundException                                   database of specific id not found
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping(path = "/{id}/createScript", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getCreateScript(@PathVariable UUID id)
@@ -209,7 +218,8 @@ public class DatabaseController {
      *
      * @param databaseId database identifier
      * @return list of chat DTOs
-     * @throws EntityNotFoundException database of specified id not found.
+     * @throws EntityNotFoundException                                   database of specified id not found.
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @GetMapping("/{databaseId}/chats")
     @ResponseStatus(HttpStatus.OK)
