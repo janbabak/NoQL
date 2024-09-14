@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,13 +30,18 @@ public class User implements UserDetails {
     @GeneratedValue
     private UUID id;
 
+    @Size(min = 1, max = 32)
     private String firstName;
 
+    @Size(min = 1, max = 32)
     private String lastName;
 
+    @Email
+    @NotBlank
     @Column(unique = true)
     private String email;
 
+    @Size(min = 8, max = 64)
     private String password;
 
     @Enumerated(EnumType.STRING)

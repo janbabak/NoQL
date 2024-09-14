@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.model.user;
 
 import com.janbabak.noqlbackend.model.Role;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class UpdateUserRequest {
     private String lastName;
 
     @Nullable
-    @Size(max = 64)
+    @Email
     private String email;
 
     @Nullable

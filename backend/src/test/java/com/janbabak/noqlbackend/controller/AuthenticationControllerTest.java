@@ -33,8 +33,10 @@ class AuthenticationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
     private AuthenticationService authenticationService;
+
     private final String ROOT_URL = "/auth";
 
     @Test
