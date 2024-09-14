@@ -80,6 +80,7 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return password;

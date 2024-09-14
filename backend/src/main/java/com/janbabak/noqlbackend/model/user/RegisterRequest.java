@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.model.user;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class RegisterRequest {
     @Size(min = 1, max = 32)
     private String lastName;
 
-    @NotNull
+    @NotBlank
     @Email
     @Size(max = 64)
     private String email;
