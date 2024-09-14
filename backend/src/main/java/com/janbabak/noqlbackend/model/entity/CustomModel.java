@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,11 @@ public class CustomModel {
     @NotNull(groups = FirstValidationGroup.class)
     @Min(value = 1, groups = SecondValidationGroup.class)
     private Integer port;
+
+    @JsonIgnore
+    @ManyToOne
+    @NotNull
+    private User user;
 
     @JsonIgnore
     public String getUrl() {
