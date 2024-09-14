@@ -8,7 +8,6 @@ import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.JwtService;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,144 +40,103 @@ class AuthenticationControllerTest {
 
     private final String ROOT_URL = "/auth";
 
-    @Test
+    @ParameterizedTest
     @DisplayName("Authenticate user")
+    @MethodSource("authenticateDataProvider")
     @WithMockUser
         // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
-    void authenticate() throws Exception {
-        // given
-        AuthenticationRequest request = new AuthenticationRequest(
-                "john.doe@gmail.com",
-                "40580jkdjfJIJj");
+    void authenticate(String requestJson,
+                       AuthenticationRequest requestObj,
+                       String responseJson,
+                       AuthenticationResponse responseObj,
+                       Boolean success) throws Exception {
 
-        // language=JSON
-        String requestContent = """
-                {
-                    "email": "john.doe@gmail.com",
-                    "password": "40580jkdjfJIJj"
-                }""";
-        AuthenticationResponse response = new AuthenticationResponse(
-                "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw",
-                new User(UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"),
-                        "John",
-                        "Doe",
-                        "john.doe@gmail.com",
-                        "40580jkdjfJIJj",
-                        Role.USER,
-                        new ArrayList<>()));
-        // language=JSON
-        String responseContent = """
-
-                {
-                    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw",
-                    "user": {
-                        "id": "af11c153-2948-4922-bca7-3e407a40da02",
-                        "firstName": "John",
-                        "lastName": "Doe",
-                        "email": "john.doe@gmail.com",
-                        "role": "USER"
-                    }
-                }""";
-
-        when(authenticationService.authenticate(request)).thenReturn(response);
+        if (success) {
+            when(authenticationService.authenticate(requestObj)).thenReturn(responseObj);
+        }
 
         // then
         mockMvc.perform(post(ROOT_URL + "/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(requestContent)
+                        .content(requestJson)
                         .with(csrf()))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().json(responseContent, true));
+                .andExpect(success ? status().isOk() : status().isBadRequest())
+                .andExpect(content().json(responseJson, true));
     }
 
-    @Test
-    @DisplayName("Authenticate users - bad request")
-    @WithMockUser
-        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
-    void authenticateBadRequest() throws Exception {
-        // given
-        // language=JSON
-        String requestContent = """
+    static Object[][] authenticateDataProvider() {
+        return new Object[][]{
                 {
-                    "email": "john.doe.gmail.com",
-                    "password": "40580jkdjfJIJj"
-                }""";
-
-        // language=JSON
-        String responseContent = """
+                        // language=JSON
+                        """
+                        {
+                            "email": "john.doe@gmail.com",
+                            "password": "40580jkdjfJIJj"
+                        }""",
+                        AuthenticationRequest.builder()
+                                .email("john.doe@gmail.com")
+                                .password("40580jkdjfJIJj")
+                                .build(),
+                        // language=JSON
+                        """
+                        {
+                            "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw",
+                            "user": {
+                                "id": "af11c153-2948-4922-bca7-3e407a40da02",
+                                "firstName": "John",
+                                "lastName": "Doe",
+                                "email": "john.doe@gmail.com",
+                                "role": "USER"
+                            }
+                        }""",
+                        AuthenticationResponse.builder()
+                                .token("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw")
+                                .user(User.builder()
+                                        .id(UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"))
+                                        .firstName("John")
+                                        .lastName("Doe")
+                                        .email("john.doe@gmail.com")
+                                        .role(Role.USER)
+                                        .databases(new ArrayList<>())
+                                        .build())
+                                .build(),
+                        true
+                },
                 {
-                    "email":"must be a well-formed email address"
-                }""";
-
-        // then
-        mockMvc.perform(post(ROOT_URL + "/authenticate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(requestContent)
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(responseContent, true));
-    }
-
-    @Test
-    @DisplayName("Test register new user")
-    @WithMockUser
-        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
-    void register() throws Exception {
-        // given
-        RegisterRequest request = new RegisterRequest(
-                "John",
-                "Doe",
-                "john.doe@gmail.com",
-                "40580jkdjfJIJj");
-
-        // language=JSON
-        String requestContent = """
+                        // language=JSON
+                        """
+                        {
+                            "email": "john.doe.gmail.com",
+                            "password": "40580jkdjfJIJj"
+                        }""",
+                        null,
+                        // language=JSON
+                        """
+                        {
+                            "email":"must be a well-formed email address"
+                        }""",
+                        null,
+                        false
+                },
                 {
-                    "email": "john.doe@gmail.com",
-                    "password": "40580jkdjfJIJj",
-                    "firstName": "John",
-                    "lastName": "Doe"
-                }""";
-        AuthenticationResponse response = new AuthenticationResponse(
-                "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw",
-                new User(
-                        UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"),
-                        "John",
-                        "Doe",
-                        "john.doe@gmail.com",
-                        "40580jkdjfJIJj",
-                        Role.USER,
-                        new ArrayList<>()));
-
-        // language=JSON
-        String responseContent = """
-
-                {
-                    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJleHAiOjE2ODU4NzQ3MzksImlhdCI6MTY4NTc4ODMzOSwiYXV0aG9yaXRpZXMiOlt7ImF1dGhvcml0eSI6IkFETUlOIn1dfQ.G4axFV8xRkzcpLulzPXp-bRuRc3lQIs2vp_jkb6LxLw",
-                    "user": {
-                        "id": "af11c153-2948-4922-bca7-3e407a40da02",
-                        "firstName": "John",
-                        "lastName": "Doe",
-                        "email": "john.doe@gmail.com",
-                        "role": "USER"
-                    }
-                }""";
-        given(authenticationService.register(request, Role.USER))
-                .willReturn(response);
-
-        // then
-        mockMvc.perform(post(ROOT_URL + "/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(requestContent)
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().json(responseContent, true));
+                        // language=JSON
+                        """
+                        {
+                            "email": "",
+                            "password": ""
+                        }""",
+                        null,
+                        // language=JSON
+                        """
+                        {
+                            "email":"must not be blank"
+                        }""",
+                        null,
+                        false
+                }
+        };
     }
 
     @ParameterizedTest
@@ -187,11 +144,11 @@ class AuthenticationControllerTest {
     @MethodSource("registerDataProvider")
     @WithMockUser
         // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
-    void registerP(String requestJson,
-                   RegisterRequest requestObj,
-                   String responseJson,
-                   AuthenticationResponse responseObj,
-                   Boolean success) throws Exception {
+    void register(String requestJson,
+                  RegisterRequest requestObj,
+                  String responseJson,
+                  AuthenticationResponse responseObj,
+                  Boolean success) throws Exception {
 
         if (success) {
             when(authenticationService.register(requestObj, Role.USER))

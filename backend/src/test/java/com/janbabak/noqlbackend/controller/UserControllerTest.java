@@ -158,7 +158,6 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "Doe",
                             "email": "john.doe@email.com",
-                            "password": "password",
                             "role": "USER"
                         }""",
                         true
@@ -170,7 +169,6 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
-                            "password": "updated password",
                             "role": "ADMIN"
                         }""",
                         User.builder()
@@ -188,7 +186,6 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
-                            "password": "updated password",
                             "role": "ADMIN"
                         }""",
                         true
