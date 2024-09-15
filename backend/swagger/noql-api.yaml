@@ -814,6 +814,8 @@ components:
         isSQL:
           type: boolean
           example: true
+        userId:
+          $ref: '#/components/schemas/UUID'
 
     CreateDatabaseRequest:
       type: object
@@ -832,6 +834,8 @@ components:
           $ref: '#/components/schemas/DatabasePassword'
         engine:
           $ref: '#/components/schemas/DatabaseEngine'
+        userId:
+          $ref: '#/components/schemas/UUID'
 
     UpdateDatabaseRequest:
       type: object
@@ -1172,46 +1176,63 @@ components:
         id:
           $ref: '#/components/schemas/UUID'
         name:
-          type: string
-          example: "My custom model"
+          $ref: '#/components/schemas/CustomModelName'
         host:
-          type: string
-          example: "http://localhost"
+          $ref: '#/components/schemas/CustomModelHost'
         port:
-          type: integer
-          example: 8080
+          $ref: '#/components/schemas/CustomModelPort'
+        userId:
+          $ref: '#/components/schemas/UUID'
 
     CreateCustomModel:
       type: object
       properties:
         name:
-          type: string
-          example: "My custom model"
-          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/CustomModelName'
+            - nullable: false
         host:
-          type: string
-          example: "http://localhost"
-          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/CustomModelHost'
+            - nullable: false
         port:
-          type: integer
-          example: 8080
-          nullable: false
+          allOf:
+            - $ref: '#/components/schemas/CustomModelPort'
+            - nullable: false
+        userId:
+          allOf:
+            - $ref: '#/components/schemas/UUID'
+            - nullable: false
 
     UpdateCustomModel:
       type: object
       properties:
         name:
-          type: string
-          example: "My custom model"
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/CustomModelName'
+            - nullable: true
         host:
-          type: string
-          example: "localhost"
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/CustomModelHost'
+            - nullable: true
         port:
-          type: integer
-          example: 8080
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/CustomModelPort'
+            - nullable: true
+
+    CustomModelName:
+      type: string
+      example: "My custom model"
+      minLength: 1
+      maxLength: 32
+
+    CustomModelPort:
+      type: integer
+      example: 8080
+
+    CustomModelHost:
+      type: string
+      example: "http://localhost"
 
     ModelOption:
       type: object

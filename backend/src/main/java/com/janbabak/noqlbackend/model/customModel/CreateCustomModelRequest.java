@@ -1,13 +1,7 @@
-package com.janbabak.noqlbackend.model.entity;
+package com.janbabak.noqlbackend.model.customModel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,19 +13,11 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
-/**
- * Custom LLM that can be plugged via API.
- */
-@Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomModel {
-
-    @Id
-    @GeneratedValue
-    private UUID id;
+public class CreateCustomModelRequest {
 
     @NotBlank(groups = FirstValidationGroup.class)
     @Length(min = 1, max = 32, groups = SecondValidationGroup.class)
@@ -45,18 +31,6 @@ public class CustomModel {
     @Min(value = 1, groups = SecondValidationGroup.class)
     private Integer port;
 
-    @JsonIgnore
-    @ManyToOne
-    @NotNull
-    private User user;
-
-    @JsonProperty("userId")
-    public UUID getUserId() {
-        return user.getId();
-    }
-
-    @JsonIgnore
-    public String getUrl() {
-        return host + ":" + port + "/query";
-    }
+    @NotNull(groups = FirstValidationGroup.class)
+    private UUID userId;
 }

@@ -61,7 +61,6 @@ public class DatabaseEntityService {
         return findAll(null);
     }
 
-
     /**
      * Find all databases with filter.
      *
@@ -71,7 +70,7 @@ public class DatabaseEntityService {
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public List<Database> findAll(UUID userId) {
-        log.info("Get all databases.");
+        log.info("Get all databases. Filter by userId={}.", userId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
 
@@ -148,6 +147,7 @@ public class DatabaseEntityService {
      * Delete database by id.
      *
      * @param databaseId database identifier
+     * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     public void deleteById(UUID databaseId) {
         log.info("Delete database by id={}.", databaseId);
