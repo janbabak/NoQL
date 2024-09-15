@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.service.JwtService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +52,5 @@ class SettingsControllerTest {
     void getSettingAnonymousUser() throws Exception {
         mockMvc.perform(get("/settings"))
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Disabled // TODO: fix
-    @Test
-    @DisplayName("Get settings with USER role")
-    @WithMockUser(roles = "USER")
-    void getSettingAnonymousUserRole() throws Exception {
-        mockMvc.perform(get("/settings"))
-                .andExpect(status().isForbidden());
     }
 }

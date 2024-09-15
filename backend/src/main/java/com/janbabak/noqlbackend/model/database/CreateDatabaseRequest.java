@@ -52,5 +52,5 @@ public class CreateDatabaseRequest {
     private DatabaseEngine engine;
 
     @NotNull(groups = FirstValidationGroup.class)
-    private UUID userId; // TODO: add to swagger
+    private UUID userId;
 }

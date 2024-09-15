@@ -32,5 +32,5 @@ public class CreateCustomModelRequest {
     private Integer port;
 
     @NotNull(groups = FirstValidationGroup.class)
-    private UUID userId; // TODO: add to swagger
+    private UUID userId;
 }
