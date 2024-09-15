@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
+import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.service.CustomModelService;
 import com.janbabak.noqlbackend.service.JwtService;
 import org.junit.jupiter.api.DisplayName;
@@ -44,11 +45,16 @@ class CustomModelControllerTest {
 
     private final String ROOT_URL = "/model";
 
+    private final User testUser = User.builder()
+            .id(UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"))
+            .build();
+
     private final CustomModel localModel = CustomModel.builder()
             .id(UUID.randomUUID())
             .name("Local model")
             .host("localhost")
             .port(8085)
+            .user(testUser)
             .build();
 
     @Test
@@ -61,14 +67,15 @@ class CustomModelControllerTest {
                 .name("Gpt proxy")
                 .host("localhost")
                 .port(8086)
+                .user(testUser)
                 .build();
 
         List<CustomModel> customModels = List.of(localModel, gptProxy);
 
-        when(customModelService.findAll()).thenReturn(customModels);
+        when(customModelService.findAll(testUser.getId())).thenReturn(customModels);
 
         // then
-        mockMvc.perform(get(ROOT_URL))
+        mockMvc.perform(get(ROOT_URL).param("userId", testUser.getId().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(customModels)));
@@ -89,10 +96,10 @@ class CustomModelControllerTest {
                         .value("6678fc72-1a55-4146-b74b-b3f5aac677df")
                         .build());
 
-        when(customModelService.getAllModels(any())).thenReturn(allModels); // TODO: userId
+        when(customModelService.getAllModels(testUser.getId())).thenReturn(allModels);
 
         // then
-        mockMvc.perform(get(ROOT_URL + "/all"))
+        mockMvc.perform(get(ROOT_URL + "/all").param("userId", testUser.getId().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(allModels)));
@@ -159,13 +166,15 @@ class CustomModelControllerTest {
                         {
                             "name": "Local model",
                             "host": "localhost",
-                            "port": 8085
+                            "port": 8085,
+                            "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
                         CustomModel.builder()
                                 .id(UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df"))
                                 .name("Local model")
                                 .host("localhost")
                                 .port(8085)
+                                .user(testUser)
                                 .build(),
                         // language=JSON
                         """
@@ -173,7 +182,8 @@ class CustomModelControllerTest {
                             "id": "6678fc72-1a55-4146-b74b-b3f5aac677df",
                             "name": "Local model",
                             "host": "localhost",
-                            "port": 8085
+                            "port": 8085,
+                            "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
                         true
                 },
@@ -190,7 +200,8 @@ class CustomModelControllerTest {
                         {
                              "port": "must not be null",
                              "host": "must not be blank",
-                             "name": "must not be blank"
+                             "name": "must not be blank",
+                             "userId": "must not be null"
                         }""",
                         false
                 },
@@ -200,7 +211,8 @@ class CustomModelControllerTest {
                         {
                             "name": "test",
                             "host": "https://www.cvut.cz/llm",
-                            "port": -304
+                            "port": -304,
+                            "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
                         null,
                         // language=JSON
@@ -216,7 +228,8 @@ class CustomModelControllerTest {
                         {
                             "name": "test name is longer than maximum length",
                             "host": "https://www.cvut.cz/llm",
-                            "port": 8888
+                            "port": 8888,
+                            "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
                         null,
                         // language=JSON
@@ -272,6 +285,7 @@ class CustomModelControllerTest {
                                 .name("Local model updated")
                                 .host("localhost")
                                 .port(8086)
+                                .user(testUser)
                                 .build(),
                         // language=JSON
                         """
@@ -279,7 +293,8 @@ class CustomModelControllerTest {
                             "id": "6678fc72-1a55-4146-b74b-b3f5aac677df",
                             "name": "Local model updated",
                             "host": "localhost",
-                            "port": 8086
+                            "port": 8086,
+                            "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
                         true
                 },
