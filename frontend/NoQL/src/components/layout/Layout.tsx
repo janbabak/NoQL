@@ -27,7 +27,7 @@ export function Layout() {
   ]
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
 
       <ApplicationBar
         drawerOpen={drawerOpen}
