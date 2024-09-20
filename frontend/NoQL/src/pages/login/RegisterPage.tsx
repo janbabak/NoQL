@@ -68,10 +68,10 @@ export function RegisterPage() {
             style={{ margin: '1.5rem 0' }}
             fullWidth
           >
-            Login
+            Register
           </LoadingButton>
 
-          <div>Already have account? <a href="/login/RegisterPage">Login</a></div>
+          <div>Already have account? <a href="/login">Login</a></div>
         </form>
       </Card>
     </div>

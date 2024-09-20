@@ -55,8 +55,6 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomModel> models;
 
-
-
     public User(RegisterRequest request, PasswordEncoder passwordEncoder, Role role) {
         firstName = request.getFirstName();
         lastName = request.getLastName();

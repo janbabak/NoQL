@@ -58,21 +58,22 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    * @param headers http(s) headers
+   * @param authenticate if true, then jwt is added to headers
    */
   post(path: string,
        data: string | number | boolean | object | null,
        parameters: ApiParameter[] = [],
-       headers: { [key: string]: string } = {}
+       headers: { [key: string]: string } = {},
+       authenticate: boolean  = true
   ): Promise<AxiosResponse> {
 
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'POST',
       data: data,
-      headers: {
-        ...headers,
-        'Authorization': jwtValue
-      },
+      headers: authenticate
+        ? { ...headers, 'Authorization': jwtValue }
+        : headers
     }
 
     return this.axiosInstance.request(requestConfig)
