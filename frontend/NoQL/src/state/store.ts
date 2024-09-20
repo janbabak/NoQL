@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit'
 import chatHistoryReducer from '././chat/chatHistorySlice.ts'
 import chatReducer from './chat/chatSlice.ts'
 import snackbarReducer from './snackbarSlice.ts'
+import authReducer from './authSlice.ts'
 
 export const store = configureStore({
   reducer: {
     chatHistoryReducer,
     chatReducer,
-    snackbarReducer
+    snackbarReducer,
+    authReducer,
   }
 })
 

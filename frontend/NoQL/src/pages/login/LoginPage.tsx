@@ -8,6 +8,7 @@ import { authenticationApi } from '../../services/api/authenticationApi.ts'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { authenticate } from '../../state/authSlice.ts'
 
 export function LoginPage() {
 
@@ -35,7 +36,8 @@ export function LoginPage() {
   async function onSubmit(data: AuthenticationRequest): Promise<void> {
     setLoading(true)
     try {
-      await authenticationApi.authenticate(data)
+      const response = await authenticationApi.authenticate(data)
+      dispatch(authenticate(response.data))
     } catch (error: unknown) {
       const errorMessage = (error as any)?.response.data || 'Password or username is incorrect'
       showErrorMessage(dispatch, errorMessage) // TODO: remove dispatch parameter
