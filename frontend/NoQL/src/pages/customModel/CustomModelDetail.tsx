@@ -3,7 +3,7 @@ import { CustomModel, UpdateCustomModelRequest } from '../../types/CustomModel.t
 import { CreateUpdateModelForm } from './CreateUpdateModelForm.tsx'
 import customModelApi from '../../services/api/customModelApi.ts'
 import { AxiosResponse } from 'axios'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import { Typography } from '@mui/material'
 
 export function CustomModelDetail() {
@@ -16,7 +16,7 @@ export function CustomModelDetail() {
 
   const navigate = useNavigate()
 
-  function cancelUpdate() {
+  function cancelUpdate(): void {
     navigate('/customModels')
   }
 

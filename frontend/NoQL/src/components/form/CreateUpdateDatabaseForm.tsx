@@ -231,10 +231,10 @@ export function CreateUpdateDatabaseForm(
               {Object.values(DatabaseEngine)
                 .filter((value) => isNaN(Number(value)))
                 .map((value) => (
-                <MenuItem key={value} value={value}>
-                  {value}
-                </MenuItem>
-              ))}
+                  <MenuItem key={value} value={value}>
+                    {value}
+                  </MenuItem>
+                ))}
             </Select>
           )}
         />

@@ -56,7 +56,9 @@ export function CreateUpdateModelForm(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelId])
 
-  const form = useForm<CreateCustomModelRequest>({ defaultValues: defaultValues })
+  const form = useForm<CreateCustomModelRequest>({
+    defaultValues: defaultValues
+  })
 
   const {
     register,

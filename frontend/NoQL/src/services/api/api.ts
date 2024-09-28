@@ -18,7 +18,7 @@ class Api {
   private constructor() {
     log.info("BE URL is: " + this.axiosInstance.defaults.baseURL)
 
-    // Add a request interceptor
+    // Add a request interceptor that inserts an auth token into headers.
     this.axiosInstance.interceptors.request.use(
       (config) => {
         const token = localStorageService.getToken()
