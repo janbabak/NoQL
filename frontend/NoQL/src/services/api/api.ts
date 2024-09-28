@@ -65,7 +65,6 @@ class Api {
    * @param data request body
    * @param parameters query parameters
    * @param headers http(s) headers
-   * @param authenticate if true, then jwt is added to headers
    */
   post(path: string,
        data: string | number | boolean | object | null,
