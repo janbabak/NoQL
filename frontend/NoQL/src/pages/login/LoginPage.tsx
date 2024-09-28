@@ -8,7 +8,6 @@ import { authenticationApi } from '../../services/api/authenticationApi.ts'
 import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
-import { authenticate } from '../../state/authSlice.ts'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 export function LoginPage() {
@@ -27,13 +26,13 @@ export function LoginPage() {
 
   const { errors } = form.formState
 
-  const dispatch: AppDispatch = useDispatch()
-
   const navigate = useNavigate()
 
   const location = useLocation()
 
   const previousLocation = location.state?.from || '/'
+
+  const dispatch = useDispatch<AppDispatch>()
 
   const [
     loading,
@@ -44,7 +43,8 @@ export function LoginPage() {
     setLoading(true)
     try {
       const response = await authenticationApi.authenticate(data)
-      dispatch(authenticate(response.data))
+      localStorage.setItem('token', response.data.token)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
       navigate(previousLocation)
     } catch (error: unknown) {
       const errorMessage = (error as any)?.response.data || 'Password or username is incorrect'

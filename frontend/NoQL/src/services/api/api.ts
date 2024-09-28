@@ -21,6 +21,20 @@ class Api {
   /** forbid constructor, because api is a singleton */
   private constructor() {
     log.info("BE URL is: " + this.axiosInstance.defaults.baseURL)
+
+    // Add a request interceptor
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('token')
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`
+        }
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      }
+    )
   }
 
   static instance: Api | null = null
@@ -44,9 +58,9 @@ class Api {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'GET',
-      headers: {
-        'Authorization': jwtValue
-      }
+      // headers: {
+      //   'Authorization': jwtValue
+      // }
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -71,9 +85,9 @@ class Api {
       url: this.createUrl(path, parameters),
       method: 'POST',
       data: data,
-      headers: authenticate
-        ? { ...headers, 'Authorization': jwtValue }
-        : headers
+      // headers: authenticate
+      //   ? { ...headers, 'Authorization': jwtValue }
+      //   : headers
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -93,9 +107,9 @@ class Api {
       url: this.createUrl(path, parameters),
       method: 'PUT',
       data: data,
-      headers: {
-        'Authorization': jwtValue
-      }
+      // headers: {
+      //   'Authorization': jwtValue
+      // }
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -110,9 +124,9 @@ class Api {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'DELETE',
-      headers: {
-        'Authorization': jwtValue
-      }
+      // headers: {
+      //   'Authorization': jwtValue
+      // }
     }
 
     return this.axiosInstance.request(requestConfig)
