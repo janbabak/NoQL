@@ -13,6 +13,7 @@ const customModelApi = {
 
   /**
    * Get all custom models.
+   * @param userId filter by user id
    */
   getAllCustomModels(userId: string | null = null): Promise<AxiosResponse<CustomModel[]>> {
     return this.API.get(this.DOMAIN, userId ? [{ name: 'userId', value: userId }] : [])
@@ -20,9 +21,10 @@ const customModelApi = {
 
   /**
    * Get all models.
+   * @param userId filter by user id
    */
-  getAllModels(): Promise<AxiosResponse<ModelOption[]>> {
-    return this.API.get(this.DOMAIN + '/all')
+  getAllModels(userId: string | null = null): Promise<AxiosResponse<ModelOption[]>> {
+    return this.API.get(this.DOMAIN + '/all',  userId ? [{ name: 'userId', value: userId }] : [])
   },
 
   /**
