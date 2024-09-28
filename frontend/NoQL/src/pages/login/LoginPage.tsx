@@ -14,7 +14,7 @@ import { localStorageService } from '../../services/LocalStorageService.ts'
 export function LoginPage() {
 
   const defaultValues: AuthenticationRequest = {
-    email: 'babka@email.com',
+    email: 'babka@email.com', // TODO: remove credentials
     password: '12345678'
   }
 

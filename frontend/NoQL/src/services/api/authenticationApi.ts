@@ -11,7 +11,7 @@ export const authenticationApi = {
    * @param request data
    */
   authenticate(request: AuthenticationRequest): Promise<AxiosResponse<AuthenticationResponse>> {
-    return this.API.post(this.DOMAIN + '/authenticate', request, [], {}, false)
+    return this.API.post(this.DOMAIN + '/authenticate', request)
   },
 
   /**
@@ -19,6 +19,6 @@ export const authenticationApi = {
    * @param request data
    */
   register(request: RegisterRequest): Promise<AxiosResponse<AuthenticationResponse>> {
-    return this.API.post(this.DOMAIN + '/register', request, [], {}, false)
+    return this.API.post(this.DOMAIN + '/register', request)
   }
 }
