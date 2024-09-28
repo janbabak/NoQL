@@ -6,6 +6,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import React, { Dispatch, SetStateAction } from 'react'
 import { NavigationDrawerLink } from './navigationDrawer.types.ts'
+import { Link } from 'react-router-dom'
 
 interface DrawerProps {
   drawerOpen: boolean,
@@ -37,7 +38,7 @@ export function NavigationDrawer({ drawerOpen, setDrawerOpen, links }: DrawerPro
       <List>
         {links.map((link, index) => (
           <ListItem key={index} disablePadding>
-            <ListItemButton component="a" href={link.href}>
+            <ListItemButton component={Link} to={link.href}>
               <ListItemIcon>
                 {link.icon}
               </ListItemIcon>

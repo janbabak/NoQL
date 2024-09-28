@@ -7,6 +7,7 @@ import customModelApi from '../../../services/api/customModelApi.ts'
 import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../../state/store.ts'
+import { localStorageService } from '../../../services/LocalStorageService.ts'
 
 interface ModelSelectProps {
   model: string,
@@ -44,7 +45,9 @@ export function ModelSelect({ model, setModel }: ModelSelectProps) {
   async function loadModelOptions(): Promise<void> {
     setModelOptionsLoading(true)
     try {
-      const response = await customModelApi.getAllModels()
+      const response = await customModelApi.getAllModels(
+        localStorageService.getUserId()
+      )
       setModelOptions(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to load models', error)

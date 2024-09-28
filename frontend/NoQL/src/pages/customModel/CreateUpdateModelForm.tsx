@@ -1,4 +1,8 @@
-import { CreateUpdateCustomModelRequest, CustomModel } from '../../types/CustomModel.ts'
+import {
+  CreateCustomModelRequest,
+  CustomModel,
+  UpdateCustomModelRequest
+} from '../../types/CustomModel.ts'
 import { AxiosResponse } from 'axios'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -9,12 +13,15 @@ import { Button, TextField } from '@mui/material'
 import styles from '../dashboard/Dashboard.module.css'
 import { LoadingButton } from '@mui/lab'
 import customModelApi from '../../services/api/customModelApi.ts'
+import { localStorageService } from '../../services/LocalStorageService.ts'
 
 interface CreateUpdateModelFormProps {
   action: 'create' | 'update';
   onClose?: () => void; // used when form is in dialog
   modelId?: string; // required only when action is set to 'update'
-  submit: ((data: CreateUpdateCustomModelRequest) => Promise<AxiosResponse<CustomModel, any>>)
+  submit:
+    ((data: UpdateCustomModelRequest) => Promise<AxiosResponse<CustomModel, any>>) |
+    ((data: CreateCustomModelRequest) => Promise<AxiosResponse<CustomModel, any>>);
 }
 
 export function CreateUpdateModelForm(
@@ -25,10 +32,11 @@ export function CreateUpdateModelForm(
     modelId
   }: CreateUpdateModelFormProps) {
 
-  const defaultValues: CreateUpdateCustomModelRequest = {
+  const defaultValues: CreateCustomModelRequest = {
     name: '',
     host: '',
-    port: 8080
+    port: 8080,
+    userId: localStorageService.getUserId() || ''
   }
 
   // load model data if action is update
@@ -48,7 +56,9 @@ export function CreateUpdateModelForm(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelId])
 
-  const form = useForm<CreateUpdateCustomModelRequest>({ defaultValues: defaultValues })
+  const form = useForm<CreateCustomModelRequest>({
+    defaultValues: defaultValues
+  })
 
   const {
     register,
@@ -76,10 +86,11 @@ export function CreateUpdateModelForm(
     }
   }
 
-  async function onSubmit(data: CreateUpdateCustomModelRequest): Promise<void> {
+  async function onSubmit(data: CreateCustomModelRequest | UpdateCustomModelRequest): Promise<void> {
     setSubmitLoading(true)
 
     try {
+      // @ts-ignore
       await submit(data)
       handleClose()
     } catch (error: unknown) {

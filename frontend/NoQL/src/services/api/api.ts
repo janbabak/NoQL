@@ -1,10 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { log } from '../loging/logger.ts'
-
-// TODO: properly setup
-const jwt = 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw'
-
-const jwtValue = 'Bearer ' + jwt
+import { localStorageService } from '../LocalStorageService.ts'
 
 /** query parameter */
 interface ApiParameter {
@@ -21,6 +17,20 @@ class Api {
   /** forbid constructor, because api is a singleton */
   private constructor() {
     log.info("BE URL is: " + this.axiosInstance.defaults.baseURL)
+
+    // Add a request interceptor that inserts an auth token into headers.
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = localStorageService.getToken()
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`
+        }
+        return config
+      },
+      (error) => {
+        return Promise.reject(error)
+      }
+    )
   }
 
   static instance: Api | null = null
@@ -44,9 +54,6 @@ class Api {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'GET',
-      headers: {
-        'Authorization': jwtValue
-      }
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -69,10 +76,7 @@ class Api {
       url: this.createUrl(path, parameters),
       method: 'POST',
       data: data,
-      headers: {
-        ...headers,
-        'Authorization': jwtValue
-      },
+      headers: headers
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -92,9 +96,6 @@ class Api {
       url: this.createUrl(path, parameters),
       method: 'PUT',
       data: data,
-      headers: {
-        'Authorization': jwtValue
-      }
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -109,9 +110,6 @@ class Api {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'DELETE',
-      headers: {
-        'Authorization': jwtValue
-      }
     }
 
     return this.axiosInstance.request(requestConfig)

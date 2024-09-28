@@ -7,7 +7,7 @@ export const store = configureStore({
   reducer: {
     chatHistoryReducer,
     chatReducer,
-    snackbarReducer
+    snackbarReducer,
   }
 })
 

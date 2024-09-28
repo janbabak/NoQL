@@ -10,6 +10,7 @@ import { showErrorWithMessageAndError } from '../../components/snackbar/GlobalSn
 import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 import AddIcon from '@mui/icons-material/Add'
 import { CreateDatabaseDialog } from './CreateDatabaseDialog.tsx'
+import { localStorageService } from '../../services/LocalStorageService.ts'
 
 export function Databases() {
 
@@ -39,7 +40,7 @@ export function Databases() {
   async function loadDatabases(): Promise<void> {
     setDatabasesLoading(true)
     try {
-      const response = await databaseApi.getAll()
+      const response = await databaseApi.getAll(localStorageService.getUserId())
       setDatabases(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to load databases', error)

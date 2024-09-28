@@ -1,22 +1,22 @@
 import { useParams } from 'react-router'
-import { CreateUpdateCustomModelRequest, CustomModel } from '../../types/CustomModel.ts'
+import { CustomModel, UpdateCustomModelRequest } from '../../types/CustomModel.ts'
 import { CreateUpdateModelForm } from './CreateUpdateModelForm.tsx'
 import customModelApi from '../../services/api/customModelApi.ts'
 import { AxiosResponse } from 'axios'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import { Typography } from '@mui/material'
 
 export function CustomModelDetail() {
 
   const { id } = useParams<string>()
 
-  async function updateCustomModel(data: CreateUpdateCustomModelRequest): Promise<AxiosResponse<CustomModel>> {
+  async function updateCustomModel(data: UpdateCustomModelRequest): Promise<AxiosResponse<CustomModel>> {
     return await customModelApi.update(id || '', data)
   }
 
   const navigate = useNavigate()
 
-  function cancelUpdate() {
+  function cancelUpdate(): void {
     navigate('/customModels')
   }
 
