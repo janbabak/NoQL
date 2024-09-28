@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { showErrorMessage } from '../snackbar/GlobalSnackbar.helpers.ts'
 import { AxiosResponse } from 'axios'
 import databaseApi from '../../services/api/databaseApi.ts'
+import { localStorageService } from '../../services/LocalStorageService.ts'
 
 interface CreateUpdateDatabaseProps {
   action: 'create' | 'update';
@@ -36,6 +37,7 @@ export function CreateUpdateDatabaseForm(
     userName: '',
     password: '',
     engine: '',
+    userId: localStorageService.getUserId() || ''
   }
 
   // load database data if action is update

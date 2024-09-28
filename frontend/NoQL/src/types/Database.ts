@@ -17,7 +17,8 @@ interface CreateDatabaseRequest {
   database: string
   userName: string
   password: string
-  engine: DatabaseEngine | '' // empty string is used for default value
+  engine: DatabaseEngine | ''
+  userId: string
 }
 
 interface UpdateDatabaseRequest {
