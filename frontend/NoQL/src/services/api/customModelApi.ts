@@ -9,8 +9,8 @@ const customModelApi = {
   /**
    * Get all custom models.
    */
-  getAllCustomModels(): Promise<AxiosResponse<CustomModel[]>> {
-    return this.API.get(this.DOMAIN)
+  getAllCustomModels(userId: string | null = null): Promise<AxiosResponse<CustomModel[]>> {
+    return this.API.get(this.DOMAIN, userId ? [{ name: 'userId', value: userId }] : [])
   },
 
   /**

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { localStorageService } from '../services/LocalStorageService.ts'
 
 interface PrivateRouteProps {
   element: React.ReactElement
@@ -7,9 +8,8 @@ interface PrivateRouteProps {
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
   const location = useLocation()
+  const token = localStorageService.getToken()
 
-  const token = localStorage.getItem('token')
-  console.log(token)
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }

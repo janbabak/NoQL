@@ -9,6 +9,7 @@ import { AppDispatch } from '../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { showErrorMessage } from '../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { localStorageService } from '../../services/LocalStorageService.ts'
 
 export function LoginPage() {
 
@@ -43,8 +44,8 @@ export function LoginPage() {
     setLoading(true)
     try {
       const response = await authenticationApi.authenticate(data)
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
+      localStorageService.setToken(response.data.token)
+      localStorageService.setUserId(response.data.user.id)
       navigate(previousLocation)
     } catch (error: unknown) {
       const errorMessage = (error as any)?.response.data || 'Password or username is incorrect'

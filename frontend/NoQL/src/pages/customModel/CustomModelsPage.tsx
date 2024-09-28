@@ -10,6 +10,7 @@ import { SkeletonStack } from '../../components/loaders/SkeletonStack.tsx'
 import { Button, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import { CreateModelDialog } from './CreateModelDialog.tsx'
+import { localStorageService } from '../../services/LocalStorageService.ts'
 
 export function CustomModelsPage() {
 
@@ -33,7 +34,8 @@ export function CustomModelsPage() {
   async function loadModels(): Promise<void> {
     setModelsLoading(true)
     try {
-      const response = await customModelApi.getAllCustomModels()
+      const response = await customModelApi.getAllCustomModels(
+        localStorageService.getUserId())
       setModels(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to load custom models', error)

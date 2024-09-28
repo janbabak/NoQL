@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { log } from '../loging/logger.ts'
+import { localStorageService } from '../LocalStorageService.ts'
 
 /** query parameter */
 interface ApiParameter {
@@ -20,7 +21,7 @@ class Api {
     // Add a request interceptor
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token')
+        const token = localStorageService.getToken()
         if (token) {
           config.headers['Authorization'] = `Bearer ${token}`
         }

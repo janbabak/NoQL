@@ -12,8 +12,8 @@ const databaseApi = {
   /**
    * Get all databases.
    */
-  getAll(): Promise<AxiosResponse<Database[]>> {
-    return this.API.get(this.DOMAIN)
+  getAll(userId: string | null = null): Promise<AxiosResponse<Database[]>> {
+    return this.API.get(this.DOMAIN, userId ? [{ name: 'userId', value: userId }] : [])
   },
 
   /**
