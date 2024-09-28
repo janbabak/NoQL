@@ -582,6 +582,8 @@ paths:
       tags:
         - Model
       summary: Get all custom models
+      parameters:
+        - $ref: '#/components/parameters/userIdQuery'
       responses:
         '200':
           description: A list of custom models
