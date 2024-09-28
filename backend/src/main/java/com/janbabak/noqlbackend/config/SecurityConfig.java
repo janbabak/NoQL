@@ -46,7 +46,12 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(401, "Unauthorized"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(403, "Forbidden")));
 
         return httpSecurity.build();
     }

@@ -1,16 +1,12 @@
 package com.janbabak.noqlbackend.error.handler;
 
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
-import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.error.exception.LLMException;
+import com.janbabak.noqlbackend.error.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import software.amazon.awssdk.services.elasticache.model.UserAlreadyExistsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,14 +33,14 @@ public class RestResponseEntityExceptionHandler {
 
     /**
      * Bad request - 400 <br />
-     * The issue is on the user's side - wrong credentials, database not available, ...
+     * The issue is on the user's side - database not available, ...
      *
      * @param e exception
      * @return error message
      */
     @ExceptionHandler({DatabaseConnectionException.class, UserAlreadyExistsException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleDatabaseConnectionException(Exception e) {
+    public String handleBadRequestException(Exception e) {
         return e.getMessage();
     }
 
