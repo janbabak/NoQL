@@ -5,6 +5,10 @@ import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
 import Typography from '@mui/material/Typography'
 import React, { SetStateAction } from 'react'
+import { localStorageService } from '../../services/LocalStorageService.ts'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Button } from '@mui/material'
+import LogoutIcon from '@mui/icons-material/Logout'
 
 interface CustomAppBarProps {
   drawerOpen: boolean,
@@ -22,7 +26,16 @@ export function ApplicationBar(
     open: boolean,
   }
 
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const theme: Theme = useTheme()
+
+  function logOut(): void {
+    localStorageService.clearUserId()
+    localStorageService.clearToken()
+    navigate('/login')
+  }
 
   const StyledAppBar =
     styled(MuiAppBar, {
@@ -54,11 +67,22 @@ export function ApplicationBar(
 
   return (
     <StyledAppBar position="fixed" open={drawerOpen} theme={theme}>
-      <Toolbar>
-        {OpenDrawerButton}
-        <Typography variant="h6" noWrap component="div">
-          NoQL
-        </Typography>
+      <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {OpenDrawerButton}
+          <Typography variant="h6" noWrap component="div">
+            NoQL
+          </Typography>
+        </div>
+
+        {location.pathname !== '/login' && location.pathname !== '/register' &&
+          <Button
+            onClick={logOut}
+            startIcon={<LogoutIcon />}
+            sx={{ color: 'white' }}
+          >
+            logout
+          </Button>}
       </Toolbar>
     </StyledAppBar>
   )
