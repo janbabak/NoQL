@@ -5,7 +5,14 @@ interface CustomModel {
   port: number
 }
 
-interface CreateUpdateCustomModelRequest {
+interface CreateCustomModelRequest {
+  name: string
+  host: string
+  port: number
+  userId: string
+}
+
+interface UpdateCustomModelRequest {
   name: string
   host: string
   port: number
@@ -18,6 +25,7 @@ interface ModelOption {
 
 export type {
   CustomModel,
-  CreateUpdateCustomModelRequest,
+  CreateCustomModelRequest,
+  UpdateCustomModelRequest,
   ModelOption,
 }

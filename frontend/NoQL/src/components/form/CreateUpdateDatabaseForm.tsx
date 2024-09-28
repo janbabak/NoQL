@@ -93,7 +93,6 @@ export function CreateUpdateDatabaseForm(
   async function onSubmit(data: CreateDatabaseRequest | UpdateDatabaseRequest): Promise<void> {
     setSubmitLoading(true)
     try {
-      console.log(data)
       // @ts-ignore
       await submit(data)
       handleClose()
