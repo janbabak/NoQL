@@ -7,6 +7,7 @@ import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,6 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     public AuthenticationResponse authenticate(@RequestBody @Valid AuthenticationRequest request)
             throws EntityNotFoundException {
-
         return authenticationService.authenticate(request);
     }
 
@@ -47,5 +47,17 @@ public class AuthenticationController {
     public AuthenticationResponse register(@RequestBody @Valid RegisterRequest request)
             throws UserAlreadyExistsException {
         return authenticationService.register(request, Role.USER);
+    }
+
+    /**
+     * Refresh access and refresh token.
+     *
+     * @param request request with refresh token in header
+     * @return response with new access and refresh token
+     * @throws EntityNotFoundException user not found.
+     */
+    @PostMapping("/refreshToken")
+    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
+        return authenticationService.refreshToken(request);
     }
 }

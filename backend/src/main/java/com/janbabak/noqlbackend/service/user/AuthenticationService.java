@@ -10,7 +10,9 @@ import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,13 +49,14 @@ public class AuthenticationService {
 
         User user = userRepository.save(new User(request, passwordEncoder, role));
         String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
                 .user(user)
                 .build();
     }
-
 
     /**
      * Authenticate existing user.
@@ -69,11 +72,46 @@ public class AuthenticationService {
                 () -> new EntityNotFoundException(USER, request.getEmail()));
 
         String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .refreshToken(refreshToken)
                 .user(user)
                 .build();
+    }
+
+    /**
+     * Refresh access and refresh token.
+     *
+     * @param request request with refresh token in header
+     * @return response with new access and refresh token
+     * @throws EntityNotFoundException user not found.
+     */
+    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
+
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new AccessDeniedException("Access denied.");
+        }
+
+        String refreshToken = authHeader.substring(7);
+        String userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            User user = userRepository.findByEmail(userEmail).orElseThrow(
+                    () -> new EntityNotFoundException(USER, userEmail));
+
+            if (jwtService.isTokenValid(refreshToken, user)) {
+                String accessToken = jwtService.generateToken(user);
+                String newRefreshToken = jwtService.generateRefreshToken(user);
+                return AuthenticationResponse.builder()
+                        .token(accessToken)
+                        .refreshToken(newRefreshToken)
+                        .user(user)
+                        .build();
+            }
+        }
+        throw new AccessDeniedException("Access denied.");
     }
 
     /**

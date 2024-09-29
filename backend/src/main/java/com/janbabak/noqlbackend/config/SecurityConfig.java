@@ -27,7 +27,8 @@ public class SecurityConfig {
     //paths, which don't require authentication
     private final String[] noAuthPaths = {
             "/",
-            "/auth/**",
+            "/auth/authenticate",
+            "/auth/register",
             "static/images/**",
     };
 

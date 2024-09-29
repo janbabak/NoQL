@@ -10,12 +10,14 @@ import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,12 +71,14 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
-        String jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt, user);
+        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn(jwt);
+        when(jwtService.generateToken(user)).thenReturn(accessToken);
+        when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
         AuthenticationResponse actual = authenticationService.register(registerRequest, Role.USER);
@@ -120,11 +124,13 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
-        String jwt = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt, user);
+        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn(jwt);
+        when(jwtService.generateToken(user)).thenReturn(accessToken);
+        when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
         AuthenticationResponse actual = authenticationService.authenticate(authenticationRequest);
@@ -144,6 +150,95 @@ class AuthenticationServiceTest {
 
         // then
         assertThrows(EntityNotFoundException.class, () -> authenticationService.authenticate(authenticationRequest));
+    }
+
+    @Test
+    @DisplayName("Refresh token - valid token")
+    void refreshTokenValid() throws EntityNotFoundException {
+        // given
+        String email = "john@gmail.com";
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-44";
+        String newRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-33";
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .firstName("John")
+                .lastName("Doe")
+                .email(email)
+                .password("password")
+                .role(Role.USER)
+                .build();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
+        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtService.isTokenValid(refreshToken, user)).thenReturn(true);
+        when(jwtService.generateToken(user)).thenReturn(accessToken);
+        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+
+        // when
+        AuthenticationResponse actual = authenticationService.refreshToken(request);
+
+        // then
+        assertEquals(accessToken, actual.token());
+        assertEquals(newRefreshToken, actual.refreshToken());
+        assertEquals(user, actual.user());
+    }
+
+    @Test
+    @DisplayName("Refresh token - invalid token")
+    void refreshTokenInvalid() {
+        // given
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
+        when(jwtService.extractUsername(refreshToken)).thenReturn(null);
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(request));
+    }
+
+    @Test
+    @DisplayName("Refresh token - token not valid for user")
+    void refreshTokenTokenNotValidForUser() {
+        // given
+        String email = "john@gmail.com";
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .firstName("John")
+                .lastName("Doe")
+                .email(email)
+                .password("password")
+                .role(Role.USER)
+                .build();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
+        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtService.isTokenValid(refreshToken, user)).thenReturn(false);
+
+        // then
+        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(request));
+    }
+
+    @Test
+    @DisplayName("Refresh token - user not found")
+    void refreshTokenUserNotFound() {
+        // given
+        String email = "john@gmail.com";
+        String refreshToken = "validRefreshToken";
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
+        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class, () -> authenticationService.refreshToken(request));
     }
 
     @Test
