@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.janbabak.noqlbackend.authentication.AuthenticationFacadeInterface;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
@@ -12,7 +11,6 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
