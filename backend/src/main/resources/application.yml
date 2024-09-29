@@ -20,5 +20,5 @@ app:
   security:
     jwt:
       secretKey: "${JWT_SECRET:secret}"
-      expiration: "${JWT_EXPIRATION:86400}"
+      expiration: "${JWT_EXPIRATION:1800}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"

@@ -84,12 +84,18 @@ public class AuthenticationService {
                 .build();
     }
 
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, EntityNotFoundException {
+    /**
+     * Refresh JWT token.
+     *
+     * @param request request with refresh token in header
+     * @return response with new access and refresh token
+     * @throws EntityNotFoundException user not found.
+     */
+    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
 
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
-            return;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new AccessDeniedException("Access denied.");
         }
 
         String refreshToken = authHeader.substring(7);
@@ -100,14 +106,15 @@ public class AuthenticationService {
 
             if (jwtService.isTokenValid(refreshToken, user)) {
                 String accessToken = jwtService.generateToken(user);
-                AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                String newRefreshToken = jwtService.generateRefreshToken(user);
+                return AuthenticationResponse.builder()
                         .token(accessToken)
-                        .refreshToken(refreshToken)
+                        .refreshToken(newRefreshToken)
                         .user(user)
                         .build();
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
+        throw new AccessDeniedException("Access denied.");
     }
 
     /**

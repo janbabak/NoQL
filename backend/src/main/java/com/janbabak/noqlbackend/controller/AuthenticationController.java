@@ -35,7 +35,6 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.OK)
     public AuthenticationResponse authenticate(@RequestBody @Valid AuthenticationRequest request)
             throws EntityNotFoundException {
-
         return authenticationService.authenticate(request);
     }
 
@@ -53,9 +52,15 @@ public class AuthenticationController {
         return authenticationService.register(request, Role.USER);
     }
 
+    /**
+     * Refresh JWT token.
+     *
+     * @param request request with refresh token in header
+     * @return response with new access and refresh token
+     * @throws EntityNotFoundException user not found.
+     */
     @PostMapping("/refreshToken")
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, EntityNotFoundException {
-        authenticationService.refreshToken(request, response);
+    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
+        return authenticationService.refreshToken(request);
     }
 }
