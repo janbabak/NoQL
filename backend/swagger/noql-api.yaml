@@ -68,6 +68,24 @@ paths:
         '400':
           description: Invalid input
 
+  /auth/refreshToken:
+    post:
+      tags:
+        - Auth
+      summary: Refresh access and refresh token
+      description: >
+        Refresh access and refresh token. The refresh token is used to get a new access token when the access token
+        expires. The refresh token is valid for 7 days. The access token is valid for 30 minutes. Use refresh token in Authorization header with Bearer prefix `Bearer: <token_value>`.
+      responses:
+        '200':
+          description: Refreshed token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '401':
+          description: Unauthorized - expired or invalid token
+
   /user:
     get:
       tags:
@@ -715,6 +733,8 @@ components:
       type: object
       properties:
         token:
+          $ref: '#/components/schemas/JwtToken'
+        refreshToken:
           $ref: '#/components/schemas/JwtToken'
         user:
           $ref: '#/components/schemas/User'

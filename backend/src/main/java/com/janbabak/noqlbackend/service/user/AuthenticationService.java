@@ -82,7 +82,7 @@ public class AuthenticationService {
     }
 
     /**
-     * Refresh JWT token.
+     * Refresh access and refresh token.
      *
      * @param request request with refresh token in header
      * @return response with new access and refresh token
