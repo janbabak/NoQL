@@ -7,11 +7,15 @@ import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,5 +51,11 @@ public class AuthenticationController {
     public AuthenticationResponse register(@RequestBody @Valid RegisterRequest request)
             throws UserAlreadyExistsException {
         return authenticationService.register(request, Role.USER);
+    }
+
+    @PostMapping("/refreshToken")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, EntityNotFoundException {
+        authenticationService.refreshToken(request, response);
     }
 }
