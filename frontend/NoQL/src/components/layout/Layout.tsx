@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Box from '@mui/material/Box'
-import { ApplicationBar } from '../navigationDrawer/CusomAppBar.tsx'
+import { CustomAppBar } from '../navigationDrawer/CustomAppBar.tsx'
 import { GlobalSnackbar } from '../snackbar/GlobalSnackbar.tsx'
 import { NavigationDrawer } from '../navigationDrawer/NavigationDrawer.tsx'
 import { useState } from 'react'
@@ -29,7 +29,7 @@ export function Layout() {
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
 
-      <ApplicationBar
+      <CustomAppBar
         drawerOpen={drawerOpen}
         setDrawerOpen={setDrawerOpen}
       />
