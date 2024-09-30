@@ -11,7 +11,7 @@ export type AuthenticationRequest = {
 }
 
 export type AuthenticationResponse = {
-  token: string
+  accessToken: string
   refreshToken: string
   user: User
 }
