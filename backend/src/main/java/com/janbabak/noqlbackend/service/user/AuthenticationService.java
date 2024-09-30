@@ -10,9 +10,7 @@ import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.JwtService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -84,18 +82,11 @@ public class AuthenticationService {
     /**
      * Refresh access and refresh token.
      *
-     * @param request request with refresh token in header
+     * @param refreshToken refresh token
      * @return response with new access and refresh token
      * @throws EntityNotFoundException user not found.
      */
-    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
-
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new AccessDeniedException("Access denied.");
-        }
-
-        String refreshToken = authHeader.substring(7);
+    public AuthenticationResponse refreshToken(String refreshToken) throws EntityNotFoundException {
         String userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             User user = userRepository.findByEmail(userEmail).orElseThrow(

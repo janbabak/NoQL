@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { log } from '../loging/logger.ts'
 import { localStorageService } from '../LocalStorageService.ts'
+import { AuthenticationResponse } from '../../types/Authentication.ts'
 
 /** query parameter */
 interface ApiParameter {
@@ -21,7 +22,7 @@ class Api {
     // Add a request interceptor that inserts an auth token into headers.
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = localStorageService.getToken()
+        const token = localStorageService.getAccessToken()
         if (token) {
           config.headers['Authorization'] = `Bearer ${token}`
         }
@@ -31,9 +32,54 @@ class Api {
         return Promise.reject(error)
       }
     )
+
+    // Add a response interceptor to handle 401 errors and refresh the token.
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config
+        if (error.response.status === 401 && !originalRequest._retry) {
+          console.log(originalRequest)
+          console.log(originalRequest._retry === undefined)
+          console.log("original reqeust retry: " + originalRequest._retry)
+          originalRequest._retry = true
+          try {
+            const response = await this.refreshToken()
+            console.log(response)
+            const newAccessToken = response.token
+            localStorageService.setAcessToken(newAccessToken)
+            return this.axiosInstance(originalRequest)
+          } catch (refreshError) {
+            return Promise.reject(refreshError)
+          }
+        }
+        return Promise.reject(error)
+      }
+    )
   }
 
   static instance: Api | null = null
+
+
+  private async refreshToken(): Promise<AuthenticationResponse> {
+    const refreshToken = localStorageService.getRefreshToken()
+    if (!refreshToken) {
+      return Promise.reject(new Error('No refresh token available'))
+    }
+
+    // using fetch, so auth header is not added by axios interceptor
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/auth/refreshToken', {
+      method: 'POST',
+      body: refreshToken,
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to refresh token')
+    }
+
+    return await response.json()
+  }
+
 
   /**
    * @return singleton instance
