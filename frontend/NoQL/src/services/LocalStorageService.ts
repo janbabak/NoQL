@@ -1,27 +1,50 @@
 export const localStorageService = {
-  TOKEN_KEY: 'token',
+  ACCESS_TOKEN_KEY: 'accessToken',
+  REFRESH_TOKEN_KEY: 'refreshToken',
   USER_ID_KEY: 'userId',
 
   /**
-   * Get authentication token from local storage.
+   * Get access token from local storage.
    */
-  getToken(): string | null {
-    return window.localStorage.getItem(this.TOKEN_KEY)
+  getAccessToken(): string | null {
+    return window.localStorage.getItem(this.ACCESS_TOKEN_KEY)
   },
 
   /**
-   * Set authentication token to local storage.
+   * Set access token to local storage.
    * @param token jwt token
    */
-  setToken(token: string): void {
-    window.localStorage.setItem(this.TOKEN_KEY, token)
+  setAccessToken(token: string): void {
+    window.localStorage.setItem(this.ACCESS_TOKEN_KEY, token)
   },
 
   /**
    * Remove authentication token from local storage.
    */
-  clearToken(): void {
-    window.localStorage.removeItem(this.TOKEN_KEY)
+  clearAccessToken(): void {
+    window.localStorage.removeItem(this.ACCESS_TOKEN_KEY)
+  },
+
+  /**
+   * Get refresh token from local storage.
+   */
+  getRefreshToken(): string | null {
+    return window.localStorage.getItem(this.REFRESH_TOKEN_KEY)
+  },
+
+  /**
+   * Set refresh token to local storage.
+   * @param token jwt token
+   */
+  setRefreshToken(token: string): void {
+    window.localStorage.setItem(this.REFRESH_TOKEN_KEY, token)
+  },
+
+  /**
+   * Remove refresh token from local storage.
+   */
+  clearRefreshToken(): void {
+    window.localStorage.removeItem(this.REFRESH_TOKEN_KEY)
   },
 
   /**

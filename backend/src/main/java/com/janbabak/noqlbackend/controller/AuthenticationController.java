@@ -7,7 +7,6 @@ import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class AuthenticationController {
      * Authenticate existing user.
      *
      * @param request request with username and password
-     * @return response with user data and JWT token
+     * @return response with user data and auth tokens
      * @throws EntityNotFoundException User with this username not found.
      */
     @PostMapping("/authenticate")
@@ -39,7 +38,7 @@ public class AuthenticationController {
      * Register new user, create new user with USER role.
      *
      * @param request user data
-     * @return response with new user data and JWT token
+     * @return response with new user data and auth tokens
      * @throws UserAlreadyExistsException User with this username already exists.
      */
     @PostMapping("/register")
@@ -52,12 +51,12 @@ public class AuthenticationController {
     /**
      * Refresh access and refresh token.
      *
-     * @param request request with refresh token in header
+     * @param refreshToken refreshToken
      * @return response with new access and refresh token
      * @throws EntityNotFoundException user not found.
      */
     @PostMapping("/refreshToken")
-    public AuthenticationResponse refreshToken(HttpServletRequest request) throws EntityNotFoundException {
-        return authenticationService.refreshToken(request);
+    public AuthenticationResponse refreshToken(@RequestBody String refreshToken) throws EntityNotFoundException {
+        return authenticationService.refreshToken(refreshToken);
     }
 }

@@ -15,7 +15,7 @@ interface CustomAppBarProps {
   setDrawerOpen: React.Dispatch<SetStateAction<boolean>>,
 }
 
-export function ApplicationBar(
+export function CustomAppBar(
   {
     drawerOpen,
     setDrawerOpen
@@ -33,7 +33,8 @@ export function ApplicationBar(
 
   function logOut(): void {
     localStorageService.clearUserId()
-    localStorageService.clearToken()
+    localStorageService.clearAccessToken()
+    localStorageService.clearRefreshToken()
     navigate('/login')
   }
 
