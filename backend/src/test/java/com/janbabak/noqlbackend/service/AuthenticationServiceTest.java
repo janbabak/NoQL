@@ -10,14 +10,12 @@ import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -168,9 +166,7 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
-        HttpServletRequest request = mock(HttpServletRequest.class);
 
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(jwtService.isTokenValid(refreshToken, user)).thenReturn(true);
@@ -178,10 +174,10 @@ class AuthenticationServiceTest {
         when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
 
         // when
-        AuthenticationResponse actual = authenticationService.refreshToken(request);
+        AuthenticationResponse actual = authenticationService.refreshToken(refreshToken);
 
         // then
-        assertEquals(accessToken, actual.token());
+        assertEquals(accessToken, actual.accessToken());
         assertEquals(newRefreshToken, actual.refreshToken());
         assertEquals(user, actual.user());
     }
@@ -191,13 +187,10 @@ class AuthenticationServiceTest {
     void refreshTokenInvalid() {
         // given
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        HttpServletRequest request = mock(HttpServletRequest.class);
-
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
         when(jwtService.extractUsername(refreshToken)).thenReturn(null);
 
         // then
-        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(request));
+        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(refreshToken));
     }
 
     @Test
@@ -214,15 +207,13 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
-        HttpServletRequest request = mock(HttpServletRequest.class);
 
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(jwtService.isTokenValid(refreshToken, user)).thenReturn(false);
 
         // then
-        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(request));
+        assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(refreshToken));
     }
 
     @Test
@@ -231,14 +222,12 @@ class AuthenticationServiceTest {
         // given
         String email = "john@gmail.com";
         String refreshToken = "validRefreshToken";
-        HttpServletRequest request = mock(HttpServletRequest.class);
 
-        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer " + refreshToken);
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> authenticationService.refreshToken(request));
+        assertThrows(EntityNotFoundException.class, () -> authenticationService.refreshToken(refreshToken));
     }
 
     @Test

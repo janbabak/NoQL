@@ -24,7 +24,7 @@ public class AuthenticationController {
      * Authenticate existing user.
      *
      * @param request request with username and password
-     * @return response with user data and JWT token
+     * @return response with user data and auth tokens
      * @throws EntityNotFoundException User with this username not found.
      */
     @PostMapping("/authenticate")
@@ -38,7 +38,7 @@ public class AuthenticationController {
      * Register new user, create new user with USER role.
      *
      * @param request user data
-     * @return response with new user data and JWT token
+     * @return response with new user data and auth tokens
      * @throws UserAlreadyExistsException User with this username already exists.
      */
     @PostMapping("/register")

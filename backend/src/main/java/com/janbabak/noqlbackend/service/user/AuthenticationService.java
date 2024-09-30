@@ -37,7 +37,7 @@ public class AuthenticationService {
      *
      * @param request user data
      * @param role    role of new user
-     * @return response with new user data and JWT token
+     * @return response with new user data and auth tokens
      * @throws UserAlreadyExistsException User with this username already exists.
      */
     public AuthenticationResponse register(RegisterRequest request, Role role) throws UserAlreadyExistsException {
@@ -50,7 +50,7 @@ public class AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .user(user)
                 .build();
@@ -60,7 +60,7 @@ public class AuthenticationService {
      * Authenticate existing user.
      *
      * @param request request with username and password
-     * @return response with user data and JWT token
+     * @return response with user data and auth tokens
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws EntityNotFoundException {
         authenticationManager.authenticate(
@@ -73,7 +73,7 @@ public class AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .user(user)
                 .build();
@@ -96,7 +96,7 @@ public class AuthenticationService {
                 String accessToken = jwtService.generateToken(user);
                 String newRefreshToken = jwtService.generateRefreshToken(user);
                 return AuthenticationResponse.builder()
-                        .token(accessToken)
+                        .accessToken(accessToken)
                         .refreshToken(newRefreshToken)
                         .user(user)
                         .build();
