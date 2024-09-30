@@ -44,7 +44,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       const response = await authenticationApi.authenticate(data)
-      localStorageService.setAccessToken(response.data.token)
+      localStorageService.setAccessToken(response.data.accessToken)
       localStorageService.setRefreshToken(response.data.refreshToken)
       localStorageService.setUserId(response.data.user.id)
       navigate(previousLocation)

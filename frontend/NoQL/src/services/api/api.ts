@@ -42,7 +42,7 @@ class Api {
           originalRequest._retry = true
           try {
             const response = await this.refreshToken()
-            localStorageService.setAccessToken(response.token)
+            localStorageService.setAccessToken(response.accessToken)
             localStorageService.setRefreshToken(response.refreshToken)
             return this.axiosInstance(originalRequest)
           } catch (refreshError) {
