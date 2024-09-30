@@ -14,8 +14,15 @@ export const localStorageService = {
    * Set access token to local storage.
    * @param token jwt token
    */
-  setAcessToken(token: string): void {
+  setAccessToken(token: string): void {
     window.localStorage.setItem(this.ACCESS_TOKEN_KEY, token)
+  },
+
+  /**
+   * Remove authentication token from local storage.
+   */
+  clearAccessToken(): void {
+    window.localStorage.removeItem(this.ACCESS_TOKEN_KEY)
   },
 
   /**
@@ -34,10 +41,10 @@ export const localStorageService = {
   },
 
   /**
-   * Remove authentication token from local storage.
+   * Remove refresh token from local storage.
    */
-  clearToken(): void {
-    window.localStorage.removeItem(this.ACCESS_TOKEN_KEY)
+  clearRefreshToken(): void {
+    window.localStorage.removeItem(this.REFRESH_TOKEN_KEY)
   },
 
   /**

@@ -39,17 +39,17 @@ class Api {
       async (error) => {
         const originalRequest = error.config
         if (error.response.status === 401 && !originalRequest._retry) {
-          console.log(originalRequest)
-          console.log(originalRequest._retry === undefined)
-          console.log("original reqeust retry: " + originalRequest._retry)
           originalRequest._retry = true
           try {
             const response = await this.refreshToken()
-            console.log(response)
-            const newAccessToken = response.token
-            localStorageService.setAcessToken(newAccessToken)
+            localStorageService.setAccessToken(response.token)
+            localStorageService.setRefreshToken(response.refreshToken)
             return this.axiosInstance(originalRequest)
           } catch (refreshError) {
+            localStorageService.clearAccessToken()
+            localStorageService.clearRefreshToken()
+            localStorageService.clearUserId()
+            window.location.href = '/login' // redirect to login page to obtain new refresh token
             return Promise.reject(refreshError)
           }
         }

@@ -33,7 +33,8 @@ export function ApplicationBar(
 
   function logOut(): void {
     localStorageService.clearUserId()
-    localStorageService.clearToken()
+    localStorageService.clearAccessToken()
+    localStorageService.clearRefreshToken()
     navigate('/login')
   }
 

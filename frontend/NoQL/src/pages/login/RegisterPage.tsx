@@ -47,7 +47,7 @@ export function RegisterPage() {
     setLoading(true)
     try {
       const response = await authenticationApi.register(data)
-      localStorageService.setAcessToken(response.data.token)
+      localStorageService.setAccessToken(response.data.token)
       localStorageService.setRefreshToken(response.data.refreshToken)
       localStorageService.setUserId(response.data.user.id)
       navigate('/')
