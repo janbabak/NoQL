@@ -1,7 +1,12 @@
 main {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     width: 100%;
     margin: 5rem auto 1rem auto;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
 }

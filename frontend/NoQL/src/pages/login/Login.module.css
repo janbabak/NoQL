@@ -3,7 +3,15 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    top: -6rem ;
+    min-height: 100vh;
+}
+
+.loginPage {
+    top: -8.5rem ;
+}
+
+.registerPage {
+    top: -3rem;
 }
 
 .card {

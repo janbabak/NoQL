@@ -60,7 +60,7 @@ export function RegisterPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.registerPage}`}>
       <Card className={styles.card}>
         <form noValidate onSubmit={handleSubmit(onSubmit)} className={styles.form}>
 

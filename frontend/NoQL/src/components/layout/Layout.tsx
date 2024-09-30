@@ -27,7 +27,7 @@ export function Layout() {
   ]
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box className={styles.layout}>
 
       <CustomAppBar
         drawerOpen={drawerOpen}

@@ -57,10 +57,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.loginPage}`}>
       <Card className={styles.card}>
-        <form
-          noValidate
+      <form
+        noValidate
           onSubmit={handleSubmit(onSubmit)}
           className={styles.form}
         >
