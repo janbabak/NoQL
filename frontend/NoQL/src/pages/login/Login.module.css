@@ -3,7 +3,10 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    top: -6rem ;
+}
+
+.loginPage {
+    top: -5.5rem ;
 }
 
 .card {
