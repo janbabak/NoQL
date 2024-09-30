@@ -15,7 +15,7 @@ interface CustomAppBarProps {
   setDrawerOpen: React.Dispatch<SetStateAction<boolean>>,
 }
 
-export function ApplicationBar(
+export function CustomAppBar(
   {
     drawerOpen,
     setDrawerOpen

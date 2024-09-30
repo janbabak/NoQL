@@ -12,12 +12,12 @@ interface ApiParameter {
 class Api {
   axiosInstance: AxiosInstance = axios.create({
     baseURL: import.meta.env.VITE_BACKEND_URL,
-    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT_MILIS),
+    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT_MILIS)
   })
 
   /** forbid constructor, because api is a singleton */
   private constructor() {
-    log.info("BE URL is: " + this.axiosInstance.defaults.baseURL)
+    log.info('BE URL is: ' + this.axiosInstance.defaults.baseURL)
 
     // Add a request interceptor that inserts an auth token into headers.
     this.axiosInstance.interceptors.request.use(
@@ -60,7 +60,10 @@ class Api {
 
   static instance: Api | null = null
 
-
+  /**
+   * Obtain new access token using refresh token. If refresh token is not available, reject promise.
+   * @private
+   */
   private async refreshToken(): Promise<AuthenticationResponse> {
     const refreshToken = localStorageService.getRefreshToken()
     if (!refreshToken) {
@@ -70,7 +73,7 @@ class Api {
     // using fetch, so auth header is not added by axios interceptor
     const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/auth/refreshToken', {
       method: 'POST',
-      body: refreshToken,
+      body: refreshToken
     })
 
     if (!response.ok) {
@@ -99,7 +102,7 @@ class Api {
   get(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
-      method: 'GET',
+      method: 'GET'
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -141,7 +144,7 @@ class Api {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
       method: 'PUT',
-      data: data,
+      data: data
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -155,7 +158,7 @@ class Api {
   delete(path: string, parameters: ApiParameter[] = []): Promise<AxiosResponse> {
     const requestConfig: AxiosRequestConfig = {
       url: this.createUrl(path, parameters),
-      method: 'DELETE',
+      method: 'DELETE'
     }
 
     return this.axiosInstance.request(requestConfig)
@@ -166,7 +169,7 @@ class Api {
    * @param path path in url
    * @param parameters query parameters
    */
-  createUrl(path: string, parameters: ApiParameter[] = []): string {
+  private createUrl(path: string, parameters: ApiParameter[] = []): string {
     let delimiter = '?'
     for (const parameter of parameters) {
       path = path + delimiter + parameter.name + '=' + parameter.value
