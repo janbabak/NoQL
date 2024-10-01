@@ -88,7 +88,6 @@ class CustomModelControllerTest {
     @DisplayName("Get all custom models with anonymous user")
     @WithAnonymousUser
     void testGetAllCustomModelsWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(get(ROOT_URL))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -122,7 +121,6 @@ class CustomModelControllerTest {
     @DisplayName("Get all models with anonymous user")
     @WithAnonymousUser
     void testGetAllModelsWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(get(ROOT_URL + "/all"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -160,7 +158,6 @@ class CustomModelControllerTest {
     @DisplayName("Get custom model by id with anonymous user")
     @WithAnonymousUser
     void testGetCustomModelByIdWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(get(ROOT_URL + "/{localModelId}", localModel.getId()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -192,7 +189,6 @@ class CustomModelControllerTest {
     @DisplayName("Create custom model with anonymous user")
     @WithAnonymousUser
     void testCreateCustomModelWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(post(ROOT_URL)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -401,7 +397,6 @@ class CustomModelControllerTest {
     @DisplayName("Update custom model with anonymous user")
     @WithAnonymousUser
     void testUpdateCustomModelWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(put(ROOT_URL + "/{localModelId}", localModel.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -429,7 +424,6 @@ class CustomModelControllerTest {
     @DisplayName("Delete custom model with anonymous user")
     @WithAnonymousUser
     void testDeleteCustomModelWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(delete(ROOT_URL + "/{localModelId}", localModel.getId())
                         .with(csrf()))
                 .andDo(print())

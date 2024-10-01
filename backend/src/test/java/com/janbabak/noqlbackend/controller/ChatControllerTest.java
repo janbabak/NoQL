@@ -99,7 +99,6 @@ class ChatControllerTest {
     @DisplayName("Create chat with anonymous user")
     @WithAnonymousUser
     void testCreateChatWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", UUID.randomUUID().toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,7 +147,6 @@ class ChatControllerTest {
     @DisplayName("Get chat by id with anonymous user")
     @WithAnonymousUser
     void testGetChatByIdWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -172,7 +170,6 @@ class ChatControllerTest {
     @DisplayName("Delete chat with anonymous user")
     @WithAnonymousUser
     void testDeleteChatByIdWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(delete(ROOT_URL + "/{chatId}", UUID.randomUUID())
                         .with(csrf()))
                 .andDo(print())
@@ -249,7 +246,6 @@ class ChatControllerTest {
     @DisplayName("Rename chat with anonymous user")
     @WithAnonymousUser
     void testRenameChatWithAnonymousUser() throws Exception {
-        // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", UUID.randomUUID())
                         .param("name", "Find all users")
                         .with(csrf()))
