@@ -7,15 +7,19 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.JwtService;
+import com.janbabak.noqlbackend.service.utils.JsonUtils;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -28,7 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthenticationController.class)
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
 @Import(JwtService.class)
 class AuthenticationControllerTest {
 
@@ -43,8 +49,7 @@ class AuthenticationControllerTest {
     @ParameterizedTest
     @DisplayName("Authenticate user")
     @MethodSource("authenticateDataProvider")
-    @WithMockUser
-        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    @WithAnonymousUser
     void authenticate(String requestJson,
                        AuthenticationRequest requestObj,
                        String responseJson,
@@ -89,7 +94,7 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "USER"
+                                "role": "ROLE_USER"
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -100,7 +105,7 @@ class AuthenticationControllerTest {
                                         .firstName("John")
                                         .lastName("Doe")
                                         .email("john.doe@gmail.com")
-                                        .role(Role.USER)
+                                        .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
                                         .build())
                                 .build(),
@@ -144,8 +149,7 @@ class AuthenticationControllerTest {
     @ParameterizedTest
     @DisplayName("Test register new user")
     @MethodSource("registerDataProvider")
-    @WithMockUser
-        // TODO: for some reason doesn't work without it, though it should work with @WithAnonymousUser
+    @WithAnonymousUser
     void register(String requestJson,
                   RegisterRequest requestObj,
                   String responseJson,
@@ -153,7 +157,7 @@ class AuthenticationControllerTest {
                   Boolean success) throws Exception {
 
         if (success) {
-            when(authenticationService.register(requestObj, Role.USER))
+            when(authenticationService.register(requestObj, Role.ROLE_USER))
                     .thenReturn(responseObj);
         }
 
@@ -166,6 +170,39 @@ class AuthenticationControllerTest {
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(responseJson, true));
+    }
+
+    @Test
+    @DisplayName("Test refresh token")
+    @WithAnonymousUser
+    void refreshToken() throws Exception {
+        // given
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
+
+        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
+                .accessToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw")
+                .refreshToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTc2NX0.HT5KK391gGf5oohjKOH_ky0Pp9ze43l4CLeygQCkwf7R4iLlv1oJ9PU4U6Ct3_SBxrSn1AW7T_kWqcEjF0Vrdg")
+                .user(User.builder()
+                        .id(UUID.fromString("b2e50470-fe61-4bf7-999f-b34d0908b9be"))
+                        .firstName("John")
+                        .lastName("Doe")
+                        .email("john.doe@email.com")
+                        .role(Role.ROLE_USER)
+                        .build())
+                .build();
+
+        when(authenticationService.refreshToken(refreshToken)).thenReturn(expectedResponse);
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/refreshToken")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(refreshToken)
+                        .with(csrf())
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JsonUtils.toJson(expectedResponse), true));
     }
 
     static Object[][] registerDataProvider() {
@@ -195,7 +232,7 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "USER"
+                                "role": "ROLE_USER"
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -206,7 +243,7 @@ class AuthenticationControllerTest {
                                         .firstName("John")
                                         .lastName("Doe")
                                         .email("john.doe@gmail.com")
-                                        .role(Role.USER)
+                                        .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
                                         .build())
                                 .build(),

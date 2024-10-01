@@ -87,8 +87,8 @@ public class EntityServiceIntegrationTest {
                 .password("password")
                 .build();
 
-        testUser = authenticationService.register(registerUserRequest, Role.USER).user();
-        testAdmin = authenticationService.register(registerAdminRequest, Role.ADMIN).user();
+        testUser = authenticationService.register(registerUserRequest, Role.ROLE_USER).user();
+        testAdmin = authenticationService.register(registerAdminRequest, Role.ROLE_ADMIN).user();
 
         AuthenticationService.authenticateUser(testUser);
     }

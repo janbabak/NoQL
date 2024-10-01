@@ -3,7 +3,6 @@ package com.janbabak.noqlbackend.config;
 import com.janbabak.noqlbackend.authentication.JwtAuthenticationFilter;
 import com.janbabak.noqlbackend.error.handler.CustomAccessDeniedHandler;
 import com.janbabak.noqlbackend.error.handler.CustomAuthenticationEntryPoint;
-import com.janbabak.noqlbackend.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(noAuthPaths).permitAll()
-                        .requestMatchers(adminPaths).hasAuthority(Role.ADMIN.name())
+                        .requestMatchers(adminPaths).hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

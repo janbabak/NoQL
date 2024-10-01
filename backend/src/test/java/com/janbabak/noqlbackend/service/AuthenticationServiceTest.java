@@ -67,7 +67,7 @@ class AuthenticationServiceTest {
                 .lastName("Doe")
                 .email(email)
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
         String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
@@ -79,7 +79,7 @@ class AuthenticationServiceTest {
         when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
-        AuthenticationResponse actual = authenticationService.register(registerRequest, Role.USER);
+        AuthenticationResponse actual = authenticationService.register(registerRequest, Role.ROLE_USER);
 
         // then
         assertEquals(authenticationResponse, actual);
@@ -98,14 +98,14 @@ class AuthenticationServiceTest {
                 .lastName("Doe")
                 .email(email)
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
         // then
         assertThrows(UserAlreadyExistsException.class,
-                () -> authenticationService.register(registerRequest, Role.USER));
+                () -> authenticationService.register(registerRequest, Role.ROLE_USER));
     }
 
     @Test
@@ -120,7 +120,7 @@ class AuthenticationServiceTest {
                 .lastName("Doe")
                 .email(email)
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
         String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
@@ -164,7 +164,7 @@ class AuthenticationServiceTest {
                 .lastName("Doe")
                 .email(email)
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
@@ -205,7 +205,7 @@ class AuthenticationServiceTest {
                 .lastName("Doe")
                 .email(email)
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
@@ -241,7 +241,7 @@ class AuthenticationServiceTest {
                 .email(email)
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn(email);
@@ -265,7 +265,7 @@ class AuthenticationServiceTest {
                 .email("john.doe@yahoo.com")
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn("different@email.com");
@@ -287,7 +287,7 @@ class AuthenticationServiceTest {
                 .email(email)
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn(email);
@@ -327,7 +327,7 @@ class AuthenticationServiceTest {
                 .email("different@email.cz")
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn(email);
@@ -353,7 +353,7 @@ class AuthenticationServiceTest {
                 .email(email)
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn(email);
@@ -387,7 +387,7 @@ class AuthenticationServiceTest {
                 .email("different@email.com")
                 .firstName("John")
                 .lastName("Doe")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(authentication.getName()).thenReturn(email);

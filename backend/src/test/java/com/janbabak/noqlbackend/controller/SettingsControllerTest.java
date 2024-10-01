@@ -5,11 +5,13 @@ import com.janbabak.noqlbackend.service.JwtService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
@@ -17,7 +19,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(SettingsController.class)
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
 @Import(JwtService.class)
 class SettingsControllerTest {
 
@@ -52,5 +56,13 @@ class SettingsControllerTest {
     void getSettingAnonymousUser() throws Exception {
         mockMvc.perform(get("/settings"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Get settings with USER role")
+    @WithMockUser(roles = "USER")
+    void getSettingUser() throws Exception {
+        mockMvc.perform(get("/settings"))
+                .andExpect(status().isForbidden());
     }
 }
