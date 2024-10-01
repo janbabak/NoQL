@@ -12,9 +12,10 @@ import java.io.IOException;
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException {
-        System.out.println("problem is: " + response.getStatus());
+    public void commence(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException) throws IOException {
 
         //errors beside 401 UNAUTHORIZED and 403 FORBIDDEN
         if (response.getStatus() >= 400
