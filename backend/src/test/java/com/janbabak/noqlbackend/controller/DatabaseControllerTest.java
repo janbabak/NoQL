@@ -23,10 +23,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -44,7 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(DatabaseController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @Import(JwtService.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DatabaseControllerTest {
@@ -83,7 +86,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get all databases")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetAllDatabases() throws Exception {
         // given
         Database localMysql = Database.builder()
@@ -110,8 +113,17 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Get all databases by anonymous user")
+    @WithAnonymousUser
+    void testGetAllDatabasesByAnotherUser() throws Exception {
+        mockMvc.perform(get(ROOT_URL))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get database by id")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetDatabaseById() throws Exception {
         when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
 
@@ -124,7 +136,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database by id not found")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetDatabaseByIdNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -137,10 +149,19 @@ class DatabaseControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("Get database by id by anonymous user")
+    @WithAnonymousUser
+    void testGetDatabaseByIdByAnotherUser() throws Exception {
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}", localPostgres.getId()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
     @ParameterizedTest
     @DisplayName("Create database")
     @MethodSource("createDatabaseDataProvider")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testCreateDatabase(String request, Database createdDatabase, String response, Boolean success)
             throws Exception {
 
@@ -277,10 +298,23 @@ class DatabaseControllerTest {
         };
     }
 
+    @Test
+    @DisplayName("Create database by anonymous user")
+    @WithAnonymousUser
+    void testCreateDatabaseByAnotherUser() throws Exception {
+        mockMvc.perform(post(ROOT_URL)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
     @ParameterizedTest
     @DisplayName("Update database")
     @MethodSource("updateDatabaseDataProvider")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testUpdateDatabase(String request, Database updatedDatabase, String response, Boolean success)
             throws Exception {
 
@@ -450,8 +484,21 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Update database by anonymous user")
+    @WithAnonymousUser
+    void testUpdateDatabaseByAnotherUser() throws Exception {
+        mockMvc.perform(put(ROOT_URL + "/{databaseId}", localPostgres.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Delete database")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testDeleteDatabaseById() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -464,8 +511,18 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Delete database by anonymous user")
+    @WithAnonymousUser
+    void testDeleteDatabaseByIdByAnotherUser() throws Exception {
+        mockMvc.perform(delete(ROOT_URL + "/{databaseId}", localPostgres.getId())
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Execute chat")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testExecuteChat() throws Exception {
 
         // given
@@ -505,7 +562,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Execute chat bad request")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testExecuteChatBadRequest() throws Exception {
         // given
         Integer pageSize = 2;
@@ -533,8 +590,29 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Execute chat by anonymous user")
+    @WithAnonymousUser
+    void testExecuteChatByAnotherUser() throws Exception {
+        // given
+        Integer pageSize = 2;
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+                        .param("pageSize", pageSize.toString())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(request))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Load chat result")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testLoadChatResult() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -572,8 +650,28 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Load chat result by anonymous user")
+    @WithAnonymousUser
+    void testLoadChatResultByAnotherUser() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        Integer page = 1;
+        Integer pageSize = 2;
+
+        // then
+        mockMvc.perform(
+                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                                .param("page", page.toString())
+                                .param("pageSize", pageSize.toString())
+                                .param("chatId", chatId.toString()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Execute query-language query")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testExecuteQueryLanguageQuery() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -615,8 +713,36 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Execute query-language query by anonymous user")
+    @WithAnonymousUser
+    void testExecuteQueryLanguageQueryByAnotherUser() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        int page = 0;
+        int pageSize = 2;
+        // language=SQL
+        String query = """
+                SELECT u.*, a.city, a.street, a.state
+                FROM public."user" u
+                JOIN public.address a ON u.id = a.user_id;
+                """;
+
+        // then
+        mockMvc.perform(
+                        post(ROOT_URL + "/{databaseId}/query/queryLanguage", databaseId)
+                                .param("page", Integer.toString(page))
+                                .param("pageSize", Integer.toString(pageSize))
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.TEXT_PLAIN)
+                                .content(query)
+                                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get database structure")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetDatabaseStructure() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -644,7 +770,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get database structure not found")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetDatabaseStructureNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -658,8 +784,21 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Get database structure by anonymous user")
+    @WithAnonymousUser
+    void testGetDatabaseStructureByAnotherUser() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get crate script")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetCreateScript() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -694,7 +833,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get crate script database not found")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetDatabaseCreateScriptNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -708,8 +847,21 @@ class DatabaseControllerTest {
     }
 
     @Test
+    @DisplayName("Get crate script by anonymous user")
+    @WithAnonymousUser
+    void testGetDatabaseCreateScriptByAnotherUser() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get chats of database")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void getChatsOfDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -728,7 +880,7 @@ class DatabaseControllerTest {
 
     @Test
     @DisplayName("Get chats of not existing database")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void getChatsOfNotExistingDatabase() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
@@ -739,5 +891,18 @@ class DatabaseControllerTest {
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/chats", databaseId))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Get chats of database by anonymous user")
+    @WithAnonymousUser
+    void getChatsOfDatabaseByAnotherUser() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{databaseId}/chats", databaseId))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }
