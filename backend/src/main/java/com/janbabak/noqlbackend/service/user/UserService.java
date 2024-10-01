@@ -82,7 +82,7 @@ public class UserService {
             userToUpdate.setEmail(data.getEmail());
         }
         if (data.getRole() != null) {
-            if (data.getRole() == Role.ADMIN) {
+            if (data.getRole() == Role.ROLE_ADMIN) {
                 // only admin is allowed to change role to admin
                 authenticationService.ifNotAdminThrowAccessDenied();
             }

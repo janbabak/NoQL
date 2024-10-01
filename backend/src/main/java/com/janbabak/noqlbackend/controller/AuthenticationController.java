@@ -45,7 +45,7 @@ public class AuthenticationController {
     @ResponseStatus(HttpStatus.CREATED)
     public AuthenticationResponse register(@RequestBody @Valid RegisterRequest request)
             throws UserAlreadyExistsException {
-        return authenticationService.register(request, Role.USER);
+        return authenticationService.register(request, Role.ROLE_USER);
     }
 
     /**

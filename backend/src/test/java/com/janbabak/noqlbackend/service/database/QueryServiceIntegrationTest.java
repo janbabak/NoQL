@@ -112,7 +112,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .password("password")
                 .build();
 
-        testUser = authenticationService.register(registerUserRequest, Role.USER).user();
+        testUser = authenticationService.register(registerUserRequest, Role.ROLE_USER).user();
 
         AuthenticationService.authenticateUser(testUser);
 

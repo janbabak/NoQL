@@ -61,7 +61,7 @@ class UserControllerTest {
                 .lastName("Doe")
                 .email("john.doe@email.com")
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         User user2 = User.builder()
@@ -70,7 +70,7 @@ class UserControllerTest {
                 .lastName("Doe")
                 .email("jane.doe@email.com")
                 .password("password2")
-                .role(Role.ADMIN)
+                .role(Role.ROLE_ADMIN)
                 .build();
 
         List<User> users = List.of(user1, user2);
@@ -149,7 +149,7 @@ class UserControllerTest {
                                 .lastName("Doe")
                                 .email("john.doe@email.com")
                                 .password("password")
-                                .role(Role.USER)
+                                .role(Role.ROLE_USER)
                                 .build(),
                         // language=JSON
                         """
@@ -177,7 +177,7 @@ class UserControllerTest {
                                 .lastName("updated last name")
                                 .email("john.updated@email.com")
                                 .password("updated password")
-                                .role(Role.ADMIN)
+                                .role(Role.ROLE_ADMIN)
                                 .build(),
                         // language=JSON
                         """

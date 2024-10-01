@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
 @SpringBootTest
+@AutoConfigureMockMvc
 @Import(JwtService.class)
 class AuthenticationControllerTest {
 
@@ -92,7 +92,7 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "USER"
+                                "role": "ROLE_USER"
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -103,7 +103,7 @@ class AuthenticationControllerTest {
                                         .firstName("John")
                                         .lastName("Doe")
                                         .email("john.doe@gmail.com")
-                                        .role(Role.USER)
+                                        .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
                                         .build())
                                 .build(),
@@ -155,7 +155,7 @@ class AuthenticationControllerTest {
                   Boolean success) throws Exception {
 
         if (success) {
-            when(authenticationService.register(requestObj, Role.USER))
+            when(authenticationService.register(requestObj, Role.ROLE_USER))
                     .thenReturn(responseObj);
         }
 
@@ -185,7 +185,7 @@ class AuthenticationControllerTest {
                         .firstName("John")
                         .lastName("Doe")
                         .email("john.doe@email.com")
-                        .role(Role.USER)
+                        .role(Role.ROLE_USER)
                         .build())
                 .build();
 
@@ -230,7 +230,7 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "USER"
+                                "role": "ROLE_USER"
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -241,7 +241,7 @@ class AuthenticationControllerTest {
                                         .firstName("John")
                                         .lastName("Doe")
                                         .email("john.doe@gmail.com")
-                                        .role(Role.USER)
+                                        .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
                                         .build())
                                 .build(),

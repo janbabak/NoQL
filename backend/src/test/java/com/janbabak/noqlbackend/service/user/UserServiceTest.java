@@ -117,7 +117,7 @@ class UserServiceTest {
                 .lastName("doe")
                 .email("john.doe@email.com")
                 .password("password")
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         UpdateUserRequest request = UpdateUserRequest.builder()
@@ -133,7 +133,7 @@ class UserServiceTest {
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
                 .password(passwordEncoder.encode("password2"))
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
