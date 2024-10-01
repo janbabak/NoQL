@@ -1,11 +1,12 @@
 package com.janbabak.noqlbackend.config;
 
 import com.janbabak.noqlbackend.authentication.JwtAuthenticationFilter;
+import com.janbabak.noqlbackend.error.handler.CustomAccessDeniedHandler;
+import com.janbabak.noqlbackend.error.handler.CustomAuthenticationEntryPoint;
 import com.janbabak.noqlbackend.model.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,10 +50,8 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"))
-                        .accessDeniedHandler((request, response, accessDeniedException) ->
-                                response.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden")));
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
         return httpSecurity.build();
     }

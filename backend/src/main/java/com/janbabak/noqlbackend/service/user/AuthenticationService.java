@@ -112,6 +112,10 @@ public class AuthenticationService {
      * @return user if id is same as id of authenticated user, otherwise null
      */
     public User checkIfRequestingSelf(UUID id) {
+        if (id == null) {
+            return null;
+        }
+
         Optional<User> user = userRepository.findById(id);
 
         if (user.isEmpty()

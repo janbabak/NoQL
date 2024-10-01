@@ -45,7 +45,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthenticationResponse'
         '400':
-          description: Invalid input
+          description: Bad reqeust - invalid input
 
   /auth/authenticate:
     post:
@@ -66,7 +66,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthenticationResponse'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid credentials
 
   /auth/refreshToken:
     post:
@@ -75,7 +77,15 @@ paths:
       summary: Refresh access and refresh token
       description: >
         Refresh access and refresh token. The refresh token is used to get a new access token when the access token
-        expires. The refresh token is valid for 7 days. The access token is valid for 30 minutes. Use refresh token in Authorization header with Bearer prefix `Bearer: <token_value>`.
+        expires. The refresh token is valid for 7 days. The access token is valid for 30 minutes.
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              description: Refresh token
+              example: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODAyMjEsImV4cCI6MTcyNzc4MDI4MX0.L7FlXwIWF71d4ozC2ED5fK1Dd_KPG6Ut4Q_Ch8K2U8drCMYsskrvF7XUBNdDdN7TFdTD2ON9ZKygEL8nNPYcQA"
       responses:
         '200':
           description: Refreshed token
@@ -83,6 +93,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Bad request - token not provided
         '401':
           description: Unauthorized - expired or invalid token
 
@@ -90,7 +102,8 @@ paths:
     get:
       tags:
         - User
-      summary: Get all users
+      summary: Get all users.
+      description: Get information about all users. Role ADMIN is required.
       security:
         - BearerAuth: [ ]
       responses:
@@ -102,6 +115,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN
 
   /user/{userId}:
     get:
@@ -120,11 +137,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN and tries to access data of a different user
         '404':
           description: User of specified ID not found
-
     put:
       tags:
         - User
@@ -148,9 +166,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN and tries to update data of a different user
         '404':
           description: User of specified ID not found
 
@@ -166,8 +186,10 @@ paths:
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN and tries to delete data of a different user
 
   /database:
     get:
@@ -188,8 +210,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Database'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden'
+          description: Forbidden - user is not an ADMIN owner of the database
     post:
       tags:
         - Database
@@ -211,9 +235,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Database'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or tries to create a database for a different user
 
   /database/{databaseId}:
     get:
@@ -232,8 +258,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Database'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
     put:
@@ -259,9 +287,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Database'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
     delete:
@@ -274,8 +304,10 @@ paths:
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
 
   /database/{databaseId}/query/chat:
     post:
@@ -306,9 +338,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/QueryResponse'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
 
@@ -334,8 +368,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QueryResponse'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of chat of specified ID not found.
 
@@ -383,9 +419,11 @@ paths:
                   errorMessage: null
 
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
 
@@ -408,8 +446,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SqlDatabaseStructure'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
 
@@ -434,8 +474,10 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/DatabaseCreateScript'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
 
@@ -460,8 +502,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ChatHistoryItem'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
 
@@ -490,8 +534,10 @@ paths:
                 name: "New chat"
                 messages: [ ]
                 modificationDate: "2024-05-24T18:40:24.649+00:00"
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of the database to which the chat is associated
         '404':
           description: Database of specified ID not found
 
@@ -512,8 +558,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Chat'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
         '404':
           description: Chat of specified ID not found
     delete:
@@ -528,8 +576,10 @@ paths:
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
 
   /chat/{chatId}/name:
     put:
@@ -550,8 +600,10 @@ paths:
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
 
   /chat/{chatId}/messages:
     post:
@@ -574,17 +626,19 @@ paths:
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
 
   /settings:
     get:
       tags:
         - Settings
       summary: Get application settings
+      description: Role ADMIN is required.
       security:
         - BearerAuth: [ ]
-      description: Role ADMIN is required.
       responses:
         '200':
           description: Application settings
@@ -592,14 +646,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Settings'
+        '401':
+          description: Unauthorized - invalid or expired access token
         '403':
-          description: Forbidden
+          description: Forbidden - user is not an ADMIN
 
   /model:
     get:
       tags:
         - Model
       summary: Get all custom models
+      description: >
+        Get all custom models. Role USER can request only his own models. Role ADMIN can request any model.
       parameters:
         - $ref: '#/components/parameters/userIdQuery'
       responses:
@@ -611,11 +669,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomModel'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the model
 
     post:
       tags:
         - Model
       summary: Create a new custom model
+      description: Role USER can create only his own models. Role ADMIN can create any model.
       requestBody:
         required: true
         content:
@@ -630,13 +693,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomModel'
         '400':
-          description: Invalid input
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or tries to create a model for a different user
 
   /model/all:
     get:
       tags:
         - Model
-      summary: Get all models including default models like GPT, ...
+      summary: Get all models (custom and default models like GPT, ...)
+      description: >
+        Get all models. Role USER can request only his own models. Role ADMIN can request any model.
+      parameters:
+        - $ref: '#/components/parameters/userIdQuery'
       responses:
         '200':
           description: A list of models
@@ -646,12 +717,17 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ModelOption'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN of those models
 
   /model/{modelId}:
     get:
       tags:
         - Model
       summary: Get a custom model by ID
+      description: Role USER can request only his own models. Role ADMIN can request any model.
       parameters:
         - $ref: '#/components/parameters/modelId'
       responses:
@@ -661,6 +737,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomModel'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the model
         '404':
           description: Custom model of specified ID not found
 
@@ -668,6 +748,7 @@ paths:
       tags:
         - Model
       summary: Update a custom model by ID
+      description: Update provided non-null fields. Role USER can update only his own models. Role ADMIN can update any model.
       parameters:
         - $ref: '#/components/parameters/modelId'
       requestBody:
@@ -683,20 +764,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomModel'
+        '400':
+          description: Bad request - invalid input
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the model
         '404':
           description: Custom model of specified ID not found
-        '400':
-          description: Invalid input
 
     delete:
       tags:
         - Model
       summary: Delete a custom model by ID
+      description: Role USER can delete only his own models. Role ADMIN can delete any custom model.
       parameters:
         - $ref: '#/components/parameters/modelId'
       responses:
         '204':
           description: No content
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the model
 
 components:
   securitySchemes:
