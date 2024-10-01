@@ -11,12 +11,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.access.AccessDeniedException;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @Import(JwtService.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserControllerTest {
@@ -51,7 +56,7 @@ class UserControllerTest {
             .build();
 
     @Test
-    @DisplayName("Get all users")
+    @DisplayName("Get all users with ADMIN role")
     @WithMockUser("ADMIN")
     void getAll() throws Exception {
         // given
@@ -85,10 +90,31 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Get user by id")
+    @DisplayName("Get all users with USER role")
+    @WithMockUser(roles = "USER")
+    void getAllForbidden() throws Exception {
+        //given
+        when(userService.findAll()).thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(get(ROOT_URL))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get all users with anonymous user")
+    @WithAnonymousUser
+    void getAllUnauthorized() throws Exception {
+        mockMvc.perform(get(ROOT_URL))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Get user by id with USER role")
     @WithMockUser(roles = "USER")
     void getById() throws Exception {
-
         // given
         when(userService.findById(testUser.getId())).thenReturn(testUser);
 
@@ -97,6 +123,15 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(testUser), true));
+    }
+
+    @Test
+    @DisplayName("Get user by id with anonymous user")
+    @WithAnonymousUser
+    void getByIdUnauthorized() throws Exception {
+        mockMvc.perform(get(ROOT_URL + "/{userId}", testUser.getId()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -158,7 +193,7 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "Doe",
                             "email": "john.doe@email.com",
-                            "role": "USER"
+                            "role": "ROLE_USER"
                         }""",
                         true
                 },
@@ -169,7 +204,7 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
-                            "role": "ADMIN"
+                            "role": "ROLE_ADMIN"
                         }""",
                         User.builder()
                                 .id(UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02"))
@@ -186,7 +221,7 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
-                            "role": "ADMIN"
+                            "role": "ROLE_ADMIN"
                         }""",
                         true
                 },
@@ -233,6 +268,16 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update user with anonymous user")
+    @WithAnonymousUser
+    void updateUserUnauthorized() throws Exception {
+        mockMvc.perform(put(ROOT_URL + "/{userId}", testUser.getId())
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Delete user")
     @WithMockUser(roles = "USER")
     void deleteUser() throws Exception {
@@ -241,5 +286,15 @@ class UserControllerTest {
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Delete user with anonymous user")
+    @WithAnonymousUser
+    void deleteUserUnauthorized() throws Exception {
+        mockMvc.perform(delete(ROOT_URL + "/{userId}", testUser.getId())
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 }
