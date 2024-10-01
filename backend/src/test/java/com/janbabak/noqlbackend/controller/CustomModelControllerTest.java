@@ -12,10 +12,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -32,7 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(CustomModelController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(JwtService.class)
 class CustomModelControllerTest {
@@ -59,7 +62,7 @@ class CustomModelControllerTest {
 
     @Test
     @DisplayName("Get all custom models")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetAllCustomModels() throws Exception {
         // given
         CustomModel gptProxy = CustomModel.builder()
@@ -82,8 +85,18 @@ class CustomModelControllerTest {
     }
 
     @Test
+    @DisplayName("Get all custom models with anonymous user")
+    @WithAnonymousUser
+    void testGetAllCustomModelsWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(get(ROOT_URL))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get all models")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetAllModels() throws Exception {
         // given
         List<ModelOption> allModels = List.of(
@@ -106,8 +119,18 @@ class CustomModelControllerTest {
     }
 
     @Test
+    @DisplayName("Get all models with anonymous user")
+    @WithAnonymousUser
+    void testGetAllModelsWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(get(ROOT_URL + "/all"))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Get custom model by id")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetCustomModelById() throws Exception {
         when(customModelService.findById(localModel.getId())).thenReturn(localModel);
 
@@ -120,7 +143,7 @@ class CustomModelControllerTest {
 
     @Test
     @DisplayName("Get custom model by id not found")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testGetCustomModelByIdNotFound() throws Exception {
         // given
         UUID customModelId = UUID.randomUUID();
@@ -133,10 +156,20 @@ class CustomModelControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("Get custom model by id with anonymous user")
+    @WithAnonymousUser
+    void testGetCustomModelByIdWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{localModelId}", localModel.getId()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
     @ParameterizedTest
     @MethodSource("createCustomModelDataProvider")
     @DisplayName("Create custom model")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testCreateCustomModel(String request, CustomModel createdModel, String response, Boolean success)
             throws Exception {
 
@@ -153,6 +186,20 @@ class CustomModelControllerTest {
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(response, true));
+    }
+
+    @Test
+    @DisplayName("Create custom model with anonymous user")
+    @WithAnonymousUser
+    void testCreateCustomModelWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(post(ROOT_URL)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
     /**
@@ -245,7 +292,7 @@ class CustomModelControllerTest {
     @ParameterizedTest
     @MethodSource("updatedCustomModelDataProvider")
     @DisplayName("Update custom model")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testUpdateCustomModel(String request, CustomModel updatedModel, String response, Boolean success)
             throws Exception {
 
@@ -351,8 +398,22 @@ class CustomModelControllerTest {
     }
 
     @Test
+    @DisplayName("Update custom model with anonymous user")
+    @WithAnonymousUser
+    void testUpdateCustomModelWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(put(ROOT_URL + "/{localModelId}", localModel.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("Delete custom model by id")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @WithMockUser(roles = "USER")
     void testDeleteCustomModelById() throws Exception {
         // given
         UUID customModelId = UUID.randomUUID();
@@ -362,6 +423,17 @@ class CustomModelControllerTest {
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Delete custom model with anonymous user")
+    @WithAnonymousUser
+    void testDeleteCustomModelWithAnonymousUser() throws Exception {
+        // then
+        mockMvc.perform(delete(ROOT_URL + "/{localModelId}", localModel.getId())
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
 }
