@@ -37,7 +37,8 @@ export function CreateUpdateDatabaseForm(
     userName: '',
     password: '',
     engine: '',
-    userId: localStorageService.getUserId() || ''
+    userId: localStorageService.getUserId() || '',
+    createDefaultChat: true
   }
 
   // load database data if action is update
