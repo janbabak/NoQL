@@ -10,7 +10,7 @@ import {
   TablePagination,
   TableRow
 } from '@mui/material'
-import React from 'react'
+import React, { memo } from 'react'
 
 interface Props {
   queryResult?: QueryResponse,
@@ -23,7 +23,7 @@ interface Props {
   loading: boolean,
 }
 
-export function ResultTable(
+const ResultTable = memo((
   {
     queryResult,
     page,
@@ -33,7 +33,7 @@ export function ResultTable(
     onPageSizeChange,
     paginationOptions = [10, 25, 50],
     loading
-  }: Props) {
+  }: Props) => {
 
   function changePage(_event: unknown, newPage: number): void {
     onPageChange(newPage, pageSize)
@@ -90,4 +90,6 @@ export function ResultTable(
       </Paper>
     </Box>
   )
-}
+})
+
+export { ResultTable }

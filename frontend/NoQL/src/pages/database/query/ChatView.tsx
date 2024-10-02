@@ -1,6 +1,6 @@
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs2015 as theme } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
-import React, { useEffect, useRef } from 'react'
+import React, { memo, useEffect, useRef } from 'react'
 import styles from './Query.module.css'
 import { Chat, ChatQueryWithResponse, LLMResult } from '../../../types/Chat.ts'
 import { useSelector } from 'react-redux'
@@ -38,7 +38,7 @@ function UsersQuery({ query }: UsersQueryProps) {
   )
 }
 
-export function ChatView() {
+const ChatView = memo(() => {
 
   const chat: Chat | null = useSelector((state: RootState) => {
     return state.chatReducer.chat
@@ -86,4 +86,6 @@ export function ChatView() {
       }
     </>
   )
-}
+})
+
+export { ChatView }

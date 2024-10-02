@@ -1,6 +1,6 @@
 import { FormControl, LinearProgress, MenuItem } from '@mui/material'
 import { Select, SelectChangeEvent } from '@mui/material-next'
-import React, { useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import styles from './Query.module.css'
 import { ModelOption } from '../../../types/CustomModel.ts'
 import customModelApi from '../../../services/api/customModelApi.ts'
@@ -14,7 +14,7 @@ interface ModelSelectProps {
   setModel: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function ModelSelect({ model, setModel }: ModelSelectProps) {
+const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
 
   const [
     modelOptions,
@@ -71,16 +71,18 @@ export function ModelSelect({ model, setModel }: ModelSelectProps) {
         >
           {modelOptions.map((modelOption: ModelOption) => {
             return (
-            <MenuItem
+              <MenuItem
                 key={modelOption.value}
                 value={modelOption.value}
-            >
-              {modelOption.label}
-            </MenuItem>)
+              >
+                {modelOption.label}
+              </MenuItem>)
           })}
           {modelOptionsLoading && <LinearProgress /> }
         </Select>
       </FormControl>
     </div>
   )
-}
+})
+
+export { ModelSelect }

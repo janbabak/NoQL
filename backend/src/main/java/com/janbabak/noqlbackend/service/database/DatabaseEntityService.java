@@ -1,11 +1,13 @@
 package com.janbabak.noqlbackend.service.database;
 
+import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.database.*;
+import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
@@ -13,11 +15,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
+import static com.janbabak.noqlbackend.service.chat.ChatService.NEW_CHAT_NAME;
 
 /**
  * Database Entity Service handles CRUD operations and similar tasks for Database Entities, utilizing the
@@ -30,6 +35,7 @@ public class DatabaseEntityService {
 
     private final DatabaseRepository databaseRepository;
     private final UserRepository userRepository;
+    private final ChatRepository chatRepository;
     private final AuthenticationService authenticationService;
 
     /**
@@ -108,7 +114,20 @@ public class DatabaseEntityService {
 
         DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
 
-        return databaseRepository.save(database);
+        database =  databaseRepository.save(database);
+
+        // create default chat
+        if (request.getCreateDefaultChat()) {
+            Chat chat = Chat.builder()
+                    .name(NEW_CHAT_NAME)
+                    .modificationDate(Timestamp.from(Instant.now()))
+                    .database(database)
+                    .build();
+
+            chatRepository.save(chat);
+        }
+
+        return database;
     }
 
     /**

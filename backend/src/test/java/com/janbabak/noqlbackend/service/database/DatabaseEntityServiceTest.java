@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.service.database;
 
 import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
+import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -40,6 +43,10 @@ class DatabaseEntityServiceTest {
 
     @Mock
     @SuppressWarnings("unused") // used in the databaseEntityService
+    private ChatRepository chatRepository;
+
+    @Mock
+    @SuppressWarnings("unused") // used in the databaseEntityService
     private AuthenticationService authenticationService;
 
     private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
@@ -47,7 +54,7 @@ class DatabaseEntityServiceTest {
     private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
             Mockito.mockStatic(DatabaseServiceFactory.class);
 
-    private final User testUser = User.builder()
+    private static final User testUser = User.builder()
             .id(UUID.randomUUID())
             .build();
 
@@ -55,7 +62,6 @@ class DatabaseEntityServiceTest {
     void tearDown() {
         databaseServiceFactoryMock.close(); // deregister the mock in the current thread
     }
-
 
     private final SqlDatabaseStructure databaseStructure = new SqlDatabaseStructure(Map.of(
             "public", new SqlDatabaseStructure.Schema("public", Map.of(
@@ -181,21 +187,11 @@ class DatabaseEntityServiceTest {
         assertEquals(databasesOfTestUser, actualTestUserDatabases);
     }
 
-    @Test
+    @ParameterizedTest
     @DisplayName("Test create database")
-    void testCreateDatabase() throws DatabaseConnectionException, EntityNotFoundException {
+    @MethodSource("createDatabaseRequestDataProvider")
+    void testCreateDatabase(CreateDatabaseRequest request, Database database) throws DatabaseConnectionException, EntityNotFoundException {
         // given
-        CreateDatabaseRequest request = CreateDatabaseRequest.builder()
-                .engine(DatabaseEngine.POSTGRES)
-                .name("local postgres")
-                .userId(testUser.getId())
-                .build();
-        Database database = Database.builder()
-                .engine(DatabaseEngine.POSTGRES)
-                .name("local postgres")
-                .user(testUser)
-                .build();
-
         when(databaseRepository.save(database)).thenReturn(database);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         databaseServiceFactoryMock
@@ -210,6 +206,39 @@ class DatabaseEntityServiceTest {
         verify(databaseRepository).save(databaseCaptor.capture());
         assertEquals(database, databaseCaptor.getValue());
         assertEquals(database, actual);
+    }
+
+    static Object[][] createDatabaseRequestDataProvider() {
+        return new Object[][]{
+                // create database without default chat
+                {
+                        CreateDatabaseRequest.builder()
+                                .engine(DatabaseEngine.POSTGRES)
+                                .name("local postgres")
+                                .userId(testUser.getId())
+                                .createDefaultChat(false)
+                                .build(),
+                        Database.builder()
+                                .engine(DatabaseEngine.POSTGRES)
+                                .name("local postgres")
+                                .user(testUser)
+                                .build()
+                },
+                // create database with default chat
+                {
+                        CreateDatabaseRequest.builder()
+                                .engine(DatabaseEngine.POSTGRES)
+                                .name("local postgres")
+                                .userId(testUser.getId())
+                                .createDefaultChat(true)
+                                .build(),
+                        Database.builder()
+                                .engine(DatabaseEngine.POSTGRES)
+                                .name("local postgres")
+                                .user(testUser)
+                                .build()
+                }
+        };
     }
 
     @Test

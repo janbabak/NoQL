@@ -948,6 +948,9 @@ components:
           $ref: '#/components/schemas/DatabaseEngine'
         userId:
           $ref: '#/components/schemas/UUID'
+        createDefaultChat:
+          type: boolean
+          example: true
 
     UpdateDatabaseRequest:
       type: object

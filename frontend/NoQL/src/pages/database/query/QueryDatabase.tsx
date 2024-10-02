@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { CHAT_TAB, CONSOLE_TAB } from './Constants.ts'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Database } from '../../../types/Database.ts'
@@ -11,7 +11,7 @@ interface QueryDatabaseProps {
   databaseLoading: boolean,
 }
 
-export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDatabaseProps) {
+const QueryDatabase = memo(({ databaseId, database, databaseLoading }: QueryDatabaseProps) => {
 
   const [
     tab,
@@ -68,4 +68,6 @@ export function QueryDatabase({ databaseId, database, databaseLoading }: QueryDa
       }
     </>
   )
-}
+})
+
+export { QueryDatabase }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { Database } from '../../types/Database.ts'
 import { DatabaseCard } from './DatabaseCard.tsx'
 import databaseApi from '../../services/api/databaseApi.ts'
@@ -12,7 +12,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { CreateDatabaseDialog } from './CreateDatabaseDialog.tsx'
 import { localStorageService } from '../../services/LocalStorageService.ts'
 
-export function Databases() {
+const Databases = memo(() => {
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -114,4 +114,6 @@ export function Databases() {
         : DatabasesList}
     </>
   )
-}
+})
+
+export { Databases }

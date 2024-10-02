@@ -41,7 +41,7 @@ public class ChatService {
     private final DatabaseRepository databaseRepository;
     private final PlotService plotService;
     private final AuthenticationService authenticationService;
-    private final String NEW_CHAT_NAME = "New chat";
+    public static final String NEW_CHAT_NAME = "New chat";
     private final int CHAT_NAME_MAX_LENGTH = 32;
 
     /**
