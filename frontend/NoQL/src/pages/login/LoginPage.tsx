@@ -42,6 +42,7 @@ export function LoginPage() {
 
   async function onSubmit(data: AuthenticationRequest): Promise<void> {
     setLoading(true)
+    console.log('tady')
     try {
       const response = await authenticationApi.authenticate(data)
       localStorageService.setAccessToken(response.data.accessToken)
@@ -49,6 +50,7 @@ export function LoginPage() {
       localStorageService.setUserId(response.data.user.id)
       navigate(previousLocation)
     } catch (error: unknown) {
+      console.log(error)
       const errorMessage = (error as any)?.response.data || 'Password or username is incorrect'
       showErrorMessage(dispatch, errorMessage) // TODO: remove dispatch parameter
     } finally {

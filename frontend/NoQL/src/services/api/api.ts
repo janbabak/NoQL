@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { log } from '../loging/logger.ts'
 import { localStorageService } from '../LocalStorageService.ts'
-import { AuthenticationResponse } from '../../types/Authentication.ts'
+import { authenticationApi } from './authenticationApi.ts'
 
 /** query parameter */
 interface ApiParameter {
@@ -41,9 +41,9 @@ class Api {
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true
           try {
-            const response = await this.refreshToken()
-            localStorageService.setAccessToken(response.accessToken)
-            localStorageService.setRefreshToken(response.refreshToken)
+            const response = await authenticationApi.refreshToken()
+            localStorageService.setAccessToken(response.data.accessToken)
+            localStorageService.setRefreshToken(response.data.refreshToken)
             return this.axiosInstance(originalRequest)
           } catch (refreshError) {
             localStorageService.clearAccessToken()
@@ -59,30 +59,6 @@ class Api {
   }
 
   static instance: Api | null = null
-
-  /**
-   * Obtain new access token using refresh token. If refresh token is not available, reject promise.
-   * @private
-   */
-  private async refreshToken(): Promise<AuthenticationResponse> {
-    const refreshToken = localStorageService.getRefreshToken()
-    if (!refreshToken) {
-      return Promise.reject(new Error('No refresh token available'))
-    }
-
-    // using fetch, so auth header is not added by axios interceptor
-    const response = await fetch(import.meta.env.VITE_BACKEND_URL + '/auth/refreshToken', {
-      method: 'POST',
-      body: refreshToken
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to refresh token')
-    }
-
-    return await response.json()
-  }
-
 
   /**
    * @return singleton instance
