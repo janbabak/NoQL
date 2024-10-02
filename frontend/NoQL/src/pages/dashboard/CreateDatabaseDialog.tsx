@@ -16,6 +16,7 @@ interface CreateDatabaseDialogProps {
 export function CreateDatabaseDialog({ open, onClose }: CreateDatabaseDialogProps) {
 
   async function createDatabase(data: CreateDatabaseRequest): Promise<AxiosResponse<Database>> {
+    data.createDefaultChat = true
     return await databaseApi.create(data)
   }
 

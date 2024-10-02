@@ -19,6 +19,7 @@ interface CreateDatabaseRequest {
   password: string
   engine: DatabaseEngine | ''
   userId: string
+  createDefaultChat: boolean
 }
 
 interface UpdateDatabaseRequest {

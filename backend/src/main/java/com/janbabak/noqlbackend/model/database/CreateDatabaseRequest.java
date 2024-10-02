@@ -53,4 +53,6 @@ public class CreateDatabaseRequest {
 
     @NotNull(groups = FirstValidationGroup.class)
     private UUID userId;
+
+    private Boolean createDefaultChat = false;
 }
