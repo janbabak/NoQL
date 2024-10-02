@@ -3,7 +3,7 @@ import styles from './Query.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import IconButton from '@mui/material/IconButton'
 import PlayCircleFilledWhiteRoundedIcon from '@mui/icons-material/PlayCircleFilledWhiteRounded'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
@@ -19,13 +19,13 @@ interface ConsoleTabProps {
   setQueryLanguageQuery: React.Dispatch<React.SetStateAction<string>>,
 }
 
-export function ConsoleTab(
+const ConsoleTab = memo((
   {
     databaseId,
     tab,
     queryLanguageQuery,
     setQueryLanguageQuery
-  }: ConsoleTabProps) {
+  }: ConsoleTabProps)  => {
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -118,4 +118,6 @@ export function ConsoleTab(
       />
     </div>
   )
-}
+})
+
+export { ConsoleTab }

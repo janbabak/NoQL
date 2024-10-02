@@ -5,7 +5,7 @@ import { LoadingButton } from '@mui/lab'
 import { Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { memo, SetStateAction, useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
@@ -27,13 +27,13 @@ interface ChatHistoryProps {
   setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
 
-export function ChatHistory(
+const ChatHistory = memo((
   {
     loadChatResult,
     loadChatHistoryAndChatAndResult,
     databaseId,
     setQueryResult
-  }: ChatHistoryProps) {
+  }: ChatHistoryProps) => {
 
   const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
     return state.chatHistoryReducer.chatHistory
@@ -277,4 +277,6 @@ export function ChatHistory(
       </div>
     </div>
   )
-}
+})
+
+export { ChatHistory }

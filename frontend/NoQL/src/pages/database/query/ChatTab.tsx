@@ -3,7 +3,7 @@ import styles from './Query.module.css'
 import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
@@ -24,7 +24,7 @@ interface ChatTabProps {
   editQueryInConsole: (query: string) => void,
 }
 
-export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
+const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => {
 
   const NEW_CHAT_NAME: string = 'New chat'
   const CHAT_NAME_MAX_LENGTH: number = 32
@@ -264,4 +264,6 @@ export function ChatTab({ databaseId, tab, editQueryInConsole }: ChatTabProps) {
 
     </div>
   )
-}
+})
+
+export { ChatTab }

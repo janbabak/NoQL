@@ -1,7 +1,7 @@
 import { Alert, Button, Paper } from '@mui/material'
 import { ResultTable } from './ResultTable.tsx'
 import { QueryResponse } from '../../../types/Query.ts'
-import React, { useEffect, useState } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 
 interface Props {
   queryResponse: QueryResponse | null,
@@ -15,7 +15,7 @@ interface Props {
   loading: boolean,
 }
 
-export function Result(
+const Result = memo((
   {
     queryResponse,
     showEditInConsoleButton,
@@ -26,7 +26,7 @@ export function Result(
     totalCount,
     onPageChange,
     loading
-  }: Props) {
+  }: Props) => {
 
   const [
     timestamp,
@@ -97,4 +97,6 @@ export function Result(
       }
     </div>
   )
-}
+})
+
+export { Result }

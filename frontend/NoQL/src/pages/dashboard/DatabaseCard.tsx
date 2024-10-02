@@ -1,7 +1,7 @@
 import { Database } from '../../types/Database.ts'
 import { Button, Card, CardActions, CardContent, Typography } from '@mui/material'
 import Chip from '@mui/material-next/Chip'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import styles from './Dashboard.module.css'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import IconButton from '@mui/material/IconButton'
@@ -15,14 +15,14 @@ interface DatabaseCardProps {
   deleteDatabaseLoading: boolean,
 }
 
-export function DatabaseCard(
+const DatabaseCard = memo((
   {
     database,
     style,
     className,
     deleteDatabase,
     deleteDatabaseLoading
-  }: DatabaseCardProps) {
+  }: DatabaseCardProps) => {
 
   const [
     dialogOpen,
@@ -60,4 +60,6 @@ export function DatabaseCard(
       />
     </Card>
   )
-}
+})
+
+export { DatabaseCard }

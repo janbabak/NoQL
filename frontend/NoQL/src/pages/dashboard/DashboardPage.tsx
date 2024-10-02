@@ -1,7 +1,8 @@
 import { Databases } from './Databases.tsx'
 import { Typography } from '@mui/material'
+import { memo } from 'react'
 
-export function DashboardPage() {
+const DashboardPage = memo(() => {
 
   return (
     <>
@@ -9,4 +10,6 @@ export function DashboardPage() {
       <Databases />
     </>
   )
-}
+})
+
+export { DashboardPage }

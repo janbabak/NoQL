@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { memo, useRef } from 'react'
 import { Editor } from '@monaco-editor/react'
 import * as monacoEditor from 'monaco-editor'
 import { editor } from 'monaco-editor'
@@ -8,7 +8,7 @@ interface Props {
   setValue: React.Dispatch<React.SetStateAction<string>>
 }
 
-export function QueryEditor({ value, setValue }: Props) {
+const QueryEditor =  memo(({ value, setValue }: Props) => {
 
   const editor = useRef<monacoEditor.editor.IStandaloneCodeEditor>()
   const monaco = useRef<typeof monacoEditor>()
@@ -49,4 +49,6 @@ export function QueryEditor({ value, setValue }: Props) {
       />
     </>
   )
-}
+})
+
+export { QueryEditor }
