@@ -33,8 +33,15 @@ services:
     volumes:
       - .plotService:/app/plotService
       - /var/run/docker.sock:/var/run/docker.sock # in order to be able ro tun docker commands (generate plots)
-    environment:
-      NOQL_DB_HOST: noql-postgres # override env file
-      PLOT_SERVICE_CONTAINER_NAME: plot-service-prod-stack
+    env_file:
+      - ./.env.prod
+
+  noql-frontend:
+    image: janbabak/noql-frontend:0.0.1
+    container_name: noql-frontend-prod-stack
+    depends_on:
+      - noql-backend
+    ports:
+      - "80:3000"
     env_file:
       - ./.env.prod
