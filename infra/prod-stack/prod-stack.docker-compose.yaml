@@ -37,11 +37,9 @@ services:
       - ./.env.prod
 
   noql-frontend:
-    image: janbabak/noql-frontend:0.0.1
+    image: janbabak/noql-frontend:0.0.3
     container_name: noql-frontend-prod-stack
     depends_on:
       - noql-backend
     ports:
       - "80:3000"
-    env_file:
-      - ./.env.prod

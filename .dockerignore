@@ -1,1 +1,3 @@
-frontend/NoQL/node_modules
+../../../frontend/NoQL/node_modules
+./**/node_modules
+node_modules
