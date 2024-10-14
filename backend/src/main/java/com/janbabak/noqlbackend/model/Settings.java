@@ -26,4 +26,10 @@ public class Settings {
     /** Name of the container where the plot service is running (e.g. when multiple instances are running */
     @Value("${app.settings.plotServiceContainerName}")
     public String plotServiceContainerName;
+
+    /**
+     * Default limit for number of queries for a newly registered user
+     */
+    @Value("${app.settings.defaultUserQueryLimit}")
+    public Integer defaultUserQueryLimit;
 }

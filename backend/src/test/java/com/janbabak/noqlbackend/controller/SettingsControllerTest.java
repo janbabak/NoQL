@@ -38,6 +38,8 @@ class SettingsControllerTest {
         when(settings.getMaxPageSize()).thenReturn(50);
         when(settings.getDefaultPageSize()).thenReturn(10);
         when(settings.getTranslationRetries()).thenReturn(3);
+        when(settings.getPlotServiceContainerName()).thenReturn("plot-service-dev-stack");
+        when(settings.getDefaultUserQueryLimit()).thenReturn(10);
 
         // then
         mockMvc.perform(get("/settings"))
@@ -46,7 +48,9 @@ class SettingsControllerTest {
                         {
                              "maxPageSize": 50,
                              "defaultPageSize": 10,
-                             "translationRetries": 3
+                             "translationRetries": 3,
+                             "plotServiceContainerName": "plot-service-dev-stack",
+                             "defaultUserQueryLimit": 10
                         }"""));
     }
 

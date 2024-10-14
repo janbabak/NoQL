@@ -69,6 +69,7 @@ class UserControllerTest {
                 .email("john.doe@email.com")
                 .password("password")
                 .role(Role.ROLE_USER)
+                .queryLimit(5)
                 .build();
 
         User user2 = User.builder()
@@ -187,6 +188,7 @@ class UserControllerTest {
                                 .email("john.doe@email.com")
                                 .password("password")
                                 .role(Role.ROLE_USER)
+                                .queryLimit(100)
                                 .build(),
                         // language=JSON
                         """
@@ -195,7 +197,8 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "Doe",
                             "email": "john.doe@email.com",
-                            "role": "ROLE_USER"
+                            "role": "ROLE_USER",
+                            "queryLimit": 100
                         }""",
                         true
                 },
@@ -206,6 +209,7 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
+                            "queryLimit": 111,
                             "role": "ROLE_ADMIN"
                         }""",
                         User.builder()
@@ -215,6 +219,7 @@ class UserControllerTest {
                                 .email("john.updated@email.com")
                                 .password("updated password")
                                 .role(Role.ROLE_ADMIN)
+                                .queryLimit(111)
                                 .build(),
                         // language=JSON
                         """
@@ -223,7 +228,8 @@ class UserControllerTest {
                             "firstName": "updated name",
                             "lastName": "updated last name",
                             "email": "john.updated@email.com",
-                            "role": "ROLE_ADMIN"
+                            "role": "ROLE_ADMIN",
+                            "queryLimit": 111
                         }""",
                         true
                 },
@@ -234,7 +240,8 @@ class UserControllerTest {
                             "firstName": "",
                             "lastName": "",
                             "email": "",
-                            "password": ""
+                            "password": "",
+                            "queryLimit": -1
                         }""",
                         null,
                         // language=JSON
@@ -242,7 +249,8 @@ class UserControllerTest {
                         {
                              "firstName": "size must be between 1 and 32",
                              "lastName": "size must be between 1 and 32",
-                             "password": "size must be between 8 and 64"
+                             "password": "size must be between 8 and 64",
+                             "queryLimit": "must be greater than or equal to 0"
                          }""",
                         false
                 },

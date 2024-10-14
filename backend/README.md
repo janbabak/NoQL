@@ -22,6 +22,7 @@
 **Other**
 
 - `TRANSLATION_RETRIES` - (required) Number of retries when translated query fails due to a syntax error
+- `DEFAULT_USER_QUERY_LIMIT` - Default number of queries that can be executed by newly registered user.
 
 **Security**
 

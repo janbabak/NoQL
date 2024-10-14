@@ -851,6 +851,8 @@ components:
           $ref: '#/components/schemas/UserPassword'
         role:
           $ref: '#/components/schemas/UserRole'
+        queryLimit:
+          $ref: '#/components/schemas/UserQueryLimit'
 
     UpdateUserRequest:
       type: object
@@ -875,6 +877,10 @@ components:
         role:
           allOf:
             - $ref: '#/components/schemas/UserRole'
+            - nullable: true
+        queryLimit:
+          allOf:
+            - $ref: '#/components/schemas/UserQueryLimit'
             - nullable: true
 
     NameOfUser:
@@ -903,6 +909,11 @@ components:
       enum:
         - ADMIN
         - USER
+
+    UserQueryLimit:
+      type: number
+      minimum: 0
+      example: 100
 
     Database:
       type: object
