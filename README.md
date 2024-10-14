@@ -37,14 +37,14 @@ cd NoQL/
 
 #### Local stack
 
-- Local stack is used for frontend development. It uses a local database and a local backend running like docker-compose
-  services.
+- Local stack is used for frontend development. It uses a local database and a local backend running in docker containers (like docker-compose
+  services).
 - Details are in the [Local stack](infra/local-stack/README.md).
 
 #### Development stack
 
 - Development stack is used for backend development and frontend development. It uses a local database and other
-  dependencies running like docker-compose services and backend running on the host machine.
+  dependencies running in docker containers (like docker-compose services) and backend running locally on the host machine.
 - It is necessary to create a `NoQL/backend/.env.local` file with the following content:
 
   ```dotenv

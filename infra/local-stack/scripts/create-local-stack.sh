@@ -6,13 +6,13 @@
 createLocalStack() {
     echo "Creating a local stack..."
 
-    docker-compose -f infra/local-stack/backend.docker-compose.yaml up -d
+    docker compose -f infra/local-stack/local-stack.docker-compose.yaml up -d
 }
 
 insertSampleData() {
     echo "Inserting sample data into the example database..."
 
-    local CONTAINER="example-postgres"
+    local CONTAINER="example-postgres-local-stack"
     local SQL_SCRIPT_PATH="./sample-data.sql"
     local DATABASE_NAME="database"
     local USER="user"
@@ -22,6 +22,8 @@ insertSampleData() {
 
 createNewDatabaseRecordInBackend() {
     echo "Creating a new database record in the backend..."
+
+    # TODO: create new user and database for him
 
     curl --location 'http://localhost:8080/database' \
     --header 'Content-Type: application/json' \

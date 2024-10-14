@@ -1,0 +1,45 @@
+# Starts backend, its dependencies - database, plot service
+version: '3.9'
+
+services:
+  # Postgres database used by backend
+  noql-postgres:
+    image: postgres:16-alpine
+    container_name: noql-postgres-prod-stack
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend-database-data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.prod
+
+  # Plot service is isolated environment for running python scripts that generate plots
+  plot-service:
+    image: janbabak/plot-service:1.0.0
+    container_name: plot-service-prod-stack
+    tty: true
+    stdin_open: true
+    volumes:
+      - .plotService:/plotService
+
+  noql-backend:
+    image: janbabak/noql-backend:0.0.1
+    container_name: noql-backend-prod-stack
+    depends_on:
+      - noql-postgres
+      - plot-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - .plotService:/app/plotService
+      - /var/run/docker.sock:/var/run/docker.sock # in order to be able ro tun docker commands (generate plots)
+    env_file:
+      - ./.env.prod
+
+  noql-frontend:
+    image: janbabak/noql-frontend:0.0.3
+    container_name: noql-frontend-prod-stack
+    depends_on:
+      - noql-backend
+    ports:
+      - "80:3000"
