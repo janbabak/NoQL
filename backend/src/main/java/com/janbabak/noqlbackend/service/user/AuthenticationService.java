@@ -49,7 +49,7 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException(request.getEmail());
         }
 
-        log.info("Created new user with default limit: {}", settings.getDefaultUserQueryLimit());
+        log.info("Created new user with default query limit: {}", settings.getDefaultUserQueryLimit());
 
         User user = userRepository.save(new User(request, passwordEncoder, role, settings.getDefaultUserQueryLimit()));
         String jwtToken = jwtService.generateToken(user);
