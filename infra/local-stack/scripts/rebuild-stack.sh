@@ -14,13 +14,14 @@ compileJar() {
 buildDockerImage() {
     echo "Building the backend container..."
 
-    docker build -t janbabak/noql-backend:0.0.1 -f ./infra/dockerImages/backend.Dockerfile .
+    infra/dockerImages/backend/backend.build.backend -x push
+    infra/dockerImages/frontend/frontend.build.frontend -x push
 }
 
 removeOldContainer() {
     echo "Removing the old backend container..."
 
-    docker rm -f noql-backend-dev
+    docker rm -f noql-backend-dev noql-frontend-dev
 }
 
 compileJar
