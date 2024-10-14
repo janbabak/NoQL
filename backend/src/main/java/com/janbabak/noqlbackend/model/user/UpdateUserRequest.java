@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.model.user;
 import com.janbabak.noqlbackend.model.Role;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -29,4 +30,8 @@ public class UpdateUserRequest {
 
     @Nullable
     private Role role;
+
+    @Nullable
+    @Min(0)
+    private Integer queryLimit; // TODO: easily hackable
 }

@@ -125,6 +125,7 @@ class UserServiceTest {
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
                 .password("password2")
+                .queryLimit(1000)
                 .build();
 
         User updatedUser = User.builder()
@@ -134,6 +135,7 @@ class UserServiceTest {
                 .email("john.doe@gmail.com")
                 .password(passwordEncoder.encode("password2"))
                 .role(Role.ROLE_USER)
+                .queryLimit(1000)
                 .build();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

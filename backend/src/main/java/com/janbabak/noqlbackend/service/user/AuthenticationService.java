@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.authentication.AuthenticationFacadeInterface;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
@@ -11,6 +12,7 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +25,7 @@ import java.util.UUID;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.USER;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -31,6 +34,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final AuthenticationFacadeInterface authenticationFacadeInterface;
+    private final Settings settings;
 
     /**
      * Register new user, create new user.
@@ -45,7 +49,9 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException(request.getEmail());
         }
 
-        User user = userRepository.save(new User(request, passwordEncoder, role));
+        log.info("Created new user with default limit: {}", settings.getDefaultUserQueryLimit());
+
+        User user = userRepository.save(new User(request, passwordEncoder, role, settings.getDefaultUserQueryLimit()));
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 

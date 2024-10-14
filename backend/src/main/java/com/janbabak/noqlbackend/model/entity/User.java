@@ -47,6 +47,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Builder.Default
+    private Integer queryLimit = 0;
+
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Database> databases;
@@ -55,11 +58,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomModel> models;
 
-    public User(RegisterRequest request, PasswordEncoder passwordEncoder, Role role) {
+    public User(RegisterRequest request, PasswordEncoder passwordEncoder, Role role, Integer queryLimit) {
         firstName = request.getFirstName();
         lastName = request.getLastName();
         email = request.getEmail();
         password = passwordEncoder.encode(request.getPassword());
+        this.queryLimit = queryLimit;
         this.role = role;
         databases = new ArrayList<>();
         models = new ArrayList<>();

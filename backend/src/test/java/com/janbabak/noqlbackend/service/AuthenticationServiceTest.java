@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.authentication.AuthenticationFacadeInterface;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
+import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
@@ -51,6 +52,10 @@ class AuthenticationServiceTest {
 
     @Mock
     private AuthenticationFacadeInterface authenticationFacadeInterface;
+
+    @Mock
+    @SuppressWarnings("unused") // used in authenticationService
+    private Settings settings;
 
     private final Authentication authentication = mock(Authentication.class);
 

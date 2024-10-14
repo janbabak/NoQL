@@ -94,7 +94,8 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "ROLE_USER"
+                                "role": "ROLE_USER",
+                                "queryLimit": 10
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -107,6 +108,7 @@ class AuthenticationControllerTest {
                                         .email("john.doe@gmail.com")
                                         .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
+                                        .queryLimit(10)
                                         .build())
                                 .build(),
                         true
@@ -232,7 +234,8 @@ class AuthenticationControllerTest {
                                 "firstName": "John",
                                 "lastName": "Doe",
                                 "email": "john.doe@gmail.com",
-                                "role": "ROLE_USER"
+                                "role": "ROLE_USER",
+                                "queryLimit": 10
                             }
                         }""",
                         AuthenticationResponse.builder()
@@ -245,6 +248,7 @@ class AuthenticationControllerTest {
                                         .email("john.doe@gmail.com")
                                         .role(Role.ROLE_USER)
                                         .databases(new ArrayList<>())
+                                        .queryLimit(10)
                                         .build())
                                 .build(),
                         true
