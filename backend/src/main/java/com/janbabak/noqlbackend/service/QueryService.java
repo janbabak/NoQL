@@ -21,6 +21,7 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import com.janbabak.noqlbackend.service.user.UserService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +57,7 @@ public class QueryService {
     private final ChatService chatService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
     private final PlotService plotService;
+    private final UserService userService;
 
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
@@ -373,11 +375,17 @@ public class QueryService {
     public QueryResponse executeChat(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, LLMException,
             DatabaseExecutionException, BadRequestException {
+        // TODO: authorization??
 
         log.info("Execute chat, database_id={}", databaseId);
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
+            log.info("Query limit exceeded");
+            return QueryResponse.failedResponse(null, "Query limit exceeded");
+        }
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
