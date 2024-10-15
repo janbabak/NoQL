@@ -200,4 +200,53 @@ class UserServiceTest {
         verify(userRepository).deleteById(idCaptor.capture());
         assertEquals(userId, idCaptor.getValue());
     }
+
+    @Test
+    @DisplayName("Decrement query limit")
+    void testDecrementQueryLimit() throws EntityNotFoundException {
+        // given
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).queryLimit(10).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // when
+        int actual = userService.decrementQueryLimit(userId);
+
+        // then
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertEquals(9, userCaptor.getValue().getQueryLimit());
+        assertEquals(actual, 10);
+    }
+
+    @Test
+    @DisplayName("Decrement query limit - limit exceeded")
+    void testDecrementQueryLimitExceeded() throws EntityNotFoundException {
+        // given
+        UUID userId = UUID.randomUUID();
+        User user = User.builder().id(userId).queryLimit(0).build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // when
+        int actual = userService.decrementQueryLimit(userId);
+
+        // then
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertEquals(0, userCaptor.getValue().getQueryLimit());
+        assertEquals(actual, 0);
+    }
+
+    @Test
+    @DisplayName("Decrement query limit - user not found")
+    void testDecrementQueryLimitUserNotFound() {
+        // given
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(EntityNotFoundException.class, () -> userService.decrementQueryLimit(userId));
+    }
 }

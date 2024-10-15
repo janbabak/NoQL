@@ -30,7 +30,7 @@ public class UserService {
      *
      * @param userId user identifier
      * @return user
-     * @throws EntityNotFoundException user of specified id not found.
+     * @throws EntityNotFoundException                                   user of specified id not found.
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or self request
      */
     public User findById(UUID userId) throws EntityNotFoundException {
@@ -58,8 +58,9 @@ public class UserService {
 
     /**
      * Update user data.
+     *
      * @param userId user identifier
-     * @param data new user data
+     * @param data   new user data
      * @return updated user
      * @throws EntityNotFoundException user of specified id not found.
      */
@@ -108,5 +109,23 @@ public class UserService {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
             userRepository.deleteById(userId);
         }
+    }
+
+
+    /**
+     * Decrement query limit for user.
+     *
+     * @param userId user identifier
+     * @return new query limit
+     * @throws EntityNotFoundException user of specified id not found.
+     */
+    public int decrementQueryLimit(UUID userId) throws EntityNotFoundException {
+        log.info("Decrement query limit for user with id={}.", userId);
+
+        User user = findById(userId);
+        int odlLimit = user.getQueryLimit();
+        user.setQueryLimit(Math.max(odlLimit - 1, 0));
+        userRepository.save(user);
+        return odlLimit;
     }
 }
