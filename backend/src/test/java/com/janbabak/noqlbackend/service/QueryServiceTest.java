@@ -3,13 +3,16 @@ package com.janbabak.noqlbackend.service;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
+import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.user.UserService;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +47,9 @@ class QueryServiceTest {
 
     @Mock
     private Settings settings;
+
+    @Mock
+    private UserService userService;
 
     private final Database postgresDatabase;
 
@@ -453,5 +460,31 @@ class QueryServiceTest {
 
         // then
         assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, request, 10));
+    }
+
+    @Test
+    @DisplayName("Test execute chat query limit exceeded")
+    void testExecuteChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, BadRequestException {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .queryLimit(0)
+                .build();
+        Database database = Database.builder()
+                .id(databaseId)
+                .user(user)
+                .build();
+        QueryResponse expected = QueryResponse.failedResponse(null, "Query limit exceeded");
+
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+        when(userService.decrementQueryLimit(any())).thenReturn(0);
+
+        // when
+        QueryResponse actual = queryService.executeChat(databaseId, request, 10);
+
+        // then
+        assertEquals(expected, actual);
     }
 }

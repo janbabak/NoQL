@@ -382,7 +382,7 @@ public class QueryService {
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        if (userService.decrementQueryLimit(database.getUserId()) < 0) {
+        if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
             return QueryResponse.failedResponse(null, "Query limit exceeded");
         }

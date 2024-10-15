@@ -119,7 +119,7 @@ public class UserService {
      * @return new query limit
      * @throws EntityNotFoundException user of specified id not found.
      */
-    public int decrementQueryLimit(UUID userId) throws EntityNotFoundException {
+    public Integer decrementQueryLimit(UUID userId) throws EntityNotFoundException {
         log.info("Decrement query limit for user with id={}.", userId);
 
         User user = findById(userId);
