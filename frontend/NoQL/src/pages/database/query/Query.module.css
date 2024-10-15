@@ -133,3 +133,19 @@
     width: 11rem;
     margin-bottom: 2rem;
 }
+
+.modelSelectQueryLimitContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.queryLimit {
+    border: 1px solid #c4c4c4;
+    border-radius: 0.25rem;
+    height: 2.5rem;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
