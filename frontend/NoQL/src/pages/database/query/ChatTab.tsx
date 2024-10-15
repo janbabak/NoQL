@@ -226,7 +226,11 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
 
         <div className={styles.chatWithInput}>
 
-          <ModelSelect model={model} setModel={setModel} />
+          <div className={styles.modelSelectQueryLimitContainer}>
+            <ModelSelect model={model} setModel={setModel} />
+            <div className={styles.queryLimit}>Queries left: 0</div>
+          </div>
+
           <ChatView />
 
           <div className={styles.chatInputContainer}>
