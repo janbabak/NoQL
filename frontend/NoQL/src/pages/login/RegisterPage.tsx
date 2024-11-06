@@ -18,11 +18,11 @@ interface RegisterFromFields extends RegisterRequest {
 export function RegisterPage() {
 
   const defaultValues: RegisterFromFields = {
-    email: 'jan@email.com',
-    password: '12345678',
-    verifyPassword: '12345678',
-    firstName: 'jan',
-    lastName: 'jan'
+    email: '',
+    password: '',
+    verifyPassword: '',
+    firstName: '',
+    lastName: ''
   }
 
   const form = useForm<RegisterFromFields>({ defaultValues })

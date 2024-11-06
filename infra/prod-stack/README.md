@@ -3,14 +3,14 @@
 ## Setup EC2 instance
 
 ```bash
-ssh ec2-user@18.199.165.133
+ssh $PROD_STACK_SSH
 mkdir infra
 ```
 
 ## Copy docker compose file
 
 ```bash
-scp -r infra/prod-stack ec2-user@18.199.165.133:/home/ec2-user/infra/prod-stack
+scp -r infra/prod-stack $PROD_STACK_SSH:/home/ec2-user/infra/prod-stack
 ```
 
 ## Setup docker
