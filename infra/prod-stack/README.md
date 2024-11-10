@@ -1,5 +1,11 @@
 # How to setup the production stack
 
+## Environment variables
+
+```bash
+export PROD_STACK_SSH = <ec2-instance-url> 
+```
+
 ## Setup EC2 instance
 
 ```bash

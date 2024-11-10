@@ -35,7 +35,7 @@ services:
       - ../../plotService:/plotService
 
   noql-backend:
-    image: janbabak/noql-backend:0.0.1
+    image: janbabak/noql-backend:0.0.2
     container_name: noql-backend-local-stack
     depends_on:
       - noql-postgres

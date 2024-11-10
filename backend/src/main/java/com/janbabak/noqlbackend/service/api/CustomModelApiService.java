@@ -94,7 +94,7 @@ public class CustomModelApiService implements QueryApi {
         try {
             return UUID.fromString(queryRequest.getModel());
         } catch (Exception e) {
-            throw new BadRequestException("Wrong model id");
+            throw new BadRequestException("Wrong model id"); // TODO: bad request or 404 model not found
         }
     }
 }
