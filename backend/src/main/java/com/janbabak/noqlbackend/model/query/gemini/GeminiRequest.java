@@ -40,7 +40,7 @@ public class GeminiRequest {
 
         // system errors
         for (String error : errors) {
-            this.contents.add(new GeminiMessage(GeminiMessage.Role.system, error));
+            this.contents.add(new GeminiMessage(GeminiMessage.Role.user, error));
         }
     }
 }

@@ -2,22 +2,29 @@ package com.janbabak.noqlbackend.model.query.gemini;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class GeminiMessage {
 
-    public final Role role;
-    public final List<Part> parts;
+    public String role;
+    public List<Part> parts;
 
     public GeminiMessage(Role role, String message) {
-        this.role = role;
+        this.role = role.name();
         this.parts = List.of(new Part(message));
     }
 
-    public record Part(String text) {}
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Part {
+        public String text;
+    }
 
     public enum Role {
         /**
@@ -25,7 +32,6 @@ public class GeminiMessage {
          */
         user,
 
-        system,
         /**
          * LLM response
          */

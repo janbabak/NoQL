@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service.api;
 
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
@@ -71,8 +70,8 @@ public class GeminiApiService implements QueryApi {
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getCandidateList().isEmpty()
-                    ? responseEntity.getBody().getCandidateList().get(0).content().getParts().get(0).text()
+            return !Objects.requireNonNull(responseEntity.getBody()).getCandidates().isEmpty()
+                    ? responseEntity.getBody().getCandidates().get(0).getContent().getParts().get(0).getText()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
