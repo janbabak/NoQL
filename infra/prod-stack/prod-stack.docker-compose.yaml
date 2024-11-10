@@ -23,7 +23,7 @@ services:
       - .plotService:/plotService
 
   noql-backend:
-    image: janbabak/noql-backend:0.0.1
+    image: janbabak/noql-backend:0.0.2
     container_name: noql-backend-prod-stack
     depends_on:
       - noql-postgres
@@ -37,7 +37,7 @@ services:
       - ./.env.prod
 
   noql-frontend:
-    image: janbabak/noql-frontend:0.0.3
+    image: janbabak/noql-frontend:0.0.6
     container_name: noql-frontend-prod-stack
     depends_on:
       - noql-backend

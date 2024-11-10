@@ -2,7 +2,7 @@
 
 # build the frontend docker image
 
-VERSION=0.0.3
+VERSION=0.0.6
 IMAGE_NAME=janbabak/noql-frontend
 DOCKER_FILE=infra/dockerImages/frontend/frontend.Dockerfile
 
