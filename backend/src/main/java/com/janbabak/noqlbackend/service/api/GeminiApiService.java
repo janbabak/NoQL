@@ -70,8 +70,8 @@ public class GeminiApiService implements QueryApi {
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getCandidates().isEmpty()
-                    ? responseEntity.getBody().getCandidates().get(0).getContent().getParts().get(0).getText()
+            return !Objects.requireNonNull(responseEntity.getBody()).candidates().isEmpty()
+                    ? responseEntity.getBody().candidates().get(0).content().parts().get(0).text()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
