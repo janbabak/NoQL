@@ -1,0 +1,20 @@
+{
+  "created": 1730909366,
+  "model": "llama3.1-70b",
+  "usage": {
+    "prompt_tokens": 1506,
+    "completion_tokens": 232,
+    "total_tokens": 1738
+  },
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{ \n    \"databaseQuery\": \"\",\n    \"generatePlot\": true, \n    \"pythonCode\": \"import psycopg2\\nimport matplotlib.pyplot as plt\\n\\nconn = psycopg2.connect(host=\\\"localhost\\\", port=45345, user=\\\"admin4445900234\\\", password=\\\"dkl45349?405\\\", database=\\\"database99889899\\\")\\ncur = conn.cursor()\\n\\nquery = \\\"SELECT T2.name, COUNT(T1.film_id) FROM film AS T1 INNER JOIN language AS T2 ON T1.language_id = T2.language_id GROUP BY T2.name\\\"\\n\\ncur.execute(query)\\n\\nrows = cur.fetchall()\\n\\nlabels = [row[0] for row in rows]\\nvalues = [row[1] for row in rows]\\n\\nplt.bar(labels, values)\\nplt.xlabel('Language')\\nplt.ylabel('Number of Films')\\nplt.title('Number of Films by Language')\\nplt.xticks(rotation=90)\\nplt.tight_layout()\\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')\\n\\nconn.close()\"\n}",
+        "function_call": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

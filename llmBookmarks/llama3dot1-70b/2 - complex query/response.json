@@ -1,0 +1,20 @@
+{
+  "created": 1730907666,
+  "model": "llama3.1-70b",
+  "usage": {
+    "prompt_tokens": 1525,
+    "completion_tokens": 47,
+    "total_tokens": 1572
+  },
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"databaseQuery\": \"SELECT * FROM film WHERE release_year BETWEEN 2011 AND 2020 AND length < 120 ORDER BY rental_rate DESC\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}",
+        "function_call": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

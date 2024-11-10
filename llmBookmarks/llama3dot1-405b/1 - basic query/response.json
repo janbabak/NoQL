@@ -1,0 +1,23 @@
+{
+  "created": 1731142217,
+  "model": "llama3.1-405b",
+  "usage": {
+    "prompt_tokens": 1498,
+    "completion_tokens": 59,
+    "total_tokens": 1557
+  },
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "content": "```json\n{\n  \"databaseQuery\": \"SELECT * FROM public.customer;\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}\n```",
+        "refusal": null,
+        "role": "assistant",
+        "function_call": null,
+        "tool_calls": null
+      }
+    }
+  ]
+}
