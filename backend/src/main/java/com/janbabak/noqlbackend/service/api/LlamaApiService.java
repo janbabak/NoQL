@@ -8,6 +8,7 @@ import com.janbabak.noqlbackend.model.query.llama.LlamaResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -23,8 +24,10 @@ public class LlamaApiService implements QueryApi {
 
     @SuppressWarnings("all")
     private final String LLAMA_API_URL = "https://api.llama-api.com/chat/completions";
-    private final String token = System.getenv("LLAMA_AUTH_TOKEN");
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${app.credentials.llamaApiKey}")
+    private String token;
 
     /**
      * Send queries in chat form the model and retrieve a response.

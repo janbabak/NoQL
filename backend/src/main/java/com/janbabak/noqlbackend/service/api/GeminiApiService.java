@@ -8,6 +8,7 @@ import com.janbabak.noqlbackend.model.query.gemini.GeminiResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -23,11 +24,10 @@ public class GeminiApiService implements QueryApi {
 
     @SuppressWarnings("FieldCanBeLocal")
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-
-    private final String token = System.getenv("AI_STUDIO_API_KEY"); // TODO: @Value
-
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${app.credentials.aiStudioApiKey}")
+    private String token;
 
     /**
      * Send queries in chat form the model and retrieve a response.

@@ -8,6 +8,7 @@ import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -21,10 +22,12 @@ import java.util.Objects;
 @NoArgsConstructor
 public class GptApiService implements QueryApi {
 
-    @SuppressWarnings("all")
+    @SuppressWarnings("FieldCanBeLocal")
     private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
-    private final String token = System.getenv("API_KEY");
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${app.credentials.openAiApiKey}")
+    private String token;
 
     /**
      * Send queries in chat form the model and retrieve a response.
