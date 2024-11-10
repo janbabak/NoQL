@@ -46,9 +46,11 @@ public class GeminiApiService implements QueryApi {
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException, BadRequestException, EntityNotFoundException {
+            List<String> errors) throws LLMException, BadRequestException {
 
         log.info("Chat with Gemini API.");
+
+        validateRequest(queryRequest);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -84,5 +86,18 @@ public class GeminiApiService implements QueryApi {
             throw new LLMException("Error on Gemini side, try it latter");
         }
         return null;
+    }
+
+    /**
+     * Validate request
+     *
+     * @param queryRequest users request
+     * @throws BadRequestException unsupported model
+     */
+    void validateRequest(QueryRequest queryRequest) throws BadRequestException {
+        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("gemini")) {
+            log.error("Model is missing in the request.");
+            throw new BadRequestException("Model is missing in the request.");
+        }
     }
 }
