@@ -6,9 +6,8 @@ import com.janbabak.noqlbackend.model.query.QueryRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeminiRequest {
-
-    public final List<GeminiMessage> contents;
+public record GeminiRequest(
+        List<GeminiMessage> contents) {
 
     /**
      * Create query
@@ -24,7 +23,7 @@ public class GeminiRequest {
             String systemQuery,
             List<String> errors
     ) {
-        this.contents = new ArrayList<>();
+        this(new ArrayList<>());
 
         // system instructions
         this.contents.add(new GeminiMessage(GeminiMessage.Role.user, systemQuery));
