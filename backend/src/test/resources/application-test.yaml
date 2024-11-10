@@ -29,3 +29,7 @@ app:
       secretKey: "${JWT_SECRET:secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret}"
       expiration: "${JWT_EXPIRATION:86400}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
+  credentials:
+    aiStudioApiKey: "xxx"
+    openAiApiKey: "xxx"
+    llamaApiKey: "xxx"
