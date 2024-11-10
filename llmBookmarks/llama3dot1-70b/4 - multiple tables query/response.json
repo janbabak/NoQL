@@ -1,0 +1,20 @@
+{
+  "created": 1730909041,
+  "model": "llama3.1-70b",
+  "usage": {
+    "prompt_tokens": 1509,
+    "completion_tokens": 96,
+    "total_tokens": 1605
+  },
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"databaseQuery\": \"SELECT T1.title, T2.first_name, T2.last_name, T3.name FROM film AS T1 INNER JOIN film_actor AS T4 ON T1.film_id = T4.film_id INNER JOIN actor AS T2 ON T4.actor_id = T2.actor_id INNER JOIN language AS T3 ON T1.language_id = T3.language_id\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}",
+        "function_call": null
+      },
+      "finish_reason": "stop"
+    }
+  ]
+}

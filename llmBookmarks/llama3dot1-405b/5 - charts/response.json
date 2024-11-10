@@ -1,0 +1,20 @@
+{
+  "created": 1730910333,
+  "model": "llama3.1-405b",
+  "usage": {
+    "prompt_tokens": 1506,
+    "completion_tokens": 299,
+    "total_tokens": 1805
+  },
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"databaseQuery\": \"\",\n  \"generatePlot\": true,\n  \"pythonCode\": \"\nimport psycopg2\nimport matplotlib.pyplot as plt\n\n# Connect to the database\nconn = psycopg2.connect(\n    host=\\\"localhost\\\",\n    port=\\\"ppp45345ppp\\\",\n    user=\\\"admin4445900234\\\",\n    password=\\\"dkl45349?405\\\",\n    database=\\\"database99889899\\\"\n)\n\n# Create a cursor object\ncur = conn.cursor()\n\n# SQL query to select data\ncur.execute(\\\"\\\"\\\"SELECT T2.name, COUNT(T1.language_id) \nFROM film T1 INNER JOIN language T2 ON T1.language_id = T2.language_id\nGROUP BY T2.name\\\"\\\"\\\")\n\n# Fetch all rows from the query\nrows = cur.fetchall()\n\n# Close the cursor and connection\ncur.close()\nconn.close()\n\n# Create two lists, one for language names and one for film counts\nlanguages = [row[0] for row in rows]\nfilm_counts = [row[1] for row in rows]\n\n# Create a bar plot\nplt.figure(figsize=(10, 5))\nplt.bar(languages, film_counts)\nplt.xlabel('Language')\nplt.ylabel('Number of Films')\nplt.title('Number of Films in Each Language')\nplt.xticks(rotation=90)\n\n# Save the plot to a file\nplt.tight_layout()\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')\n\"\n}\n```",
+        "function_call": null
+      },
+      "finish_reason": "max_token"
+    }
+  ]
+}

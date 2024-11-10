@@ -1,0 +1,34 @@
+{
+  "id": "chatcmpl-AQbhwoitEnFZvcNsfIb38ZCoZQHTp",
+  "object": "chat.completion",
+  "created": 1730904840,
+  "model": "gpt-4o-mini-2024-07-18",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"databaseQuery\": \"SELECT * FROM public.film WHERE release_year BETWEEN 2011 AND 2020 AND length < 120 ORDER BY rental_rate DESC;\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}\n```",
+        "refusal": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1512,
+    "completion_tokens": 53,
+    "total_tokens": 1565,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "system_fingerprint": "fp_0ba0d124f1"
+}

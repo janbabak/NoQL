@@ -1,0 +1,34 @@
+{
+  "id": "chatcmpl-AQVhfjBT3ZVppuAELTSRLUEQe2fkv",
+  "object": "chat.completion",
+  "created": 1730881759,
+  "model": "gpt-4o-2024-08-06",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n    \"databaseQuery\": \"SELECT l.name AS language_name, COUNT(f.film_id) AS film_count FROM public.film f INNER JOIN public.language l ON f.language_id = l.language_id GROUP BY l.name;\",\n    \"generatePlot\": true,\n    \"pythonCode\": \"\\nimport matplotlib.pyplot as plt\\nimport psycopg2\\nimport pandas as pd\\n\\n# Connect to the database\\nconnection = psycopg2.connect(host='localhost', port='ppp45345ppp', user='admin4445900234', password='dkl45349?405', database='database99889899')\\n\\n# Query to get the number of films per language\\nquery = \\\"SELECT l.name AS language_name, COUNT(f.film_id) AS film_count FROM public.film f INNER JOIN public.language l ON f.language_id = l.language_id GROUP BY l.name;\\\"\\n\\n# Fetch the data\\nfilms_df = pd.read_sql(query, connection)\\n\\n# Close the connection\\nconnection.close()\\n\\n# Plotting\\nplt.figure(figsize=(10, 6))\\nplt.bar(films_df['language_name'], films_df['film_count'], color='skyblue')\\nplt.title('Number of Films per Language')\\nplt.xlabel('Language')\\nplt.ylabel('Number of Films')\\nplt.xticks(rotation=45)\\nplt.tight_layout()\\n\\n# Save the plot to a file\\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')\\nplt.close()\"\n}\n```",
+        "refusal": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1493,
+    "completion_tokens": 325,
+    "total_tokens": 1818,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "system_fingerprint": "fp_159d8341cc"
+}

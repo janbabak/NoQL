@@ -1,0 +1,34 @@
+{
+  "id": "chatcmpl-AQbDks2fIvWLsq9jU2DkXGhxAGagW",
+  "object": "chat.completion",
+  "created": 1730902968,
+  "model": "gpt-4-turbo-2024-04-09",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"databaseQuery\": \"SELECT f.title, a.first_name, a.last_name, l.name AS language FROM public.film f JOIN public.film_actor fa ON f.film_id = fa.film_id JOIN public.actor a ON fa.actor_id = a.actor_id JOIN public.language l ON f.language_id = l.language_id\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}",
+        "refusal": null
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1470,
+    "completion_tokens": 83,
+    "total_tokens": 1553,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "system_fingerprint": "fp_5db30363ff"
+}

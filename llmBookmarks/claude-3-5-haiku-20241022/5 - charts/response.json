@@ -1,0 +1,18 @@
+{
+  "id": "msg_018K1PAoGPE3ozQ2wnCWKPTw",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-3-5-haiku-20241022",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\n    \"databaseQuery\": \"SELECT l.name AS language, COUNT(f.film_id) AS film_count FROM language l LEFT JOIN film f ON l.language_id = f.language_id GROUP BY l.name ORDER BY film_count DESC\",\n    \"generatePlot\": true,\n    \"pythonCode\": \"import psycopg2\\nimport matplotlib.pyplot as plt\\n\\nconn = psycopg2.connect(host='localhost', port=45345, user='admin4445900234', password='dkl45349?405', database='database99889899')\\n\\ncursor = conn.cursor()\\ncursor.execute(\\\"SELECT l.name AS language, COUNT(f.film_id) AS film_count FROM language l LEFT JOIN film f ON l.language_id = f.language_id GROUP BY l.name ORDER BY film_count DESC\\\")\\n\\nresults = cursor.fetchall()\\nlanguages = [row[0] for row in results]\\nfilm_counts = [row[1] for row in results]\\n\\nplt.figure(figsize=(10, 6))\\nplt.bar(languages, film_counts)\\nplt.title('Number of Films by Language')\\nplt.xlabel('Language')\\nplt.ylabel('Film Count')\\nplt.xticks(rotation=45)\\nplt.tight_layout()\\nplt.savefig('./plotService/plots/noQlGeneratedPlot.png')\\n\\ncursor.close()\\nconn.close()\"\n}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 1795,
+    "output_tokens": 366
+  }
+}

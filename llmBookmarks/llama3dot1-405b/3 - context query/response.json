@@ -1,0 +1,23 @@
+{
+  "created": 1731142560,
+  "model": "llama3.1-405b",
+  "usage": {
+    "prompt_tokens": 1667,
+    "completion_tokens": 69,
+    "total_tokens": 1736
+  },
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "content": "```json\n{\n  \"databaseQuery\": \"SELECT first_name, last_name, email FROM public.customer ORDER BY last_name;\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}\n```",
+        "refusal": null,
+        "role": "assistant",
+        "function_call": null,
+        "tool_calls": null
+      }
+    }
+  ]
+}

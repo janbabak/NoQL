@@ -1,0 +1,22 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "```json\n{\n  \"databaseQuery\": \"SELECT * FROM customer;\",\n  \"generatePlot\": false,\n  \"pythonCode\": \"\"\n}\n```"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "avgLogprobs": -1.2857950891235044e-05
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1744,
+    "candidatesTokenCount": 35,
+    "totalTokenCount": 1779
+  },
+  "modelVersion": "gemini-1.5-pro-002"
+}
