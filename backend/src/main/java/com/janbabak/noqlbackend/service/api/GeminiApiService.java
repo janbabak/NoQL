@@ -1,10 +1,11 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.gpt.GptRequest;
-import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
+import com.janbabak.noqlbackend.model.query.gemini.GeminiRequest;
+import com.janbabak.noqlbackend.model.query.gemini.GeminiResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -19,12 +20,15 @@ import java.util.Objects;
 @Slf4j
 @Service
 @NoArgsConstructor
-public class GptApiService implements QueryApi {
+public class GeminiApiService implements QueryApi {
 
-    @SuppressWarnings("all")
-    private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
-    private final String token = System.getenv("API_KEY");
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+
+    private final String token = System.getenv("AI_STUDIO_API_KEY"); // TODO: @Value
+
     private final RestTemplate restTemplate = new RestTemplate();
+
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -42,58 +46,43 @@ public class GptApiService implements QueryApi {
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException, BadRequestException {
+            List<String> errors) throws LLMException, BadRequestException, EntityNotFoundException {
 
-        log.info("Chat with GPT API.");
-
-        validateRequest(queryRequest);
+        log.info("Chat with Gemini API.");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<GptRequest> request = new HttpEntity<>(
-                new GptRequest(chatHistory, queryRequest, systemQuery, errors), headers);
+        HttpEntity<GeminiRequest> request = new HttpEntity<>(
+                new GeminiRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<GptResponse> responseEntity;
+        String url = GEMINI_URL + "/" + queryRequest.getModel() + ":generateContent?key=" + token;
+
+        ResponseEntity<GeminiResponse> responseEntity;
 
         try {
-            // TODO: post for entity
-            responseEntity = restTemplate.exchange(GPT_URL, HttpMethod.POST, request, GptResponse.class);
+            responseEntity = restTemplate.postForEntity(url, request, GeminiResponse.class);
         } catch (RestClientException e) {
-            log.error("Error while calling Llama API. {}", e.getMessage());
-            throw new LLMException("Error while calling Llama API, try it latter.");
+            log.error("Gemini API request failed: {}", e.getMessage());
+            throw new LLMException("Error while calling Gemini API, try it later.");
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+            return !Objects.requireNonNull(responseEntity.getBody()).getCandidateList().isEmpty()
+                    ? responseEntity.getBody().getCandidateList().get(0).content().getParts().get(0).text()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            log.error("Bad request to the GPT model, status_code={}, response={}.",
+            log.error("Bad request to the Gemini model, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Bad request to the GPT model, we are working on it.");
+            throw new LLMException("Bad request to the Gemini model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
-            log.error("Error on GPT side, status_code={}, response={}.",
+            log.error("Error on Gemini side, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Error on GPT side, try it latter");
+            throw new LLMException("Error on Gemini side, try it latter");
         }
         return null;
-    }
-
-    /**
-     * Validate request
-     *
-     * @param queryRequest users request
-     * @throws BadRequestException unsupported model
-     */
-    void validateRequest(QueryRequest queryRequest) throws BadRequestException {
-        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("gpt")) {
-            log.error("Model is missing in the request.");
-            throw new BadRequestException("Model is missing in the request.");
-        }
     }
 }

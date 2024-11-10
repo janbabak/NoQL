@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LlmMessage {
+public class LlmMessage { // TODO: move one folder up
     public Role role;
     public String content;
 
