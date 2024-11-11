@@ -188,8 +188,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         QueryResponse queryResponse = queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
 
         // then
-        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
-        assertEquals(22, queryResponse.getTotalCount());
+        assertEquals(pageSize, queryResponse.data().rows().size()); // page size
+        assertEquals(22, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
     }
 
@@ -225,29 +225,29 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
-            messages.add(chatService.addMessageToChat(chat.getId(), messageRequest));
+            messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
         }
 
         // when
-        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.getId(), page, pageSize);
+        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.id(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
-        expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(
-                queryResponse.getChatQueryWithResponse().getTimestamp());
+        expectedResponse.chatQueryWithResponse().setId(lastMessage.getId());
+        expectedResponse.chatQueryWithResponse().setTimestamp(
+                queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
-            expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.getId() + ".png");
+            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
+                    "/static/images/" + chat.id() + ".png");
         }
 
         // then
-        assertTrue(pageSize >= queryResponse.getData().getRows().size());
-        assertEquals(expectedTotalCount, queryResponse.getTotalCount());
+        assertTrue(pageSize >= queryResponse.data().rows().size());
+        assertEquals(expectedTotalCount, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
-        chatService.deleteChatById(chat.getId());
+        chatService.deleteChatById(chat.id());
     }
 
     /**
@@ -368,9 +368,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
-        request.setChatId(chat.getId());
+        request.setChatId(chat.id());
         for (CreateChatQueryWithResponseRequest message : messages) {
-            chatService.addMessageToChat(chat.getId(), message);
+            chatService.addMessageToChat(chat.id(), message);
         }
 
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
@@ -381,22 +381,22 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
-        expectedResponse.getChatQueryWithResponse().setId(
-                queryResponse.getChatQueryWithResponse().getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(
-                queryResponse.getChatQueryWithResponse().getTimestamp());
+        expectedResponse.chatQueryWithResponse().setId(
+                queryResponse.chatQueryWithResponse().getId());
+        expectedResponse.chatQueryWithResponse().setTimestamp(
+                queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
-            expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.getId() + ".png");
+            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
+                    "/static/images/" + chat.id() + ".png");
         }
 
         // then
-        assertTrue(pageSize >= queryResponse.getData().getRows().size());
-        assertEquals(totalCount, queryResponse.getTotalCount());
+        assertTrue(pageSize >= queryResponse.data().rows().size());
+        assertEquals(totalCount, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
-        chatService.deleteChatById(chat.getId());
+        chatService.deleteChatById(chat.id());
     }
 
     /**

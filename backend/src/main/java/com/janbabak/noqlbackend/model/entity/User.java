@@ -59,10 +59,10 @@ public class User implements UserDetails {
     private List<CustomModel> models;
 
     public User(RegisterRequest request, PasswordEncoder passwordEncoder, Role role, Integer queryLimit) {
-        firstName = request.getFirstName();
-        lastName = request.getLastName();
-        email = request.getEmail();
-        password = passwordEncoder.encode(request.getPassword());
+        firstName = request.firstName();
+        lastName = request.lastName();
+        email = request.email();
+        password = passwordEncoder.encode(request.password());
         this.queryLimit = queryLimit;
         this.role = role;
         databases = new ArrayList<>();

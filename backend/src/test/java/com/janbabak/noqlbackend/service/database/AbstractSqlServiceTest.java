@@ -43,7 +43,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     abstract Table getExamTable();
 
     protected Table getTable(String schema, String tableName) {
-        return databaseStructure.getSchemas().get(schema).getTables().get(tableName);
+        return databaseStructure.schemas().get(schema).tables().get(tableName);
     }
 
     protected String getUserTableName() {
@@ -63,11 +63,11 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
      * @param columns     columns of the table
      */
     protected void verifyTable(Table table, String name, List<String> primaryKeys, List<String> columns) {
-        assertEquals(name, table.getName());
-        assertEquals(columns.size(), table.getColumns().size());
+        assertEquals(name, table.name());
+        assertEquals(columns.size(), table.columns().size());
         assertEquals(primaryKeys.size(), table.getPrimaryKeys().size());
         for (String column : columns) {
-            assertTrue(table.getColumns().containsKey(column));
+            assertTrue(table.columns().containsKey(column));
         }
         for (String primaryKey : primaryKeys) {
             assertTrue(table.getPrimaryKeys().contains(primaryKey));
@@ -88,22 +88,22 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getUserTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("id"));
+                table.columns().get("id"));
 
         assertEquals(new Column("name", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("name"));
+                table.columns().get("name"));
 
         assertEquals(new Column("age", INTEGER_DATA_TYPE, false, null),
-                table.getColumns().get("age"));
+                table.columns().get("age"));
 
         assertEquals(new Column("sex", CHAR_DATA_TYPE, false, null),
-                table.getColumns().get("sex"));
+                table.columns().get("sex"));
 
         assertEquals(new Column("email", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("email"));
+                table.columns().get("email"));
 
         assertEquals(new Column("created_at", TIMESTAMP_DATA_TYPE, false, null),
-                table.getColumns().get("created_at"));
+                table.columns().get("created_at"));
     }
 
     @Test
@@ -112,23 +112,23 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getAddressTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("id"));
+                table.columns().get("id"));
 
         assertEquals(new Column("user_id", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getDefaultSchema(), getUserTableName(), "id")),
-                table.getColumns().get("user_id"));
+                table.columns().get("user_id"));
 
         assertEquals(new Column("street", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("street"));
+                table.columns().get("street"));
 
         assertEquals(new Column("city", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("city"));
+                table.columns().get("city"));
 
         assertEquals(new Column("state", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("state"));
+                table.columns().get("state"));
 
         assertEquals(new Column("postal_code", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("postal_code"));
+                table.columns().get("postal_code"));
     }
 
     @Test
@@ -137,36 +137,36 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getOrderTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("id"));
+                table.columns().get("id"));
 
         assertEquals(new Column("user_id", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getDefaultSchema(), getUserTableName(), "id")),
-                table.getColumns().get("user_id"));
+                table.columns().get("user_id"));
 
         assertEquals(new Column("order_date", DATE_DATA_TYPE, false, null),
-                table.getColumns().get("order_date"));
+                table.columns().get("order_date"));
 
         assertEquals(new Column("total_amount", NUMERIC_DATA_TYPE, false, null),
-                table.getColumns().get("total_amount"));
+                table.columns().get("total_amount"));
 
         assertEquals(new Column("payment_method", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("payment_method"));
+                table.columns().get("payment_method"));
 
         assertEquals(new Column("shipping_address_id", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getDefaultSchema(), "address", "id")),
-                table.getColumns().get("shipping_address_id"));
+                table.columns().get("shipping_address_id"));
 
         assertEquals(new Column("is_shipped", BOOLEAN_DATA_TYPE, false, null),
-                table.getColumns().get("is_shipped"));
+                table.columns().get("is_shipped"));
 
         assertEquals(new Column("tracking_number", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("tracking_number"));
+                table.columns().get("tracking_number"));
 
         assertEquals(new Column("status", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("status"));
+                table.columns().get("status"));
 
         assertEquals(new Column("notes", TEXT_DATA_TYPE, false, null),
-                table.getColumns().get("notes"));
+                table.columns().get("notes"));
     }
 
     @Test
@@ -175,13 +175,13 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getSpecialisationTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("id"));
+                table.columns().get("id"));
 
         assertEquals(new Column("name", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("name"));
+                table.columns().get("name"));
 
         assertEquals(new Column("manager", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("manager"));
+                table.columns().get("manager"));
     }
 
     @Test
@@ -190,20 +190,20 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getStudentTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("id"));
+                table.columns().get("id"));
 
         assertEquals(new Column("name", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("name"));
+                table.columns().get("name"));
 
         assertEquals(new Column("birthdate", DATE_DATA_TYPE, false, null),
-                table.getColumns().get("birthdate"));
+                table.columns().get("birthdate"));
 
         assertEquals(new Column("grade", INTEGER_DATA_TYPE, false, null),
-                table.getColumns().get("grade"));
+                table.columns().get("grade"));
 
         assertEquals(new Column("specialisation_id", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getCvutSchema(), "specialisation", "id")),
-                table.getColumns().get("specialisation_id"));
+                table.columns().get("specialisation_id"));
     }
 
     @Test
@@ -212,18 +212,18 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getFitWikiTable();
 
         assertEquals(new Column("identifier", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("identifier"));
+                table.columns().get("identifier"));
 
         assertEquals(new Column("data", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("data"));
+                table.columns().get("data"));
 
         assertEquals(new Column("author", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getDefaultSchema(), getUserTableName(), "id")),
-                table.getColumns().get("author"));
+                table.columns().get("author"));
 
         assertEquals(new Column("reviewer_of_data", INTEGER_DATA_TYPE, false,
                         new ForeignKey(getCvutSchema(), "student", "id")),
-                table.getColumns().get("reviewer_of_data"));
+                table.columns().get("reviewer_of_data"));
     }
 
     @Test
@@ -232,10 +232,10 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         Table table = getCourseTable();
 
         assertEquals(new Column("(identifier of course", INTEGER_DATA_TYPE, true, null),
-                table.getColumns().get("(identifier of course"));
+                table.columns().get("(identifier of course"));
         assertEquals(
                 new Column("name", VARCHAR_DATA_TYPE, false, null),
-                table.getColumns().get("name"));
+                table.columns().get("name"));
     }
 
     @Test
@@ -245,10 +245,10 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
 
         assertEquals(new Column("student", INTEGER_DATA_TYPE, true,
                         new ForeignKey(getCvutSchema(), "student", "id")),
-                table.getColumns().get("student"));
+                table.columns().get("student"));
 
         assertEquals(new Column("course", INTEGER_DATA_TYPE, true,
                         new ForeignKey(getCvutSchema(), "course", getCourseIdentifier())),
-                table.getColumns().get("course"));
+                table.columns().get("course"));
     }
 }

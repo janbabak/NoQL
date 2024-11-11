@@ -12,17 +12,14 @@ import java.util.Map;
 /**
  * Represents an SQL database object - contains information about schemas, tables, columns, primary keys
  */
-@Data
-@AllArgsConstructor
-public class SqlDatabaseStructure implements DatabaseStructure {
-    public final static String DEFAULT_SCHEMA = "public";
-    private Map<String, Schema> schemas;
+public record SqlDatabaseStructure(Map<String, Schema> schemas) implements DatabaseStructure {
+    public static final String DEFAULT_SCHEMA = "public";
 
     /**
      * Create the database and automatically insert default public schema.
      */
     public SqlDatabaseStructure() {
-        schemas = new HashMap<>();
+        this(new HashMap<>());
     }
 
     /**
@@ -37,16 +34,16 @@ public class SqlDatabaseStructure implements DatabaseStructure {
         for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
             script
                     .append("\nCREATE SCHEMA IF NOT EXISTS \"")
-                    .append(schemaEntry.getValue().getName())
+                    .append(schemaEntry.getValue().name())
                     .append("\";\n");
 
             // tables
-            for (Map.Entry<String, Table> tableEntry : schemaEntry.getValue().getTables().entrySet()) {
+            for (Map.Entry<String, Table> tableEntry : schemaEntry.getValue().tables().entrySet()) {
                 script
                         .append("\nCREATE TABLE IF NOT EXISTS ")
-                        .append(schemaEntry.getValue().getName())
+                        .append(schemaEntry.getValue().name())
                         .append(".")
-                        .append(tableEntry.getValue().getName())
+                        .append(tableEntry.getValue().name())
                         .append("\n(");
 
                 List<String> primaryKeys = tableEntry.getValue().getPrimaryKeys();
@@ -77,6 +74,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
 
     /**
      * Get data transfer object
+     *
      * @return DTO
      */
     public SqlDatabaseStructureDto toDto() {
@@ -86,31 +84,24 @@ public class SqlDatabaseStructure implements DatabaseStructure {
     /**
      * Represents database schema.
      */
-    @Data
-    @AllArgsConstructor
-    public static class Schema {
-        private String name;
-        private Map<String, Table> tables;
-
+    public record Schema(
+            String name,
+            Map<String, Table> tables
+    ) {
         public Schema(String name) {
-            this.name = name;
-            this.tables = new HashMap<>();
+            this(name, new HashMap<>());
         }
     }
 
     /**
      * Represents database table inside a schema.
      */
-    @Data
-    @AllArgsConstructor
-    public static class Table {
-        private String name;
-        private Map<String, Column> columns;
-
+    public record Table(
+            String name,
+            Map<String, Column> columns
+    ) {
         public Table(String name) {
-
-            this.name = name;
-            this.columns = new HashMap<>();
+            this(name, new HashMap<>());
         }
 
         /**
@@ -121,7 +112,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
         public List<String> getPrimaryKeys() {
             List<String> primaryKeys = new ArrayList<>();
             for (Map.Entry<String, Column> entry : columns.entrySet()) {
-                if (entry.getValue().isPrimaryKey) {
+                if (entry.getValue().getIsPrimaryKey()) {
                     primaryKeys.add(entry.getKey());
                 }
             }
@@ -135,7 +126,7 @@ public class SqlDatabaseStructure implements DatabaseStructure {
          */
         @SuppressWarnings("all")
         public List<Column> getColumnsSortedByPrimaryKey() {
-            return columns.values().stream().sorted((a, b) -> a.isPrimaryKey ? -1 : 1).toList();
+            return columns.values().stream().sorted((a, b) -> a.getIsPrimaryKey() ? -1 : 1).toList();
         }
     }
 
@@ -151,23 +142,17 @@ public class SqlDatabaseStructure implements DatabaseStructure {
         private ForeignKey foreignKey; // if not null, this column references another column in another table
 
         public Column(String name, String dataType, Boolean isPrimaryKey) {
-            this.name = name;
-            this.dataType = dataType;
-            this.isPrimaryKey = isPrimaryKey;
-            this.foreignKey = null;
+            this(name, dataType, isPrimaryKey, null);
         }
     }
 
     /**
      * Foreign key / reference
      */
-    @Data
-    @AllArgsConstructor
-    public static class ForeignKey {
-        private String referencedSchema;
-        private String referencedTable;
-        private String referencedColumn;
-
+    public record ForeignKey(
+            String referencedSchema,
+            String referencedTable,
+            String referencedColumn) {
         @JsonIgnore
         public String getReferencingString() {
             return " REFERENCES "

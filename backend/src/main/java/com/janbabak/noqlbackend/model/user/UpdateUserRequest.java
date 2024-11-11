@@ -6,32 +6,30 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.Data;
 
-@Data
 @Builder
-public class UpdateUserRequest {
+public record UpdateUserRequest(
 
-    @Nullable
-    @Size(min = 1, max = 32)
-    private String firstName;
+        @Nullable
+        @Size(min = 1, max = 32)
+        String firstName,
 
-    @Nullable
-    @Size(min = 1, max = 32)
-    private String lastName;
+        @Nullable
+        @Size(min = 1, max = 32)
+        String lastName,
 
-    @Nullable
-    @Email
-    private String email;
+        @Nullable
+        @Email
+        String email,
 
-    @Nullable
-    @Size(min = 8, max = 64)
-    private String password;
+        @Nullable
+        @Size(min = 8, max = 64)
+        String password,
 
-    @Nullable
-    private Role role;
+        @Nullable
+        Role role,
 
-    @Nullable
-    @Min(0)
-    private Integer queryLimit; // TODO: easily hackable
+        @Nullable
+        @Min(0)
+        Integer queryLimit) { // TODO: easily hackable
 }

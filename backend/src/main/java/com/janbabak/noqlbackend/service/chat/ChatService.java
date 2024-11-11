@@ -155,8 +155,8 @@ public class ChatService {
         Timestamp timestamp = Timestamp.from(Instant.now());
         ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
-                .nlQuery(request.getNlQuery())
-                .llmResponse(request.getLlmResult())
+                .nlQuery(request.nlQuery())
+                .llmResponse(request.llmResult())
                 .timestamp(timestamp)
                 .build();
 

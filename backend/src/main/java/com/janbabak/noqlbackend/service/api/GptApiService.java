@@ -5,7 +5,6 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.gpt.GptRequest;
 import com.janbabak.noqlbackend.model.query.gpt.GptResponse;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@NoArgsConstructor
 public class GptApiService implements QueryApi {
 
     @Value("${app.externalServices.openAiApi.url}")
@@ -71,8 +69,8 @@ public class GptApiService implements QueryApi {
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+            return !Objects.requireNonNull(responseEntity.getBody()).choices().isEmpty()
+                    ? responseEntity.getBody().choices().get(0).message().getContent()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {

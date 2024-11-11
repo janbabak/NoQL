@@ -13,10 +13,12 @@ public record GeminiResponse(
     public record Candidate(
             GeminiMessage content,
             String finishReason,
-            double avgLogprobs) {}
+            double avgLogprobs) {
+    }
 
     public record UsageMetadata(
             int promptTokenCount,
             int candidatesTokenCount,
-            int totalTokenCount) {}
+            int totalTokenCount) {
+    }
 }

@@ -73,8 +73,8 @@ public class CustomModelApiService implements QueryApi {
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+            return !Objects.requireNonNull(responseEntity.getBody()).choices().isEmpty()
+                    ? responseEntity.getBody().choices().get(0).message().getContent()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {

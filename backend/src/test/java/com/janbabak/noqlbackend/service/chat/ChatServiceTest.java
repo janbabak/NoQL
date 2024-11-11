@@ -284,8 +284,8 @@ class ChatServiceTest {
         ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
                 .id(UUID.randomUUID())
                 .chat(chat)
-                .nlQuery(request.getNlQuery())
-                .llmResponse(request.getLlmResult())
+                .nlQuery(request.nlQuery())
+                .llmResponse(request.llmResult())
                 .build();
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
@@ -346,8 +346,8 @@ class ChatServiceTest {
         ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
                 .id(UUID.randomUUID())
                 .chat(chat)
-                .nlQuery(request.getNlQuery())
-                .llmResponse(request.getLlmResult())
+                .nlQuery(request.nlQuery())
+                .llmResponse(request.llmResult())
                 .build();
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));

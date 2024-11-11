@@ -116,18 +116,18 @@ public class EntityServiceIntegrationTest {
         createChats(adminMysql, 2);
 
         AuthenticationService.authenticateUser(testUser);
-        addMessagesToChat(postgresChats.get(0).getId(), 3);
-        addMessagesToChat(postgresChats.get(1).getId(), 1);
-        addMessagesToChat(postgresChats.get(2).getId(), 4);
-        addMessagesToChat(mysqlChats.get(0).getId(), 4);
-        addMessagesToChat(mysqlChats.get(2).getId(), 2);
+        addMessagesToChat(postgresChats.get(0).id(), 3);
+        addMessagesToChat(postgresChats.get(1).id(), 1);
+        addMessagesToChat(postgresChats.get(2).id(), 4);
+        addMessagesToChat(mysqlChats.get(0).id(), 4);
+        addMessagesToChat(mysqlChats.get(2).id(), 2);
 
         // update objects
-        renameChat(postgresChats.get(2).getId());
+        renameChat(postgresChats.get(2).id());
         updateDatabase(postgres.getId());
 
         // delete objects
-        deleteChat(postgresChats.get(0).getId());
+        deleteChat(postgresChats.get(0).id());
         deleteMysql(mysql.getId());
         deletePostgres(postgres.getId());
         deleteAdminMysql(adminMysql.getId());
@@ -247,7 +247,7 @@ public class EntityServiceIntegrationTest {
     void renameChat(UUID chatId) throws EntityNotFoundException {
         chatService.renameChat(chatId, "This is the new name of the chat :)");
 
-        assertEquals("This is the new name of the chat", chatService.findById(chatId).getName());
+        assertEquals("This is the new name of the chat", chatService.findById(chatId).name());
     }
 
     /**
