@@ -39,19 +39,19 @@ public class PostgresService extends SqlDatabaseService {
                 String referencingSchemaAndTable = result.resultSet().getString(TABLE_NAME_COLUMN_NAME);
                 ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 
-                Schema schema = db.getSchemas().get(foreignKeyData.referencingSchema);
+                Schema schema = db.schemas().get(foreignKeyData.referencingSchema);
                 if (schema == null) {
                     continue;
                 }
-                Table table = schema.getTables().get(foreignKeyData.referencingTable);
+                Table table = schema.tables().get(foreignKeyData.referencingTable);
                 if (table == null) {
                     // table not found, because table name is in double quotes
-                    table = schema.getTables().get(stripQuotes(foreignKeyData.referencingTable));
+                    table = schema.tables().get(stripQuotes(foreignKeyData.referencingTable));
                     if (table == null) {
                         continue;
                     }
                 }
-                Column column = table.getColumns().get(foreignKeyData.referencingColumn);
+                Column column = table.columns().get(foreignKeyData.referencingColumn);
                 if (column == null) {
                     continue;
                 }

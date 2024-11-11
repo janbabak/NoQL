@@ -8,14 +8,14 @@ import java.util.List;
 public record SqlDatabaseStructureDto(List<SchemaDto> schemas) implements DatabaseStructureDto {
 
     public SqlDatabaseStructureDto(SqlDatabaseStructure sqlDatabaseStructure) {
-        this(sqlDatabaseStructure.getSchemas().values().stream().map(SchemaDto::new).toList());
+        this(sqlDatabaseStructure.schemas().values().stream().map(SchemaDto::new).toList());
     }
 
     public record SchemaDto(
             String name,
             List<TableDto> tables) {
         public SchemaDto(SqlDatabaseStructure.Schema schema) {
-            this(schema.getName(), schema.getTables().values().stream().map(TableDto::new).toList());
+            this(schema.name(), schema.tables().values().stream().map(TableDto::new).toList());
         }
     }
 
@@ -23,7 +23,7 @@ public record SqlDatabaseStructureDto(List<SchemaDto> schemas) implements Databa
             String name,
             List<SqlDatabaseStructure.Column> columns) {
         public TableDto(SqlDatabaseStructure.Table table) {
-            this(table.getName(), table.getColumns().values().stream().toList());
+            this(table.name(), table.columns().values().stream().toList());
         }
     }
 }

@@ -100,33 +100,33 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     @DisplayName("Test schemas")
     void testSchemas() {
         // MySQL does not have schemas like postgres. The top level is the database and it contains tables.
-        assertEquals(1, databaseStructure.getSchemas().size());
-        assertTrue(databaseStructure.getSchemas().containsKey(getDefaultSchema()));
+        assertEquals(1, databaseStructure.schemas().size());
+        assertTrue(databaseStructure.schemas().containsKey(getDefaultSchema()));
     }
 
     @Test
     @DisplayName("Test default schema/database")
     void testDefaultSchema() {
-        SqlDatabaseStructure.Schema schema = databaseStructure.getSchemas().get(getDefaultSchema());
+        SqlDatabaseStructure.Schema schema = databaseStructure.schemas().get(getDefaultSchema());
 
-        assertEquals(getDefaultSchema(), schema.getName());
-        assertEquals(8, schema.getTables().size());
-        assertTrue(schema.getTables().containsKey("user"));
-        assertTrue(schema.getTables().containsKey("address"));
-        assertTrue(schema.getTables().containsKey("order"));
-        assertTrue(schema.getTables().containsKey("specialisation"));
-        assertTrue(schema.getTables().containsKey("student"));
-        assertTrue(schema.getTables().containsKey("fit_wiki"));
-        assertTrue(schema.getTables().containsKey("course"));
-        assertTrue(schema.getTables().containsKey("exam"));
+        assertEquals(getDefaultSchema(), schema.name());
+        assertEquals(8, schema.tables().size());
+        assertTrue(schema.tables().containsKey("user"));
+        assertTrue(schema.tables().containsKey("address"));
+        assertTrue(schema.tables().containsKey("order"));
+        assertTrue(schema.tables().containsKey("specialisation"));
+        assertTrue(schema.tables().containsKey("student"));
+        assertTrue(schema.tables().containsKey("fit_wiki"));
+        assertTrue(schema.tables().containsKey("course"));
+        assertTrue(schema.tables().containsKey("exam"));
 
-        verifyTable(schema.getTables().get("user"), "user", List.of("id"),
+        verifyTable(schema.tables().get("user"), "user", List.of("id"),
                 List.of("id", "name", "age", "sex", "email", "created_at"));
 
-        verifyTable(schema.getTables().get("address"), "address", List.of("id"),
+        verifyTable(schema.tables().get("address"), "address", List.of("id"),
                 List.of("id", "user_id", "street", "city", "state", "postal_code"));
 
-        verifyTable(schema.getTables().get("order"), "order", List.of("id"),
+        verifyTable(schema.tables().get("order"), "order", List.of("id"),
                 List.of("id", "user_id", "order_date", "total_amount", "payment_method", "shipping_address_id",
                         "is_shipped", "tracking_number", "status", "notes"));
     }

@@ -33,15 +33,15 @@ public class MySqlService extends SqlDatabaseService {
                 String referencedTable = resultSet.getString("referenced_table");
                 String referencedColumn = resultSet.getString("referenced_column");
 
-                Schema schema = dbStructure.getSchemas().get(referencingSchema);
+                Schema schema = dbStructure.schemas().get(referencingSchema);
                 if (schema == null) {
                     continue;
                 }
-                Table table = schema.getTables().get(referencingTable);
+                Table table = schema.tables().get(referencingTable);
                 if (table == null) {
                     continue;
                 }
-                Column column = table.getColumns().get(referencingColumn);
+                Column column = table.columns().get(referencingColumn);
                 if (column == null) {
                     continue;
                 }

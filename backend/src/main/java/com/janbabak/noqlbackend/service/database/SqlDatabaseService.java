@@ -50,13 +50,13 @@ public abstract class SqlDatabaseService extends BaseDatabaseService {
                 Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
 
                 SqlDatabaseStructure.Schema schema =
-                        dbStructure.getSchemas().computeIfAbsent(tableSchema, SqlDatabaseStructure.Schema::new);
+                        dbStructure.schemas().computeIfAbsent(tableSchema, SqlDatabaseStructure.Schema::new);
 
                 SqlDatabaseStructure.Table table =
-                        schema.getTables().computeIfAbsent(tableName, SqlDatabaseStructure.Table::new);
+                        schema.tables().computeIfAbsent(tableName, SqlDatabaseStructure.Table::new);
 
                 // columnName key definitely doesn't exist - no need of checking it out
-                table.getColumns().put(columnName, new SqlDatabaseStructure.Column(columnName, dataType, primaryKey));
+                table.columns().put(columnName, new SqlDatabaseStructure.Column(columnName, dataType, primaryKey));
             }
         } catch (SQLException e) {
             throw new DatabaseExecutionException(e.getMessage());

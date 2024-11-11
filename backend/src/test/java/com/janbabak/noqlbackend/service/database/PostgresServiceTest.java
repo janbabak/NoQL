@@ -110,29 +110,29 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test schemas")
     void testSchemas() {
-        assertEquals(2, databaseStructure.getSchemas().size());
-        assertTrue(databaseStructure.getSchemas().containsKey(getDefaultSchema()));
-        assertTrue(databaseStructure.getSchemas().containsKey(getCvutSchema()));
+        assertEquals(2, databaseStructure.schemas().size());
+        assertTrue(databaseStructure.schemas().containsKey(getDefaultSchema()));
+        assertTrue(databaseStructure.schemas().containsKey(getCvutSchema()));
     }
 
     @Test
     @DisplayName("Test public schema")
     void testPublicSchema() {
-        Schema schema = databaseStructure.getSchemas().get(getDefaultSchema());
+        Schema schema = databaseStructure.schemas().get(getDefaultSchema());
 
-        assertEquals(getDefaultSchema(), schema.getName());
-        assertEquals(3, schema.getTables().size());
-        assertTrue(schema.getTables().containsKey("user"));
-        assertTrue(schema.getTables().containsKey("address"));
-        assertTrue(schema.getTables().containsKey("order"));
+        assertEquals(getDefaultSchema(), schema.name());
+        assertEquals(3, schema.tables().size());
+        assertTrue(schema.tables().containsKey("user"));
+        assertTrue(schema.tables().containsKey("address"));
+        assertTrue(schema.tables().containsKey("order"));
 
-        verifyTable(schema.getTables().get("user"), "user", List.of("id"),
+        verifyTable(schema.tables().get("user"), "user", List.of("id"),
                 List.of("id", "name", "age", "sex", "email", "created_at"));
 
-        verifyTable(schema.getTables().get("address"), "address", List.of("id"),
+        verifyTable(schema.tables().get("address"), "address", List.of("id"),
                 List.of("id", "user_id", "street", "city", "state", "postal_code"));
 
-        verifyTable(schema.getTables().get("order"), "order", List.of("id"),
+        verifyTable(schema.tables().get("order"), "order", List.of("id"),
                 List.of("id", "user_id", "order_date", "total_amount", "payment_method", "shipping_address_id",
                         "is_shipped", "tracking_number", "status", "notes"));
     }
@@ -140,29 +140,29 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test cvut schema")
     void testCvutSchema() {
-        Schema schema = databaseStructure.getSchemas().get(getCvutSchema());
+        Schema schema = databaseStructure.schemas().get(getCvutSchema());
 
-        assertEquals(getCvutSchema(), schema.getName());
-        assertEquals(5, schema.getTables().size());
-        assertTrue(schema.getTables().containsKey("specialisation"));
-        assertTrue(schema.getTables().containsKey("student"));
-        assertTrue(schema.getTables().containsKey("fit_wiki"));
-        assertTrue(schema.getTables().containsKey("course"));
-        assertTrue(schema.getTables().containsKey("exam"));
+        assertEquals(getCvutSchema(), schema.name());
+        assertEquals(5, schema.tables().size());
+        assertTrue(schema.tables().containsKey("specialisation"));
+        assertTrue(schema.tables().containsKey("student"));
+        assertTrue(schema.tables().containsKey("fit_wiki"));
+        assertTrue(schema.tables().containsKey("course"));
+        assertTrue(schema.tables().containsKey("exam"));
 
-        verifyTable(schema.getTables().get("specialisation"), "specialisation", List.of("id"),
+        verifyTable(schema.tables().get("specialisation"), "specialisation", List.of("id"),
                 List.of("id", "name", "manager"));
 
-        verifyTable(schema.getTables().get("student"), "student", List.of("id"),
+        verifyTable(schema.tables().get("student"), "student", List.of("id"),
                 List.of("id", "name", "birthdate", "grade", "specialisation_id"));
 
-        verifyTable(schema.getTables().get("fit_wiki"), "fit_wiki", List.of("identifier"),
+        verifyTable(schema.tables().get("fit_wiki"), "fit_wiki", List.of("identifier"),
                 List.of("identifier", "data", "author", "reviewer_of_data"));
 
-        verifyTable(schema.getTables().get("course"), "course", List.of("(identifier of course"),
+        verifyTable(schema.tables().get("course"), "course", List.of("(identifier of course"),
                 List.of("(identifier of course", "name"));
 
-        verifyTable(schema.getTables().get("exam"), "exam", List.of("student", "course"),
+        verifyTable(schema.tables().get("exam"), "exam", List.of("student", "course"),
                 List.of("student", "course"));
     }
 }
