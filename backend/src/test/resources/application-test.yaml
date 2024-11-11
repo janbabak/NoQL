@@ -33,3 +33,4 @@ app:
     aiStudioApiKey: "xxx"
     openAiApiKey: "xxx"
     llamaApiKey: "xxx"
+    anthropicApiKey: "xxx"
