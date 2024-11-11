@@ -22,12 +22,12 @@ import java.util.Objects;
 @NoArgsConstructor
 public class GeminiApiService implements QueryApi {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models";
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${app.externalServices.geminiApi.url}")
+    private String geminiUrl;
 
-    @Value("${app.credentials.aiStudioApiKey}")
+    @Value("${app.externalServices.geminiApi.apiKey}")
     private String token;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -58,7 +58,7 @@ public class GeminiApiService implements QueryApi {
         HttpEntity<GeminiRequest> request = new HttpEntity<>(
                 new GeminiRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        String url = GEMINI_URL + "/" + queryRequest.getModel() + ":generateContent?key=" + token;
+        String url = geminiUrl + "/" + queryRequest.getModel() + ":generateContent?key=" + token;
 
         ResponseEntity<GeminiResponse> responseEntity;
 

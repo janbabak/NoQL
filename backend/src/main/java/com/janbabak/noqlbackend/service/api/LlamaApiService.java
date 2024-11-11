@@ -22,12 +22,12 @@ import java.util.Objects;
 @NoArgsConstructor
 public class LlamaApiService implements QueryApi {
 
-    @SuppressWarnings("all")
-    private final String LLAMA_API_URL = "https://api.llama-api.com/chat/completions";
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${app.externalServices.llamaApi.url}")
+    private String llamaUrl;
 
-    @Value("${app.credentials.llamaApiKey}")
-    private String token;
+    @Value("${app.externalServices.llamaApi.apiKey}")
+    private String apiKey;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -52,7 +52,7 @@ public class LlamaApiService implements QueryApi {
         validateRequest(queryRequest);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
+        headers.setBearerAuth(this.apiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
@@ -62,7 +62,7 @@ public class LlamaApiService implements QueryApi {
         ResponseEntity<LlamaResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.exchange(LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
+            responseEntity = restTemplate.exchange(llamaUrl, HttpMethod.POST, request, LlamaResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling Llama API. {}", e.getMessage());
             throw new LLMException("Error while calling Llama API, try it latter.");
