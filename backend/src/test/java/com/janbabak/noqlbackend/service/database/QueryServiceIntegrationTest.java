@@ -225,11 +225,11 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
-            messages.add(chatService.addMessageToChat(chat.getId(), messageRequest));
+            messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
         }
 
         // when
-        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.getId(), page, pageSize);
+        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.id(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
@@ -238,7 +238,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.getId() + ".png");
+                    "/static/images/" + chat.id() + ".png");
         }
 
         // then
@@ -247,7 +247,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
-        chatService.deleteChatById(chat.getId());
+        chatService.deleteChatById(chat.id());
     }
 
     /**
@@ -368,9 +368,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
-        request.setChatId(chat.getId());
+        request.setChatId(chat.id());
         for (CreateChatQueryWithResponseRequest message : messages) {
-            chatService.addMessageToChat(chat.getId(), message);
+            chatService.addMessageToChat(chat.id(), message);
         }
 
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
@@ -387,7 +387,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.getId() + ".png");
+                    "/static/images/" + chat.id() + ".png");
         }
 
         // then
@@ -396,7 +396,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
-        chatService.deleteChatById(chat.getId());
+        chatService.deleteChatById(chat.id());
     }
 
     /**

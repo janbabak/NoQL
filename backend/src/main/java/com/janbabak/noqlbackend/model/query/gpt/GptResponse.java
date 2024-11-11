@@ -1,7 +1,6 @@
 package com.janbabak.noqlbackend.model.query.gpt;
 
 import com.janbabak.noqlbackend.model.query.LlmMessage;
-import lombok.Data;
 
 import java.util.List;
 
