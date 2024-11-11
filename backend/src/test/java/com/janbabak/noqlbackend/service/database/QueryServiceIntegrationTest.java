@@ -188,8 +188,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         QueryResponse queryResponse = queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
 
         // then
-        assertEquals(pageSize, queryResponse.getData().getRows().size()); // page size
-        assertEquals(22, queryResponse.getTotalCount());
+        assertEquals(pageSize, queryResponse.data().rows().size()); // page size
+        assertEquals(22, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
     }
 
@@ -233,17 +233,17 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // message id and timestamp are generated, so we need to set them manually
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
-        expectedResponse.getChatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(
-                queryResponse.getChatQueryWithResponse().getTimestamp());
+        expectedResponse.chatQueryWithResponse().setId(lastMessage.getId());
+        expectedResponse.chatQueryWithResponse().setTimestamp(
+                queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
-            expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
+            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
                     "/static/images/" + chat.getId() + ".png");
         }
 
         // then
-        assertTrue(pageSize >= queryResponse.getData().getRows().size());
-        assertEquals(expectedTotalCount, queryResponse.getTotalCount());
+        assertTrue(pageSize >= queryResponse.data().rows().size());
+        assertEquals(expectedTotalCount, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
@@ -381,18 +381,18 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
-        expectedResponse.getChatQueryWithResponse().setId(
-                queryResponse.getChatQueryWithResponse().getId());
-        expectedResponse.getChatQueryWithResponse().setTimestamp(
-                queryResponse.getChatQueryWithResponse().getTimestamp());
+        expectedResponse.chatQueryWithResponse().setId(
+                queryResponse.chatQueryWithResponse().getId());
+        expectedResponse.chatQueryWithResponse().setTimestamp(
+                queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
-            expectedResponse.getChatQueryWithResponse().getLlmResult().setPlotUrl(
+            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
                     "/static/images/" + chat.getId() + ".png");
         }
 
         // then
-        assertTrue(pageSize >= queryResponse.getData().getRows().size());
-        assertEquals(totalCount, queryResponse.getTotalCount());
+        assertTrue(pageSize >= queryResponse.data().rows().size());
+        assertEquals(totalCount, queryResponse.totalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup

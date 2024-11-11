@@ -1,9 +1,7 @@
 package com.janbabak.noqlbackend.model.query;
 
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,15 +12,12 @@ import java.util.List;
 /**
  * Response with retrieved data.
  */
-@Data
 @Builder
-@AllArgsConstructor
-public class QueryResponse {
-
-    private RetrievedData data;
-    private Long totalCount; // total count of rows (response is paginated, so it does not contain all of them)
-    private ChatQueryWithResponseDto chatQueryWithResponse; // last chat query with LLM response
-    private String errorMessage; // error message when the query execution failed due to syntax error
+public record QueryResponse(
+    RetrievedData data,
+    Long totalCount, // total count of rows (response is paginated, so it does not contain all of them)
+    ChatQueryWithResponseDto chatQueryWithResponse, // last chat query with LLM response
+    String errorMessage /* error message when the query execution failed due to syntax error */ ) {
 
     public static QueryResponse successfulResponse(
             RetrievedData resultData, ChatQueryWithResponseDto message, Long totalCount) {
@@ -33,23 +28,21 @@ public class QueryResponse {
         return new QueryResponse(null, null, message, errorMessage);
     }
 
-    @Data
-    @AllArgsConstructor
-    public static class RetrievedData {
-        private final List<String> columnNames;
-        private final List<List<String>> rows;
+    public record RetrievedData(
+        List<String> columnNames,
+        List<List<String>> rows) {
 
         public RetrievedData(ResultSet resultSet) throws SQLException {
+            this(new ArrayList<>(), new ArrayList<>());
+
             ResultSetMetaData rsmd = resultSet.getMetaData();
 
             // columns
-            columnNames = new ArrayList<>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 columnNames.add(rsmd.getColumnName(i));
             }
 
             // rows
-            rows = new ArrayList<>();
             while (resultSet.next()) {
                 List<String> row = new ArrayList<>();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
