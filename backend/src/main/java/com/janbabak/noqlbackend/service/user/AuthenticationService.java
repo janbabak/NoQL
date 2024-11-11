@@ -45,8 +45,8 @@ public class AuthenticationService {
      * @throws UserAlreadyExistsException User with this username already exists.
      */
     public AuthenticationResponse register(RegisterRequest request, Role role) throws UserAlreadyExistsException {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException(request.getEmail());
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new UserAlreadyExistsException(request.email());
         }
 
         log.info("Created new user with default query limit: {}", settings.getDefaultUserQueryLimit());
@@ -70,10 +70,10 @@ public class AuthenticationService {
      */
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws EntityNotFoundException {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
-                () -> new EntityNotFoundException(USER, request.getEmail()));
+        User user = userRepository.findByEmail(request.email()).orElseThrow(
+                () -> new EntityNotFoundException(USER, request.email()));
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
