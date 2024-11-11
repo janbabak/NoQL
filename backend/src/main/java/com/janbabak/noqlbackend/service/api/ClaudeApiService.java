@@ -1,12 +1,10 @@
 package com.janbabak.noqlbackend.service.api;
 
-import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.claude.ClaudeRequest;
 import com.janbabak.noqlbackend.model.query.claude.ClaudeResponse;
-import com.janbabak.noqlbackend.model.query.gemini.GeminiResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -24,6 +22,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ClaudeApiService implements QueryApi {
 
+    @SuppressWarnings("FieldCanBeLocal")
     private final String CLAUDE_URL = "https://api.anthropic.com/v1/messages";
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -46,7 +45,7 @@ public class ClaudeApiService implements QueryApi {
             List<ChatQueryWithResponse> chatHistory,
             QueryRequest queryRequest,
             String systemQuery,
-            List<String> errors) throws LLMException, BadRequestException, EntityNotFoundException {
+            List<String> errors) throws LLMException, BadRequestException {
 
         log.info("Chat with Claude API.");
 
