@@ -37,8 +37,8 @@ public class ChatQueryWithResponseDto {
         private String plotUrl; // if null, plot wasn't generated
 
         public LLMResult(LLMResponse LLMResponse, UUID chatId) {
-            this.databaseQuery = LLMResponse.getDatabaseQuery();
-            this.plotUrl = LLMResponse.getGeneratePlot()
+            this.databaseQuery = LLMResponse.databaseQuery();
+            this.plotUrl = LLMResponse.generatePlot()
                     ? ResourceConfig.IMAGES_STATIC_FOLDER + chatId + PlotService.PLOT_IMAGE_FILE_EXTENSION
                     : null;
         }

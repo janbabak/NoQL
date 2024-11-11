@@ -288,16 +288,16 @@ public class QueryService {
                 new ChatQueryWithResponseDto(latestMessage, new LLMResult(LLMResponse, chatId));
 
         // only plot without any select query to retrieve the data
-        if (LLMResponse.getDatabaseQuery() == null) {
+        if (LLMResponse.databaseQuery() == null) {
             return QueryResponse.successfulResponse(null, chatQueryWithResponseDto, null);
         }
 
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.getDatabaseQuery(), page, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
             RetrievedData retrievedData = new RetrievedData(result.resultSet());
-            Long totalCount = getTotalCount(LLMResponse.getDatabaseQuery(), databaseService);
+            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
 
             return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
@@ -333,18 +333,18 @@ public class QueryService {
 
         LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
 
-        if (llmResponse.getGeneratePlot()) {
+        if (llmResponse.generatePlot()) {
             log.info("Generate plot");
-            plotService.generatePlot(llmResponse.getPythonCode(), database, queryRequest.getChatId());
+            plotService.generatePlot(llmResponse.pythonCode(), database, queryRequest.getChatId());
         }
 
         RetrievedData retrievedData = null;
         Long totalCount = null;
-        if (llmResponse.getDatabaseQuery() != null || !llmResponse.getGeneratePlot()) {
-            String paginatedQuery = setPaginationInSqlQuery(llmResponse.getDatabaseQuery(), 0, pageSize, database);
+        if (llmResponse.databaseQuery() != null || !llmResponse.generatePlot()) {
+            String paginatedQuery = setPaginationInSqlQuery(llmResponse.databaseQuery(), 0, pageSize, database);
             try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
                 retrievedData = new RetrievedData(result.resultSet());
-                totalCount = getTotalCount(llmResponse.getDatabaseQuery(), databaseService);
+                totalCount = getTotalCount(llmResponse.databaseQuery(), databaseService);
             }
         }
 
