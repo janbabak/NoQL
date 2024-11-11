@@ -141,9 +141,9 @@ public class CustomModelService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(customModel.getUserId());
 
-        if (data.getName() != null) customModel.setName(data.getName());
-        if (data.getHost() != null) customModel.setHost(data.getHost());
-        if (data.getPort() != null) customModel.setPort(data.getPort());
+        if (data.name() != null) customModel.setName(data.name());
+        if (data.host() != null) customModel.setHost(data.host());
+        if (data.port() != null) customModel.setPort(data.port());
 
         return customModelRepository.save(customModel);
     }
