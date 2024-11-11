@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.model.query.claude;
 
 import java.util.List;
 
-public record ClaudeResponse (
+public record ClaudeResponse(
         String id,
         String type,
         String model,
@@ -15,9 +15,11 @@ public record ClaudeResponse (
     public record Content(
             String type,
             String text
-    ) {}
+    ) {
+    }
 
     public record Usage(
             int input_tokens,
-            int output_tokens) {}
+            int output_tokens) {
+    }
 }

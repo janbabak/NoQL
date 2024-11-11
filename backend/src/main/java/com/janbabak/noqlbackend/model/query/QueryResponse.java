@@ -14,14 +14,14 @@ import java.util.List;
  */
 @Builder
 public record QueryResponse(
-    RetrievedData data,
-    Long totalCount, // total count of rows (response is paginated, so it does not contain all of them)
-    ChatQueryWithResponseDto chatQueryWithResponse, // last chat query with LLM response
-    String errorMessage /* error message when the query execution failed due to syntax error */ ) {
+        RetrievedData data,
+        Long totalCount, // total count of rows (response is paginated, so it does not contain all of them)
+        ChatQueryWithResponseDto chatQueryWithResponse, // last chat query with LLM response
+        String errorMessage /* error message when the query execution failed due to syntax error */) {
 
     public static QueryResponse successfulResponse(
             RetrievedData resultData, ChatQueryWithResponseDto message, Long totalCount) {
-        return new QueryResponse(resultData, totalCount, message,null);
+        return new QueryResponse(resultData, totalCount, message, null);
     }
 
     public static QueryResponse failedResponse(ChatQueryWithResponseDto message, String errorMessage) {
@@ -29,8 +29,8 @@ public record QueryResponse(
     }
 
     public record RetrievedData(
-        List<String> columnNames,
-        List<List<String>> rows) {
+            List<String> columnNames,
+            List<List<String>> rows) {
 
         public RetrievedData(ResultSet resultSet) throws SQLException {
             this(new ArrayList<>(), new ArrayList<>());

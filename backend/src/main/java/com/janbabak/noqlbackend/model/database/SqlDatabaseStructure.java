@@ -156,7 +156,7 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
         @JsonIgnore
         public String getReferencingString() {
             return " REFERENCES "
-                    + (referencedSchema.equals(SqlDatabaseStructure.DEFAULT_SCHEMA) ? "" : referencedSchema + ".")
+                    + (referencedSchema.equals(DEFAULT_SCHEMA) ? "" : referencedSchema + ".")
                     + referencedTable + "(" + referencedColumn + "),";
         }
     }

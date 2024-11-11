@@ -13,11 +13,13 @@ public record CustomModelResponse(
             int prompt_tokens,
             int completion_tokens,
             int total_tokens
-    ) {}
+    ) {
+    }
 
     public record Choice(
             LlmMessage message,
             String finish_reason,
             int index
-    ) {}
+    ) {
+    }
 }

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record LlamaRequest(
-    String model,
-    List<LlmMessage> messages) {
+        String model,
+        List<LlmMessage> messages) {
 
     /**
      * Create query
