@@ -30,6 +30,7 @@ public class ClaudeApiService implements QueryApi {
 
     @Value("${app.externalServices.claudeApi.anthropicVersion}")
     private String anthropicVersion;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**

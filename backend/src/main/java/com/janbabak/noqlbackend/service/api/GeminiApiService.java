@@ -27,6 +27,7 @@ public class GeminiApiService implements QueryApi {
 
     @Value("${app.externalServices.geminiApi.apiKey}")
     private String token;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**

@@ -27,6 +27,7 @@ public class GptApiService implements QueryApi {
 
     @Value("${app.externalServices.openAiApi.apiKey}")
     private String apiKey;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
