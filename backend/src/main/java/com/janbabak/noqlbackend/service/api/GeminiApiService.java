@@ -5,7 +5,6 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.gemini.GeminiRequest;
 import com.janbabak.noqlbackend.model.query.gemini.GeminiResponse;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-@NoArgsConstructor
 public class GeminiApiService implements QueryApi {
 
     @Value("${app.externalServices.geminiApi.url}")
