@@ -71,24 +71,24 @@ public class UserService {
 
         User userToUpdate = findById(userId);
 
-        if (data.getFirstName() != null) userToUpdate.setFirstName(data.getFirstName());
-        if (data.getLastName() != null) userToUpdate.setLastName(data.getLastName());
-        if (data.getQueryLimit() != null) userToUpdate.setQueryLimit(data.getQueryLimit());
-        if (data.getPassword() != null) userToUpdate.setPassword(passwordEncoder.encode(data.getPassword()));
-        if (data.getEmail() != null && !data.getEmail().isEmpty()) {
-            userRepository.findByEmail(data.getEmail()).ifPresent(user -> {
+        if (data.firstName() != null) userToUpdate.setFirstName(data.firstName());
+        if (data.lastName() != null) userToUpdate.setLastName(data.lastName());
+        if (data.queryLimit() != null) userToUpdate.setQueryLimit(data.queryLimit());
+        if (data.password() != null) userToUpdate.setPassword(passwordEncoder.encode(data.password()));
+        if (data.email() != null && !data.email().isEmpty()) {
+            userRepository.findByEmail(data.email()).ifPresent(user -> {
                 if (!user.getId().equals(userId)) {
                     throw new IllegalArgumentException("User with this email already exists.");
                 }
             });
-            userToUpdate.setEmail(data.getEmail());
+            userToUpdate.setEmail(data.email());
         }
-        if (data.getRole() != null) {
-            if (data.getRole() == Role.ROLE_ADMIN) {
+        if (data.role() != null) {
+            if (data.role() == Role.ROLE_ADMIN) {
                 // only admin is allowed to change role to admin
                 authenticationService.ifNotAdminThrowAccessDenied();
             }
-            userToUpdate.setRole(data.getRole());
+            userToUpdate.setRole(data.role());
         }
 
         return userRepository.save(userToUpdate);
