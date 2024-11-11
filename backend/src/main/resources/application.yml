@@ -23,3 +23,7 @@ app:
       secretKey: "${JWT_SECRET:secret}"
       expiration: "${JWT_EXPIRATION:1800}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
+  credentials:
+    aiStudioApiKey: "${AI_STUDIO_API_KEY}"
+    openAiApiKey: "${OPEN_AI_API_KEY}"
+    llamaApiKey: "${LLAMA_API_KEY}"

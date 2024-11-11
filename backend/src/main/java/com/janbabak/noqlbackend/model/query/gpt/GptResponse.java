@@ -9,7 +9,7 @@ import java.util.List;
  * GPT response object from the GPT API
  */
 @Data
-public class GptResponse {
+public class GptResponse { // TODO: record
     private String id;
     private String object;
     private String model;

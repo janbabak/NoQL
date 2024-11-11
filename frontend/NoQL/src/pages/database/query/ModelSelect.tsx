@@ -21,13 +21,15 @@ const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
     setModelOptions
   ] = useState<ModelOption[]>([
     // fallback if not loaded from backend
-    { label: 'GPT 4o', value: "gpt-4o" },
-    { label: 'GPT 4', value: "gpt-4" },
-    { label: 'GPT 4 Turbo', value: "gpt-4-turbo" },
-    { label: 'GPT 4 32k', value: "gpt-4-32k" },
-    { label: 'GPT 3.5 Turbo', value: "gpt-3.5-turbo" },
-    { label: 'Llama3 70B', value: "llama3-70b" },
-    { label: 'Llama3 13B Chat', value: "llama-13b-chat" }
+    { label: 'GPT 4o', value: 'gpt-4o' },
+    { label: 'GPT 4', value: 'gpt-4' },
+    { label: 'GPT 4 Turbo', value: 'gpt-4-turbo' },
+    { label: 'GPT 4 32k', value: 'gpt-4-32k' },
+    { label: 'GPT 3.5 Turbo', value: 'gpt-3.5-turbo' },
+    { label: 'Llama3 70B', value: 'llama3-70b' },
+    { label: 'Llama3 13B Chat', value: 'llama-13b-chat' },
+    { label: 'Gemini 1.5 pro', value: 'gemini-1.5-pro' },
+    { label: 'Gemini 1.5 flash', value: 'gemini-1.5-flash' }
   ])
 
   const [
@@ -66,7 +68,7 @@ const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
         <Select
           value={model}
           onChange={selectModel}
-          size='small'
+          size="small"
           className={styles.modelSelect}
         >
           {modelOptions.map((modelOption: ModelOption) => {
@@ -78,7 +80,7 @@ const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
                 {modelOption.label}
               </MenuItem>)
           })}
-          {modelOptionsLoading && <LinearProgress /> }
+          {modelOptionsLoading && <LinearProgress />}
         </Select>
       </FormControl>
     </div>

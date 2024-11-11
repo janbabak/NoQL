@@ -14,6 +14,7 @@ import java.util.List;
 public class GptRequest {
     public final String model; // GPT LLM
     public final List<LlmMessage> messages; // list of messages - can contain user, system, and assistant messages
+    // TODO: max_tokens??
 
     /**
      * Create query
@@ -35,16 +36,19 @@ public class GptRequest {
         // system instructions
         this.messages.add(new LlmMessage(Role.system, systemQuery));
 
+        // chat history
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
             this.messages.add(new LlmMessage(Role.user, chatQueryWithResponse.getNlQuery()));
             this.messages.add(new LlmMessage(Role.assistant, chatQueryWithResponse.getLlmResponse()));
         }
 
+        // query
         this.messages.add(new LlmMessage(Role.user, queryRequest.getQuery()));
 
         // system errors
         for (String error : errors) {
             this.messages.add(new LlmMessage(Role.system, error));
         }
+        // TODO: add llm response that caused the error
     }
 }

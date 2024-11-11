@@ -3,8 +3,8 @@ package com.janbabak.noqlbackend.service.api;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.llama.LlamaRequest;
-import com.janbabak.noqlbackend.model.query.llama.LlamaResponse;
+import com.janbabak.noqlbackend.model.query.gemini.GeminiRequest;
+import com.janbabak.noqlbackend.model.query.gemini.GeminiResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -20,24 +20,24 @@ import java.util.Objects;
 @Slf4j
 @Service
 @NoArgsConstructor
-public class LlamaApiService implements QueryApi {
+public class GeminiApiService implements QueryApi {
 
-    @SuppressWarnings("all")
-    private final String LLAMA_API_URL = "https://api.llama-api.com/chat/completions";
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${app.credentials.llamaApiKey}")
+    @Value("${app.credentials.aiStudioApiKey}")
     private String token;
 
     /**
      * Send queries in chat form the model and retrieve a response.
      *
      * @param chatHistory  chat history
-     * @param queryRequest users query, model...
+     * @param queryRequest users query and model
      * @param systemQuery  instructions from the NoQL system about task that needs to be done
      * @param errors       list of errors from previous executions that should help the model fix its query
      * @return model's response
-     * @throws LLMException when LLM request fails.
+     * @throws LLMException        when LLM request fails.
      * @throws BadRequestException when queryRequest is not valid
      */
     @Override
@@ -47,41 +47,42 @@ public class LlamaApiService implements QueryApi {
             String systemQuery,
             List<String> errors) throws LLMException, BadRequestException {
 
-        log.info("Chat with Llama API");
+        log.info("Chat with Gemini API.");
 
         validateRequest(queryRequest);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<LlamaRequest> request = new HttpEntity<>(
-                new LlamaRequest(chatHistory, queryRequest, systemQuery, errors), headers);
+        HttpEntity<GeminiRequest> request = new HttpEntity<>(
+                new GeminiRequest(chatHistory, queryRequest, systemQuery, errors), headers);
 
-        ResponseEntity<LlamaResponse> responseEntity;
+        String url = GEMINI_URL + "/" + queryRequest.getModel() + ":generateContent?key=" + token;
+
+        ResponseEntity<GeminiResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.exchange(LLAMA_API_URL, HttpMethod.POST, request, LlamaResponse.class);
+            responseEntity = restTemplate.postForEntity(url, request, GeminiResponse.class);
         } catch (RestClientException e) {
-            log.error("Error while calling Llama API. {}", e.getMessage());
-            throw new LLMException("Error while calling Llama API, try it latter.");
+            log.error("Gemini API request failed: {}", e.getMessage());
+            throw new LLMException("Error while calling Gemini API, try it later.");
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return !Objects.requireNonNull(responseEntity.getBody()).getChoices().isEmpty()
-                    ? responseEntity.getBody().getChoices().get(0).getMessage().getContent()
+            return !Objects.requireNonNull(responseEntity.getBody()).candidates().isEmpty()
+                    ? responseEntity.getBody().candidates().get(0).content().parts().get(0).text()
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            log.error("Bad request to the Llama model, status_code={}, response={}.",
+            log.error("Bad request to the Gemini model, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Bad request to the Llama model, we are working on it.");
+            throw new LLMException("Bad request to the Gemini model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
-            log.error("Error on Llama side, status_code={}, response={}.",
+            log.error("Error on Gemini side, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Error on Llama side, try it latter");
+            throw new LLMException("Error on Gemini side, try it latter");
         }
         return null;
     }
@@ -93,9 +94,9 @@ public class LlamaApiService implements QueryApi {
      * @throws BadRequestException unsupported model
      */
     void validateRequest(QueryRequest queryRequest) throws BadRequestException {
-        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("llama")) {
-            log.error("Unsupported model: {}", queryRequest.getModel());
-            throw new BadRequestException("Only Llama models are supported.");
+        if (queryRequest.getModel() == null || !queryRequest.getModel().startsWith("gemini")) {
+            log.error("Model is missing in the request.");
+            throw new BadRequestException("Model is missing in the request.");
         }
     }
 }

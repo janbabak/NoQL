@@ -4,7 +4,7 @@
 
 - App can be configured by environment variables in the `backend/.env.local` file.
 
-### Envoronment variables
+### Environment variables
 
 **Pagination**
 
@@ -29,6 +29,12 @@
 - `JWT_SECRET` - (required) Secret key for JWT token generation (at least 512 bits)
 - `JWT_EXPIRATION` - Expiration time of JWT token in seconds. (Default is 1 day)
 - `JWT_REFRESH_EXPIRATION` - Expiration time of JWT refresh token in seconds. (Default is 7 days)
+
+**Api keys to external services**
+
+- `AI_STUDIO_API_KEY` - (required) Google Gemini model API key
+- `OPEN_AI_API_KEY` - (required) OpenAI API key - for GPT models
+- `LLAMA_API_KEY` - (required) for Llama models
 
 ## Gradle properties
 
