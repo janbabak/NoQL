@@ -68,8 +68,8 @@ public class CustomModelApiService implements QueryApi {
         try {
             responseEntity = restTemplate.exchange(model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
         } catch (RestClientException e) {
-            log.error("Error while calling Llama API. {}", e.getMessage());
-            throw new LLMException("Error while calling Llama API, try it latter.");
+            log.error("Error while calling Custom model API. {}", e.getMessage());
+            throw new LLMException("Error while calling Custom model API, try it latter.");
         }
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
@@ -78,14 +78,14 @@ public class CustomModelApiService implements QueryApi {
                     : null;
         }
         if (responseEntity.getStatusCode().is4xxClientError()) {
-            log.error("Bad request to the GPT model, status_code={}, response={}.",
+            log.error("Bad request to the Custom model, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Bad request to the GPT model, we are working on it.");
+            throw new LLMException("Bad request to the Custom model, we are working on it.");
         }
         if (responseEntity.getStatusCode().is5xxServerError()) {
-            log.error("Error on GPT side, status_code={}, response={}.",
+            log.error("Error on Custom side, status_code={}, response={}.",
                     responseEntity.getStatusCode(), responseEntity.getBody());
-            throw new LLMException("Error on GPT side, try it latter");
+            throw new LLMException("Error on Custom side, try it latter");
         }
         return null;
     }

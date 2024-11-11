@@ -23,8 +23,17 @@ app:
       secretKey: "${JWT_SECRET:secret}"
       expiration: "${JWT_EXPIRATION:1800}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
-  credentials:
-    aiStudioApiKey: "${AI_STUDIO_API_KEY}"
-    openAiApiKey: "${OPEN_AI_API_KEY}"
-    llamaApiKey: "${LLAMA_API_KEY}"
-    anthropicApiKey: "${ANTHROPIC_API_KEY}"
+  externalServices:
+    openAiApi:
+      url: "${OPEN_AI_API_URL}"
+      apiKey: "${OPEN_AI_API_KEY}"
+    geminiApi:
+      url: "${GEMINI_API_URL}"
+      apiKey: "${GEMINI_API_KEY}"
+    llamaApi:
+      url: "${LLAMA_API_URL}"
+      apiKey: "${LLAMA_API_KEY}"
+    claudeApi:
+      url: "${CLAUDE_API_URL}"
+      apiKey: "${CLAUDE_API_KEY}"
+      anthropicVersion: "${ANTHROPIC_VERSION}"

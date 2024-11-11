@@ -22,12 +22,16 @@ import java.util.Objects;
 @NoArgsConstructor
 public class ClaudeApiService implements QueryApi {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String CLAUDE_URL = "https://api.anthropic.com/v1/messages";
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${app.externalServices.claudeApi.url}")
+    private String claudeUrl;
 
-    @Value("${app.credentials.anthropicApiKey}")
+    @Value("${app.externalServices.claudeApi.apiKey}")
     private String apiKey;
+
+    @Value("${app.externalServices.claudeApi.anthropicVersion}")
+    private String anthropicVersion;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -55,7 +59,7 @@ public class ClaudeApiService implements QueryApi {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.add("x-api-key", apiKey);
-        headers.add("anthropic-version", "2023-06-01");
+        headers.add("anthropic-version", anthropicVersion);
 
         HttpEntity<ClaudeRequest> request = new HttpEntity<>(
                 new ClaudeRequest(chatHistory, queryRequest, systemQuery, errors), headers);
@@ -63,7 +67,7 @@ public class ClaudeApiService implements QueryApi {
         ResponseEntity<ClaudeResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.postForEntity(CLAUDE_URL, request, ClaudeResponse.class);
+            responseEntity = restTemplate.postForEntity(claudeUrl, request, ClaudeResponse.class);
         } catch (RestClientException e) {
             log.error("Claude API request failed: {}", e.getMessage());
             throw new LLMException("Error while calling Claude API, try it later.");

@@ -22,12 +22,13 @@ import java.util.Objects;
 @NoArgsConstructor
 public class GptApiService implements QueryApi {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String GPT_URL = "https://api.openai.com/v1/chat/completions";
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${app.externalServices.openAiApi.url}")
+    private String gptUrl;
 
-    @Value("${app.credentials.openAiApiKey}")
-    private String token;
+    @Value("${app.externalServices.openAiApi.apiKey}")
+    private String apiKey;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     /**
      * Send queries in chat form the model and retrieve a response.
@@ -52,7 +53,7 @@ public class GptApiService implements QueryApi {
         validateRequest(queryRequest);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(this.token);
+        headers.setBearerAuth(this.apiKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
@@ -63,7 +64,7 @@ public class GptApiService implements QueryApi {
 
         try {
             // TODO: post for entity
-            responseEntity = restTemplate.exchange(GPT_URL, HttpMethod.POST, request, GptResponse.class);
+            responseEntity = restTemplate.exchange(gptUrl, HttpMethod.POST, request, GptResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling Llama API. {}", e.getMessage());
             throw new LLMException("Error while calling Llama API, try it latter.");
