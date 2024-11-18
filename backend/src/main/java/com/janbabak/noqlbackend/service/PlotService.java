@@ -75,14 +75,14 @@ public class PlotService {
      *
      * @param scriptContent content of python file responsible for plot generation (code)
      * @param database      database object - use its real credentials instead of placeholders
-     * @param chatId        chat identifier - used for naming the plot
+     * @param fileName      name of the generated file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public void generatePlot(String scriptContent, Database database, UUID chatId)
+    public void generatePlot(String scriptContent, Database database, String fileName)
             throws PlotScriptExecutionException {
 
         try {
-            createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
+            createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
             ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
                     .formatted(settings.getPlotServiceContainerName(), scriptPath));
 
@@ -128,14 +128,14 @@ public class PlotService {
      *
      * @param scriptContent script with placeholders
      * @param database      database with real credentials
-     * @param chatId        chat identifierf
+     * @param fileName      name of the file to save plot
      * @return script with real credentials
      */
-    String replaceCredentialsInScript(String scriptContent, Database database, UUID chatId) {
+    String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
         scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER, database.getPassword());
         scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
         scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
-        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, chatId.toString());
+        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, fileName);
         scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
                 database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
         return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());

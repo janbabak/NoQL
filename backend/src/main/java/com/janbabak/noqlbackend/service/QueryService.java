@@ -309,11 +309,12 @@ public class QueryService {
     /**
      * Retrieve data requested by the user in form of table or plot or both.
      *
-     * @param queryRequest    query request
-     * @param llmResponseJson LLM unparsed response
-     * @param databaseService specific database service
-     * @param database        database
-     * @param pageSize        number of rows per page
+     * @param queryRequest      query request
+     * @param llmResponseJson   LLM unparsed response
+     * @param databaseService   specific database service
+     * @param database          database
+     * @param pageSize          number of rows per page
+     * @param chatHistoryLength number of messages in chat
      * @return query response with retrieved data and now plot
      * @throws BadRequestException          pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException  cannot establish database connection
@@ -328,14 +329,18 @@ public class QueryService {
             String llmResponseJson,
             BaseDatabaseService databaseService,
             Database database,
-            Integer pageSize) throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException,
-            SQLException, EntityNotFoundException, PlotScriptExecutionException, JsonProcessingException {
+            Integer pageSize,
+            Integer chatHistoryLength) throws BadRequestException, DatabaseConnectionException,
+            DatabaseExecutionException, SQLException, EntityNotFoundException, PlotScriptExecutionException,
+            JsonProcessingException {
 
         LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
 
         if (llmResponse.generatePlot()) {
             log.info("Generate plot");
-            plotService.generatePlot(llmResponse.pythonCode(), database, queryRequest.getChatId());
+
+            String fileName = queryRequest.getChatId() + "-" + chatHistoryLength;
+            plotService.generatePlot(llmResponse.pythonCode(), database, fileName);
         }
 
         RetrievedData retrievedData = null;
@@ -408,7 +413,7 @@ public class QueryService {
 
             try {
                 return showResultTableAndGeneratePlot(
-                        queryRequest, llmResponseJson, specificDatabaseService, database, pageSize);
+                        queryRequest, llmResponseJson, specificDatabaseService, database, pageSize, chatHistory.size());
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
                 log.error("Cannot parse response JSON: {}", llmResponseJson);
