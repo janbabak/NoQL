@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
@@ -12,6 +11,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -43,13 +44,13 @@ class QueryServiceTest {
     private DatabaseRepository databaseRepository;
 
     @Mock
-    private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
-
-    @Mock
     private Settings settings;
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ChatService chatService;
 
     private final Database postgresDatabase;
 
@@ -432,8 +433,7 @@ class QueryServiceTest {
 
     @Test
     @DisplayName("Test load chat result chat not found")
-    void testLoadChatResultTestNotFound()
-            throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+    void testLoadChatResultTestNotFound() throws EntityNotFoundException {
 
         // given
         UUID chatId = UUID.randomUUID();
@@ -441,13 +441,11 @@ class QueryServiceTest {
         UUID messageId = UUID.randomUUID();
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
-
-        // when
-        QueryResponse actual = queryService.loadChatResult(databaseId, chatId, messageId, 0, 10);
+        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
 
         // then
-        assertNull(actual);
+        assertThrows(EntityNotFoundException.class,
+                () -> queryService.loadChatResult(databaseId, chatId, messageId, 0, 10));
     }
 
     @Test

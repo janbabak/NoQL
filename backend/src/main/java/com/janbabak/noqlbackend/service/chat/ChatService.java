@@ -84,7 +84,8 @@ public class ChatService {
                             }
                         })
                         .toList(),
-                chat.getModificationDate());
+                chat.getModificationDate(),
+                chat.getDatabase().getId());
     }
 
 
@@ -135,7 +136,8 @@ public class ChatService {
 
         chat = chatRepository.save(chat);
 
-        return new ChatDto(chat.getId(), chat.getName(), List.of(), chat.getModificationDate());
+        return new ChatDto(
+                chat.getId(), chat.getName(), List.of(), chat.getModificationDate(), chat.getDatabase().getId());
     }
 
     /**

@@ -75,7 +75,8 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatDto expected = new ChatDto(chatId, "Test chat", new ArrayList<>(), null);
+        ChatDto expected = new ChatDto(
+                chatId, "Test chat", new ArrayList<>(), null, null);
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
@@ -218,7 +219,8 @@ class ChatServiceTest {
                 .database(database)
                 .build();
 
-        ChatDto expected = new ChatDto(chat.getId(), "New chat", new ArrayList<>(), null);
+        ChatDto expected = new ChatDto(
+                chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.save(any())).thenReturn(chat);

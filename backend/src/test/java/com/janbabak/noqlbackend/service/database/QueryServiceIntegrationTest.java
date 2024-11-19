@@ -222,6 +222,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // given
         UUID databaseId = getDatabase().getId();
+
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {

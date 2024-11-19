@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -32,6 +33,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
+import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.MESSAGE;
 import static com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto.LLMResult;
 import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 
@@ -271,15 +273,24 @@ public class QueryService {
             UUID messageId,
             Integer page,
             Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
+        // TODO: authorization??
 
         log.info("Reload chat result, chatId={}", chatId);
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId).orElse(null);
-        if (message == null) {
-            return null;
+        ChatDto chat = chatService.findById(chatId);
+
+        if (!chat.databaseId().equals(databaseId)) {
+            throw new BadRequestException("Chat does not belong to the specified database");
+        }
+
+        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
+                .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
+
+        if (!message.getChat().getId().equals(chatId)) {
+            throw new BadRequestException("Message does not belong to the specified chat");
         }
 
         LLMResponse LLMResponse;
