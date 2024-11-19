@@ -257,6 +257,7 @@ public class QueryService {
      *
      * @param databaseId identifier of the database to which the selected chat belongs
      * @param chatId     chat to load identifier
+     * @param messageId  identifier of the message to load
      * @param page       page number (first pages has is 0)
      * @param pageSize   number of items per page
      * @return query response
@@ -264,28 +265,34 @@ public class QueryService {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException cannot establish connection with database
      */
-    public QueryResponse loadChatResult(UUID databaseId, UUID chatId, Integer page, Integer pageSize)
-            throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
+    public QueryResponse loadChatResult(
+            UUID databaseId,
+            UUID chatId,
+            UUID messageId,
+            Integer page,
+            Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
+
         log.info("Reload chat result, chatId={}", chatId);
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
-        ChatQueryWithResponse latestMessage =
-                chatQueryWithResponseRepository.findLatestMessageFromChat(chatId).orElse(null);
-        if (latestMessage == null) {
+        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId).orElse(null);
+        if (message == null) {
             return null;
         }
 
         LLMResponse LLMResponse;
         try {
-            LLMResponse = createFromJson(latestMessage.getLlmResponse(), LLMResponse.class);
+            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
         } catch (JsonProcessingException e) {
             return null; // should not happen since values that cannot be parsed aren't saved
         }
 
+        String fileName = LLMResponse.generatePlot() ? chatId + "-" + messageId : null;
+
         ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(latestMessage, new LLMResult(LLMResponse, chatId));
+                new ChatQueryWithResponseDto(message, new LLMResult(LLMResponse, fileName));
 
         // only plot without any select query to retrieve the data
         if (LLMResponse.databaseQuery() == null) {
@@ -314,7 +321,6 @@ public class QueryService {
      * @param databaseService   specific database service
      * @param database          database
      * @param pageSize          number of rows per page
-     * @param chatHistoryLength number of messages in chat
      * @return query response with retrieved data and now plot
      * @throws BadRequestException          pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException  cannot establish database connection
@@ -329,18 +335,24 @@ public class QueryService {
             String llmResponseJson,
             BaseDatabaseService databaseService,
             Database database,
-            Integer pageSize,
-            Integer chatHistoryLength) throws BadRequestException, DatabaseConnectionException,
+            Integer pageSize) throws BadRequestException, DatabaseConnectionException,
             DatabaseExecutionException, SQLException, EntityNotFoundException, PlotScriptExecutionException,
             JsonProcessingException {
 
         LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
 
+        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
+                queryRequest.getChatId(),
+                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
+
+        String plotFileName = llmResponse.generatePlot()
+                ? queryRequest.getChatId().toString() + "-" + chatQueryWithResponse.getId()
+                : null;
+
         if (llmResponse.generatePlot()) {
             log.info("Generate plot");
 
-            String fileName = queryRequest.getChatId() + "-" + chatHistoryLength;
-            plotService.generatePlot(llmResponse.pythonCode(), database, fileName);
+            plotService.generatePlot(llmResponse.pythonCode(), database, plotFileName);
         }
 
         RetrievedData retrievedData = null;
@@ -353,12 +365,8 @@ public class QueryService {
             }
         }
 
-        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                queryRequest.getChatId(),
-                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
-
         ChatQueryWithResponseDto chatQueryWithResponseDto = new ChatQueryWithResponseDto(
-                chatQueryWithResponse, new LLMResult(llmResponse, queryRequest.getChatId()));
+                chatQueryWithResponse, new LLMResult(llmResponse, plotFileName));
 
         return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
     }
@@ -413,7 +421,7 @@ public class QueryService {
 
             try {
                 return showResultTableAndGeneratePlot(
-                        queryRequest, llmResponseJson, specificDatabaseService, database, pageSize, chatHistory.size());
+                        queryRequest, llmResponseJson, specificDatabaseService, database, pageSize);
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
                 log.error("Cannot parse response JSON: {}", llmResponseJson);

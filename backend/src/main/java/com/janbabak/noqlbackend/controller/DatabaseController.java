@@ -133,10 +133,11 @@ public class DatabaseController {
     }
 
     /**
-     * Load chat result of existing chat.
+     * Load chat result of specific message of existing chat.
      *
      * @param databaseId database identifier
      * @param chatId     chat identifier
+     * @param messageId  message identifier
      * @param page       page number (fist page is 0)
      * @param pageSize   number of items per page
      * @return result of the latest message from the chat
@@ -150,10 +151,11 @@ public class DatabaseController {
     public QueryResponse loadChatResult(
             @PathVariable UUID databaseId,
             @RequestParam UUID chatId,
+            @RequestParam UUID messageId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.loadChatResult(databaseId, chatId, page, pageSize);
+        return queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize);
     }
 
     /**
@@ -164,9 +166,9 @@ public class DatabaseController {
      * @param page       page number (first pages is 0)
      * @param pageSize   number of items in one page
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws EntityNotFoundException                                   queried database not found.
+     * @throws DatabaseConnectionException                               cannot establish connection with the database
+     * @throws BadRequestException                                       pageSize value is greater than maximum allowed value
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)

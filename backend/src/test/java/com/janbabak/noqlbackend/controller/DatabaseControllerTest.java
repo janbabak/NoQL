@@ -619,6 +619,7 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
         Integer page = 1;
         Integer pageSize = 2;
         QueryResponse response = QueryResponse.builder()
@@ -638,14 +639,16 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        when(queryService.loadChatResult(databaseId, chatId, page, pageSize)).thenReturn(response);
+        when(queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize)).thenReturn(response);
 
         // then
         mockMvc.perform(
-                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                        get(ROOT_URL + "/{databaseId}/query/loadChatResult",
+                                databaseId, chatId, messageId, page, pageSize)
                                 .param("page", page.toString())
                                 .param("pageSize", pageSize.toString())
-                                .param("chatId", chatId.toString()))
+                                .param("chatId", chatId.toString())
+                                .param("messageId", messageId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -658,15 +661,18 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
         Integer page = 1;
         Integer pageSize = 2;
 
         // then
         mockMvc.perform(
-                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                        get(ROOT_URL + "/{databaseId}/query/loadChatResult",
+                                databaseId, chatId, messageId, page, pageSize)
                                 .param("page", page.toString())
                                 .param("pageSize", pageSize.toString())
-                                .param("chatId", chatId.toString()))
+                                .param("chatId", chatId.toString())
+                                .param("messageId", messageId.toString()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }

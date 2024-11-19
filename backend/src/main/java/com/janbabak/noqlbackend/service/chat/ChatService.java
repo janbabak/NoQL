@@ -68,11 +68,14 @@ public class ChatService {
                         .map(message -> {
                             try {
                                 LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+                                String plotFileName = llmResponse.generatePlot()
+                                        ? chat.getId() + "-" + message.getId()
+                                        : null;
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
                                         message.getNlQuery(),
-                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, chat.getId()),
+                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, plotFileName),
                                         message.getTimestamp());
                             } catch (JsonProcessingException e) {
                                 // should not happen since invalid JSONs are not saved

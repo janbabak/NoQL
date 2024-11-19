@@ -227,18 +227,19 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
             messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
         }
+        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.id(), page, pageSize);
+        QueryResponse queryResponse = queryService.loadChatResult(
+                databaseId, chat.id(), lastMessage.getId(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
-        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
         expectedResponse.chatQueryWithResponse().setId(lastMessage.getId());
         expectedResponse.chatQueryWithResponse().setTimestamp(
                 queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + ".png");
+                    "/static/images/" + chat.id() + "-" + lastMessage.getId() + ".png");
         }
 
         // then
@@ -385,9 +386,10 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 queryResponse.chatQueryWithResponse().getId());
         expectedResponse.chatQueryWithResponse().setTimestamp(
                 queryResponse.chatQueryWithResponse().getTimestamp());
+
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + ".png");
+                    "/static/images/" + chat.id() + "-" + queryResponse.chatQueryWithResponse().getId() + ".png");
         }
 
         // then

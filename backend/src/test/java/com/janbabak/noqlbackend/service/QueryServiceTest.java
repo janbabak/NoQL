@@ -438,12 +438,13 @@ class QueryServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
         UUID databaseId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatQueryWithResponseRepository.findLatestMessageFromChat(chatId)).thenReturn(Optional.empty());
+        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
 
         // when
-        QueryResponse actual = queryService.loadChatResult(databaseId, chatId, 0, 10);
+        QueryResponse actual = queryService.loadChatResult(databaseId, chatId, messageId, 0, 10);
 
         // then
         assertNull(actual);
