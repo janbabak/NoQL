@@ -126,8 +126,7 @@ public class DatabaseController {
     public QueryResponse executeChat(
             @PathVariable UUID databaseId,
             @RequestBody @Valid QueryRequest queryRequest,
-            @RequestParam Integer pageSize
-    ) throws DatabaseConnectionException, DatabaseExecutionException,
+            @RequestParam Integer pageSize) throws DatabaseConnectionException, DatabaseExecutionException,
             EntityNotFoundException, LLMException, BadRequestException {
         return queryService.executeChat(databaseId, queryRequest, pageSize);
     }
@@ -146,12 +145,12 @@ public class DatabaseController {
      * @throws EntityNotFoundException                                   database or chat not found
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
-    @GetMapping("/{databaseId}/query/loadChatResult")
+    @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse loadChatResult(
             @PathVariable UUID databaseId,
-            @RequestParam UUID chatId,
-            @RequestParam UUID messageId,
+            @PathVariable UUID chatId,
+            @PathVariable UUID messageId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {

@@ -129,7 +129,7 @@ paths:
       summary: Get a user by ID.
       description: Role USER can request only his own data. Role ADMIN can request any user data.
       parameters:
-        - $ref: '#/components/parameters/userId'
+        - $ref: '#/components/parameters/userIdPath'
       responses:
         '200':
           description: A user of specified ID
@@ -151,7 +151,7 @@ paths:
       summary: Update a user by ID
       description: Update provided non-null fields. Role USER can update only his own data. Role ADMIN can update any user data. Role USER can't update role.
       parameters:
-        - $ref: '#/components/parameters/userId'
+        - $ref: '#/components/parameters/userIdPath'
       requestBody:
         required: true
         content:
@@ -182,7 +182,7 @@ paths:
       summary: Delete a user by ID
       description: Role USER can delete only his own data. Role ADMIN can delete any user data.
       parameters:
-        - $ref: '#/components/parameters/userId'
+        - $ref: '#/components/parameters/userIdPath'
       responses:
         '204':
           description: No content
@@ -250,7 +250,7 @@ paths:
       summary: Get a database by ID
       description: Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '200':
           description: A database of specified ID
@@ -272,7 +272,7 @@ paths:
       summary: Update a database by ID
       description: Update provided non-null fields. Role USER can update only his own databases. Role ADMIN can update any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       requestBody:
         required: true
         content:
@@ -300,7 +300,7 @@ paths:
       summary: Delete a database by ID
       description: Role USER can delete only his own databases. Role ADMIN can delete any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '204':
           description: No content
@@ -309,7 +309,7 @@ paths:
         '403':
           description: Forbidden - user is not an ADMIN or owner of the database
 
-  /database/{databaseId}/query/chat:
+  /database/{databaseId}/chat/{chatId}/query:
     post:
       tags:
         - Database
@@ -320,7 +320,8 @@ paths:
         Query a database by chat of messages. The LLM translates the natural language query to a database query and
         returns requested data and/or a plot. Role USER can query only his own databases. Role ADMIN can query any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
+        - $ref: '#/components/parameters/chatIdPath'
         - $ref: '#/components/parameters/pageSize'
       requestBody:
         required: true
@@ -346,17 +347,18 @@ paths:
         '404':
           description: Database of specified ID not found
 
-  /database/{databaseId}/query/loadChatResult:
-    post:
+  /database/{databaseId}/chat/{chatId}/message/{messageId}:
+    get:
       tags:
         - Database
       security:
         - BearerAuth: [ ]
-      summary: Load chat resul of existing chat
+      summary: Load result of message
       description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
-        - $ref: '#/components/parameters/chatIdQuery'
+        - $ref: '#/components/parameters/databaseIdPath'
+        - $ref: '#/components/parameters/chatIdPath'
+        - $ref: '#/components/parameters/messageIdPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       responses:
@@ -385,7 +387,7 @@ paths:
       description: >
         Query a database by database query language. Return retrieved rows of data or error message if the query is invalid. Role USER can query only his own databases. Role ADMIN can query any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       requestBody:
@@ -437,7 +439,7 @@ paths:
       description: >
         Get database structure. Return a list of schemas with tables with columns and types (if the database is SQL) or other form of structure. Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '200':
           description: >
@@ -466,7 +468,7 @@ paths:
         input from LLM, not for direct execution. Role USER can request only his own databases. Role ADMIN can request
         any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '200':
           description: Database create script
@@ -492,7 +494,7 @@ paths:
         Get all chats of a database. Return a list of chats only with their names and identifiers.
         Role USER can request only his own databases. Role ADMIN can request any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '200':
           description: A list of chats of a database
@@ -521,7 +523,7 @@ paths:
         Role USER can create only chats associated with his own databases. Role ADMIN can create chats associated with
         any database.
       parameters:
-        - $ref: '#/components/parameters/databaseId'
+        - $ref: '#/components/parameters/databaseIdPath'
       responses:
         '201':
           description: Created chat
@@ -1047,8 +1049,6 @@ components:
     QueryRequest:
       type: object
       properties:
-        chatId:
-          $ref: '#/components/schemas/UUID'
         query:
           $ref: '#/components/schemas/NaturalLanguageQuery'
         model:
@@ -1064,7 +1064,7 @@ components:
         - GPT_4_32K
         - GPT_3_5_TURBO
         - LLAMA3_70B
-        - LLAMA3_13B_CHAT
+        - LLAMA3_13B_CHAT # TODO fix
 
     QueryResponse:
       type: object
@@ -1372,7 +1372,7 @@ components:
 
   parameters:
 
-    userId:
+    userIdPath:
       name: userId
       in: path
       required: true
@@ -1388,7 +1388,7 @@ components:
       schema:
         $ref: '#/components/schemas/UUID'
 
-    databaseId:
+    databaseIdPath:
       name: databaseId
       in: path
       required: true
@@ -1409,6 +1409,14 @@ components:
       in: path
       required: true
       description: ID of the chat
+      schema:
+        $ref: '#/components/schemas/UUID'
+
+    messageIdPath:
+      name: messageId
+      in: path
+      required: true
+      description: ID of message from chat
       schema:
         $ref: '#/components/schemas/UUID'
 

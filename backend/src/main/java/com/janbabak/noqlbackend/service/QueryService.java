@@ -368,7 +368,9 @@ public class QueryService {
 
         RetrievedData retrievedData = null;
         Long totalCount = null;
-        if (llmResponse.databaseQuery() != null || !llmResponse.generatePlot()) {
+
+        if (!llmResponse.databaseQuery().isEmpty() || !llmResponse.generatePlot()) {
+
             String paginatedQuery = setPaginationInSqlQuery(llmResponse.databaseQuery(), 0, pageSize, database);
             try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
                 retrievedData = new RetrievedData(result.resultSet());
