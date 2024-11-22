@@ -196,7 +196,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
 
     setPageLoading(true)
     const messageId = chat?.messages[chat.messages.length - 1].id ?? ''
-    console.log(messageId + "msag id")
     try {
       const response: AxiosResponse<QueryResponse> =
         await databaseApi.loadChatResult(databaseId, chat?.id || '', messageId, page, pageSize)
@@ -239,7 +238,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     if (result.payload.messages.length > 0) {
       // @ts-expect-error
       const messageId = result.payload.messages[result.payload.messages.length - 1].id ?? ''
-      console.log("messageId is chat tab: ", messageId)
       await loadChatResult(chatId, messageId)
     } else {
       setQueryResult(null)

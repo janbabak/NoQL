@@ -688,6 +688,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
         Integer page = 0;
         Integer pageSize = 2;
+        @SuppressWarnings("all")
         // language=SQL
         String query = """
                 SELECT u.*, a.city, a.street, a.state
@@ -731,6 +732,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
         int page = 0;
         int pageSize = 2;
+        @SuppressWarnings("all")
         // language=SQL
         String query = """
                 SELECT u.*, a.city, a.street, a.state
@@ -813,6 +815,7 @@ class DatabaseControllerTest {
     void testGetCreateScript() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
+        @SuppressWarnings("all")
         // language=SQL
         String createScript = """
                 CREATE SCHEMA IF NOT EXISTS "public";

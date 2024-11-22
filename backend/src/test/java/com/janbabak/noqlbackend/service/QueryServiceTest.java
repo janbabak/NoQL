@@ -193,6 +193,7 @@ class QueryServiceTest {
         assertEquals(errorMessage, exception.getMessage());
     }
 
+    @SuppressWarnings("all")
     static Object[][] setPaginationBadRequestDataProvider() {
         return new Object[][]{
                 {
@@ -223,6 +224,7 @@ class QueryServiceTest {
         assertEquals(expectedQuery, actualValue);
     }
 
+    @SuppressWarnings("all")
     static Object[][] trimAndRemoveTrailingSemicolonDataProvider() {
         return new Object[][]{
                 {
@@ -285,6 +287,7 @@ class QueryServiceTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
+    @SuppressWarnings("all")
     private static Object[][] testExtractQueryFromMarkdownResponseDataProvider() {
         return new Object[][]{
                 // responses with markdown
