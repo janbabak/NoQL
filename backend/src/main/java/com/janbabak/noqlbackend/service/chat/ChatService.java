@@ -206,7 +206,7 @@ public class ChatService {
         if (chat.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.get().getDatabase().getUser().getId());
             chatRepository.deleteById(chatId);
-            plotService.deletePlot(chatId);
+            plotService.deletePlots(chatId.toString());
         }
     }
 }

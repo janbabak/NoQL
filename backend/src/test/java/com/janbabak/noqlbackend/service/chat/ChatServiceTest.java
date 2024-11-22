@@ -488,11 +488,11 @@ class ChatServiceTest {
 
         // then
         ArgumentCaptor<UUID> repositoryIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<UUID> plotIdCaptor = ArgumentCaptor.forClass(UUID.class);
+        ArgumentCaptor<String> plotIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(chatRepository).deleteById(repositoryIdCaptor.capture());
-        verify(plotService).deletePlot(plotIdCaptor.capture());
+        verify(plotService).deletePlots(plotIdCaptor.capture());
         assertEquals(chatId, repositoryIdCaptor.getValue());
-        assertEquals(chatId, plotIdCaptor.getValue());
+        assertEquals(chatId.toString(), plotIdCaptor.getValue());
     }
 
     @Test

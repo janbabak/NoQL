@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Responsible for generating plots/charts/graphs.
@@ -32,16 +32,6 @@ public class PlotService {
     private static File plotsDirectory;
     private static File script;
     private final Settings settings;
-
-    /**
-     * Get path to plot of chat
-     *
-     * @param chatId chat identifier
-     * @return path to the plot (does not verify whether the file exist).
-     */
-    public static Path getPlotPath(UUID chatId) {
-        return Path.of(plotsDirPath + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
-    }
 
     /**
      * Create working directory and plot script
@@ -142,17 +132,23 @@ public class PlotService {
     }
 
     /**
-     * Delete plot associated with a chat.
+     * Delete plots associated with a chat. This means all plots with names that start with chatId.
      *
-     * @param chatId chat identifier
+     * @param prefix common prefix of all plots to delete.
      */
-    public void deletePlot(UUID chatId) {
-        Path path = getPlotPath(chatId);
-
-        try {
-            Files.deleteIfExists(path);
+    public void deletePlots(String prefix) {
+        try (Stream<Path> filesStream = Files.list(plotsDirPath)) {
+            filesStream
+                    .filter(path -> path.getFileName().toString().startsWith(prefix))
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException e) {
+                            log.error("Delete plot failed, path={}, message={}", path, e.getMessage());
+                        }
+                    });
         } catch (IOException e) {
-            log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
+            log.error("Failed to list files in directory, message={}", e.getMessage());
         }
     }
 
