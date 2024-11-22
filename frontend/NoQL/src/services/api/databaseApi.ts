@@ -79,18 +79,15 @@ const databaseApi = {
    * Load chat result.
    * @param databaseId database identifier
    * @param chatId chat identifier
+   * @param messageId message to load result of identifier
    * @param page page number (first page is 0)
    * @param pageSize number of items in one page
    */
-  loadChatResult(databaseId: string, chatId: string, page: number, pageSize: number):
+  loadChatResult(databaseId: string, chatId: string, messageId: string, page: number, pageSize: number):
     Promise<AxiosResponse<QueryResponse>> {
-
-    return this.API.get(this.DOMAIN + '/' + databaseId + '/query/loadChatResult',
+    console.log("messageId database api: ", messageId)
+    return this.API.get(`${this.DOMAIN}/${databaseId}/chat/${chatId}/message/${messageId}`,
       [
-        {
-          name: 'chatId',
-          value: chatId
-        },
         {
           name: 'pageSize',
           value: pageSize

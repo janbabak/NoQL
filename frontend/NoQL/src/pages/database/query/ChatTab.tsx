@@ -118,7 +118,9 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     // @ts-ignore
     if (result.payload.messages.length > 0) {
       // @ts-ignore
-      void loadChatResult(result.payload.id)
+      const messageId = result.payload.messages[result.payload.messages.length - 1].id ?? ''
+      // @ts-ignore
+      void loadChatResult(result.payload.id, messageId)
     } else {
       setQueryResult(null)
     }
@@ -192,9 +194,11 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     setPage(page)
 
     setPageLoading(true)
+    const messageId = chat?.messages[chat.messages.length - 1].id ?? ''
+    console.log(messageId + "msag id")
     try {
       const response: AxiosResponse<QueryResponse> =
-        await databaseApi.loadChatResult(databaseId, chat?.id || '', page, pageSize)
+        await databaseApi.loadChatResult(databaseId, chat?.id || '', messageId, page, pageSize)
 
       setQueryResult(response.data)
     } catch (error: unknown) {
@@ -205,14 +209,15 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
   }
 
   /**
-   * Fetch result of query language query.
+   * Fetch chat result.
    * @param chatId identifier
+   * @param messageId message to load identifier
    */
-  async function loadChatResult(chatId: string): Promise<void> {
+  async function loadChatResult(chatId: string, messageId: string): Promise<void> {
     setQueryLoading(true)
     try {
       const response: AxiosResponse<QueryResponse> =
-        await databaseApi.loadChatResult(databaseId, chatId || '', 0, pageSize)
+        await databaseApi.loadChatResult(databaseId, chatId || '', messageId, 0, pageSize)
 
       setPage(0)
       setQueryResult(response.data)
@@ -231,7 +236,10 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
     // @ts-expect-error
     if (result.payload.messages.length > 0) {
-      await loadChatResult(chatId)
+      // @ts-expect-error
+      const messageId = result.payload.messages[result.payload.messages.length - 1].id ?? ''
+      console.log("messageId is chat tab: ", messageId)
+      await loadChatResult(chatId, messageId)
     } else {
       setQueryResult(null)
     }
