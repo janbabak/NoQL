@@ -1,7 +1,6 @@
 import { ChatQueryWithResponse } from './Chat.ts'
 
 interface QueryRequest {
-  chatId: string,
   query: string,
   model: string,
 }

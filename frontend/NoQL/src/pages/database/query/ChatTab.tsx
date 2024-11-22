@@ -147,11 +147,12 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     try {
       const response: AxiosResponse<QueryResponse> = await databaseApi.queryChat(
         databaseId, {
-          chatId: chatHistory[activeChatIndexRedux].id,
           // @ts-ignore
           query: naturalLanguageQuery.current.value,
           model: model
         },
+        // @ts-ignore
+        chatHistory[activeChatIndexRedux].id, // chatId
         pageSize)
 
       // @ts-ignore
