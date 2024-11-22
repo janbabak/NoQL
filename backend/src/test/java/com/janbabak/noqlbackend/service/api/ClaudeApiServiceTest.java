@@ -5,8 +5,6 @@ import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClaudeApiServiceTest {
@@ -21,8 +19,8 @@ class ClaudeApiServiceTest {
 
     static QueryRequest[] validRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "claude-3-5-sonnet-20241022"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "claude-3-5-haiku-20241022")
+                new QueryRequest("Find the oldest user", "claude-3-5-sonnet-20241022"),
+                new QueryRequest("Find the oldest user", "claude-3-5-haiku-20241022")
         };
     }
 
@@ -34,8 +32,8 @@ class ClaudeApiServiceTest {
 
     static QueryRequest[] badRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4o"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama-13b-chat"),
+                new QueryRequest("Find the oldest user", "gpt-4o"),
+                new QueryRequest("Find the oldest user", "llama-13b-chat"),
         };
     }
 }

@@ -5,8 +5,6 @@ import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class GeminiApiServiceTest {
@@ -21,8 +19,8 @@ class GeminiApiServiceTest {
 
     static QueryRequest[] validRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gemini-1.5-pro"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gemini-1.5-flash")
+                new QueryRequest("Find the oldest user", "gemini-1.5-pro"),
+                new QueryRequest("Find the oldest user", "gemini-1.5-flash")
         };
     }
 
@@ -34,8 +32,8 @@ class GeminiApiServiceTest {
 
     static QueryRequest[] badRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4o"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama-13b-chat"),
+                new QueryRequest("Find the oldest user", "gpt-4o"),
+                new QueryRequest("Find the oldest user", "llama-13b-chat"),
         };
     }
 }

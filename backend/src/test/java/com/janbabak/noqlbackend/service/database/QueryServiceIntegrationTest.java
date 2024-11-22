@@ -370,7 +370,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
-        request.setChatId(chat.id());
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }
@@ -380,7 +379,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         doNothing().when(plotService).generatePlot(any(), any(), any());
 
         // when
-        QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
+        QueryResponse queryResponse = queryService.executeChat(databaseId, chat.id(), request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
         expectedResponse.chatQueryWithResponse().setId(
@@ -415,7 +414,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         true, // plot result
                         List.of(), // messages
                         // query request
-                        new QueryRequest(null, "plot sex of users older than 24", "gpt-4o"),
+                        new QueryRequest("plot sex of users older than 24", "gpt-4o"),
                         // LLM response
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
                         // expected response
@@ -448,7 +447,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                             "pythonCode": ""
                                         }""")),
                         // query request
-                        new QueryRequest(null, "sort them in descending order", "gpt-4o"),
+                        new QueryRequest("sort them in descending order", "gpt-4o"),
                         // language=JSON LLM response
                         """
                         {

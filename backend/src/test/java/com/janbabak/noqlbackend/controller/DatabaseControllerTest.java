@@ -531,7 +531,7 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
+        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
         QueryResponse response = QueryResponse.builder()
                 .totalCount(10L)
                 .errorMessage(null)
@@ -548,11 +548,12 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        when(queryService.executeChat(databaseId, request, pageSize)).thenReturn(response);
+        when(queryService.executeChat(databaseId, chatId, request, pageSize)).thenReturn(response);
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/chat/{chatId}/query", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -570,7 +571,7 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, null, null);
+        QueryRequest request = new QueryRequest(null, null);
         // language=JSON
         String response = """
                 {
@@ -580,8 +581,9 @@ class DatabaseControllerTest {
 
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/chat/{chatId}/query", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -599,11 +601,12 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
+        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -643,7 +646,7 @@ class DatabaseControllerTest {
 
         // then
         mockMvc.perform(
-                        get(ROOT_URL + "/{databaseId}/query/loadChatResult",
+                        get(ROOT_URL + "/{databaseId}/chat/{chatId}/message/{messageId}",
                                 databaseId, chatId, messageId, page, pageSize)
                                 .param("page", page.toString())
                                 .param("pageSize", pageSize.toString())

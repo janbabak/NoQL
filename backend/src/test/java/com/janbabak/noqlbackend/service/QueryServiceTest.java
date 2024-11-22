@@ -453,12 +453,13 @@ class QueryServiceTest {
     void testExecuteChatDatabaseNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, request, 10));
+        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, chatId, request, 10));
     }
 
     @Test
@@ -466,7 +467,8 @@ class QueryServiceTest {
     void testExecuteChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, BadRequestException {
         // given
         UUID databaseId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .queryLimit(0)
@@ -481,7 +483,7 @@ class QueryServiceTest {
         when(userService.decrementQueryLimit(any())).thenReturn(0);
 
         // when
-        QueryResponse actual = queryService.executeChat(databaseId, request, 10);
+        QueryResponse actual = queryService.executeChat(databaseId, chatId, request, 10);
 
         // then
         assertEquals(expected, actual);

@@ -111,6 +111,7 @@ public class DatabaseController {
      * Query the user's database using natural language from in chat form.
      *
      * @param databaseId   database identifier
+     * @param chatId       chat identifier
      * @param queryRequest query
      * @param pageSize     number of items in one page
      * @return query result
@@ -121,14 +122,16 @@ public class DatabaseController {
      * @throws BadRequestException                                       pageSize value is greater than maximum allowed value
      * @throws org.springframework.security.access.AccessDeniedException if user is not admin or owner of the database.
      */
-    @PostMapping("/{databaseId}/query/chat")
+    @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeChat(
             @PathVariable UUID databaseId,
+            @PathVariable UUID chatId,
             @RequestBody @Valid QueryRequest queryRequest,
-            @RequestParam Integer pageSize) throws DatabaseConnectionException, DatabaseExecutionException,
-            EntityNotFoundException, LLMException, BadRequestException {
-        return queryService.executeChat(databaseId, queryRequest, pageSize);
+            @RequestParam Integer pageSize
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
+            LLMException, BadRequestException {
+        return queryService.executeChat(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**

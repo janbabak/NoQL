@@ -327,11 +327,12 @@ public class QueryService {
     /**
      * Retrieve data requested by the user in form of table or plot or both.
      *
-     * @param queryRequest      query request
-     * @param llmResponseJson   LLM unparsed response
-     * @param databaseService   specific database service
-     * @param database          database
-     * @param pageSize          number of rows per page
+     * @param queryRequest    query request
+     * @param chatId          chat identifier
+     * @param llmResponseJson LLM unparsed response
+     * @param databaseService specific database service
+     * @param database        database
+     * @param pageSize        number of rows per page
      * @return query response with retrieved data and now plot
      * @throws BadRequestException          pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException  cannot establish database connection
@@ -343,6 +344,7 @@ public class QueryService {
      */
     private QueryResponse showResultTableAndGeneratePlot(
             QueryRequest queryRequest,
+            UUID chatId,
             String llmResponseJson,
             BaseDatabaseService databaseService,
             Database database,
@@ -352,12 +354,11 @@ public class QueryService {
 
         LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
 
-        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(
-                queryRequest.getChatId(),
+        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(chatId,
                 new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
 
         String plotFileName = llmResponse.generatePlot()
-                ? queryRequest.getChatId().toString() + "-" + chatQueryWithResponse.getId()
+                ? chatId.toString() + "-" + chatQueryWithResponse.getId()
                 : null;
 
         if (llmResponse.generatePlot()) {
@@ -389,6 +390,7 @@ public class QueryService {
      * and executed. Select query is read only.
      *
      * @param databaseId   database id
+     * @param chatId       chat id
      * @param queryRequest query
      * @param pageSize     number of items per page
      * @return result that contains data in form of table that is automatically paginated starting by page 0 or plot
@@ -398,7 +400,7 @@ public class QueryService {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws LLMException                large language model failure
      */
-    public QueryResponse executeChat(UUID databaseId, QueryRequest queryRequest, Integer pageSize)
+    public QueryResponse executeChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, LLMException,
             DatabaseExecutionException, BadRequestException {
         // TODO: authorization??
@@ -417,8 +419,7 @@ public class QueryService {
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
         String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();
-        List<ChatQueryWithResponse> chatHistory =
-                chatQueryWithResponseService.getMessagesFromChat(queryRequest.getChatId());
+        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
         String llmResponseJson = "";
 
         QueryApi queryApi = llmApiServiceFactory.getQueryApiService(queryRequest.getModel());
@@ -434,7 +435,7 @@ public class QueryService {
 
             try {
                 return showResultTableAndGeneratePlot(
-                        queryRequest, llmResponseJson, specificDatabaseService, database, pageSize);
+                        queryRequest, chatId, llmResponseJson, specificDatabaseService, database, pageSize);
             } catch (JsonProcessingException e) {
                 errors.add("Cannot parse response JSON - bad syntax.");
                 log.error("Cannot parse response JSON: {}", llmResponseJson);
