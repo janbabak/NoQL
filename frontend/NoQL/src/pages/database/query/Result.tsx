@@ -71,6 +71,7 @@ const Result = memo((
             </Alert>
           }
 
+          {/*plot*/}
           {queryResponse?.chatQueryWithResponse?.llmResult?.plotUrl != null &&
             <Paper elevation={2} style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
               <img

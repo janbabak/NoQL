@@ -11,5 +11,6 @@ public record ChatDto(
         UUID id,
         String name,
         List<ChatQueryWithResponseDto> messages,
-        Timestamp modificationDate) {
+        Timestamp modificationDate,
+        UUID databaseId) {
 }

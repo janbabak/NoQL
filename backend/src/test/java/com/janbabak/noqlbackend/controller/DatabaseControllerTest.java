@@ -531,7 +531,7 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
+        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
         QueryResponse response = QueryResponse.builder()
                 .totalCount(10L)
                 .errorMessage(null)
@@ -548,11 +548,12 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        when(queryService.executeChat(databaseId, request, pageSize)).thenReturn(response);
+        when(queryService.executeChat(databaseId, chatId, request, pageSize)).thenReturn(response);
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/chat/{chatId}/query", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -570,7 +571,7 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, null, null);
+        QueryRequest request = new QueryRequest(null, null);
         // language=JSON
         String response = """
                 {
@@ -580,8 +581,9 @@ class DatabaseControllerTest {
 
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/chat/{chatId}/query", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -599,11 +601,12 @@ class DatabaseControllerTest {
         Integer pageSize = 2;
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(chatId, "find all users older than 25", "gpt-4o");
+        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
 
         // then
-        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, pageSize)
+        mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, chatId, pageSize)
                         .param("pageSize", pageSize.toString())
+                        .param("chatId", chatId.toString())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(request))
@@ -619,6 +622,7 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
         Integer page = 1;
         Integer pageSize = 2;
         QueryResponse response = QueryResponse.builder()
@@ -638,14 +642,16 @@ class DatabaseControllerTest {
                         .build())
                 .build();
 
-        when(queryService.loadChatResult(databaseId, chatId, page, pageSize)).thenReturn(response);
+        when(queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize)).thenReturn(response);
 
         // then
         mockMvc.perform(
-                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                        get(ROOT_URL + "/{databaseId}/chat/{chatId}/message/{messageId}",
+                                databaseId, chatId, messageId, page, pageSize)
                                 .param("page", page.toString())
                                 .param("pageSize", pageSize.toString())
-                                .param("chatId", chatId.toString()))
+                                .param("chatId", chatId.toString())
+                                .param("messageId", messageId.toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(toJson(response), true));
@@ -658,15 +664,18 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
         Integer page = 1;
         Integer pageSize = 2;
 
         // then
         mockMvc.perform(
-                        get(ROOT_URL + "/{databaseId}/query/loadChatResult", databaseId, chatId, page, pageSize)
+                        get(ROOT_URL + "/{databaseId}/query/loadChatResult",
+                                databaseId, chatId, messageId, page, pageSize)
                                 .param("page", page.toString())
                                 .param("pageSize", pageSize.toString())
-                                .param("chatId", chatId.toString()))
+                                .param("chatId", chatId.toString())
+                                .param("messageId", messageId.toString()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
@@ -679,6 +688,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
         Integer page = 0;
         Integer pageSize = 2;
+        @SuppressWarnings("all")
         // language=SQL
         String query = """
                 SELECT u.*, a.city, a.street, a.state
@@ -722,6 +732,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.randomUUID();
         int page = 0;
         int pageSize = 2;
+        @SuppressWarnings("all")
         // language=SQL
         String query = """
                 SELECT u.*, a.city, a.street, a.state
@@ -804,6 +815,7 @@ class DatabaseControllerTest {
     void testGetCreateScript() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
+        @SuppressWarnings("all")
         // language=SQL
         String createScript = """
                 CREATE SCHEMA IF NOT EXISTS "public";

@@ -5,8 +5,6 @@ import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class GptApiServiceTest {
@@ -21,11 +19,11 @@ class GptApiServiceTest {
 
     static QueryRequest[] validRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4o"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4-turbo"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-4-32k"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "gpt-3.5-turbo")
+                new QueryRequest("Find the oldest user", "gpt-4o"),
+                new QueryRequest("Find the oldest user", "gpt-4"),
+                new QueryRequest("Find the oldest user", "gpt-4-turbo"),
+                new QueryRequest("Find the oldest user", "gpt-4-32k"),
+                new QueryRequest("Find the oldest user", "gpt-3.5-turbo")
         };
     }
 
@@ -37,8 +35,8 @@ class GptApiServiceTest {
 
     static QueryRequest[] badRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama3-70b"),
-                new QueryRequest(UUID.randomUUID(), "Find the oldest user", "llama-13b-chat"),
+                new QueryRequest("Find the oldest user", "llama3-70b"),
+                new QueryRequest("Find the oldest user", "llama-13b-chat"),
         };
     }
 }

@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
@@ -12,6 +11,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -43,13 +44,13 @@ class QueryServiceTest {
     private DatabaseRepository databaseRepository;
 
     @Mock
-    private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
-
-    @Mock
     private Settings settings;
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private ChatService chatService;
 
     private final Database postgresDatabase;
 
@@ -192,6 +193,7 @@ class QueryServiceTest {
         assertEquals(errorMessage, exception.getMessage());
     }
 
+    @SuppressWarnings("all")
     static Object[][] setPaginationBadRequestDataProvider() {
         return new Object[][]{
                 {
@@ -222,6 +224,7 @@ class QueryServiceTest {
         assertEquals(expectedQuery, actualValue);
     }
 
+    @SuppressWarnings("all")
     static Object[][] trimAndRemoveTrailingSemicolonDataProvider() {
         return new Object[][]{
                 {
@@ -284,6 +287,7 @@ class QueryServiceTest {
         assertEquals(expectedQuery, actualQuery);
     }
 
+    @SuppressWarnings("all")
     private static Object[][] testExtractQueryFromMarkdownResponseDataProvider() {
         return new Object[][]{
                 // responses with markdown
@@ -432,21 +436,19 @@ class QueryServiceTest {
 
     @Test
     @DisplayName("Test load chat result chat not found")
-    void testLoadChatResultTestNotFound()
-            throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+    void testLoadChatResultTestNotFound() throws EntityNotFoundException {
 
         // given
         UUID chatId = UUID.randomUUID();
         UUID databaseId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatQueryWithResponseRepository.findLatestMessageFromChat(chatId)).thenReturn(Optional.empty());
-
-        // when
-        QueryResponse actual = queryService.loadChatResult(databaseId, chatId, 0, 10);
+        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
 
         // then
-        assertNull(actual);
+        assertThrows(EntityNotFoundException.class,
+                () -> queryService.loadChatResult(databaseId, chatId, messageId, 0, 10));
     }
 
     @Test
@@ -454,12 +456,13 @@ class QueryServiceTest {
     void testExecuteChatDatabaseNotFound() {
         // given
         UUID databaseId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, request, 10));
+        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, chatId, request, 10));
     }
 
     @Test
@@ -467,7 +470,8 @@ class QueryServiceTest {
     void testExecuteChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, LLMException, BadRequestException {
         // given
         UUID databaseId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(UUID.randomUUID(), "SELECT * FROM public.user;", "gpt-4o");
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .queryLimit(0)
@@ -482,7 +486,7 @@ class QueryServiceTest {
         when(userService.decrementQueryLimit(any())).thenReturn(0);
 
         // when
-        QueryResponse actual = queryService.executeChat(databaseId, request, 10);
+        QueryResponse actual = queryService.executeChat(databaseId, chatId, request, 10);
 
         // then
         assertEquals(expected, actual);

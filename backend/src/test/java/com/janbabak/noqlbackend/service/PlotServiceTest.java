@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -23,8 +21,8 @@ class PlotServiceTest {
     @ParameterizedTest
     @MethodSource("replaceCredentialsDataProvider")
     @DisplayName("Replace credentials in the script")
-    void testReplaceCredentialsInScript(String inputScript, Database database, String expectedScript, UUID chatId) {
-        String actualScript = plotService.replaceCredentialsInScript(inputScript, database, chatId);
+    void testReplaceCredentialsInScript(String inputScript, Database database, String expectedScript, String fileName) {
+        String actualScript = plotService.replaceCredentialsInScript(inputScript, database, fileName);
         assertEquals(expectedScript, actualScript);
     }
 
@@ -41,7 +39,7 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.json"),
-                        UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a")
+                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0"
                 },
                 {
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
@@ -54,7 +52,7 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.json"),
-                        UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a")
+                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0"
                 }
         };
     }

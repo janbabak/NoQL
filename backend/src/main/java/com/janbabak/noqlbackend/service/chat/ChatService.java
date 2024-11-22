@@ -68,11 +68,14 @@ public class ChatService {
                         .map(message -> {
                             try {
                                 LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+                                String plotFileName = llmResponse.generatePlot()
+                                        ? chat.getId() + "-" + message.getId()
+                                        : null;
 
                                 return new ChatQueryWithResponseDto(
                                         message.getId(),
                                         message.getNlQuery(),
-                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, chat.getId()),
+                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, plotFileName),
                                         message.getTimestamp());
                             } catch (JsonProcessingException e) {
                                 // should not happen since invalid JSONs are not saved
@@ -81,7 +84,8 @@ public class ChatService {
                             }
                         })
                         .toList(),
-                chat.getModificationDate());
+                chat.getModificationDate(),
+                chat.getDatabase().getId());
     }
 
 
@@ -132,7 +136,8 @@ public class ChatService {
 
         chat = chatRepository.save(chat);
 
-        return new ChatDto(chat.getId(), chat.getName(), List.of(), chat.getModificationDate());
+        return new ChatDto(
+                chat.getId(), chat.getName(), List.of(), chat.getModificationDate(), chat.getDatabase().getId());
     }
 
     /**
@@ -201,7 +206,7 @@ public class ChatService {
         if (chat.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.get().getDatabase().getUser().getId());
             chatRepository.deleteById(chatId);
-            plotService.deletePlot(chatId);
+            plotService.deletePlots(chatId.toString());
         }
     }
 }

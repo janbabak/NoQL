@@ -222,23 +222,25 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // given
         UUID databaseId = getDatabase().getId();
+
         ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
             messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
         }
+        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        QueryResponse queryResponse = queryService.loadChatResult(databaseId, chat.id(), page, pageSize);
+        QueryResponse queryResponse = queryService.loadChatResult(
+                databaseId, chat.id(), lastMessage.getId(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
-        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
         expectedResponse.chatQueryWithResponse().setId(lastMessage.getId());
         expectedResponse.chatQueryWithResponse().setTimestamp(
                 queryResponse.chatQueryWithResponse().getTimestamp());
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + ".png");
+                    "/static/images/" + chat.id() + "-" + lastMessage.getId() + ".png");
         }
 
         // then
@@ -368,7 +370,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
-        request.setChatId(chat.id());
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }
@@ -378,16 +379,17 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         doNothing().when(plotService).generatePlot(any(), any(), any());
 
         // when
-        QueryResponse queryResponse = queryService.executeChat(databaseId, request, pageSize);
+        QueryResponse queryResponse = queryService.executeChat(databaseId, chat.id(), request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
         expectedResponse.chatQueryWithResponse().setId(
                 queryResponse.chatQueryWithResponse().getId());
         expectedResponse.chatQueryWithResponse().setTimestamp(
                 queryResponse.chatQueryWithResponse().getTimestamp());
+
         if (plotResult) {
             expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + ".png");
+                    "/static/images/" + chat.id() + "-" + queryResponse.chatQueryWithResponse().getId() + ".png");
         }
 
         // then
@@ -412,7 +414,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         true, // plot result
                         List.of(), // messages
                         // query request
-                        new QueryRequest(null, "plot sex of users older than 24", "gpt-4o"),
+                        new QueryRequest("plot sex of users older than 24", "gpt-4o"),
                         // LLM response
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
                         // expected response
@@ -445,7 +447,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                             "pythonCode": ""
                                         }""")),
                         // query request
-                        new QueryRequest(null, "sort them in descending order", "gpt-4o"),
+                        new QueryRequest("sort them in descending order", "gpt-4o"),
                         // language=JSON LLM response
                         """
                         {

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * Responsible for generating plots/charts/graphs.
@@ -32,16 +32,6 @@ public class PlotService {
     private static File plotsDirectory;
     private static File script;
     private final Settings settings;
-
-    /**
-     * Get path to plot of chat
-     *
-     * @param chatId chat identifier
-     * @return path to the plot (does not verify whether the file exist).
-     */
-    public static Path getPlotPath(UUID chatId) {
-        return Path.of(plotsDirPath + "/" + chatId + PLOT_IMAGE_FILE_EXTENSION);
-    }
 
     /**
      * Create working directory and plot script
@@ -75,14 +65,14 @@ public class PlotService {
      *
      * @param scriptContent content of python file responsible for plot generation (code)
      * @param database      database object - use its real credentials instead of placeholders
-     * @param chatId        chat identifier - used for naming the plot
+     * @param fileName      name of the generated file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public void generatePlot(String scriptContent, Database database, UUID chatId)
+    public void generatePlot(String scriptContent, Database database, String fileName)
             throws PlotScriptExecutionException {
 
         try {
-            createPlotScript(replaceCredentialsInScript(scriptContent, database, chatId));
+            createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
             ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
                     .formatted(settings.getPlotServiceContainerName(), scriptPath));
 
@@ -128,31 +118,37 @@ public class PlotService {
      *
      * @param scriptContent script with placeholders
      * @param database      database with real credentials
-     * @param chatId        chat identifierf
+     * @param fileName      name of the file to save plot
      * @return script with real credentials
      */
-    String replaceCredentialsInScript(String scriptContent, Database database, UUID chatId) {
+    String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
         scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER, database.getPassword());
         scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
         scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
-        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, chatId.toString());
+        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, fileName);
         scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
                 database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
         return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
     }
 
     /**
-     * Delete plot associated with a chat.
+     * Delete plots associated with a chat. This means all plots with names that start with chatId.
      *
-     * @param chatId chat identifier
+     * @param prefix common prefix of all plots to delete.
      */
-    public void deletePlot(UUID chatId) {
-        Path path = getPlotPath(chatId);
-
-        try {
-            Files.deleteIfExists(path);
+    public void deletePlots(String prefix) {
+        try (Stream<Path> filesStream = Files.list(plotsDirPath)) {
+            filesStream
+                    .filter(path -> path.getFileName().toString().startsWith(prefix))
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException e) {
+                            log.error("Delete plot failed, path={}, message={}", path, e.getMessage());
+                        }
+                    });
         } catch (IOException e) {
-            log.error("Delete plot failed, chatId={}, message={}", chatId, e.getMessage());
+            log.error("Failed to list files in directory, message={}", e.getMessage());
         }
     }
 

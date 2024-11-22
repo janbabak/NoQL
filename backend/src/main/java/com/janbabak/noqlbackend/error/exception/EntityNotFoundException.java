@@ -28,7 +28,8 @@ public class EntityNotFoundException extends Exception {
         DATABASE("Database"),
         CHAT("Chat"),
         CUSTOM_MODEL("Custom Model"),
-        USER("User");
+        USER("User"),
+        MESSAGE("Message");
 
         public final String label;
 

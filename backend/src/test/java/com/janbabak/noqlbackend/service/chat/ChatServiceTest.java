@@ -75,7 +75,8 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatDto expected = new ChatDto(chatId, "Test chat", new ArrayList<>(), null);
+        ChatDto expected = new ChatDto(
+                chatId, "Test chat", new ArrayList<>(), null, null);
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
@@ -218,7 +219,8 @@ class ChatServiceTest {
                 .database(database)
                 .build();
 
-        ChatDto expected = new ChatDto(chat.getId(), "New chat", new ArrayList<>(), null);
+        ChatDto expected = new ChatDto(
+                chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.save(any())).thenReturn(chat);
@@ -486,11 +488,11 @@ class ChatServiceTest {
 
         // then
         ArgumentCaptor<UUID> repositoryIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<UUID> plotIdCaptor = ArgumentCaptor.forClass(UUID.class);
+        ArgumentCaptor<String> plotIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(chatRepository).deleteById(repositoryIdCaptor.capture());
-        verify(plotService).deletePlot(plotIdCaptor.capture());
+        verify(plotService).deletePlots(plotIdCaptor.capture());
         assertEquals(chatId, repositoryIdCaptor.getValue());
-        assertEquals(chatId, plotIdCaptor.getValue());
+        assertEquals(chatId.toString(), plotIdCaptor.getValue());
     }
 
     @Test
