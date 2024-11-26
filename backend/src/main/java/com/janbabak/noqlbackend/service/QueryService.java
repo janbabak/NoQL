@@ -16,6 +16,7 @@ import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
 import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
@@ -102,6 +103,8 @@ public class QueryService {
                 .toString();
     }
 
+    public record PaginatedQuery(String query, Integer page, Integer pageSize) {}
+
     /**
      * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
      *
@@ -111,10 +114,10 @@ public class QueryService {
      *                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @param database database object
-     * @return database language query with pagination
+     * @return database language query with pagination, page number and page size
      * @throws BadRequestException pageSize value is greater than maximum allowed value
      */
-    public String setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
+    public PaginatedQuery setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
             throws BadRequestException {
         // defaults
         if (page == null) {
@@ -136,10 +139,12 @@ public class QueryService {
 
         query = query.trim();
 
-        return switch (database.getEngine()) {
+        query = switch (database.getEngine()) {
             case POSTGRES, MYSQL -> "SELECT * FROM (%s) AS query LIMIT %d OFFSET %d;"
                     .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
         };
+
+        return new PaginatedQuery(query, page, pageSize);
     }
 
     // package private for testing
@@ -244,7 +249,7 @@ public class QueryService {
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
             return QueryResponse.successfulResponse(
@@ -267,6 +272,7 @@ public class QueryService {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException cannot establish connection with database
      */
+    @Deprecated
     public QueryResponse loadChatResult(
             UUID databaseId,
             UUID chatId,
@@ -311,7 +317,7 @@ public class QueryService {
         }
 
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
+        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database).query;
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
             RetrievedData retrievedData = new RetrievedData(result.resultSet());
@@ -321,6 +327,68 @@ public class QueryService {
         } catch (DatabaseExecutionException | SQLException e) {
             // should not happen since not executable responses aren't saved
             return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage());
+        }
+    }
+
+    /**
+     * Load result of response of last message from chat. Used when user opens an old chat.
+     *
+     * @param databaseId identifier of the database to which the selected chat belongs
+     * @param chatId     chat to load identifier
+     * @param messageId  identifier of the message to load
+     * @param page       page number (first pages has is 0)
+     * @param pageSize   number of items per page
+     * @return query response
+     * @throws EntityNotFoundException     database or chat not found
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws DatabaseConnectionException cannot establish connection with database
+     */
+    public ChatResponseData loadChatResultData(
+            UUID databaseId,
+            UUID chatId,
+            UUID messageId,
+            Integer page,
+            Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
+        // TODO: authorization??
+
+        log.info("Load chat result data, chatId={}", chatId);
+
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        ChatDto chat = chatService.findById(chatId);
+
+        if (!chat.databaseId().equals(databaseId)) {
+            throw new BadRequestException("Chat does not belong to the specified database");
+        }
+
+        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
+                .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
+
+        if (!message.getChat().getId().equals(chatId)) {
+            throw new BadRequestException("Message does not belong to the specified chat");
+        }
+
+        LLMResponse LLMResponse;
+        try {
+            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            return null; // should not happen since values that cannot be parsed aren't saved
+        }
+
+        // only plot without any select query to retrieve the data
+        if (LLMResponse.databaseQuery() == null || LLMResponse.databaseQuery().isEmpty()) {
+            return null;
+        }
+
+        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
+        PaginatedQuery paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
+
+        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
+            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
+            return new ChatResponseData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
+        } catch (DatabaseExecutionException | SQLException e) {
+            return null; // should not happen since not executable responses aren't saved
         }
     }
 
@@ -372,7 +440,7 @@ public class QueryService {
 
         if (!llmResponse.databaseQuery().isEmpty() || !llmResponse.generatePlot()) {
 
-            String paginatedQuery = setPaginationInSqlQuery(llmResponse.databaseQuery(), 0, pageSize, database);
+            String paginatedQuery = setPaginationInSqlQuery(llmResponse.databaseQuery(), 0, pageSize, database).query;
             try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
                 retrievedData = new RetrievedData(result.resultSet());
                 totalCount = getTotalCount(llmResponse.databaseQuery(), databaseService);

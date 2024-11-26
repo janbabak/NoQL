@@ -10,6 +10,7 @@ import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -149,6 +150,7 @@ public class DatabaseController {
      * @throws EntityNotFoundException     database or chat not found
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
+    @Deprecated
     @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse loadChatResult(
@@ -159,6 +161,32 @@ public class DatabaseController {
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
         return queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize);
+    }
+
+    /**
+     * Load result of specific message of existing chat.
+     *
+     * @param databaseId database identifier
+     * @param chatId     chat identifier
+     * @param messageId  message identifier
+     * @param page       page number (fist page is 0)
+     * @param pageSize   number of items per page
+     * @return result of the latest message from the chat
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws EntityNotFoundException     database or chat not found
+     * @throws AccessDeniedException       if user is not admin or owner of the database.
+     */
+    @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}/data")
+    @ResponseStatus(HttpStatus.OK)
+    public ChatResponseData loadChatResultNew(
+            @PathVariable UUID databaseId,
+            @PathVariable UUID chatId,
+            @PathVariable UUID messageId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer pageSize
+    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+        return queryService.loadChatResultData(databaseId, chatId, messageId, page, pageSize);
     }
 
     /**
