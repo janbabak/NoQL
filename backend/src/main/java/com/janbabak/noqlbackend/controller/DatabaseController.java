@@ -10,6 +10,7 @@ import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
 import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
@@ -124,6 +125,7 @@ public class DatabaseController {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
+    @Deprecated // TODO: remove
     @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse executeChat(
@@ -134,6 +136,34 @@ public class DatabaseController {
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
             LLMException, BadRequestException {
         return queryService.executeChat(databaseId, chatId, queryRequest, pageSize);
+    }
+
+    /**
+     * Query the user's database using natural language from in chat form.
+     *
+     * @param databaseId   database identifier
+     * @param chatId       chat identifier
+     * @param queryRequest query
+     * @param pageSize     number of items in one page
+     * @return query result
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  retrieving database schema failure
+     * @throws EntityNotFoundException     database not found
+     * @throws LLMException                LLM request failed
+     * @throws BadRequestException         pageSize value is greater than maximum allowed value
+     * @throws AccessDeniedException       if user is not admin or owner of the database.
+     */
+    @Deprecated // TODO: remove
+    @PostMapping("/{databaseId}/chat/{chatId}/queryNew")
+    @ResponseStatus(HttpStatus.OK)
+    public ChatResponse executeChatNew(
+            @PathVariable UUID databaseId,
+            @PathVariable UUID chatId,
+            @RequestBody @Valid QueryRequest queryRequest,
+            @RequestParam Integer pageSize
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
+            LLMException, BadRequestException {
+        return queryService.executeChatNew(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**
@@ -150,7 +180,7 @@ public class DatabaseController {
      * @throws EntityNotFoundException     database or chat not found
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
-    @Deprecated
+    @Deprecated // TODO: remove
     @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}")
     @ResponseStatus(HttpStatus.OK)
     public QueryResponse loadChatResult(
