@@ -1,6 +1,6 @@
 import Api from './api.ts'
 import { AxiosResponse } from 'axios'
-import { Chat } from '../../types/Chat.ts'
+import { Chat, ChatNew } from '../../types/Chat.ts'
 
 const chatApi = {
   API: Api.getInstance(),
@@ -8,6 +8,10 @@ const chatApi = {
 
   getById(id: string): Promise<AxiosResponse<Chat>> {
     return this.API.get(this.DOMAIN + '/' + id)
+  },
+
+  getByIdNew(id: string): Promise<AxiosResponse<ChatNew>> {
+    return this.API.get(this.DOMAIN + '/' + id + '/new')
   },
 
   createNewChat(databaseId: string): Promise<AxiosResponse<Chat>> {

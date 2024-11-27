@@ -154,7 +154,7 @@ public class DatabaseController {
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping("/{databaseId}/chat/{chatId}/queryNew")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK) // TODO: swagger docw
     public ChatResponse queryChat(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,

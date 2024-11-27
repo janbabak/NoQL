@@ -9,17 +9,24 @@ import { QueryResponse } from '../../../types/Query.ts'
 import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
-import { ChatView } from './ChatView.tsx'
+// import { ChatView } from './ChatView.tsx'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
-import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../state/chat/chatSlice.ts'
+import {
+  addMessage,
+  addMessageAndChangeName,
+  fetchChat,
+  fetchChatNew,
+  setChatToNull
+} from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
 import { ModelSelect } from './ModelSelect.tsx'
 import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { User } from '../../../types/Authentication.ts'
 import { localStorageService } from '../../../services/LocalStorageService.ts'
 import userApi from '../../../services/api/userApi.ts'
+import { ChatView2 } from './ChatView2.tsx'
 
 interface ChatTabProps {
   databaseId: string,
@@ -107,7 +114,12 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     // @ts-ignore
     if (result.payload.length > chatIndex && chatIndex >= 0) {
       // @ts-ignore
-      result = await dispatch(fetchChat(result.payload[chatIndex].id))
+      const id = result.payload[chatIndex].id
+      // @ts-ignore
+      result = await dispatch(fetchChat(id)) // TODO: remove
+      // @ts-ignore
+      result = await dispatch(fetchChatNew(id))
+      console.log(result)
     } else {
       setQueryResult(null)
       dispatch(setChatToNull())
@@ -285,7 +297,9 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
             {QueryLimit}
           </div>
 
-          <ChatView />
+          {/*<ChatView />*/}
+
+          <ChatView2 />
 
           <div className={styles.chatInputContainer}>
             <TextField
