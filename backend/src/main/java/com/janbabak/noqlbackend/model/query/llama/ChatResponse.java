@@ -2,28 +2,32 @@ package com.janbabak.noqlbackend.model.query.llama;
 
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
+@Data
 @Builder
-public record ChatResponse(
-        ChatResponseData data,
-        UUID messageId,
-        String nlQuery, // natural language query
-        String dbQuery, // database query
-        String plotUrl,
-        Timestamp timestamp,
-        String error
-) {
+@AllArgsConstructor
+public class ChatResponse {
+    private ChatResponseData data;
+    private UUID messageId;
+    private String nlQuery; // natural language query
+    private String dbQuery; // database query
+    private String plotUrl;
+    private Timestamp timestamp;
+    private String error;
 
     /**
      * Create response with data.
-     * @param data retrieved data from database
+     *
+     * @param data                  retrieved data from database
      * @param chatQueryWithResponse chat query with response stored in database
-     * @param llmResponse response from large language model
-     * @param plotFileName name of the file that contains the plot without extension if exist
+     * @param llmResponse           response from large language model
+     * @param plotFileName          name of the file that contains the plot without extension if exist
      */
     public ChatResponse(ChatResponseData data,
                         ChatQueryWithResponse chatQueryWithResponse,

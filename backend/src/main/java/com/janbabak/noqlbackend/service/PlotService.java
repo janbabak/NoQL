@@ -24,8 +24,9 @@ public class PlotService {
     private static final String PLOT_SCRIPT_NAME = "plot.py";
     private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5L;
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
-    public static final Path plotsDirPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
-    private static final Path scriptPath = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    public static final Path PLOTS_DIR_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
+    private static final Path SCRIPT_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    private static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
     @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
     @SuppressWarnings("FieldCanBeLocal")
@@ -44,13 +45,13 @@ public class PlotService {
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create working directory in plot service");
         }
-        plotsDirectory = plotsDirPath.toFile();
+        plotsDirectory = PLOTS_DIR_PATH.toFile();
         if (!plotsDirectory.exists() && !plotsDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create plot directory in plot service");
         }
 
         // create script
-        script = scriptPath.toFile();
+        script = SCRIPT_PATH.toFile();
         try {
             if (!script.exists() && !script.createNewFile()) {
                 logAndThrowRuntimeError("Cannot create plot script");
@@ -72,11 +73,11 @@ public class PlotService {
     public String generatePlot(String scriptContent, Database database, String fileName)
             throws PlotScriptExecutionException {
 
-        fileName = fileName + PLOT_IMAGE_FILE_EXTENSION;
+        fileName = PLOTS_DIR_URL_PATH + "/" + fileName + PLOT_IMAGE_FILE_EXTENSION;
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
             ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
-                    .formatted(settings.getPlotServiceContainerName(), scriptPath));
+                    .formatted(settings.getPlotServiceContainerName(), SCRIPT_PATH));
 
             Process process = processBuilder.start();
 
@@ -140,7 +141,7 @@ public class PlotService {
      * @param prefix common prefix of all plots to delete.
      */
     public void deletePlots(String prefix) {
-        try (Stream<Path> filesStream = Files.list(plotsDirPath)) {
+        try (Stream<Path> filesStream = Files.list(PLOTS_DIR_PATH)) {
             filesStream
                     .filter(path -> path.getFileName().toString().startsWith(prefix))
                     .forEach(path -> {

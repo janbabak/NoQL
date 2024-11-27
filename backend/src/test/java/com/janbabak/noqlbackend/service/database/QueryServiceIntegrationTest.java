@@ -12,6 +12,8 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
@@ -42,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
@@ -161,7 +162,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @ParameterizedTest
     @MethodSource("databaseDataProvider")
     @DisplayName("Test execute query language query")
-    @SuppressWarnings("all") // IDE can't see the columns
+    @SuppressWarnings("all")
+        // IDE can't see the columns
     void testExecuteQueryLanguageQuery(Database database)
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
@@ -250,7 +252,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // cleanup
         chatService.deleteChatById(chat.id());
-    }
+    } // TODO: test the new version
 
     /**
      * @return page, page size, expected total count, plot result, messages, expected response
@@ -373,10 +375,11 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }
+        String plotFileName = databaseId + "-" + chat.id() + ".png";
 
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        doNothing().when(plotService).generatePlot(any(), any(), any());
+        when(plotService.generatePlot(any(), any(), any())).thenReturn(plotFileName);
 
         // when
         QueryResponse queryResponse = queryService.executeChat(databaseId, chat.id(), request, pageSize);
@@ -477,6 +480,148 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                         null),
                                 null)
 
+                },
+        };
+    }
+
+    /**
+     * @param pageSize         number of items per page
+     * @param totalCount       total count of rows
+     * @param plotResult       if the result contains plot
+     * @param messages         messages to save into database
+     * @param request          query request - natural language query
+     * @param llmResponse      LLM response
+     * @param expectedResponse expected response
+     */
+    @ParameterizedTest
+    @MethodSource("testQueryChatWithPlotDataProvider")
+    @DisplayName("Test query chat - plot data provided")
+    void testQueryChat(
+            Integer pageSize,
+            Long totalCount,
+            Boolean plotResult,
+            List<CreateChatQueryWithResponseRequest> messages,
+            QueryRequest request,
+            String llmResponse,
+            ChatResponse expectedResponse
+    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
+            LLMException, BadRequestException, PlotScriptExecutionException {
+
+        // given
+        UUID databaseId = getDatabase().getId();
+        ChatDto chat = chatService.create(databaseId);
+        for (CreateChatQueryWithResponseRequest message : messages) {
+            chatService.addMessageToChat(chat.id(), message);
+        }
+        String plotFileName = "/static/images/" + chat.id() + "-unknown-message-id.png";
+
+        when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
+        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+        when(plotService.generatePlot(any(), any(), any())).thenReturn(plotFileName);
+
+        // when
+        ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);
+
+        // message id and timestamp are generated, so we need to set them manually
+        expectedResponse.setMessageId(actual.getMessageId());
+        expectedResponse.setTimestamp(actual.getTimestamp());
+
+        if (plotResult) {
+            expectedResponse.setPlotUrl(plotFileName);
+        }
+
+        // then
+        assertTrue(pageSize >= actual.getData().rows().size());
+        assertEquals(totalCount, actual.getData().totalCount());
+        assertEquals(expectedResponse, actual);
+
+        // cleanup
+        chatService.deleteChatById(chat.id());
+    }
+
+    /**
+     * @return page size, total count, plot result, messages, request, LLM response, expected response
+     */
+    @SuppressWarnings("all")
+    // IDE can't see the columns
+    Object[][] testQueryChatWithPlotDataProvider() {
+        return new Object[][]{
+                {
+                        8, // page size
+                        2L, // total count
+                        true, // plot result
+                        List.of(), // messages
+                        // query request
+                        new QueryRequest("plot sex of users older than 24", "gpt-4o"),
+                        // LLM response
+                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
+                        // expected response
+                        ChatResponse.builder()
+                                .messageId(null)
+                                .nlQuery("plot sex of users older than 24")
+                                .plotUrl(null)
+                                .timestamp(null)
+                                .error(null)
+                                .dbQuery(
+                                        // language=SQL
+                                        "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex")
+                                .data(ChatResponseData.builder()
+                                        .page(0)
+                                        .pageSize(8)
+                                        .totalCount(2L)
+                                        .columnNames(List.of("sex", "count"))
+                                        .rows(List.of(
+                                                List.of("M", "9"),
+                                                List.of("F", "10")))
+                                        .build())
+                                .build()
+                },
+                {
+                        8, // page size
+                        22L, // total count
+                        false, // plot result
+                        List.of(new CreateChatQueryWithResponseRequest( // messages
+                                "find emails of all users",
+                                // language=JSON
+                                """
+                                        {
+                                            "databaseQuery": "SELECT email FROM eshop_user;",
+                                            "generatePlot": false,
+                                            "pythonCode": ""
+                                        }""")),
+                        // query request
+                        new QueryRequest("sort them in descending order", "gpt-4o"),
+                        // language=JSON LLM response
+                        """
+                        {
+                            "databaseQuery": "SELECT email FROM eshop_user ORDER BY email DESC;",
+                            "generatePlot": false
+                        }""",
+                        // expected response
+                        ChatResponse.builder()
+                                .messageId(null)
+                                .plotUrl(null)
+                                .timestamp(null)
+                                .error(null)
+                                .nlQuery("sort them in descending order")
+                                .dbQuery(
+                                        // language=SQL
+                                        "SELECT email FROM eshop_user ORDER BY email DESC;")
+                                .data(ChatResponseData.builder()
+                                        .page(0)
+                                        .pageSize(8)
+                                        .totalCount(22L)
+                                        .columnNames(List.of("email"))
+                                        .rows(List.of(List.of("william.davis@example.com"),
+                                                List.of("sophia.lopez@example.com"),
+                                                List.of("sarah.brown@example.com"),
+                                                List.of("olivia.garcia@example.com"),
+                                                List.of("nicholas.brown@example.com"),
+                                                List.of("michael.davis@example.com"),
+                                                List.of("matthew.hernandez@example.com"),
+                                                List.of("john.doe@example.com")))
+                                        .build())
+                                .build()
                 },
         };
     }

@@ -1,11 +1,14 @@
 package com.janbabak.noqlbackend.model.query.llama;
 
+import lombok.Builder;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 public record ChatResponseData(
         List<String> columnNames,
         List<List<String>> rows,
