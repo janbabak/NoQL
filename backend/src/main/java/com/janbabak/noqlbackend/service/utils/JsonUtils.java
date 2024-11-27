@@ -8,11 +8,15 @@ public class JsonUtils {
 
     /**
      * Create object from JSON string.
-     * @param json JSON string
+     *
+     * @param json  JSON string
      * @param clazz class of object
-     * @throws JsonProcessingException JSON syntax error
+     * @throws JsonProcessingException  JSON syntax error
+     * @throws IllegalArgumentException null json or other invalid input
      */
-    public static <T> T createFromJson(String json, Class<T> clazz) throws JsonProcessingException {
+    public static <T> T createFromJson(String json, Class<T> clazz)
+            throws JsonProcessingException, IllegalArgumentException {
+
         return objectMapper.readValue(json, clazz);
     }
 

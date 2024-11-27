@@ -354,6 +354,7 @@ paths:
       security:
         - BearerAuth: [ ]
       summary: Load result of message
+      deprecated: true
       description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
       parameters:
         - $ref: '#/components/parameters/databaseIdPath'
@@ -376,6 +377,37 @@ paths:
           description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of chat of specified ID not found.
+
+  /database/{databaseId}/chat/{chatId}/message/{messageId}/data:
+    get:
+      tags:
+        - Database
+      security:
+        - BearerAuth: [ ]
+      summary: Load result of message
+      description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
+      parameters:
+        - $ref: '#/components/parameters/databaseIdPath'
+        - $ref: '#/components/parameters/chatIdPath'
+        - $ref: '#/components/parameters/messageIdPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
+            natural language query to a database query or generate the plot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponseData'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the database
+        '404':
+          description: Database of chat of specified ID not found.
+
 
   /database/{databaseId}/query/queryLanguage:
     post:
@@ -1079,6 +1111,35 @@ components:
           allOf:
             - $ref: '#/components/schemas/QueryErrorMessage'
             - example: null
+
+    ChatResponseData:
+      type: object
+      description: Retrieved data from the database query in form of table.
+      properties:
+        page:
+          type: integer
+          format: int64
+          example: 0
+        pageSize:
+          type: integer
+          format: int64
+          example: 10
+        totalCount:
+          type: integer
+          format: int64
+          example: 200
+        columnNames:
+          type: array
+          items:
+            type: string
+          example: [ "sex", "count" ]
+        rows:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+          example: [ [ "male", "8" ], [ "female", "2" ] ]
 
     RetrievedData:
       type: object
