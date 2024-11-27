@@ -594,7 +594,7 @@ public class QueryService {
     }
 
     /**
-     * Execute natural language select query from the chat. The query is translated to specific dialect via LLM
+     * Query natural chat with natural language query. The query is translated to specific dialect via LLM
      * and executed. Select query is read only.
      *
      * @param databaseId   database id
@@ -608,7 +608,7 @@ public class QueryService {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws LLMException                large language model failure
      */
-    public ChatResponse executeChatNew(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
+    public ChatResponse queryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, LLMException,
             DatabaseExecutionException, BadRequestException {
         // TODO: authorization??

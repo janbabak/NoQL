@@ -153,17 +153,16 @@ public class DatabaseController {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
-    @Deprecated // TODO: remove
     @PostMapping("/{databaseId}/chat/{chatId}/queryNew")
     @ResponseStatus(HttpStatus.OK)
-    public ChatResponse executeChatNew(
+    public ChatResponse queryChat(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,
             @RequestBody @Valid QueryRequest queryRequest,
             @RequestParam Integer pageSize
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
             LLMException, BadRequestException {
-        return queryService.executeChatNew(databaseId, chatId, queryRequest, pageSize);
+        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**

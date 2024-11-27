@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
@@ -687,6 +688,77 @@ class QueryServiceTest {
 
         // when
         QueryResponse actual = queryService.executeChat(databaseId, chatId, request, 10);
+
+        // then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Test query chat - database not found")
+    void testQueryChatDatabaseNotFound() {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
+
+        String expectedErrorMsg = "Database of id: \"" + databaseId + "\" not found.";
+
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+
+        // then
+        Exception exception = assertThrows(EntityNotFoundException.class,
+                () -> queryService.queryChat(databaseId, chatId, request, 10));
+
+        assertEquals(expectedErrorMsg, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test query chat - chat not found")
+    void testQueryChatChatNotFound() throws EntityNotFoundException {
+        // given
+        UUID chatId = UUID.randomUUID();
+        UUID databaseId = UUID.randomUUID();
+        UUID messageId = UUID.randomUUID();
+
+        String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
+
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
+
+        // then
+        Exception exception = assertThrows(EntityNotFoundException.class,
+                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+
+        assertEquals(expectedErrorMsg, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test query chat - query limit exceeded")
+    void testQueryChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException,
+            DatabaseExecutionException, LLMException, BadRequestException {
+        // given
+        UUID databaseId = UUID.randomUUID();
+        UUID chatId = UUID.randomUUID();
+
+        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
+
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .queryLimit(0)
+                .build();
+
+        Database database = Database.builder()
+                .id(databaseId)
+                .user(user)
+                .build();
+
+        ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded");
+
+        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+        when(userService.decrementQueryLimit(any())).thenReturn(0);
+
+        // when
+        ChatResponse actual = queryService.queryChat(databaseId, chatId, request, 10);
 
         // then
         assertEquals(expected, actual);
