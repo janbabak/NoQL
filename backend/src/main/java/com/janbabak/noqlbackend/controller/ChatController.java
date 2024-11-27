@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
+import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import jakarta.validation.Valid;
@@ -46,6 +47,11 @@ public class ChatController {
     @GetMapping("/{chatId}")
     public ChatDto getById(@PathVariable UUID chatId) throws EntityNotFoundException {
         return chatService.findById(chatId);
+    }
+
+    @GetMapping("/{chatId}/new") // TODO: test
+    public ChatDtoNew getByIdNew(@PathVariable UUID chatId) throws EntityNotFoundException {
+        return chatService.findByIdNew(chatId);
     }
 
     /**

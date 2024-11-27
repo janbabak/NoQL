@@ -5,14 +5,11 @@ import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.*;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
-import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +50,7 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
+    @Deprecated // TODO: remove
     public ChatDto findById(UUID chatId) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
@@ -86,6 +84,56 @@ public class ChatService {
                         .toList(),
                 chat.getModificationDate(),
                 chat.getDatabase().getId());
+    }
+
+    /**
+     * Find chat by chat id.
+     *
+     * @param chatId chat identifier
+     * @return chat
+     * @throws EntityNotFoundException                                   chat of specified id not found
+     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
+     */
+    @Transactional
+    public ChatDtoNew findByIdNew(UUID chatId) throws EntityNotFoundException {
+        log.info("Get chat by id={}", chatId);
+
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
+
+        return ChatDtoNew.builder()
+                .id(chat.getId())
+                .name(chat.getName())
+                .modificationDate(chat.getModificationDate())
+                .databaseId(chat.getDatabase().getId())
+                .messages(chat.getMessages()
+                        .stream()
+                        .map(message -> {
+                            try {
+                                LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+                                String plotFileName = llmResponse.generatePlot()
+                                        ? PlotService.PLOTS_DIR_URL_PATH + "/" + chat.getId() + "-" + message.getId() +
+                                        PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
+                                        : null;
+
+                                return new ChatResponse(
+                                        null,
+                                        message.getId(),
+                                        message.getNlQuery(),
+                                        llmResponse.databaseQuery(),
+                                        plotFileName,
+                                        message.getTimestamp(),
+                                        null);
+                            } catch (JsonProcessingException e) {
+                                // should not happen since invalid JSONs are not saved
+                                log.error("Cannot parse message JSON from database, messageId={}", message.getId());
+                                return ChatResponse.failedResponse(
+                                        "Cannot parse message JSON from database, messageId=" + message.getId());
+                            }
+                        })
+                        .toList())
+                .build();
     }
 
 

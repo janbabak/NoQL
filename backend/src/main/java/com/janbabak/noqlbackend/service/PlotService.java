@@ -26,7 +26,7 @@ public class PlotService {
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path PLOTS_DIR_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path SCRIPT_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
-    private static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
+    public static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
     @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
     @SuppressWarnings("FieldCanBeLocal")
