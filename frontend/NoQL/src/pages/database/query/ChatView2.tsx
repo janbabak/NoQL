@@ -18,7 +18,7 @@ export function ChatView2() {
         ? <div>Loading</div>
         : <div>{chat?.messages.map((message: ChatResponse) => {
           return (
-            <div key={message.messageId}>
+            <div style={{border: '2px solid gray',  margin: '1rem'}} key={message.messageId}>
               <div>{message.nlQuery}</div>
               <div>{message.dbQuery}</div>
             </div>

@@ -119,7 +119,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
       result = await dispatch(fetchChat(id)) // TODO: remove
       // @ts-ignore
       result = await dispatch(fetchChatNew(id))
-      console.log(result)
     } else {
       setQueryResult(null)
       dispatch(setChatToNull())
@@ -130,7 +129,7 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     // @ts-ignore
     if (result.payload.messages.length > 0) {
       // @ts-ignore
-      const messageId = result.payload.messages[result.payload.messages.length - 1].id ?? ''
+      const messageId = result.payload.messages[result.payload.messages.length - 1].messageId ?? ''
       // @ts-ignore
       void loadChatResult(result.payload.id, messageId)
     } else {
@@ -225,20 +224,20 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
    * @param chatId identifier
    * @param messageId message to load identifier
    */
-  async function loadChatResult(chatId: string, messageId: string): Promise<void> {
-    setQueryLoading(true)
-    try {
-      const response: AxiosResponse<QueryResponse> =
-        await databaseApi.loadChatResult(databaseId, chatId || '', messageId, 0, pageSize)
-
-      setPage(0)
-      setQueryResult(response.data)
-    } catch (error: unknown) {
-      showErrorWithMessageAndError(dispatch, 'Failed to load chat', error)
-    } finally {
-      setQueryLoading(false)
-    }
-  }
+  // async function loadChatResult(chatId: string, messageId: string): Promise<void> {
+  //   setQueryLoading(true)
+  //   try {
+  //     const response: AxiosResponse<QueryResponse> =
+  //       await databaseApi.loadChatResult(databaseId, chatId || '', messageId, 0, pageSize)
+  //
+  //     setPage(0)
+  //     setQueryResult(response.data)
+  //   } catch (error: unknown) {
+  //     showErrorWithMessageAndError(dispatch, 'Failed to load chat', error)
+  //   } finally {
+  //     setQueryLoading(false)
+  //   }
+  // }
 
   /**
    * Load query result of a chat - load it's content and query response.
@@ -250,7 +249,7 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     if (result.payload.messages.length > 0) {
       // @ts-expect-error
       const messageId = result.payload.messages[result.payload.messages.length - 1].id ?? ''
-      await loadChatResult(chatId, messageId)
+      // await loadChatResult(chatId, messageId) // TODO: load chat result on create
     } else {
       setQueryResult(null)
     }
