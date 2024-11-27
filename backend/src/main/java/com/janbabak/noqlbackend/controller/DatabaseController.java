@@ -215,7 +215,7 @@ public class DatabaseController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.loadChatResultData(databaseId, chatId, messageId, page, pageSize);
+        return queryService.loadChatResponseData(databaseId, chatId, messageId, page, pageSize);
     }
 
     /**

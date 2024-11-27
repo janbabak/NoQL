@@ -344,7 +344,7 @@ public class QueryService {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws DatabaseConnectionException cannot establish connection with database
      */
-    public ChatResponseData loadChatResultData(
+    public ChatResponseData loadChatResponseData(
             UUID databaseId,
             UUID chatId,
             UUID messageId,

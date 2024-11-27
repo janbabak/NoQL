@@ -488,7 +488,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
@@ -509,7 +509,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
@@ -536,7 +536,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
@@ -562,7 +562,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(BadRequestException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
@@ -594,7 +594,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(BadRequestException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
@@ -625,7 +625,7 @@ class QueryServiceTest {
         when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
 
         // then
-        assertNull(queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+        assertNull(queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
     }
 
     static Object[][] testLoadChatDataEmptyLlmResponseDataProvider() {
@@ -727,7 +727,7 @@ class QueryServiceTest {
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResultData(databaseId, chatId, messageId, 0, 10));
+                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
     }

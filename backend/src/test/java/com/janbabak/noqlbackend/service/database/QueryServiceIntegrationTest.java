@@ -252,14 +252,136 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // cleanup
         chatService.deleteChatById(chat.id());
-    } // TODO: test the new version
+    }
+
+    /**
+     * @param page               page number
+     * @param pageSize           number of items per page
+     * @param expectedTotalCount total count of rows
+     * @param messageRequests    list of messages to save into database
+     * @param expectedResponse   expected response
+     */
+    @ParameterizedTest
+    @MethodSource("testLoadChatResponseDataProvider")
+    @DisplayName("Test load chat")
+    void testLoadChatResponseData(
+            Integer page,
+            Integer pageSize,
+            Long expectedTotalCount,
+            List<CreateChatQueryWithResponseRequest> messageRequests,
+            ChatResponseData expectedResponse
+    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+
+        // given
+        UUID databaseId = getDatabase().getId();
+
+        ChatDto chat = chatService.create(databaseId);
+        List<ChatQueryWithResponse> messages = new ArrayList<>();
+        for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
+            messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
+        }
+        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
+
+        // when
+        ChatResponseData queryResponse = queryService.loadChatResponseData(
+                databaseId, chat.id(), lastMessage.getId(), page, pageSize);
+
+        // message id and timestamp are generated, so we need to set them manually
+
+        // then
+        assertTrue(pageSize >= queryResponse.rows().size());
+        assertEquals(expectedTotalCount, queryResponse.totalCount());
+        assertEquals(expectedResponse, queryResponse);
+
+        // cleanup
+        chatService.deleteChatById(chat.id());
+    }
+
+    /**
+     * @return page, page size, expected total count, messages, expected response
+     */
+    @SuppressWarnings("all")
+    // IDE can't see the columns
+    Object[][] testLoadChatResponseDataProvider() {
+        return new Object[][]{
+                {
+                        0, // page
+                        10, // page size
+                        2L, // expected total count
+                        List.of( // messages
+                                new CreateChatQueryWithResponseRequest(
+                                        "find emails of all users",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM eshop_user;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }"""),
+                                new CreateChatQueryWithResponseRequest(
+                                        "plot sex of users older than 24",
+                                        FileUtils.getFileContent(
+                                                "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
+                        // expected response
+                        ChatResponseData.builder()
+                                .page(0)
+                                .pageSize(10)
+                                .totalCount(2L)
+                                .columnNames(List.of("sex", "count"))
+                                .rows(List.of(
+                                        List.of("M", "9"),
+                                        List.of("F", "10")))
+                                .build()
+                },
+                {
+                        1, // page
+                        10, // page size
+                        22L, // expected total count
+                        List.of(new CreateChatQueryWithResponseRequest( // messages
+                                        "find emails of all users",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM eshop_user;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }"""),
+                                new CreateChatQueryWithResponseRequest(
+                                        "sort them in descending order",
+                                        // language=JSON
+                                        """
+                                                {
+                                                    "databaseQuery": "SELECT email FROM eshop_user ORDER BY email DESC;",
+                                                    "generatePlot": false,
+                                                    "pythonCode": ""
+                                                }""")),
+                        // expected reseponse
+                        ChatResponseData.builder()
+                                .page(1)
+                                .pageSize(10)
+                                .totalCount(22L)
+                                .columnNames(List.of("email"))
+                                .rows(List.of(List.of("jane.doe@example.com"),
+                                        List.of("james.wilson@example.com"),
+                                        List.of("grace.miller@example.com"),
+                                        List.of("emma.scott@example.com"),
+                                        List.of("emily.johnson@example.com"),
+                                        List.of("ella.thomas@example.com"),
+                                        List.of("david.taylor@example.com"),
+                                        List.of("daniel.miller@example.com"),
+                                        List.of("christopher.johnson@example.com"),
+                                        List.of("bob.smith@example.com")))
+                                .build()
+                }
+        };
+    }
 
     /**
      * @return page, page size, expected total count, plot result, messages, expected response
      */
     @SuppressWarnings("all")
     // IDE can't see the columns
-    Object[][] testLoadChatDataProvider() {
+    Object[][] testLoadChatDataProvider() { // TODO: remove
         return new Object[][]{
                 {
                         0, // page
