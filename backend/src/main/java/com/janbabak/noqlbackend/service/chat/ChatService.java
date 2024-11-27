@@ -10,6 +10,8 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
+import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
+import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
@@ -116,9 +118,10 @@ public class ChatService {
                                         ? PlotService.PLOTS_DIR_URL_PATH + "/" + chat.getId() + "-" + message.getId() +
                                         PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
                                         : null;
+                                ChatResponseData data = QueryService.getChatResponseData(message, chat.getDatabase());
 
                                 return new ChatResponse(
-                                        null,
+                                        data,
                                         message.getId(),
                                         message.getNlQuery(),
                                         llmResponse.databaseQuery(),
@@ -135,7 +138,6 @@ public class ChatService {
                         .toList())
                 .build();
     }
-
 
     /**
      * Find all chats associated with specified database sorted by the modification date in descending order.

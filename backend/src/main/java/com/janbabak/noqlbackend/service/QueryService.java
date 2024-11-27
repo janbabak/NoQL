@@ -118,7 +118,7 @@ public class QueryService {
      * @return database language query with pagination, page number and page size
      * @throws BadRequestException pageSize value is greater than maximum allowed value
      */
-    public PaginatedQuery setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
+    public static PaginatedQuery setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
             throws BadRequestException {
         // defaults
         if (page == null) {
@@ -130,10 +130,10 @@ public class QueryService {
             throw new BadRequestException(error);
         }
         if (pageSize == null) {
-            pageSize = settings.getDefaultPageSize();
+            pageSize = Settings.getDefaultPageSizeStatic();
         }
-        if (pageSize > settings.getMaxPageSize()) {
-            String error = "Page size is greater than maximum allowed value=" + settings.getMaxPageSize();
+        if (pageSize > Settings.getMaxPageSizeStatic()) {
+            String error = "Page size is greater than maximum allowed value=" + Settings.getMaxPageSizeStatic();
             log.error(error);
             throw new BadRequestException(error);
         }
@@ -149,7 +149,7 @@ public class QueryService {
     }
 
     // package private for testing
-    String trimAndRemoveTrailingSemicolon(String query) {
+    static String trimAndRemoveTrailingSemicolon(String query) {
         query = query.trim();
 
         if (query.isEmpty()) {
@@ -210,7 +210,7 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
+    private static Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
@@ -389,6 +389,34 @@ public class QueryService {
             Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
             return new ChatResponseData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
         } catch (DatabaseExecutionException | SQLException e) {
+            return null; // should not happen since not executable responses aren't saved
+        }
+    }
+
+    public static ChatResponseData getChatResponseData(ChatQueryWithResponse message, Database database) {
+        LLMResponse LLMResponse;
+        try {
+            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            return null; // should not happen since values that cannot be parsed aren't saved
+        }
+
+        // only plot without any select query to retrieve the data
+        if (LLMResponse.databaseQuery() == null || LLMResponse.databaseQuery().isEmpty()) {
+            return null;
+        }
+
+        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
+        QueryService.PaginatedQuery paginatedQuery;
+        try {
+            paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), 0, null, database);
+        } catch (BadRequestException e) {
+            return null; // should not happen
+        }
+        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
+            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
+            return new ChatResponseData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
+        } catch (DatabaseExecutionException | SQLException | DatabaseConnectionException e) {
             return null; // should not happen since not executable responses aren't saved
         }
     }

@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -36,6 +37,7 @@ import java.util.UUID;
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.CHAT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,8 +54,8 @@ class QueryServiceTest {
     @Mock
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
-    @Mock
-    private Settings settings;
+//    @Mock
+//    private Settings settings;
 
     @Mock
     private UserService userService;
@@ -135,17 +137,20 @@ class QueryServiceTest {
     void testSetPagination(String query, Integer page, Integer pageSize, PaginatedQuery expectedQuery)
             throws BadRequestException {
 
-        when(settings.getMaxPageSize()).thenReturn(50);
+        MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class);
+        settingsMockedStatic.when(Settings::getMaxPageSizeStatic).thenReturn(50);
         if (pageSize == null) {
-            when(settings.getDefaultPageSize()).thenReturn(10);
+            settingsMockedStatic.when(Settings::getDefaultPageSizeStatic).thenReturn(10);
         }
 
         // when
-        PaginatedQuery actualValue = queryService.setPaginationInSqlQuery(
+        PaginatedQuery actualValue = QueryService.setPaginationInSqlQuery(
                 query, page, pageSize, postgresDatabase);
 
         // then
         assertEquals(expectedQuery, actualValue);
+
+        settingsMockedStatic.close();
     }
 
     @SuppressWarnings("all")
@@ -203,16 +208,19 @@ class QueryServiceTest {
     @DisplayName("Test set pagination with bad request")
     void testSetPaginationBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
         // given
+        MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class);
         if (page >= 0) { // otherwise unnecessary stubbing error
-            when(settings.getMaxPageSize()).thenReturn(50);
+            settingsMockedStatic.when(Settings::getMaxPageSizeStatic).thenReturn(50);
         }
 
         // when
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> queryService.setPaginationInSqlQuery(query, page, pageSize, postgresDatabase));
+                () -> QueryService.setPaginationInSqlQuery(query, page, pageSize, postgresDatabase));
 
         // then
         assertEquals(errorMessage, exception.getMessage());
+
+        settingsMockedStatic.close();
     }
 
     @SuppressWarnings("all")
@@ -240,7 +248,7 @@ class QueryServiceTest {
     @DisplayName("Test trim and remove trailing semicolon")
     void testTrimAndRemoveTrailingSemicolon(String query, String expectedQuery) {
         // when
-        String actualValue = queryService.trimAndRemoveTrailingSemicolon(query);
+        String actualValue = QueryService.trimAndRemoveTrailingSemicolon(query);
 
         // then
         assertEquals(expectedQuery, actualValue);
