@@ -14,25 +14,33 @@ import {
 import { AppDispatch } from '../../../../state/store.ts'
 import { useDispatch } from 'react-redux'
 import { loadChatMessageData } from '../../../../state/chat/chatSlice.ts'
-import React from 'react'
+import React, { useState } from 'react'
 
 interface ResultProps {
   message: ChatResponse
-  loading: boolean,
   paginationOptions?: number[]
 }
 
 export function ResultNew(
   {
     message,
-    loading,
     paginationOptions = [10, 20, 25, 50]
   }: ResultProps) {
 
   const dispatch: AppDispatch = useDispatch()
 
+  const [
+    loading,
+    setLoading
+  ] = useState<boolean>(false)
+
   async function loadPage(page: number, pageSize: number): Promise<void> {
-    await dispatch(loadChatMessageData({ messageId: message.messageId, page, pageSize }))
+    setLoading(true)
+    try {
+      await dispatch(loadChatMessageData({ messageId: message.messageId, page, pageSize }))
+    } finally {
+      setLoading(false)
+    }
   }
 
   function onPageSizeChange(event: React.ChangeEvent<HTMLInputElement>): void {
