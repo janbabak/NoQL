@@ -6,7 +6,7 @@ import { SkeletonStack } from '../../../../components/loaders/SkeletonStack.tsx'
 import { ChatItem } from './ChatItem.tsx'
 import React, { useEffect, useRef } from 'react'
 
-export function ChatView2() {
+export function ChatView() {
 
   const chat: ChatNew | null = useSelector((state: RootState) => {
     return state.chatReducer.chatNew

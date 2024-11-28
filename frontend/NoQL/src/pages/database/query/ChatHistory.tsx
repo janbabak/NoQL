@@ -5,7 +5,7 @@ import { LoadingButton } from '@mui/lab'
 import { Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { memo, SetStateAction, useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
 import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
 import chatApi from '../../../services/api/chatApi.ts'
-import { QueryResponse } from '../../../types/Query.ts'
 import { setChat } from '../../../state/chat/chatSlice.ts'
 import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
 import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
@@ -24,7 +23,6 @@ interface ChatHistoryProps {
   loadChatResult: (chatId: string) => Promise<void>,
   loadChatHistoryAndChatAndResult: (chatIndex: number) => Promise<void>
   databaseId: string,
-  setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
 
 const ChatHistory = memo((
@@ -32,7 +30,6 @@ const ChatHistory = memo((
     loadChatResult,
     loadChatHistoryAndChatAndResult,
     databaseId,
-    setQueryResult
   }: ChatHistoryProps) => {
 
   const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
@@ -141,7 +138,6 @@ const ChatHistory = memo((
   async function createChat(): Promise<void> {
     const result = await dispatch(createNewChat(databaseId))
     dispatch(setChat(result.payload as Chat))
-    setQueryResult(null)
   }
 
   // focus input element that is rendered when chatToRenameId changes
