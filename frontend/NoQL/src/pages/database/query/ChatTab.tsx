@@ -14,7 +14,6 @@ import { AppDispatch, RootState } from '../../../state/store.ts'
 import {
   addMessage,
   addMessageAndChangeName,
-  fetchChat,
   fetchChatNew,
   setChatToNull
 } from '../../../state/chat/chatSlice.ts'
@@ -29,10 +28,9 @@ import { ChatView2 } from './chat/ChatView2.tsx'
 interface ChatTabProps {
   databaseId: string,
   tab: number,
-  editQueryInConsole: (query: string) => void,
 }
 
-const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => {
+const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
   const NEW_CHAT_NAME: string = 'New chat'
   const CHAT_NAME_MAX_LENGTH: number = 32
@@ -114,8 +112,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
       // @ts-ignore
       const id = result.payload[chatIndex].id
       // @ts-ignore
-      result = await dispatch(fetchChat(id)) // TODO: remove
-      // @ts-ignore
       result = await dispatch(fetchChatNew(id))
     } else {
       setQueryResult(null)
@@ -129,7 +125,7 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
       // @ts-ignore
       const messageId = result.payload.messages[result.payload.messages.length - 1].messageId ?? ''
       // @ts-ignore
-      void loadChatResult(result.payload.id, messageId)
+      // void loadChatResult(result.payload.id, messageId)
     } else {
       setQueryResult(null)
     }
@@ -242,7 +238,7 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
    * @param chatId chat id
    */
   async function loadChatAndResult(chatId: string): Promise<void> {
-    const result = await dispatch(fetchChat(chatId)) // TODO: move to chat history
+    const result = await dispatch(fetchChatNew(chatId)) // TODO: move to chat history
     // @ts-expect-error
     if (result.payload.messages.length > 0) {
       // @ts-expect-error

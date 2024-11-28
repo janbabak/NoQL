@@ -50,8 +50,9 @@ public class ChatController {
     }
 
     @GetMapping("/{chatId}/new") // TODO: test
-    public ChatDtoNew getByIdNew(@PathVariable UUID chatId) throws EntityNotFoundException {
-        return chatService.findByIdNew(chatId);
+    public ChatDtoNew getByIdNew(@PathVariable UUID chatId, @RequestParam(required = false) Integer pageSize)
+            throws EntityNotFoundException {
+        return chatService.findByIdNew(chatId, pageSize);
     }
 
     /**

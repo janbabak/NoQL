@@ -334,8 +334,6 @@ public class QueryService {
     /**
      * Load result of response of last message from chat. Used when user opens an old chat.
      *
-     * @param databaseId identifier of the database to which the selected chat belongs
-     * @param chatId     chat to load identifier
      * @param messageId  identifier of the message to load
      * @param page       page number (first pages has is 0)
      * @param pageSize   number of items per page
@@ -345,55 +343,18 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with database
      */
     public ChatResponseData loadChatResponseData(
-            UUID databaseId,
-            UUID chatId,
             UUID messageId,
             Integer page,
             Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
         // TODO: authorization??
 
-        log.info("Load chat result data, chatId={}", chatId);
-
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
-
-        ChatDto chat = chatService.findById(chatId);
-
-        if (!chat.databaseId().equals(databaseId)) {
-            throw new BadRequestException("Chat does not belong to the specified database");
-        }
-
         ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
 
-        if (!message.getChat().getId().equals(chatId)) {
-            throw new BadRequestException("Message does not belong to the specified chat");
-        }
-
-        LLMResponse LLMResponse;
-        try {
-            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
-        } catch (JsonProcessingException | IllegalArgumentException e) {
-            return null; // should not happen since values that cannot be parsed aren't saved
-        }
-
-        // only plot without any select query to retrieve the data
-        if (LLMResponse.databaseQuery() == null || LLMResponse.databaseQuery().isEmpty()) {
-            return null;
-        }
-
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        PaginatedQuery paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
-
-        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
-            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
-            return new ChatResponseData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
-        } catch (DatabaseExecutionException | SQLException e) {
-            return null; // should not happen since not executable responses aren't saved
-        }
+        return getChatResponseData(message, message.getChat().getDatabase(), page, pageSize);
     }
 
-    public static ChatResponseData getChatResponseData(ChatQueryWithResponse message, Database database) {
+    public static ChatResponseData getChatResponseData(ChatQueryWithResponse message, Database database, Integer page, Integer pageSize) {
         LLMResponse LLMResponse;
         try {
             LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
@@ -409,7 +370,7 @@ public class QueryService {
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         QueryService.PaginatedQuery paginatedQuery;
         try {
-            paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), 0, null, database);
+            paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
         } catch (BadRequestException e) {
             return null; // should not happen
         }

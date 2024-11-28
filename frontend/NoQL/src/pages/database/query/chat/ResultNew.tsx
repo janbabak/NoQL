@@ -1,4 +1,4 @@
-import { ChatResponseData } from '../../../../types/Chat.ts'
+import { ChatResponse } from '../../../../types/Chat.ts'
 import {
   Box,
   LinearProgress,
@@ -11,30 +11,48 @@ import {
   TablePagination,
   TableRow
 } from '@mui/material'
+import { AppDispatch } from '../../../../state/store.ts'
+import { useDispatch } from 'react-redux'
+import { loadChatMessageData } from '../../../../state/chat/chatSlice.ts'
+import React from 'react'
 
 interface ResultProps {
-  data: ChatResponseData
+  message: ChatResponse
   loading: boolean,
   paginationOptions?: number[]
 }
 
 export function ResultNew(
   {
-    data,
+    message,
     loading,
-    paginationOptions = [10, 25, 50]
+    paginationOptions = [10, 20, 25, 50]
   }: ResultProps) {
+
+  const dispatch: AppDispatch = useDispatch()
+
+  async function loadPage(page: number, pageSize: number): Promise<void> {
+    await dispatch(loadChatMessageData({ messageId: message.messageId, page, pageSize }))
+  }
+
+  function onPageSizeChange(event: React.ChangeEvent<HTMLInputElement>): void {
+    void loadPage(0, parseInt(event.target.value, 10))
+  }
+
+  function onPageChange(_event: unknown, newPage: number): void {
+    void loadPage(newPage, message.data?.pageSize || 10)
+  }
 
   const TableHeadElement =
     <TableHead>
       <TableRow>
-        {data.columnNames.map((columnName: string, columnNameIndex: number) =>
+        {message.data?.columnNames.map((columnName: string, columnNameIndex: number) =>
           <TableCell key={columnNameIndex}>{columnName}</TableCell>)}
       </TableRow>
 
       {loading &&
         <TableRow>
-          <td colSpan={data.columnNames.length}>
+          <td colSpan={message.data?.columnNames.length}>
             <LinearProgress />
           </td>
         </TableRow>}
@@ -42,7 +60,7 @@ export function ResultNew(
 
   const TableBodyElement =
     <TableBody>
-      {data.rows.map((row: string[], rowIndex: number) =>
+      {message.data?.rows.map((row: string[], rowIndex: number) =>
         <TableRow
           key={rowIndex}
           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -71,11 +89,11 @@ export function ResultNew(
         <TablePagination
           rowsPerPageOptions={paginationOptions}
           component="div"
-          count={data.totalCount}
-          rowsPerPage={data.pageSize}
-          page={data.page}
-          onPageChange={(_event) => console.log('implement')}
-          onRowsPerPageChange={(_event) => console.log('implement')}
+          count={message.data?.totalCount || 0}
+          rowsPerPage={message.data?.pageSize || 10}
+          page={message.data?.page || 0}
+          onPageChange={onPageChange}
+          onRowsPerPageChange={onPageSizeChange}
         />
       </Paper>
     </Box>

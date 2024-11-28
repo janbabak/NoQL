@@ -195,8 +195,6 @@ public class DatabaseController {
     /**
      * Load result of specific message of existing chat.
      *
-     * @param databaseId database identifier
-     * @param chatId     chat identifier
      * @param messageId  message identifier
      * @param page       page number (fist page is 0)
      * @param pageSize   number of items per page
@@ -209,13 +207,11 @@ public class DatabaseController {
     @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}/data")
     @ResponseStatus(HttpStatus.OK)
     public ChatResponseData loadChatResultNew(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
             @PathVariable UUID messageId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer pageSize
     ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.loadChatResponseData(databaseId, chatId, messageId, page, pageSize);
+        return queryService.loadChatResponseData(messageId, page, pageSize);
     }
 
     /**

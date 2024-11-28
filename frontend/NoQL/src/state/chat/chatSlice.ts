@@ -1,7 +1,8 @@
-import { Chat, ChatNew, ChatQueryWithResponse } from '../../types/Chat.ts'
+import { Chat, ChatNew, ChatQueryWithResponse, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import chatApi from '../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
+import messageApi from '../../services/api/messageApi.ts'
 
 interface ChatState {
   chat: Chat | null,
@@ -57,21 +58,6 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatState>): void => {
     builder
-      // fetch chat
-      .addCase(fetchChat.fulfilled,
-        (state: ChatState, action: PayloadAction<Chat>): void => {
-          state.chat = action.payload
-          state.loading = false
-          state.error = undefined
-        })
-      .addCase(fetchChat.pending, (state: ChatState): void => {
-        state.loading = true
-      })
-      .addCase(fetchChat.rejected,
-        (state: ChatState, action): void => {
-          state.loading = false
-          state.error = action.error.message
-        })
       // fetch chat new
       .addCase(fetchChatNew.fulfilled,
         (state: ChatState, action: PayloadAction<ChatNew>): void => {
@@ -86,23 +72,45 @@ const chatSlice = createSlice({
         (state: ChatState, action): void => {
           state.loading = false
           state.error = action.error.message
-        })
+      })
+      .addCase(loadChatMessageData.fulfilled,
+        (state: ChatState, action: PayloadAction<{data: ChatResponseData, messageId: string}>): void => {
+
+        console.log(action)
+        if (!state.chatNew || !state.chatNew.messages) {
+          console.log("no chatNew or messages")
+          return
+        }
+
+        const messageIndex: number = state.chatNew.messages.findIndex(
+          (message: ChatResponse): boolean => message.messageId === action.payload.messageId)
+
+        if (messageIndex !== -1) {
+          state.chatNew.messages[messageIndex].data = action.payload.data
+        }
+      })
 
   }
 })
-
-export const fetchChat = createAsyncThunk('chat/fetchChat',
-  async (chatId: string): Promise<Chat> => {
-    return await chatApi.getById(chatId)
-      .then((response: AxiosResponse<Chat>) => response.data)
-      .catch((error) => error)
-  }
-)
 
 export const fetchChatNew = createAsyncThunk('chat/fetchChatNew',
   async (chatId: string): Promise<ChatNew> => {
     return await chatApi.getByIdNew(chatId)
       .then((response: AxiosResponse<ChatNew>) => response.data)
+      .catch((error) => error)
+  }
+)
+
+export const loadChatMessageData = createAsyncThunk(
+  'chat/loadChatMessagePage',
+  async (payload: { messageId: string, page: number, pageSize: number }) => {
+    return await messageApi.getMessageData(payload.messageId, payload.page, payload.pageSize)
+      .then((response: AxiosResponse<ChatResponseData>) => {
+        return {
+          data: response.data,
+          messageId: payload.messageId
+        }
+      })
       .catch((error) => error)
   }
 )

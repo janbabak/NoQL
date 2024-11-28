@@ -15,7 +15,7 @@ export function ChatView2() {
     return state.chatReducer.loading
   })
 
-  const ChatLoading =
+  const ChatLoadingElement =
     <div className={styles.chatWindowLoading}>
       <SkeletonStack height={50} />
     </div>
@@ -23,7 +23,7 @@ export function ChatView2() {
   return (
     <>
       {chatLoading
-        ? ChatLoading
+        ? ChatLoadingElement
         : <div>{chat?.messages.map((message: ChatResponse) => {
           return <ChatItem message={message} key={message.messageId} />
         })}</div>

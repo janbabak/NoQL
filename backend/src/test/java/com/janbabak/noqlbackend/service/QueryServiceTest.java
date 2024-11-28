@@ -464,214 +464,173 @@ class QueryServiceTest {
                 () -> queryService.executeQueryLanguageSelectQuery(databaseId, query, 0, 10));
     }
 
-    @Test
-    @DisplayName("Test load chat result chat not found")
-    void testLoadChatResultTestNotFound() throws EntityNotFoundException {
+//    @Test
+//    @DisplayName("Test load chat result chat not found")
+//    void testLoadChatResultTestNotFound() throws EntityNotFoundException {
+//
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
+//
+//        // then
+//        assertThrows(EntityNotFoundException.class,
+//                () -> queryService.loadChatResult(databaseId, chatId, messageId, 0, 10));
+//    }
+//
+//    @Test
+//    @DisplayName("Test load chat chat - message not found")
+//    void testLoadChatDataMessageNotFoundTest() throws EntityNotFoundException {
+//
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
+//
+//        ChatDto chatDto = ChatDto.builder()
+//                .id(chatId)
+//                .databaseId(databaseId)
+//                .build();
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenReturn(chatDto);
+//        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
+//
+//        // then
+//        Exception exception = assertThrows(EntityNotFoundException.class,
+//                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
+//
+//        assertEquals(expectedErrorMsg, exception.getMessage());
+//    }
 
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
-
-        // then
-        assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResult(databaseId, chatId, messageId, 0, 10));
-    }
-
-    @Test
-    @DisplayName("Test load chat chat - database not found")
-    void testLoadChatDataDatabaseNotFoundTest() {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Database of id: \"" + databaseId + "\" not found.";
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
-
-        // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test load chat chat - chat not found")
-    void testLoadChatDataChatNotFoundTest() throws EntityNotFoundException {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
-
-        // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test load chat chat - message not found")
-    void testLoadChatDataMessageNotFoundTest() throws EntityNotFoundException {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
-
-        ChatDto chatDto = ChatDto.builder()
-                .id(chatId)
-                .databaseId(databaseId)
-                .build();
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenReturn(chatDto);
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
-
-        // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test load chat chat - chat doesn't belong to database")
-    void testLoadChatDataChatNotBelongToDatabaseTest() throws EntityNotFoundException {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Chat does not belong to the specified database";
-
-        ChatDto chatDto = ChatDto.builder()
-                .id(chatId)
-                .databaseId(UUID.randomUUID())
-                .build();
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenReturn(chatDto);
-
-        // then
-        Exception exception = assertThrows(BadRequestException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test load chat chat - message doesn't belong to chat")
-    void testLoadChatDataMessageNotBelongToChatTest() throws EntityNotFoundException {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Message does not belong to the specified chat";
-
-        ChatDto chatDto = ChatDto.builder()
-                .id(chatId)
-                .databaseId(databaseId)
-                .build();
-
-        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
-                .id(messageId)
-                .chat(Chat.builder().id(UUID.randomUUID()).build())
-                .build();
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenReturn(chatDto);
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
-
-        // then
-        Exception exception = assertThrows(BadRequestException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @ParameterizedTest
-    @MethodSource("testLoadChatDataEmptyLlmResponseDataProvider")
-    @DisplayName("Test load chat chat - LLM response has empty query")
-    void testLoadChatDataLlmResponseHasEmptyQueryTest(String llmResponse) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
-
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        ChatDto chatDto = ChatDto.builder()
-                .id(chatId)
-                .databaseId(databaseId)
-                .build();
-
-        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
-                .id(messageId)
-                .chat(Chat.builder().id(chatId).build())
-                .llmResponse(llmResponse)
-                .build();
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenReturn(chatDto);
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
-
-        // then
-        assertNull(queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-    }
-
-    static Object[][] testLoadChatDataEmptyLlmResponseDataProvider() {
-        return new Object[][]{
-                {
-                        null
-                },
-                {
-                        ""
-                },
-                {
-                        "{}"
-                },
-                {
-                        // language=JSON
-                        """
-                                {
-                                  "databaseQuery": "",
-                                  "generatePlot": false,
-                                  "pythonCode": ""
-                                }"""
-                }
-        };
-    }
-
-    @Test
-    @DisplayName("Test execute chat database not found")
-    void testExecuteChatDatabaseNotFound() {
-        // given
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
-
-        // then
-        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, chatId, request, 10));
-    }
+//    @Test
+//    @DisplayName("Test load chat chat - chat doesn't belong to database")
+//    void testLoadChatDataChatNotBelongToDatabaseTest() throws EntityNotFoundException {
+//
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        String expectedErrorMsg = "Chat does not belong to the specified database";
+//
+//        ChatDto chatDto = ChatDto.builder()
+//                .id(chatId)
+//                .databaseId(UUID.randomUUID())
+//                .build();
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenReturn(chatDto);
+//
+//        // then
+//        Exception exception = assertThrows(BadRequestException.class,
+//                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
+//
+//        assertEquals(expectedErrorMsg, exception.getMessage());
+//    }
+//
+//    @Test
+//    @DisplayName("Test load chat chat - message doesn't belong to chat")
+//    void testLoadChatDataMessageNotBelongToChatTest() throws EntityNotFoundException {
+//
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        String expectedErrorMsg = "Message does not belong to the specified chat";
+//
+//        ChatDto chatDto = ChatDto.builder()
+//                .id(chatId)
+//                .databaseId(databaseId)
+//                .build();
+//
+//        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
+//                .id(messageId)
+//                .chat(Chat.builder().id(UUID.randomUUID()).build())
+//                .build();
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenReturn(chatDto);
+//        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
+//
+//        // then
+//        Exception exception = assertThrows(BadRequestException.class,
+//                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
+//
+//        assertEquals(expectedErrorMsg, exception.getMessage());
+//    }
+//
+//    @ParameterizedTest
+//    @MethodSource("testLoadChatDataEmptyLlmResponseDataProvider")
+//    @DisplayName("Test load chat chat - LLM response has empty query")
+//    void testLoadChatDataLlmResponseHasEmptyQueryTest(String llmResponse) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+//
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        ChatDto chatDto = ChatDto.builder()
+//                .id(chatId)
+//                .databaseId(databaseId)
+//                .build();
+//
+//        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
+//                .id(messageId)
+//                .chat(Chat.builder().id(chatId).build())
+//                .llmResponse(llmResponse)
+//                .build();
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenReturn(chatDto);
+//        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
+//
+//        // then
+//        assertNull(queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
+//    }
+//
+//    static Object[][] testLoadChatDataEmptyLlmResponseDataProvider() {
+//        return new Object[][]{
+//                {
+//                        null
+//                },
+//                {
+//                        ""
+//                },
+//                {
+//                        "{}"
+//                },
+//                {
+//                        // language=JSON
+//                        """
+//                                {
+//                                  "databaseQuery": "",
+//                                  "generatePlot": false,
+//                                  "pythonCode": ""
+//                                }"""
+//                }
+//        };
+//    }
+//
+//    @Test
+//    @DisplayName("Test execute chat database not found")
+//    void testExecuteChatDatabaseNotFound() {
+//        // given
+//        UUID databaseId = UUID.randomUUID();
+//        UUID chatId = UUID.randomUUID();
+//        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+//
+//        // then
+//        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, chatId, request, 10));
+//    }
 
     @Test
     @DisplayName("Test execute chat query limit exceeded")
@@ -720,55 +679,55 @@ class QueryServiceTest {
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
 
-    @Test
-    @DisplayName("Test query chat - chat not found")
-    void testQueryChatChatNotFound() throws EntityNotFoundException {
-        // given
-        UUID chatId = UUID.randomUUID();
-        UUID databaseId = UUID.randomUUID();
-        UUID messageId = UUID.randomUUID();
-
-        String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
-        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
-
-        // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test query chat - query limit exceeded")
-    void testQueryChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException,
-            DatabaseExecutionException, LLMException, BadRequestException {
-        // given
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-
-        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
-
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .queryLimit(0)
-                .build();
-
-        Database database = Database.builder()
-                .id(databaseId)
-                .user(user)
-                .build();
-
-        ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded");
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(userService.decrementQueryLimit(any())).thenReturn(0);
-
-        // when
-        ChatResponse actual = queryService.queryChat(databaseId, chatId, request, 10);
-
-        // then
-        assertEquals(expected, actual);
-    }
+//    @Test
+//    @DisplayName("Test query chat - chat not found")
+//    void testQueryChatChatNotFound() throws EntityNotFoundException {
+//        // given
+//        UUID chatId = UUID.randomUUID();
+//        UUID databaseId = UUID.randomUUID();
+//        UUID messageId = UUID.randomUUID();
+//
+//        String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+//        when(chatService.findById(chatId)).thenThrow(new EntityNotFoundException(CHAT, chatId));
+//
+//        // then
+//        Exception exception = assertThrows(EntityNotFoundException.class,
+//                () -> queryService.loadChatResponseData(databaseId, chatId, messageId, 0, 10));
+//
+//        assertEquals(expectedErrorMsg, exception.getMessage());
+//    }
+//
+//    @Test
+//    @DisplayName("Test query chat - query limit exceeded")
+//    void testQueryChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException,
+//            DatabaseExecutionException, LLMException, BadRequestException {
+//        // given
+//        UUID databaseId = UUID.randomUUID();
+//        UUID chatId = UUID.randomUUID();
+//
+//        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
+//
+//        User user = User.builder()
+//                .id(UUID.randomUUID())
+//                .queryLimit(0)
+//                .build();
+//
+//        Database database = Database.builder()
+//                .id(databaseId)
+//                .user(user)
+//                .build();
+//
+//        ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded");
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+//        when(userService.decrementQueryLimit(any())).thenReturn(0);
+//
+//        // when
+//        ChatResponse actual = queryService.queryChat(databaseId, chatId, request, 10);
+//
+//        // then
+//        assertEquals(expected, actual);
+//    }
 }

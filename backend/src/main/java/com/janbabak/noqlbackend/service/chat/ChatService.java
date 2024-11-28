@@ -91,13 +91,14 @@ public class ChatService {
     /**
      * Find chat by chat id.
      *
-     * @param chatId chat identifier
+     * @param chatId   chat identifier
+     * @param pageSize number of messages to return
      * @return chat
      * @throws EntityNotFoundException                                   chat of specified id not found
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatDtoNew findByIdNew(UUID chatId) throws EntityNotFoundException {
+    public ChatDtoNew findByIdNew(UUID chatId, Integer pageSize) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
@@ -118,7 +119,8 @@ public class ChatService {
                                         ? PlotService.PLOTS_DIR_URL_PATH + "/" + chat.getId() + "-" + message.getId() +
                                         PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
                                         : null;
-                                ChatResponseData data = QueryService.getChatResponseData(message, chat.getDatabase());
+                                ChatResponseData data = QueryService.getChatResponseData(
+                                        message, chat.getDatabase(), 0, pageSize);
 
                                 return new ChatResponse(
                                         data,
