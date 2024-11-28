@@ -6,10 +6,6 @@ const chatApi = {
   API: Api.getInstance(),
   DOMAIN: '/chat',
 
-  getById(id: string): Promise<AxiosResponse<Chat>> {
-    return this.API.get(this.DOMAIN + '/' + id)
-  },
-
   getByIdNew(id: string): Promise<AxiosResponse<ChatNew>> {
     return this.API.get(this.DOMAIN + '/' + id + '/new')
   },

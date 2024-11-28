@@ -79,31 +79,6 @@ const databaseApi = {
   },
 
   /**
-   * Load chat result.
-   * @param databaseId database identifier
-   * @param chatId chat identifier
-   * @param messageId message to load result of identifier
-   * @param page page number (first page is 0)
-   * @param pageSize number of items in one page
-   */
-  loadChatResult(databaseId: string, chatId: string, messageId: string, page: number, pageSize: number):
-    Promise<AxiosResponse<QueryResponse>> {
-    console.log("messageId database api: ", messageId)
-    return this.API.get(`${this.DOMAIN}/${databaseId}/chat/${chatId}/message/${messageId}`,
-      [
-        {
-          name: 'pageSize',
-          value: pageSize
-        },
-        {
-          name: 'page',
-          value: page
-        }
-      ]
-    )
-  },
-
-  /**
    * Query the user's database using database query language, result is automatically paginated.
    * @param id database id
    * @param query database query in corresponding database query language

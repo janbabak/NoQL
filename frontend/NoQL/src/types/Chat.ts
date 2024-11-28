@@ -29,8 +29,8 @@ interface ChatResponse {
   data: ChatResponseData | null
   messageId: string,
   nlQuery: string,
-  dbQuery: string,
-  plotUrl: string,
+  dbQuery: string | null,
+  plotUrl: string | null,
   timestamp: Date,
   error: string,
 }

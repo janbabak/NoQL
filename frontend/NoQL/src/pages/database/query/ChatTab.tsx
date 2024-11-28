@@ -6,10 +6,8 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { memo, useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { QueryResponse } from '../../../types/Query.ts'
-import { Result } from './Result.tsx'
 import { ChatHistory } from './ChatHistory.tsx'
 import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
-// import { ChatView } from './ChatView.tsx'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
@@ -26,7 +24,7 @@ import { showErrorWithMessageAndError } from '../../../components/snackbar/Globa
 import { User } from '../../../types/Authentication.ts'
 import { localStorageService } from '../../../services/LocalStorageService.ts'
 import userApi from '../../../services/api/userApi.ts'
-import { ChatView2 } from './ChatView2.tsx'
+import { ChatView2 } from './chat/ChatView2.tsx'
 
 interface ChatTabProps {
   databaseId: string,
@@ -208,10 +206,10 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
     setPageLoading(true)
     const messageId = chat?.messages[chat.messages.length - 1].id ?? ''
     try {
-      const response: AxiosResponse<QueryResponse> =
-        await databaseApi.loadChatResult(databaseId, chat?.id || '', messageId, page, pageSize)
+      // const response: AxiosResponse<QueryResponse> =
+        // await databaseApi.loadChatResult(databaseId, chat?.id || '', messageId, page, pageSize)
 
-      setQueryResult(response.data)
+      // setQueryResult(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to load next page', error)
     } finally {
@@ -296,8 +294,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
             {QueryLimit}
           </div>
 
-          {/*<ChatView />*/}
-
           <ChatView2 />
 
           <div className={styles.chatInputContainer}>
@@ -321,19 +317,6 @@ const ChatTab = memo(({ databaseId, tab, editQueryInConsole }: ChatTabProps) => 
           </div>
         </div>
       </div>
-
-      <Result
-        queryResponse={queryResult}
-        editQueryInConsole={editQueryInConsole}
-        showEditInConsoleButton={true}
-        page={page}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-        totalCount={queryResult?.totalCount || 1}
-        onPageChange={onPageChange}
-        loading={queryLoading || pageLoading}
-      />
-
     </div>
   )
 })
