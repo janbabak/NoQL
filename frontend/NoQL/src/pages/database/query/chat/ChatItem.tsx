@@ -2,6 +2,7 @@ import { ChatResponse } from '../../../../types/Chat.ts'
 import { NaturalLanguageQuery } from './NaturalLanguageQuery.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { ResultNew } from './ResultNew.tsx'
+import { Plot } from './Plot.tsx'
 
 interface ChatItemProps {
   message: ChatResponse,
@@ -17,6 +18,9 @@ export function ChatItem({ message }: ChatItemProps) {
 
       {message.dbQuery != null && message.dbQuery != '' &&
         <GeneratedQuery query={message.dbQuery} />}
+
+      {message.plotUrl != null &&
+        <Plot plotUrl={message.plotUrl} />}
 
       {/*TODO: loading*/}
       {message.data != null &&
