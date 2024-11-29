@@ -1,4 +1,4 @@
-import { ChatQueryWithResponse } from './Chat.ts'
+import { ChatQueryWithResponse, ChatResponseData } from './Chat.ts'
 
 interface QueryRequest {
   query: string,
@@ -17,4 +17,10 @@ interface QueryResponse {
   errorMessage: string | null
 }
 
-export type { QueryRequest, QueryResponse, RetrievedData }
+interface ConsoleResponse { // TODO: find right file for this type
+  data: ChatResponseData | null
+  dbQuery: string | null
+  error: string | null
+}
+
+export type { QueryRequest, QueryResponse, RetrievedData, ConsoleResponse }

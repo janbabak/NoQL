@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { CreateDatabaseRequest, Database, UpdateDatabaseRequest } from '../../types/Database.ts'
-import { QueryRequest, QueryResponse } from '../../types/Query.ts'
+import { ConsoleResponse, QueryRequest } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
 import { ChatHistoryItem, ChatResponse } from '../../types/Chat.ts'
 
@@ -79,7 +79,7 @@ const databaseApi = {
    * changed
    */
   queryQueryLanguageQuery(id: string, query: string, page: number = 0, pageSize: number = 10)
-    : Promise<AxiosResponse<QueryResponse>> {
+    : Promise<AxiosResponse<ConsoleResponse>> {
 
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/queryLanguage',

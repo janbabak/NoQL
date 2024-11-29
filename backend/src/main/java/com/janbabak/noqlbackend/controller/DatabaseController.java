@@ -8,10 +8,7 @@ import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
-import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
+import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
@@ -199,8 +196,6 @@ public class DatabaseController {
      * @param page       page number (fist page is 0)
      * @param pageSize   number of items per page
      * @return result of the latest message from the chat
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws EntityNotFoundException     database or chat not found
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
@@ -209,8 +204,7 @@ public class DatabaseController {
     public ChatResponseData loadChatResultNew(
             @PathVariable UUID messageId,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+            @RequestParam(required = false) Integer pageSize) throws EntityNotFoundException {
         return queryService.loadChatResponseData(messageId, page, pageSize);
     }
 
@@ -228,8 +222,8 @@ public class DatabaseController {
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeQueryLanguageQuery(
+    @ResponseStatus(HttpStatus.OK) // TODO: update swagger and tests
+    public ConsoleResponse executeQueryLanguageQuery(
             @PathVariable UUID databaseId,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,

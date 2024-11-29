@@ -13,11 +13,8 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
-import com.janbabak.noqlbackend.model.query.QueryResponse;
+import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
-import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
-import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
 import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
@@ -237,12 +234,13 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    public QueryResponse executeQueryLanguageSelectQuery(
+    public ConsoleResponse executeQueryLanguageSelectQuery(
             UUID databaseId,
             String query,
             Integer page,
             Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+        // TODO: authorization??
 
         log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
@@ -253,10 +251,16 @@ public class QueryService {
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
-            return QueryResponse.successfulResponse(
-                    new RetrievedData(result.resultSet()), null, getTotalCount(query, databaseService));
+            return ConsoleResponse.builder()
+                    .data(new ChatResponseData(
+                            result.resultSet(),
+                            page,
+                            pageSize,
+                            getTotalCount(query, databaseService)))
+                    .dbQuery(query)
+                    .build();
         } catch (DatabaseExecutionException | SQLException e) {
-            return QueryResponse.failedResponse(null, e.getMessage());
+            return ConsoleResponse.failedResponse(e.getMessage());
         }
     }
 
@@ -339,13 +343,11 @@ public class QueryService {
      * @param pageSize   number of items per page
      * @return query response
      * @throws EntityNotFoundException     database or chat not found
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
-     * @throws DatabaseConnectionException cannot establish connection with database
      */
     public ChatResponseData loadChatResponseData(
             UUID messageId,
             Integer page,
-            Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
+            Integer pageSize) throws EntityNotFoundException {
         // TODO: authorization??
 
         ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)

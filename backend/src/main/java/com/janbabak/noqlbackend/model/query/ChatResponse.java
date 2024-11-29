@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.query.llama;
+package com.janbabak.noqlbackend.model.query;
 
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;

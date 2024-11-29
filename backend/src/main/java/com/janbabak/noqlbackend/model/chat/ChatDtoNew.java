@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.model.chat;
 
-import com.janbabak.noqlbackend.model.query.llama.ChatResponse;
+import com.janbabak.noqlbackend.model.query.ChatResponse;
 import lombok.Builder;
 
 import java.sql.Timestamp;

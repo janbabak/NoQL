@@ -1,11 +1,9 @@
 package com.janbabak.noqlbackend.controller;
 
-import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.query.llama.ChatResponseData;
+import com.janbabak.noqlbackend.model.query.ChatResponseData;
 import com.janbabak.noqlbackend.service.QueryService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +21,7 @@ public class MessageController {
     public ChatResponseData loadChatResponseData(
             @PathVariable UUID messageId,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+            @RequestParam(required = false) Integer pageSize) throws EntityNotFoundException {
         return queryService.loadChatResponseData(messageId, page, pageSize);
     }
 }
