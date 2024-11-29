@@ -24,7 +24,7 @@ export function ChatItem({ message }: ChatItemProps) {
 
       {/*TODO: loading*/}
       {message.data != null &&
-        <ResultNew message={message} loading={false} />}
+        <ResultNew message={message} />}
     </div>
   )
 }

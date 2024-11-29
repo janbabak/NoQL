@@ -1,24 +1,22 @@
-import { Chat, ChatNew, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
+import { ChatNew, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import chatApi from '../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
 import messageApi from '../../services/api/messageApi.ts'
 
 interface ChatState {
-  chat: Chat | null,
   chatNew: ChatNew | null,
   loading: boolean,
   error: string | undefined,
 }
 
 const initialState: ChatState = {
-  chat: null,
   chatNew: null,
   loading: false,
   error: undefined
 }
 
-interface ChatResponeAndName {
+interface ChatResponseAndName {
   message: ChatResponse,
   name: string
 }
@@ -36,7 +34,7 @@ const chatSlice = createSlice({
         action.payload
       ]
     },
-    addMessageAndChangeName: (state: ChatState, action: PayloadAction<ChatResponeAndName>): void => {
+    addMessageAndChangeName: (state: ChatState, action: PayloadAction<ChatResponseAndName>): void => {
       if (!state.chatNew) {
         return
       }
@@ -50,25 +48,25 @@ const chatSlice = createSlice({
       }
     },
     setChatToNull: (state: ChatState): void => {
-      state.chat = null
+      state.chatNew = null
     },
-    setChat: (state: ChatState, action: PayloadAction<Chat>): void => {
-      state.chat = action.payload
+    setChat: (state: ChatState, action: PayloadAction<ChatNew>): void => {
+      state.chatNew = action.payload
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatState>): void => {
     builder
       // fetch chat new
-      .addCase(fetchChatNew.fulfilled,
+      .addCase(fetchChat.fulfilled,
         (state: ChatState, action: PayloadAction<ChatNew>): void => {
           state.chatNew = action.payload
           state.loading = false
           state.error = undefined
         })
-      .addCase(fetchChatNew.pending, (state: ChatState): void => {
+      .addCase(fetchChat.pending, (state: ChatState): void => {
         state.loading = true
       })
-      .addCase(fetchChatNew.rejected,
+      .addCase(fetchChat.rejected,
         (state: ChatState, action): void => {
           state.loading = false
           state.error = action.error.message
@@ -76,9 +74,7 @@ const chatSlice = createSlice({
       .addCase(loadChatMessageData.fulfilled,
         (state: ChatState, action: PayloadAction<{data: ChatResponseData, messageId: string}>): void => {
 
-        console.log(action)
         if (!state.chatNew || !state.chatNew.messages) {
-          console.log("no chatNew or messages")
           return
         }
 
@@ -93,7 +89,7 @@ const chatSlice = createSlice({
   }
 })
 
-export const fetchChatNew = createAsyncThunk('chat/fetchChatNew',
+export const fetchChat = createAsyncThunk('chat/fetchChatNew',
   async (chatId: string): Promise<ChatNew> => {
     return await chatApi.getByIdNew(chatId)
       .then((response: AxiosResponse<ChatNew>) => response.data)

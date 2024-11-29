@@ -6,13 +6,14 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { memo, useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../services/api/databaseApi.ts'
 import { ChatHistory } from './ChatHistory.tsx'
-import { Chat, ChatHistoryItem, ChatResponse } from '../../../types/Chat.ts'
+import { ChatHistoryItem, ChatNew, ChatResponse } from '../../../types/Chat.ts'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../state/store.ts'
 import {
-  addMessageAndChangeName, addMessage,
-  fetchChatNew,
+  addMessageAndChangeName,
+  addMessage,
+  fetchChat,
   setChatToNull
 } from '../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
@@ -28,6 +29,9 @@ interface ChatTabProps {
   tab: number,
 }
 
+/**
+ * Tab with chat input and chat history.
+ */
 const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
   const NEW_CHAT_NAME: string = 'New chat'
@@ -35,12 +39,12 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  const activeChatIndexRedux: number = useSelector((state: RootState) => {
+  const activeChatIndexRedux: number = useSelector((state: RootState) => { //TODO: rename to activeChatIndex
     return state.chatHistoryReducer.activeChatIndex
   })
 
-  const chat: Chat | null = useSelector((state: RootState) => {
-    return state.chatReducer.chat
+  const chat: ChatNew | null = useSelector((state: RootState) => {
+    return state.chatReducer.chatNew
   })
 
   const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
@@ -72,7 +76,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
   // TODO: fix multiple calls
   useEffect((): void => {
     void loadUser()
-    void loadChatHistoryAndChatAndResult(0)
+    void loadChatHistoryAndFetchChat(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -80,17 +84,16 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
    * Load chat history, then active chat content, then query the chat for the result.
    * Creates new chat if there isn't any. // TODO that
    */
-  async function loadChatHistoryAndChatAndResult(chatIndex: number): Promise<void> {
+  async function loadChatHistoryAndFetchChat(chatIndex: number): Promise<void> {
     // chat history
-    await dispatch(fetchChatHistory(databaseId))
+    const result = await dispatch(fetchChatHistory(databaseId))
 
-    // chat
     // @ts-ignore
     if (result.payload.length > chatIndex && chatIndex >= 0) {
       // @ts-ignore
       const id = result.payload[chatIndex].id
       // @ts-ignore
-       await dispatch(fetchChatNew(id))
+       await dispatch(fetchChat(id))
     } else {
       dispatch(setChatToNull())
       return
@@ -121,8 +124,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
           query: naturalLanguageQuery.current.value,
           model: model
         },
-        // @ts-ignore
-        chatHistory[activeChatIndexRedux].id, // chatId
+        chatHistory[activeChatIndexRedux].id,
         10)
 
       // @ts-ignore
@@ -140,7 +142,6 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
           message: response.data,
           name: updatedName
         }))
-        // @ts-ignore
         dispatch(renameChat({
           index: activeChatIndexRedux,
           name: updatedName
@@ -161,7 +162,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
    * @param chatId chat id
    */
   async function loadChatAndResult(chatId: string): Promise<void> {
-    await dispatch(fetchChatNew(chatId)) // TODO: move to chat history
+    await dispatch(fetchChat(chatId)) // TODO: move to chat history
   }
 
   /**
@@ -193,7 +194,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
       <div className={styles.chatTabContainer}>
         <ChatHistory
           loadChatResult={loadChatAndResult}
-          loadChatHistoryAndChatAndResult={loadChatHistoryAndChatAndResult}
+          loadChatHistoryAndChatAndResult={loadChatHistoryAndFetchChat}
           databaseId={databaseId}
         />
 

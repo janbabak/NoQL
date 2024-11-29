@@ -3,8 +3,7 @@ interface NaturalLanguageQueryProps {
 }
 
 /**
- * Component to display the natural language query in chat messages
- * @param query natural language query
+ * Natural language query in chat messages
  */
 export function NaturalLanguageQuery({ query }: NaturalLanguageQueryProps) {
   return (

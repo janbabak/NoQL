@@ -1,5 +1,5 @@
 import styles from './Query.module.css'
-import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
+import { ChatHistoryItem, ChatNew } from '../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'
 import { Menu, MenuItem, TextField } from '@mui/material'
@@ -25,6 +25,9 @@ interface ChatHistoryProps {
   databaseId: string,
 }
 
+/**
+ * Chat history - list of previous chats.
+ */
 const ChatHistory = memo((
   {
     loadChatResult,
@@ -40,7 +43,7 @@ const ChatHistory = memo((
     return state.chatHistoryReducer.loading
   })
 
-  const createChatLoadingRedux: boolean = useSelector((state: RootState) => {
+  const createChatLoading: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.createNewChatLoading
   })
 
@@ -137,7 +140,7 @@ const ChatHistory = memo((
 
   async function createChat(): Promise<void> {
     const result = await dispatch(createNewChat(databaseId))
-    dispatch(setChat(result.payload as Chat))
+    dispatch(setChat(result.payload as ChatNew))
   }
 
   // focus input element that is rendered when chatToRenameId changes
@@ -179,8 +182,8 @@ const ChatHistory = memo((
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      loading={createChatLoadingRedux}
-      disabled={createChatLoadingRedux}
+      loading={createChatLoading}
+      disabled={createChatLoading}
       fullWidth
     >
       New chat

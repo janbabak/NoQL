@@ -21,7 +21,12 @@ interface ResultProps {
   paginationOptions?: number[]
 }
 
-export function ResultNew(
+/**
+ * Component for displaying a message result - table of data
+ * @param message - chat message with data
+ * @param paginationOptions - list of possible page sizes
+ */
+export function ResultNew( //TODO: rename to ChatResultTable
   {
     message,
     paginationOptions = [10, 20, 25, 50]

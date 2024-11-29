@@ -4,6 +4,9 @@ interface PlotProps {
   plotUrl: string
 }
 
+/**
+ * Image of generated plot.
+ */
 export function Plot({ plotUrl }: PlotProps) {
   return (
     <Paper elevation={2} style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>

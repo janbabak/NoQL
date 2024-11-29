@@ -5,6 +5,9 @@ interface GeneratedQueryProps {
   query: string
 }
 
+/**
+ * Database query - so far only SQL.
+ */
 export function GeneratedQuery({ query }: GeneratedQueryProps) {
   return (
     <SyntaxHighlighter

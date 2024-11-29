@@ -6,6 +6,9 @@ import { SkeletonStack } from '../../../../components/loaders/SkeletonStack.tsx'
 import { ChatItem } from './ChatItem.tsx'
 import React, { useEffect, useRef } from 'react'
 
+/**
+ * Chat - list of messages with results.
+ */
 export function ChatView() {
 
   const chat: ChatNew | null = useSelector((state: RootState) => {
@@ -41,8 +44,7 @@ export function ChatView() {
         : <div ref={chatWindowRef} className={styles.chatWindow}>
           {chat?.messages.map((message: ChatResponse) => {
             return <ChatItem message={message} key={message.messageId} />
-          })}</div>
-      }
+          })}</div>}
     </>
   )
 }
