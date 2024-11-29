@@ -3,7 +3,7 @@ import Api from './api.ts'
 import { CreateDatabaseRequest, Database, UpdateDatabaseRequest } from '../../types/Database.ts'
 import { QueryRequest, QueryResponse } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
-import { ChatHistoryItem } from '../../types/Chat.ts'
+import { ChatHistoryItem, ChatResponse } from '../../types/Chat.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -69,6 +69,19 @@ const databaseApi = {
 
     return this.API.post(
       `${this.DOMAIN}/${databaseId}/chat/${chatId}/query`,
+      request, [
+        {
+          name: 'pageSize',
+          value: pageSize
+        }
+      ]
+    )
+  },
+
+  queryChatNew(databaseId: string, request: QueryRequest, chatId: string, pageSize: number)
+    : Promise<AxiosResponse<ChatResponse>> {
+    return this.API.post(
+      `${this.DOMAIN}/${databaseId}/chat/${chatId}/queryNew`,
       request, [
         {
           name: 'pageSize',

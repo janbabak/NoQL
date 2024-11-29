@@ -23,6 +23,11 @@ interface MessageWithNamePayload {
   name: string
 }
 
+interface ChatResponeAndName {
+  message: ChatResponse,
+  name: string
+}
+
 const chatSlice = createSlice({
   name: 'chat',
   initialState,
@@ -36,6 +41,15 @@ const chatSlice = createSlice({
         action.payload
       ]
     },
+    addMessageNew: (state: ChatState, action: PayloadAction<ChatResponse>): void => {
+      if (!state.chatNew) {
+        return
+      }
+      state.chatNew.messages = [
+        ...state.chatNew.messages,
+        action.payload
+      ]
+    },
     addMessageAndChangeName: (state: ChatState, action: PayloadAction<MessageWithNamePayload>): void => {
       if (!state.chat) {
         return
@@ -44,6 +58,19 @@ const chatSlice = createSlice({
         ...state.chat,
         messages: [
           ...state.chat.messages,
+          action.payload.message
+        ],
+        name: action.payload.name
+      }
+    },
+    addMessageAndChangeNameNew: (state: ChatState, action: PayloadAction<ChatResponeAndName>): void => {
+      if (!state.chatNew) {
+        return
+      }
+      state.chatNew = {
+        ...state.chatNew,
+        messages: [
+          ...state.chatNew.messages,
           action.payload.message
         ],
         name: action.payload.name
@@ -117,7 +144,9 @@ export const loadChatMessageData = createAsyncThunk(
 
 export const {
   addMessage,
+  addMessageNew,
   addMessageAndChangeName,
+  addMessageAndChangeNameNew,
   setChatToNull,
   setChat
 } = chatSlice.actions
