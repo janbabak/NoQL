@@ -1,8 +1,8 @@
-import { ChatNew, ChatResponse } from '../../../../types/Chat.ts'
+import { ChatNew, ChatResponse } from '../../../../../types/Chat.ts'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../../../state/store.ts'
-import styles from '../Query.module.css'
-import { SkeletonStack } from '../../../../components/loaders/SkeletonStack.tsx'
+import { RootState } from '../../../../../state/store.ts'
+import styles from '../../Query.module.css'
+import { SkeletonStack } from '../../../../../components/loaders/SkeletonStack.tsx'
 import { ChatItem } from './ChatItem.tsx'
 import React, { useEffect, useRef } from 'react'
 

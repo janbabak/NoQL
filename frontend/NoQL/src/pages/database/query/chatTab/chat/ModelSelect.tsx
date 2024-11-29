@@ -1,13 +1,13 @@
 import { FormControl, LinearProgress, MenuItem } from '@mui/material'
 import { Select, SelectChangeEvent } from '@mui/material-next'
 import React, { memo, useEffect, useState } from 'react'
-import styles from './Query.module.css'
-import { ModelOption } from '../../../types/CustomModel.ts'
-import customModelApi from '../../../services/api/customModelApi.ts'
-import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import styles from '../../Query.module.css'
+import { ModelOption } from '../../../../../types/CustomModel.ts'
+import customModelApi from '../../../../../services/api/customModelApi.ts'
+import { showErrorWithMessageAndError } from '../../../../../components/snackbar/GlobalSnackbar.helpers.ts'
 import { useDispatch } from 'react-redux'
-import { AppDispatch } from '../../../state/store.ts'
-import { localStorageService } from '../../../services/LocalStorageService.ts'
+import { AppDispatch } from '../../../../../state/store.ts'
+import { localStorageService } from '../../../../../services/LocalStorageService.ts'
 
 interface ModelSelectProps {
   model: string,

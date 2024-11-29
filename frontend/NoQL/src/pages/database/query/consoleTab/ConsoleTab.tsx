@@ -1,16 +1,16 @@
-import { CONSOLE_TAB } from './Constants.ts'
-import styles from './Query.module.css'
+import { CONSOLE_TAB } from '../Constants.ts'
+import styles from '../Query.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import IconButton from '@mui/material/IconButton'
 import PlayCircleFilledWhiteRoundedIcon from '@mui/icons-material/PlayCircleFilledWhiteRounded'
 import React, { memo, useState } from 'react'
-import databaseApi from '../../../services/api/databaseApi.ts'
-import { QueryResponse } from '../../../types/Query.ts'
-import { Result } from './Result.tsx'
+import databaseApi from '../../../../services/api/databaseApi.ts'
+import { QueryResponse } from '../../../../types/Query.ts'
+import { Result } from '../Result.tsx'
 import { LinearProgress } from '@mui/material'
-import { AppDispatch } from '../../../state/store.ts'
+import { AppDispatch } from '../../../../state/store.ts'
 import { useDispatch } from 'react-redux'
-import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ConsoleTabProps {
   databaseId: string

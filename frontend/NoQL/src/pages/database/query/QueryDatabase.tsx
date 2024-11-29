@@ -1,9 +1,9 @@
 import React, { memo, useState } from 'react'
-import { CHAT_TAB, CONSOLE_TAB } from './Constants.ts'
+import { CHAT_TAB } from './Constants.ts'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Database } from '../../../types/Database.ts'
-import { ChatTab } from './ChatTab.tsx'
-import { ConsoleTab } from './ConsoleTab.tsx'
+import { ChatTab } from './chatTab/ChatTab.tsx'
+import { ConsoleTab } from './consoleTab/ConsoleTab.tsx'
 
 interface QueryDatabaseProps {
   databaseId: string,
@@ -11,7 +11,12 @@ interface QueryDatabaseProps {
   databaseLoading: boolean,
 }
 
-const QueryDatabase = memo(({ databaseId, database, databaseLoading }: QueryDatabaseProps) => {
+const QueryDatabase = memo((
+  {
+    databaseId,
+    database,
+    databaseLoading
+  }: QueryDatabaseProps) => {
 
   const [
     tab,
@@ -22,11 +27,6 @@ const QueryDatabase = memo(({ databaseId, database, databaseLoading }: QueryData
     queryLanguageQuery,
     setQueryLanguageQuery
   ] = useState<string>('')
-
-  function editInConsole(query: string): void {
-    setQueryLanguageQuery(query)
-    setTab(CONSOLE_TAB)
-  }
 
   function handleTabChange(_event: React.SyntheticEvent, newValue: number): void {
     setTab(newValue)
@@ -55,7 +55,6 @@ const QueryDatabase = memo(({ databaseId, database, databaseLoading }: QueryData
           <ChatTab
             databaseId={databaseId}
             tab={tab}
-            editQueryInConsole={editInConsole}
           />
 
           <ConsoleTab

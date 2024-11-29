@@ -1,27 +1,27 @@
-import { CHAT_TAB } from './Constants.ts'
-import styles from './Query.module.css'
+import { CHAT_TAB } from '../Constants.ts'
+import styles from '../Query.module.css'
 import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { memo, useEffect, useRef, useState } from 'react'
-import databaseApi from '../../../services/api/databaseApi.ts'
+import databaseApi from '../../../../services/api/databaseApi.ts'
 import { ChatHistory } from './ChatHistory.tsx'
-import { ChatHistoryItem, ChatNew, ChatResponse } from '../../../types/Chat.ts'
+import { ChatHistoryItem, ChatNew, ChatResponse } from '../../../../types/Chat.ts'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../../state/store.ts'
+import { AppDispatch, RootState } from '../../../../state/store.ts'
 import {
   addMessageAndChangeName,
   addMessage,
   fetchChat,
   setChatToNull
-} from '../../../state/chat/chatSlice.ts'
-import { fetchChatHistory, renameChat } from '../../../state/chat/chatHistorySlice.ts'
-import { ModelSelect } from './ModelSelect.tsx'
-import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
-import { User } from '../../../types/Authentication.ts'
-import { localStorageService } from '../../../services/LocalStorageService.ts'
-import userApi from '../../../services/api/userApi.ts'
+} from '../../../../state/chat/chatSlice.ts'
+import { fetchChatHistory, renameChat } from '../../../../state/chat/chatHistorySlice.ts'
+import { ModelSelect } from './chat/ModelSelect.tsx'
+import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { User } from '../../../../types/Authentication.ts'
+import { localStorageService } from '../../../../services/LocalStorageService.ts'
+import userApi from '../../../../services/api/userApi.ts'
 import { ChatView } from './chat/ChatView.tsx'
 
 interface ChatTabProps {

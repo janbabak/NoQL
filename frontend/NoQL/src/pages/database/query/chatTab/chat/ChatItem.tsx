@@ -1,7 +1,7 @@
-import { ChatResponse } from '../../../../types/Chat.ts'
+import { ChatResponse } from '../../../../../types/Chat.ts'
 import { NaturalLanguageQuery } from './NaturalLanguageQuery.tsx'
 import { GeneratedQuery } from './GeneratedQuery.tsx'
-import { ResultNew } from './ResultNew.tsx'
+import { ChatResultComponent } from './ChatResultComponent.tsx'
 import { Plot } from './Plot.tsx'
 
 interface ChatItemProps {
@@ -24,7 +24,7 @@ export function ChatItem({ message }: ChatItemProps) {
 
       {/*TODO: loading*/}
       {message.data != null &&
-        <ResultNew message={message} />}
+        <ChatResultComponent message={message} />}
     </div>
   )
 }

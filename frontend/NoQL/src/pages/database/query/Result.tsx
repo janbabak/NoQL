@@ -85,7 +85,7 @@ const Result = memo((
 
           {totalCount != null && queryResponse.data &&
             <ResultTable
-              queryResult={queryResponse}
+              data={queryResponse}
               page={page}
               pageSize={pageSize}
               totalCount={totalCount}
