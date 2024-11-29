@@ -1,4 +1,4 @@
-import { Chat, ChatNew, ChatQueryWithResponse, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
+import { Chat, ChatNew, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import chatApi from '../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
@@ -18,11 +18,6 @@ const initialState: ChatState = {
   error: undefined
 }
 
-interface MessageWithNamePayload {
-  message: ChatQueryWithResponse,
-  name: string
-}
-
 interface ChatResponeAndName {
   message: ChatResponse,
   name: string
@@ -32,16 +27,7 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState,
   reducers: {
-    addMessage: (state: ChatState, action: PayloadAction<ChatQueryWithResponse>): void => {
-      if (!state.chat) {
-        return
-      }
-      state.chat.messages = [
-        ...state.chat.messages,
-        action.payload
-      ]
-    },
-    addMessageNew: (state: ChatState, action: PayloadAction<ChatResponse>): void => {
+    addMessage: (state: ChatState, action: PayloadAction<ChatResponse>): void => {
       if (!state.chatNew) {
         return
       }
@@ -50,20 +36,7 @@ const chatSlice = createSlice({
         action.payload
       ]
     },
-    addMessageAndChangeName: (state: ChatState, action: PayloadAction<MessageWithNamePayload>): void => {
-      if (!state.chat) {
-        return
-      }
-      state.chat = {
-        ...state.chat,
-        messages: [
-          ...state.chat.messages,
-          action.payload.message
-        ],
-        name: action.payload.name
-      }
-    },
-    addMessageAndChangeNameNew: (state: ChatState, action: PayloadAction<ChatResponeAndName>): void => {
+    addMessageAndChangeName: (state: ChatState, action: PayloadAction<ChatResponeAndName>): void => {
       if (!state.chatNew) {
         return
       }
@@ -144,9 +117,7 @@ export const loadChatMessageData = createAsyncThunk(
 
 export const {
   addMessage,
-  addMessageNew,
   addMessageAndChangeName,
-  addMessageAndChangeNameNew,
   setChatToNull,
   setChat
 } = chatSlice.actions

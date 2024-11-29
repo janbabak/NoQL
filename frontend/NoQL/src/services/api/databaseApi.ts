@@ -57,28 +57,7 @@ const databaseApi = {
     return this.API.get(this.DOMAIN + '/' + id + '/structure')
   },
 
-  /**
-   * Query the user's database by executing chat.
-   * @param databaseId database identifier
-   * @param request query request
-   * @param chatId chat identifier
-   * @param pageSize number of items in one page
-   */
   queryChat(databaseId: string, request: QueryRequest, chatId: string, pageSize: number)
-    : Promise<AxiosResponse<QueryResponse>> {
-
-    return this.API.post(
-      `${this.DOMAIN}/${databaseId}/chat/${chatId}/query`,
-      request, [
-        {
-          name: 'pageSize',
-          value: pageSize
-        }
-      ]
-    )
-  },
-
-  queryChatNew(databaseId: string, request: QueryRequest, chatId: string, pageSize: number)
     : Promise<AxiosResponse<ChatResponse>> {
     return this.API.post(
       `${this.DOMAIN}/${databaseId}/chat/${chatId}/queryNew`,
