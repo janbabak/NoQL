@@ -4,7 +4,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
@@ -75,13 +75,13 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatDtoNew expected = new ChatDtoNew(
+        ChatDto expected = new ChatDto(
                 chatId, "Test chat", new ArrayList<>(), null, null);
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
-        ChatDtoNew actual = chatService.findByIdNew(chatId, null, true);
+        ChatDto actual = chatService.findByIdNew(chatId, null, true);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -221,14 +221,14 @@ class ChatServiceTest {
                 .database(database)
                 .build();
 
-        ChatDtoNew expected = new ChatDtoNew(
+        ChatDto expected = new ChatDto(
                 chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.save(any())).thenReturn(chat);
 
         // when
-        ChatDtoNew actual = chatService.create(databaseId);
+        ChatDto actual = chatService.create(databaseId);
 
         // then
         assertEquals(expected, actual);

@@ -53,14 +53,14 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatDtoNew findByIdNew(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
+    public ChatDto findByIdNew(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
-        return ChatDtoNew.builder()
+        return ChatDto.builder()
                 .id(chat.getId())
                 .name(chat.getName())
                 .modificationDate(chat.getModificationDate())
@@ -130,7 +130,7 @@ public class ChatService {
      * @return saved object with id
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
-    public ChatDtoNew create(UUID databaseId) throws EntityNotFoundException {
+    public ChatDto create(UUID databaseId) throws EntityNotFoundException {
         log.info("Create new chat.");
 
         Database database = databaseRepository.findById(databaseId)
@@ -146,7 +146,7 @@ public class ChatService {
 
         chat = chatRepository.save(chat);
 
-        return new ChatDtoNew(
+        return new ChatDto(
                 chat.getId(), chat.getName(), List.of(), chat.getModificationDate(), chat.getDatabase().getId());
     }
 

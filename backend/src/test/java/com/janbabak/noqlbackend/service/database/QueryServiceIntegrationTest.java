@@ -3,7 +3,7 @@ package com.janbabak.noqlbackend.service.database;
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Role;
-import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
@@ -223,7 +223,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
 
-        ChatDtoNew chat = chatService.create(databaseId);
+        ChatDto chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
             messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
@@ -511,7 +511,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // given
         UUID databaseId = getDatabase().getId();
-        ChatDtoNew chat = chatService.create(databaseId);
+        ChatDto chat = chatService.create(databaseId);
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }

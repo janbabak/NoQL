@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
@@ -52,7 +52,7 @@ class ChatControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
         UUID chatId = UUID.randomUUID();
-        ChatDtoNew chatDto = ChatDtoNew.builder()
+        ChatDto chatDto = ChatDto.builder()
                 .id(chatId)
                 .name("New chat")
                 .build();
@@ -118,7 +118,7 @@ class ChatControllerTest {
     void testGetChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
-        ChatDtoNew chatDto = ChatDtoNew.builder()
+        ChatDto chatDto = ChatDto.builder()
                 .id(chatId)
                 .name("Test chat")
                 .build();

@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
+import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import jakarta.validation.Valid;
@@ -31,7 +31,7 @@ public class ChatController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ChatDtoNew create(@RequestParam UUID databaseId) throws EntityNotFoundException {
+    public ChatDto create(@RequestParam UUID databaseId) throws EntityNotFoundException {
         return chatService.create(databaseId);
     }
 
@@ -44,7 +44,7 @@ public class ChatController {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @GetMapping("/{chatId}") // TODO: test
-    public ChatDtoNew getByIdNew(@PathVariable UUID chatId, @RequestParam(required = false) Integer pageSize)
+    public ChatDto getByIdNew(@PathVariable UUID chatId, @RequestParam(required = false) Integer pageSize)
             throws EntityNotFoundException {
         return chatService.findByIdNew(chatId, pageSize, true);
     }
