@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Builder
-public record ChatResponseData(
+public record ChatResponseData( //TODO: rename to RetrievedData
         List<String> columnNames,
         List<List<String>> rows,
         Integer page,

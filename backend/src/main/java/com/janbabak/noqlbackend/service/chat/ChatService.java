@@ -172,7 +172,7 @@ public class ChatService {
      * @return saved object with id
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
-    public ChatDto create(UUID databaseId) throws EntityNotFoundException {
+    public ChatDtoNew create(UUID databaseId) throws EntityNotFoundException {
         log.info("Create new chat.");
 
         Database database = databaseRepository.findById(databaseId)
@@ -188,7 +188,7 @@ public class ChatService {
 
         chat = chatRepository.save(chat);
 
-        return new ChatDto(
+        return new ChatDtoNew(
                 chat.getId(), chat.getName(), List.of(), chat.getModificationDate(), chat.getDatabase().getId());
     }
 

@@ -122,90 +122,16 @@ public class DatabaseController {
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
-    @Deprecated // TODO: remove
     @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
-    public QueryResponse executeChat(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @RequestBody @Valid QueryRequest queryRequest,
-            @RequestParam Integer pageSize
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
-            LLMException, BadRequestException {
-        return queryService.executeChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    /**
-     * Query the user's database using natural language from in chat form.
-     *
-     * @param databaseId   database identifier
-     * @param chatId       chat identifier
-     * @param queryRequest query
-     * @param pageSize     number of items in one page
-     * @return query result
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  retrieving database schema failure
-     * @throws EntityNotFoundException     database not found
-     * @throws LLMException                LLM request failed
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
-     * @throws AccessDeniedException       if user is not admin or owner of the database.
-     */
-    @PostMapping("/{databaseId}/chat/{chatId}/queryNew")
-    @ResponseStatus(HttpStatus.OK) // TODO: swagger doc
     public ChatResponse queryChat(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,
-            @RequestBody @Valid QueryRequest queryRequest,
-            @RequestParam Integer pageSize
+            @RequestParam(required = false) Integer pageSize,
+            @RequestBody @Valid QueryRequest queryRequest
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
             LLMException, BadRequestException {
         return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    /**
-     * Load chat result of specific message of existing chat.
-     *
-     * @param databaseId database identifier
-     * @param chatId     chat identifier
-     * @param messageId  message identifier
-     * @param page       page number (fist page is 0)
-     * @param pageSize   number of items per page
-     * @return result of the latest message from the chat
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
-     * @throws EntityNotFoundException     database or chat not found
-     * @throws AccessDeniedException       if user is not admin or owner of the database.
-     */
-    @Deprecated // TODO: remove
-    @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}")
-    @ResponseStatus(HttpStatus.OK)
-    public QueryResponse loadChatResult(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @PathVariable UUID messageId,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
-        return queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize);
-    }
-
-    /**
-     * Load result of specific message of existing chat.
-     *
-     * @param messageId  message identifier
-     * @param page       page number (fist page is 0)
-     * @param pageSize   number of items per page
-     * @return result of the latest message from the chat
-     * @throws EntityNotFoundException     database or chat not found
-     * @throws AccessDeniedException       if user is not admin or owner of the database.
-     */
-    @GetMapping("/{databaseId}/chat/{chatId}/message/{messageId}/data")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatResponseData loadChatResultNew(
-            @PathVariable UUID messageId,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize) throws EntityNotFoundException {
-        return queryService.loadChatResponseData(messageId, page, pageSize);
     }
 
     /**
@@ -222,7 +148,7 @@ public class DatabaseController {
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseStatus(HttpStatus.OK) // TODO: update swagger and tests
+    @ResponseStatus(HttpStatus.OK) // TODO: update tests
     public ConsoleResponse executeQueryLanguageQuery(
             @PathVariable UUID databaseId,
             @RequestBody String query,
