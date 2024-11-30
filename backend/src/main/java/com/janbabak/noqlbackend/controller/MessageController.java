@@ -28,7 +28,7 @@ public class MessageController {
      * @throws org.springframework.security.access.AccessDeniedException when user is not admin or owner of the message
      */
     @GetMapping("/{messageId}/data")
-    public ChatResponseData loadMessageData( // TODO: tests
+    public ChatResponseData loadMessageData(
                                              @PathVariable UUID messageId,
                                              @RequestParam(required = false) Integer page,
                                              @RequestParam(required = false) Integer pageSize)

@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
@@ -613,72 +612,6 @@ class DatabaseControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
-
-    //TODO: move to messge controller test
-//    @Test
-//    @DisplayName("Load chat result")
-//    @WithMockUser(roles = "USER")
-//    void testLoadChatResult() throws Exception {
-//        // given
-//        UUID databaseId = UUID.randomUUID();
-//        UUID chatId = UUID.randomUUID();
-//        UUID messageId = UUID.randomUUID();
-//        Integer page = 1;
-//        Integer pageSize = 2;
-//        QueryResponse response = QueryResponse.builder()
-//                .totalCount(10L)
-//                .errorMessage(null)
-//                .data(new QueryResponse.RetrievedData(
-//                        List.of("name", "email", "age"),
-//                        List.of(
-//                                List.of("John", "john@gmail.com", "26"),
-//                                List.of("Lenny", "lenny@gmail.com", "65"))))
-//                .chatQueryWithResponse(ChatQueryWithResponseDto.builder()
-//                        .id(UUID.randomUUID())
-//                        .nlQuery("find all users older than 25")
-//                        .timestamp(null)
-//                        .llmResult(new ChatQueryWithResponseDto.LLMResult(
-//                                "SELECT * FROM users WHERE age > 25", null))
-//                        .build())
-//                .build();
-//
-//        when(queryService.loadChatResult(databaseId, chatId, messageId, page, pageSize)).thenReturn(response);
-//
-//        // then
-//        mockMvc.perform(
-//                        get(ROOT_URL + "/{databaseId}/chat/{chatId}/message/{messageId}",
-//                                databaseId, chatId, messageId, page, pageSize)
-//                                .param("page", page.toString())
-//                                .param("pageSize", pageSize.toString())
-//                                .param("chatId", chatId.toString())
-//                                .param("messageId", messageId.toString()))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(content().json(toJson(response), true));
-//    }
-
-//    @Test
-//    @DisplayName("Load chat result by anonymous user")
-//    @WithAnonymousUser
-//    void testLoadChatResultByAnotherUser() throws Exception {
-//        // given
-//        UUID databaseId = UUID.randomUUID();
-//        UUID chatId = UUID.randomUUID();
-//        UUID messageId = UUID.randomUUID();
-//        Integer page = 1;
-//        Integer pageSize = 2;
-//
-//        // then
-//        mockMvc.perform(
-//                        get(ROOT_URL + "/{databaseId}/query/loadChatResult",
-//                                databaseId, chatId, messageId, page, pageSize)
-//                                .param("page", page.toString())
-//                                .param("pageSize", pageSize.toString())
-//                                .param("chatId", chatId.toString())
-//                                .param("messageId", messageId.toString()))
-//                .andDo(print())
-//                .andExpect(status().isUnauthorized());
-//    }
 
     @Test
     @DisplayName("Execute query-language query")
