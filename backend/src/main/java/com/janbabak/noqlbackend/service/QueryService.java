@@ -6,13 +6,10 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
-import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.model.query.QueryResponse.RetrievedData;
 import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
@@ -267,77 +264,6 @@ public class QueryService {
     /**
      * Load result of response of last message from chat. Used when user opens an old chat.
      *
-     * @param databaseId identifier of the database to which the selected chat belongs
-     * @param chatId     chat to load identifier
-     * @param messageId  identifier of the message to load
-     * @param page       page number (first pages has is 0)
-     * @param pageSize   number of items per page
-     * @return query response
-     * @throws EntityNotFoundException     database or chat not found
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
-     * @throws DatabaseConnectionException cannot establish connection with database
-     */
-    @Deprecated // TODO: remove
-    public QueryResponse loadChatResult(
-            UUID databaseId,
-            UUID chatId,
-            UUID messageId,
-            Integer page,
-            Integer pageSize) throws EntityNotFoundException, BadRequestException, DatabaseConnectionException {
-        // TODO: authorization??
-
-        log.info("Reload chat result, chatId={}", chatId);
-
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
-
-        ChatDto chat = chatService.findById(chatId);
-
-        if (!chat.databaseId().equals(databaseId)) {
-            throw new BadRequestException("Chat does not belong to the specified database");
-        }
-
-        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
-                .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
-
-        if (!message.getChat().getId().equals(chatId)) {
-            throw new BadRequestException("Message does not belong to the specified chat");
-        }
-
-        LLMResponse LLMResponse;
-        try {
-            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
-        } catch (JsonProcessingException e) {
-            return null; // should not happen since values that cannot be parsed aren't saved
-        }
-
-        String fileName = LLMResponse.generatePlot() ? chatId + "-" + messageId : null;
-
-        ChatQueryWithResponseDto chatQueryWithResponseDto =
-                new ChatQueryWithResponseDto(message, new LLMResult(LLMResponse, fileName));
-
-        // only plot without any select query to retrieve the data
-        if (LLMResponse.databaseQuery() == null) {
-            return QueryResponse.successfulResponse(null, chatQueryWithResponseDto, null);
-        }
-
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database).query;
-
-        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
-            RetrievedData retrievedData = new RetrievedData(result.resultSet());
-            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
-
-            return QueryResponse.successfulResponse(retrievedData, chatQueryWithResponseDto, totalCount);
-        } catch (DatabaseExecutionException | SQLException e) {
-            // should not happen since not executable responses aren't saved
-            return QueryResponse.failedResponse(chatQueryWithResponseDto, e.getMessage());
-        }
-    }
-
-    /**
-     * Load result of response of last message from chat. Used when user opens an old chat.
-     *
      * @param messageId  identifier of the message to load
      * @param page       page number (first pages has is 0)
      * @param pageSize   number of items per page
@@ -356,7 +282,11 @@ public class QueryService {
         return getChatResponseData(message, message.getChat().getDatabase(), page, pageSize);
     }
 
-    public static ChatResponseData getChatResponseData(ChatQueryWithResponse message, Database database, Integer page, Integer pageSize) {
+    public static ChatResponseData getChatResponseData(
+            ChatQueryWithResponse message, Database database,
+            Integer page,
+            Integer pageSize) {
+
         LLMResponse LLMResponse;
         try {
             LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);

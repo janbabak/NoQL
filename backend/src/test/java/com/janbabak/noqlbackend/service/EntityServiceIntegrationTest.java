@@ -248,7 +248,7 @@ public class EntityServiceIntegrationTest {
         chatService.renameChat(chatId, "This is the new name of the chat :)");
 
         assertEquals("This is the new name of the chat",
-                chatService.findByIdNew(chatId, null).name());
+                chatService.findByIdNew(chatId, null, false).name());
     }
 
     /**
@@ -285,11 +285,12 @@ public class EntityServiceIntegrationTest {
     void deleteChat(UUID chatId) throws EntityNotFoundException {
         assertEquals(8, chatRepository.findAll().size());
         assertEquals(14, chatQueryWithResponseRepository.findAll().size());
-        assertNotNull(chatService.findByIdNew(chatId, null));
+        assertNotNull(chatService.findByIdNew(chatId, null, false));
 
         chatService.deleteChatById(chatId);
 
-        assertThrows(EntityNotFoundException.class, () -> chatService.findByIdNew(chatId, null));
+        assertThrows(EntityNotFoundException.class,
+                () -> chatService.findByIdNew(chatId, null, false));
         assertEquals(7, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertEquals(2, databaseService.findAll(testUser.getId()).size());

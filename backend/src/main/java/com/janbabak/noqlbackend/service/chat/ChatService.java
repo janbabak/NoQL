@@ -46,51 +46,6 @@ public class ChatService {
     /**
      * Find chat by chat id.
      *
-     * @param chatId chat identifier
-     * @return chat
-     * @throws EntityNotFoundException                                   chat of specified id not found
-     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
-     */
-    @Transactional
-    @Deprecated // TODO: remove
-    public ChatDto findById(UUID chatId) throws EntityNotFoundException {
-        log.info("Get chat by id={}", chatId);
-
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
-
-        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
-
-        return new ChatDto(
-                chat.getId(),
-                chat.getName(),
-                chat.getMessages()
-                        .stream()
-                        .map(message -> {
-                            try {
-                                LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
-                                String plotFileName = llmResponse.generatePlot()
-                                        ? chat.getId() + "-" + message.getId()
-                                        : null;
-
-                                return new ChatQueryWithResponseDto(
-                                        message.getId(),
-                                        message.getNlQuery(),
-                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, plotFileName),
-                                        message.getTimestamp());
-                            } catch (JsonProcessingException e) {
-                                // should not happen since invalid JSONs are not saved
-                                log.error("Cannot parse message JSON from database, messageId={}", message.getId());
-                                return null;
-                            }
-                        })
-                        .toList(),
-                chat.getModificationDate(),
-                chat.getDatabase().getId());
-    }
-
-    /**
-     * Find chat by chat id.
-     *
      * @param chatId   chat identifier
      * @param pageSize number of messages to return
      * @return chat
@@ -98,7 +53,7 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatDtoNew findByIdNew(UUID chatId, Integer pageSize) throws EntityNotFoundException {
+    public ChatDtoNew findByIdNew(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
@@ -119,8 +74,11 @@ public class ChatService {
                                         ? PlotService.PLOTS_DIR_URL_PATH + "/" + chat.getId() + "-" + message.getId() +
                                         PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
                                         : null;
-                                ChatResponseData data = QueryService.getChatResponseData(
-                                        message, chat.getDatabase(), 0, pageSize);
+
+                                ChatResponseData data = includeData
+                                        ? QueryService.getChatResponseData(
+                                                message, chat.getDatabase(), 0, pageSize)
+                                        : null;
 
                                 return new ChatResponse(
                                         data,

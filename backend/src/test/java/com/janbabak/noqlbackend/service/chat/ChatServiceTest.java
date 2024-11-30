@@ -81,7 +81,7 @@ class ChatServiceTest {
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
-        ChatDtoNew actual = chatService.findByIdNew(chatId, null);
+        ChatDtoNew actual = chatService.findByIdNew(chatId, null, true);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -108,7 +108,8 @@ class ChatServiceTest {
                 .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
-        assertThrows(AccessDeniedException.class, () -> chatService.findByIdNew(chatId, null));
+        assertThrows(AccessDeniedException.class,
+                () -> chatService.findByIdNew(chatId, null, true));
     }
 
     @Test
@@ -120,7 +121,8 @@ class ChatServiceTest {
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.findByIdNew(chatId, null));
+        assertThrows(EntityNotFoundException.class,
+                () -> chatService.findByIdNew(chatId, null, true));
     }
 
     @Test
