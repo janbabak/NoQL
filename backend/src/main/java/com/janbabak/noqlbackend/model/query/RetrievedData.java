@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Builder
-public record ChatResponseData( //TODO: rename to RetrievedData
+public record RetrievedData(
         List<String> columnNames,
         List<List<String>> rows,
         Integer page,
@@ -26,7 +26,7 @@ public record ChatResponseData( //TODO: rename to RetrievedData
      * @param totalCount total count of rows (response is paginated, so it does not contain all of them)
      * @throws SQLException when the result set is not valid
      */
-    public ChatResponseData(ResultSet resultSet, Integer page, Integer pageSize, Long totalCount)
+    public RetrievedData(ResultSet resultSet, Integer page, Integer pageSize, Long totalCount)
             throws SQLException {
 
         this(new ArrayList<>(), new ArrayList<>(), page, pageSize, totalCount);

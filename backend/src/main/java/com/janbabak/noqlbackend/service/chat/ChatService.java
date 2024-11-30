@@ -10,7 +10,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
-import com.janbabak.noqlbackend.model.query.ChatResponseData;
+import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
@@ -75,7 +75,7 @@ public class ChatService {
                                         PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
                                         : null;
 
-                                ChatResponseData data = includeData
+                                RetrievedData data = includeData
                                         ? QueryService.getChatResponseData(
                                                 message, chat.getDatabase(), 0, pageSize)
                                         : null;

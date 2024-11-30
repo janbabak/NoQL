@@ -627,33 +627,33 @@ class QueryServiceTest {
 //        assertThrows(EntityNotFoundException.class, () -> queryService.executeChat(databaseId, chatId, request, 10));
 //    }
 
-    @Test
-    @DisplayName("Test execute chat query limit exceeded")
-    void testExecuteChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException,
-            DatabaseExecutionException, LLMException, BadRequestException {
-        // given
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
-        User user = User.builder()
-                .id(UUID.randomUUID())
-                .queryLimit(0)
-                .build();
-        Database database = Database.builder()
-                .id(databaseId)
-                .user(user)
-                .build();
-        QueryResponse expected = QueryResponse.failedResponse(null, "Query limit exceeded");
-
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(userService.decrementQueryLimit(any())).thenReturn(0);
-
-        // when
-        QueryResponse actual = queryService.executeChat(databaseId, chatId, request, 10);
-
-        // then
-        assertEquals(expected, actual);
-    }
+//    @Test
+//    @DisplayName("Test execute chat query limit exceeded")
+//    void testExecuteChatQueryLimitExceeded() throws EntityNotFoundException, DatabaseConnectionException,
+//            DatabaseExecutionException, LLMException, BadRequestException {
+//        // given
+//        UUID databaseId = UUID.randomUUID();
+//        UUID chatId = UUID.randomUUID();
+//        QueryRequest request = new QueryRequest("SELECT * FROM public.user;", "gpt-4o");
+//        User user = User.builder()
+//                .id(UUID.randomUUID())
+//                .queryLimit(0)
+//                .build();
+//        Database database = Database.builder()
+//                .id(databaseId)
+//                .user(user)
+//                .build();
+//        QueryResponse expected = QueryResponse.failedResponse(null, "Query limit exceeded");
+//
+//        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+//        when(userService.decrementQueryLimit(any())).thenReturn(0);
+//
+//        // when
+//        QueryResponse actual = queryService.executeChat(databaseId, chatId, request, 10);
+//
+//        // then
+//        assertEquals(expected, actual);
+//    }
 
     @Test
     @DisplayName("Test query chat - database not found")

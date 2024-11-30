@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ConsoleResponse(
-        ChatResponseData data,
+        RetrievedData data,
         String dbQuery,
         String error
 ) {

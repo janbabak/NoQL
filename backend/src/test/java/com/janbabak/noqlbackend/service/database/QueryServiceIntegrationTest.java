@@ -173,7 +173,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ConsoleResponse expectedResponse = ConsoleResponse.builder()
                 .error(null)
                 .dbQuery(query)
-                .data(new ChatResponseData(
+                .data(new RetrievedData(
                         List.of("id", "name", "age", "sex", "email"),
                         List.of(List.of("10", "David Taylor", "45", "M", "david.taylor@example.com"),
                                 List.of("19", "Ella Thomas", "24", "F", "ella.thomas@example.com"),
@@ -217,7 +217,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             Integer pageSize,
             Long expectedTotalCount,
             List<CreateChatQueryWithResponseRequest> messageRequests,
-            ChatResponseData expectedResponse
+            RetrievedData expectedResponse
     ) throws EntityNotFoundException {
 
         // given
@@ -231,7 +231,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        ChatResponseData queryResponse = queryService.loadChatResponseData(lastMessage.getId(), page, pageSize);
+        RetrievedData queryResponse = queryService.loadChatResponseData(lastMessage.getId(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
 
@@ -270,7 +270,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                         FileUtils.getFileContent(
                                                 "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
                         // expected response
-                        ChatResponseData.builder()
+                        RetrievedData.builder()
                                 .page(0)
                                 .pageSize(10)
                                 .totalCount(2L)
@@ -303,7 +303,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                                     "pythonCode": ""
                                                 }""")),
                         // expected reseponse
-                        ChatResponseData.builder()
+                        RetrievedData.builder()
                                 .page(1)
                                 .pageSize(10)
                                 .totalCount(22L)
@@ -349,7 +349,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                         "plot sex of users older than 24",
                                         FileUtils.getFileContent(
                                                 "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
-                        new ChatResponseData(
+                        new RetrievedData(
                                 List.of("sex", "count"),
                                 List.of(List.of("M", "9"), List.of("F", "10")),
                                 0,
@@ -380,7 +380,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                                     "generatePlot": false,
                                                     "pythonCode": ""
                                                 }""")),
-                        new ChatResponseData(
+                        new RetrievedData(
                                 List.of("email"),
                                 List.of(List.of("jane.doe@example.com"),
                                         List.of("james.wilson@example.com"),
@@ -425,7 +425,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                 .dbQuery(
                                         // language=SQL
                                         "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex")
-                                .data(ChatResponseData.builder()
+                                .data(RetrievedData.builder()
                                         .page(0)
                                         .pageSize(8)
                                         .totalCount(2L)
@@ -467,7 +467,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                 .dbQuery(
                                         // language=SQL
                                         "SELECT email FROM eshop_user ORDER BY email DESC;")
-                                .data(ChatResponseData.builder()
+                                .data(RetrievedData.builder()
                                         .page(0)
                                         .pageSize(8)
                                         .totalCount(22L)
@@ -567,7 +567,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                 .dbQuery(
                                         // language=SQL
                                         "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex")
-                                .data(ChatResponseData.builder()
+                                .data(RetrievedData.builder()
                                         .page(0)
                                         .pageSize(8)
                                         .totalCount(2L)
@@ -609,7 +609,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                 .dbQuery(
                                         // language=SQL
                                         "SELECT email FROM eshop_user ORDER BY email DESC;")
-                                .data(ChatResponseData.builder()
+                                .data(RetrievedData.builder()
                                         .page(0)
                                         .pageSize(8)
                                         .totalCount(22L)

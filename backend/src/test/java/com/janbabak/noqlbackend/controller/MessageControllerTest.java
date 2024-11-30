@@ -49,7 +49,7 @@ class MessageControllerTest {
         UUID messageId = UUID.randomUUID();
         Integer page = 1;
         Integer pageSize = 2;
-        ChatResponseData response = ChatResponseData.builder()
+        RetrievedData response = RetrievedData.builder()
                 .page(page)
                 .pageSize(pageSize)
                 .totalCount(10L)

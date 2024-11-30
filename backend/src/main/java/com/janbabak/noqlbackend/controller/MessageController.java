@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.query.ChatResponseData;
+import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.QueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -28,7 +28,7 @@ public class MessageController {
      * @throws org.springframework.security.access.AccessDeniedException when user is not admin or owner of the message
      */
     @GetMapping("/{messageId}/data")
-    public ChatResponseData loadMessageData(
+    public RetrievedData loadMessageData(
                                              @PathVariable UUID messageId,
                                              @RequestParam(required = false) Integer page,
                                              @RequestParam(required = false) Integer pageSize)

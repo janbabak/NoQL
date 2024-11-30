@@ -537,7 +537,7 @@ class DatabaseControllerTest {
                 .messageId(UUID.randomUUID())
                 .plotUrl(null)
                 .error(null)
-                .data(new ChatResponseData(
+                .data(new RetrievedData(
                         List.of("name", "email", "age"),
                         List.of(List.of("John", "john@gmail.com", "26"),
                                 List.of("Lenny", "lenny@gmail.com", "65")),
@@ -629,7 +629,7 @@ class DatabaseControllerTest {
                 JOIN public.address a ON u.id = a.user_id;
                 """;
         ConsoleResponse response = ConsoleResponse.builder()
-                .data(new ChatResponseData(
+                .data(new RetrievedData(
                         List.of("id", "name", "age", "sex", "email", "created_at", "city", "street", "state"),
                         List.of(
                                 List.of("1", "John Doe", "25", "M", "john.doe@example.com",
