@@ -148,7 +148,7 @@ public class DatabaseController {
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseStatus(HttpStatus.OK) // TODO: update tests
+    @ResponseStatus(HttpStatus.OK)
     public ConsoleResponse executeQueryLanguageQuery(
             @PathVariable UUID databaseId,
             @RequestBody String query,
