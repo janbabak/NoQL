@@ -77,7 +77,7 @@ public class ChatService {
                                         : null;
 
                                 RetrievedData data = includeData
-                                        ? QueryService.getChatResponseData(
+                                        ? QueryService.retrieveDataFromMessage(
                                         message, chat.getDatabase(), 0, pageSize)
                                         : null;
 

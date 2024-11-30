@@ -33,6 +33,6 @@ public class MessageController {
                                              @RequestParam(required = false) Integer page,
                                              @RequestParam(required = false) Integer pageSize)
             throws EntityNotFoundException {
-        return queryService.loadChatResponseData(messageId, page, pageSize);
+        return queryService.getDataByMessageId(messageId, page, pageSize);
     }
 }

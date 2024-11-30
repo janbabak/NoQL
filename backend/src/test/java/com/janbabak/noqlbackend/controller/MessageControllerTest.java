@@ -59,7 +59,7 @@ class MessageControllerTest {
                         List.of("Lenny", "lenny@gmail.com", "65")))
                 .build();
 
-        when(queryService.loadChatResponseData(messageId, page, pageSize)).thenReturn(response);
+        when(queryService.getDataByMessageId(messageId, page, pageSize)).thenReturn(response);
 
         // then
         mockMvc.perform(

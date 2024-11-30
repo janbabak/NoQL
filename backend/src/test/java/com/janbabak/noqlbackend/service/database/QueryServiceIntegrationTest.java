@@ -231,7 +231,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        RetrievedData queryResponse = queryService.loadChatResponseData(lastMessage.getId(), page, pageSize);
+        RetrievedData queryResponse = queryService.getDataByMessageId(lastMessage.getId(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
 

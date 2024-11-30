@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
+import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
@@ -54,6 +55,7 @@ public class QueryService {
     private final ChatQueryWithResponseService chatQueryWithResponseService;
     private final PlotService plotService;
     private final UserService userService;
+    private final ChatRepository chatRepository;
 
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
@@ -96,7 +98,8 @@ public class QueryService {
                 .toString();
     }
 
-    public record PaginatedQuery(String query, Integer page, Integer pageSize) {}
+    public record PaginatedQuery(String query, Integer page, Integer pageSize) {
+    }
 
     /**
      * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
@@ -262,13 +265,13 @@ public class QueryService {
     /**
      * Load result of response of last message from chat. Used when user opens an old chat.
      *
-     * @param messageId  identifier of the message to load
-     * @param page       page number (first pages has is 0)
-     * @param pageSize   number of items per page
+     * @param messageId identifier of the message to load
+     * @param page      page number (first pages has is 0)
+     * @param pageSize  number of items per page
      * @return query response
-     * @throws EntityNotFoundException     database or chat not found
+     * @throws EntityNotFoundException database or chat not found
      */
-    public RetrievedData loadChatResponseData(
+    public RetrievedData getDataByMessageId(
             UUID messageId,
             Integer page,
             Integer pageSize) throws EntityNotFoundException {
@@ -277,11 +280,21 @@ public class QueryService {
         ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
 
-        return getChatResponseData(message, message.getChat().getDatabase(), page, pageSize);
+        return retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
 
-    public static RetrievedData getChatResponseData(
-            ChatQueryWithResponse message, Database database,
+    /**
+     * Retrieve data from the message.
+     *
+     * @param message  message
+     * @param database database
+     * @param page     page number (starting by 0)
+     * @param pageSize number of items per page
+     * @return retrieved data
+     */
+    public static RetrievedData retrieveDataFromMessage(
+            ChatQueryWithResponse message,
+            Database database,
             Integer page,
             Integer pageSize) {
 
@@ -401,6 +414,9 @@ public class QueryService {
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        chatRepository.findById(chatId)
+                .orElseThrow(() -> new EntityNotFoundException(EntityNotFoundException.Entity.CHAT, chatId));
 
         if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
