@@ -53,7 +53,7 @@ class SettingsControllerTest {
                              "translationRetries": 3,
                              "plotServiceContainerName": "plot-service-dev-stack",
                              "defaultUserQueryLimit": 10
-                        }"""));
+                        }""", true));
     }
 
     @Test

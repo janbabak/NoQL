@@ -46,7 +46,7 @@ public class ChatController {
     @GetMapping("/{chatId}")
     public ChatDto getById(@PathVariable UUID chatId, @RequestParam(required = false) Integer pageSize)
             throws EntityNotFoundException {
-        return chatService.findByIdNew(chatId, pageSize, true);
+        return chatService.findById(chatId, pageSize, true);
     }
 
     /**

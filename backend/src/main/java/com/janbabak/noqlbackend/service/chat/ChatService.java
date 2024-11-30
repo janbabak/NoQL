@@ -46,14 +46,15 @@ public class ChatService {
     /**
      * Find chat by chat id.
      *
-     * @param chatId   chat identifier
-     * @param pageSize number of messages to return
+     * @param chatId      chat identifier
+     * @param pageSize    number of messages to return
+     * @param includeData if true, include retrieved data in the response, otherwise data field is null
      * @return chat
      * @throws EntityNotFoundException                                   chat of specified id not found
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatDto findByIdNew(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
+    public ChatDto findById(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
@@ -77,7 +78,7 @@ public class ChatService {
 
                                 RetrievedData data = includeData
                                         ? QueryService.getChatResponseData(
-                                                message, chat.getDatabase(), 0, pageSize)
+                                        message, chat.getDatabase(), 0, pageSize)
                                         : null;
 
                                 return new ChatResponse(

@@ -123,7 +123,7 @@ class ChatControllerTest {
                 .name("Test chat")
                 .build();
 
-        when(chatService.findByIdNew(eq(chatId), any(), eq(true))).thenReturn(chatDto);
+        when(chatService.findById(eq(chatId), any(), eq(true))).thenReturn(chatDto);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
@@ -139,7 +139,7 @@ class ChatControllerTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatService.findByIdNew(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
+        when(chatService.findById(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
