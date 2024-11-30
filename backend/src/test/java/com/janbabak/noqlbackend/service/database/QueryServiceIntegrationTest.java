@@ -3,17 +3,13 @@ package com.janbabak.noqlbackend.service.database;
 import com.janbabak.noqlbackend.dao.LocalDatabaseTest;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Role;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
-import com.janbabak.noqlbackend.model.query.QueryRequest;
-import com.janbabak.noqlbackend.model.query.QueryResponse;
-import com.janbabak.noqlbackend.model.query.ChatResponse;
-import com.janbabak.noqlbackend.model.query.ChatResponseData;
+import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
@@ -174,25 +170,29 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // language=SQL
         String query = "SELECT id, name, age, sex, email FROM eshop_user ORDER BY name;";
 
-        QueryResponse expectedResponse = new QueryResponse(
-                new QueryResponse.RetrievedData(
+        ConsoleResponse expectedResponse = ConsoleResponse.builder()
+                .error(null)
+                .dbQuery(query)
+                .data(new ChatResponseData(
                         List.of("id", "name", "age", "sex", "email"),
                         List.of(List.of("10", "David Taylor", "45", "M", "david.taylor@example.com"),
                                 List.of("19", "Ella Thomas", "24", "F", "ella.thomas@example.com"),
                                 List.of("5", "Emily Johnson", "40", "F", "emily.johnson@example.com"),
                                 List.of("17", "Emma Scott", "30", "F", "emma.scott@example.com"),
-                                List.of("21", "Grace Miller", "34", "F", "grace.miller@example.com"))),
-                22L,
-                null,
-                null);
+                                List.of("21", "Grace Miller", "34", "F", "grace.miller@example.com")),
+                        page,
+                        pageSize,
+                        22L))
+                .build();
 
         // when
-        QueryResponse queryResponse = queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
+        ConsoleResponse consoleResponse = queryService.executeQueryLanguageSelectQuery(
+                databaseId, query, page, pageSize);
 
         // then
-        assertEquals(pageSize, queryResponse.data().rows().size()); // page size
-        assertEquals(22, queryResponse.totalCount());
-        assertEquals(expectedResponse, queryResponse);
+        assertEquals(pageSize, consoleResponse.data().rows().size()); // page size
+        assertEquals(22, consoleResponse.data().totalCount());
+        assertEquals(expectedResponse, consoleResponse);
     }
 
     Object[] databaseDataProvider() {
@@ -200,58 +200,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 postgresDatabase,
                 mySqlDatabase
         };
-    }
-
-    /**
-     * @param page               page number
-     * @param pageSize           number of items per page
-     * @param expectedTotalCount total count of rows
-     * @param plotResult         if the result contains plot
-     * @param messageRequests    list of messages to save into database
-     * @param expectedResponse   expected response
-     */
-    @ParameterizedTest
-    @MethodSource("testLoadChatDataProvider")
-    @DisplayName("Test load chat")
-    void testLoadChatResults(
-            Integer page,
-            Integer pageSize,
-            Long expectedTotalCount,
-            Boolean plotResult,
-            List<CreateChatQueryWithResponseRequest> messageRequests,
-            QueryResponse expectedResponse
-    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
-
-        // given
-        UUID databaseId = getDatabase().getId();
-
-        ChatDto chat = chatService.create(databaseId);
-        List<ChatQueryWithResponse> messages = new ArrayList<>();
-        for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
-            messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
-        }
-        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
-
-        // when
-        QueryResponse queryResponse = queryService.loadChatResult(
-                databaseId, chat.id(), lastMessage.getId(), page, pageSize);
-
-        // message id and timestamp are generated, so we need to set them manually
-        expectedResponse.chatQueryWithResponse().setId(lastMessage.getId());
-        expectedResponse.chatQueryWithResponse().setTimestamp(
-                queryResponse.chatQueryWithResponse().getTimestamp());
-        if (plotResult) {
-            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + "-" + lastMessage.getId() + ".png");
-        }
-
-        // then
-        assertTrue(pageSize >= queryResponse.data().rows().size());
-        assertEquals(expectedTotalCount, queryResponse.totalCount());
-        assertEquals(expectedResponse, queryResponse);
-
-        // cleanup
-        chatService.deleteChatById(chat.id());
     }
 
     /**
@@ -270,12 +218,12 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             Long expectedTotalCount,
             List<CreateChatQueryWithResponseRequest> messageRequests,
             ChatResponseData expectedResponse
-    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+    ) throws EntityNotFoundException {
 
         // given
         UUID databaseId = getDatabase().getId();
 
-        ChatDto chat = chatService.create(databaseId);
+        ChatDtoNew chat = chatService.create(databaseId);
         List<ChatQueryWithResponse> messages = new ArrayList<>();
         for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
             messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
@@ -283,8 +231,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        ChatResponseData queryResponse = queryService.loadChatResponseData(
-                databaseId, chat.id(), lastMessage.getId(), page, pageSize);
+        ChatResponseData queryResponse = queryService.loadChatResponseData(lastMessage.getId(), page, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
 
@@ -381,7 +328,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      */
     @SuppressWarnings("all")
     // IDE can't see the columns
-    Object[][] testLoadChatDataProvider() { // TODO: remove
+    Object[][] testLoadChatDataProvider() {
         return new Object[][]{
                 {
                         0, // page
@@ -402,20 +349,13 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                         "plot sex of users older than 24",
                                         FileUtils.getFileContent(
                                                 "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
-                        new QueryResponse( // expected response
-                                new QueryResponse.RetrievedData(
-                                        List.of("sex", "count"),
-                                        List.of(List.of("M", "9"), List.of("F", "10"))),
-                                2L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "plot sex of users older than 24",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
-                                                null),
-                                        null),
-                                null)
+                        new ChatResponseData(
+                                List.of("sex", "count"),
+                                List.of(List.of("M", "9"), List.of("F", "10")),
+                                0,
+                                10,
+                                2L
+                        )
                 },
                 {
                         1, // page
@@ -440,30 +380,22 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                                                     "generatePlot": false,
                                                     "pythonCode": ""
                                                 }""")),
-                        new QueryResponse( // expected response
-                                new QueryResponse.RetrievedData(
-                                        List.of("email"),
-                                        List.of(List.of("jane.doe@example.com"),
-                                                List.of("james.wilson@example.com"),
-                                                List.of("grace.miller@example.com"),
-                                                List.of("emma.scott@example.com"),
-                                                List.of("emily.johnson@example.com"),
-                                                List.of("ella.thomas@example.com"),
-                                                List.of("david.taylor@example.com"),
-                                                List.of("daniel.miller@example.com"),
-                                                List.of("christopher.johnson@example.com"),
-                                                List.of("bob.smith@example.com"))),
-                                22L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "sort them in descending order",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT email FROM eshop_user ORDER BY email DESC;",
-                                                null),
-                                        null),
-                                null)
-
+                        new ChatResponseData(
+                                List.of("email"),
+                                List.of(List.of("jane.doe@example.com"),
+                                        List.of("james.wilson@example.com"),
+                                        List.of("grace.miller@example.com"),
+                                        List.of("emma.scott@example.com"),
+                                        List.of("emily.johnson@example.com"),
+                                        List.of("ella.thomas@example.com"),
+                                        List.of("david.taylor@example.com"),
+                                        List.of("daniel.miller@example.com"),
+                                        List.of("christopher.johnson@example.com"),
+                                        List.of("bob.smith@example.com")),
+                                1,
+                                10,
+                                22L
+                        )
                 }
         };
     }
@@ -487,13 +419,13 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             List<CreateChatQueryWithResponseRequest> messages,
             QueryRequest request,
             String llmResponse,
-            QueryResponse expectedResponse
+            ChatResponse expectedResponse
     ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
             LLMException, BadRequestException, PlotScriptExecutionException {
 
         // given
         UUID databaseId = getDatabase().getId();
-        ChatDto chat = chatService.create(databaseId);
+        ChatDtoNew chat = chatService.create(databaseId);
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }
@@ -504,22 +436,19 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         when(plotService.generatePlot(any(), any(), any())).thenReturn(plotFileName);
 
         // when
-        QueryResponse queryResponse = queryService.executeChat(databaseId, chat.id(), request, pageSize);
+        ChatResponse queryResponse = queryService.queryChat(databaseId, chat.id(), request, pageSize);
 
         // message id and timestamp are generated, so we need to set them manually
-        expectedResponse.chatQueryWithResponse().setId(
-                queryResponse.chatQueryWithResponse().getId());
-        expectedResponse.chatQueryWithResponse().setTimestamp(
-                queryResponse.chatQueryWithResponse().getTimestamp());
+        expectedResponse.setMessageId(queryResponse.getMessageId());
+        expectedResponse.setTimestamp(queryResponse.getTimestamp());
 
         if (plotResult) {
-            expectedResponse.chatQueryWithResponse().getLlmResult().setPlotUrl(
-                    "/static/images/" + chat.id() + "-" + queryResponse.chatQueryWithResponse().getId() + ".png");
+            expectedResponse.setPlotUrl("/static/images/" + chat.id() + "-" + queryResponse.getMessageId() + ".png");
         }
 
         // then
-        assertTrue(pageSize >= queryResponse.data().rows().size());
-        assertEquals(totalCount, queryResponse.totalCount());
+        assertTrue(pageSize >= queryResponse.getData().rows().size());
+        assertEquals(totalCount, queryResponse.getData().totalCount());
         assertEquals(expectedResponse, queryResponse);
 
         // cleanup
@@ -543,20 +472,24 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         // LLM response
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
                         // expected response
-                        new QueryResponse(
-                                new QueryResponse.RetrievedData(
-                                        List.of("sex", "count"),
-                                        List.of(List.of("M", "9"), List.of("F", "10"))),
-                                2L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "plot sex of users older than 24",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex",
-                                                null),
-                                        null),
-                                null)
+                        ChatResponse.builder()
+                                .messageId(null)
+                                .error(null)
+                                .timestamp(null)
+                                .nlQuery("plot sex of users older than 24")
+                                .dbQuery(
+                                        // language=SQL
+                                        "SELECT sex, COUNT(*) FROM eshop_user WHERE age > 24 GROUP BY sex")
+                                .data(ChatResponseData.builder()
+                                        .page(0)
+                                        .pageSize(8)
+                                        .totalCount(2L)
+                                        .columnNames(List.of("sex", "count"))
+                                        .rows(List.of(
+                                                List.of("M", "9"),
+                                                List.of("F", "10")))
+                                        .build())
+                                .build()
                 },
                 {
                         8, // page size
@@ -580,28 +513,30 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                             "generatePlot": false
                         }""",
                         // expected response
-                        new QueryResponse(
-                                new QueryResponse.RetrievedData(
-                                        List.of("email"),
-                                        List.of(List.of("william.davis@example.com"),
+                        ChatResponse.builder()
+                                .messageId(null)
+                                .error(null)
+                                .timestamp(null)
+                                .plotUrl(null)
+                                .nlQuery("sort them in descending order")
+                                .dbQuery(
+                                        // language=SQL
+                                        "SELECT email FROM eshop_user ORDER BY email DESC;")
+                                .data(ChatResponseData.builder()
+                                        .page(0)
+                                        .pageSize(8)
+                                        .totalCount(22L)
+                                        .columnNames(List.of("email"))
+                                        .rows(List.of(List.of("william.davis@example.com"),
                                                 List.of("sophia.lopez@example.com"),
                                                 List.of("sarah.brown@example.com"),
                                                 List.of("olivia.garcia@example.com"),
                                                 List.of("nicholas.brown@example.com"),
                                                 List.of("michael.davis@example.com"),
                                                 List.of("matthew.hernandez@example.com"),
-                                                List.of("john.doe@example.com"))),
-                                22L,
-                                new ChatQueryWithResponseDto(
-                                        null,
-                                        "sort them in descending order",
-                                        new ChatQueryWithResponseDto.LLMResult(
-                                                // language=SQL
-                                                "SELECT email FROM eshop_user ORDER BY email DESC;",
-                                                null),
-                                        null),
-                                null)
-
+                                                List.of("john.doe@example.com")))
+                                        .build())
+                                .build()
                 },
         };
     }
@@ -631,7 +566,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         // given
         UUID databaseId = getDatabase().getId();
-        ChatDto chat = chatService.create(databaseId);
+        ChatDtoNew chat = chatService.create(databaseId);
         for (CreateChatQueryWithResponseRequest message : messages) {
             chatService.addMessageToChat(chat.id(), message);
         }

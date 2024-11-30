@@ -7,7 +7,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
 import com.janbabak.noqlbackend.model.Role;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
+import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
@@ -109,8 +109,8 @@ public class EntityServiceIntegrationTest {
         Database adminMysql = databases.get(2);
 
         AuthenticationService.authenticateUser(testUser);
-        List<ChatDto> postgresChats = createChats(postgres, 3);
-        List<ChatDto> mysqlChats = createChats(mysql, 3);
+        List<ChatDtoNew> postgresChats = createChats(postgres, 3);
+        List<ChatDtoNew> mysqlChats = createChats(mysql, 3);
 
         AuthenticationService.authenticateUser(testAdmin);
         createChats(adminMysql, 2);
@@ -198,8 +198,8 @@ public class EntityServiceIntegrationTest {
      * @return list of crated chats
      * @throws EntityNotFoundException should not happen
      */
-    List<ChatDto> createChats(Database database, int count) throws EntityNotFoundException {
-        List<ChatDto> chats = new ArrayList<>();
+    List<ChatDtoNew> createChats(Database database, int count) throws EntityNotFoundException {
+        List<ChatDtoNew> chats = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             chats.add(chatService.create(database.getId()));
         }
@@ -247,7 +247,8 @@ public class EntityServiceIntegrationTest {
     void renameChat(UUID chatId) throws EntityNotFoundException {
         chatService.renameChat(chatId, "This is the new name of the chat :)");
 
-        assertEquals("This is the new name of the chat", chatService.findById(chatId).name());
+        assertEquals("This is the new name of the chat",
+                chatService.findByIdNew(chatId, null).name());
     }
 
     /**
@@ -284,11 +285,11 @@ public class EntityServiceIntegrationTest {
     void deleteChat(UUID chatId) throws EntityNotFoundException {
         assertEquals(8, chatRepository.findAll().size());
         assertEquals(14, chatQueryWithResponseRepository.findAll().size());
-        assertNotNull(chatService.findById(chatId));
+        assertNotNull(chatService.findByIdNew(chatId, null));
 
         chatService.deleteChatById(chatId);
 
-        assertThrows(EntityNotFoundException.class, () -> chatService.findById(chatId));
+        assertThrows(EntityNotFoundException.class, () -> chatService.findByIdNew(chatId, null));
         assertEquals(7, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertEquals(2, databaseService.findAll(testUser.getId()).size());

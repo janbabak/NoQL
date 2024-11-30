@@ -4,7 +4,7 @@ import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
+import com.janbabak.noqlbackend.model.chat.ChatDtoNew;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
@@ -75,13 +75,13 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatDto expected = new ChatDto(
+        ChatDtoNew expected = new ChatDtoNew(
                 chatId, "Test chat", new ArrayList<>(), null, null);
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
-        ChatDto actual = chatService.findById(chatId);
+        ChatDtoNew actual = chatService.findByIdNew(chatId, null);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -108,7 +108,7 @@ class ChatServiceTest {
                 .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
-        assertThrows(AccessDeniedException.class, () -> chatService.findById(chatId));
+        assertThrows(AccessDeniedException.class, () -> chatService.findByIdNew(chatId, null));
     }
 
     @Test
@@ -120,7 +120,7 @@ class ChatServiceTest {
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.findById(chatId));
+        assertThrows(EntityNotFoundException.class, () -> chatService.findByIdNew(chatId, null));
     }
 
     @Test
@@ -219,14 +219,14 @@ class ChatServiceTest {
                 .database(database)
                 .build();
 
-        ChatDto expected = new ChatDto(
+        ChatDtoNew expected = new ChatDtoNew(
                 chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepository.save(any())).thenReturn(chat);
 
         // when
-        ChatDto actual = chatService.create(databaseId);
+        ChatDtoNew actual = chatService.create(databaseId);
 
         // then
         assertEquals(expected, actual);
