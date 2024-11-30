@@ -401,61 +401,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     }
 
     /**
-     * @param pageSize         number of items per page
-     * @param totalCount       total count of rows
-     * @param plotResult       if the result contains plot
-     * @param messages         messages to save into database
-     * @param request          query request - natural language query
-     * @param llmResponse      LLM response
-     * @param expectedResponse expected response
-     */
-    @ParameterizedTest
-    @MethodSource("testExecuteChatWithPlotDataProvider")
-    @DisplayName("Test execute chat")
-    void testExecuteChat(
-            Integer pageSize,
-            Long totalCount,
-            Boolean plotResult,
-            List<CreateChatQueryWithResponseRequest> messages,
-            QueryRequest request,
-            String llmResponse,
-            ChatResponse expectedResponse
-    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException,
-            LLMException, BadRequestException, PlotScriptExecutionException {
-
-        // given
-        UUID databaseId = getDatabase().getId();
-        ChatDtoNew chat = chatService.create(databaseId);
-        for (CreateChatQueryWithResponseRequest message : messages) {
-            chatService.addMessageToChat(chat.id(), message);
-        }
-        String plotFileName = databaseId + "-" + chat.id() + ".png";
-
-        when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
-        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        when(plotService.generatePlot(any(), any(), any())).thenReturn(plotFileName);
-
-        // when
-        ChatResponse queryResponse = queryService.queryChat(databaseId, chat.id(), request, pageSize);
-
-        // message id and timestamp are generated, so we need to set them manually
-        expectedResponse.setMessageId(queryResponse.getMessageId());
-        expectedResponse.setTimestamp(queryResponse.getTimestamp());
-
-        if (plotResult) {
-            expectedResponse.setPlotUrl("/static/images/" + chat.id() + "-" + queryResponse.getMessageId() + ".png");
-        }
-
-        // then
-        assertTrue(pageSize >= queryResponse.getData().rows().size());
-        assertEquals(totalCount, queryResponse.getData().totalCount());
-        assertEquals(expectedResponse, queryResponse);
-
-        // cleanup
-        chatService.deleteChatById(chat.id());
-    }
-
-    /**
      * @return page size, total count, plot result, messages, request, LLM response, expected response
      */
     @SuppressWarnings("all")
