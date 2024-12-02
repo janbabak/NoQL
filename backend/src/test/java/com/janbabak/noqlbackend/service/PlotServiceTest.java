@@ -3,11 +3,14 @@ package com.janbabak.noqlbackend.service;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +42,7 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.json"),
-                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0--84728494-04b5-49e1-8b4e-7b3aeac8836a-0.png"
+                        "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png"
                 },
                 {
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
@@ -52,8 +55,52 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.json"),
-                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0--12345678-04b5-49e1-8b4e-7b3aeac8836a-0.png"
+                        "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png"
                 }
         };
+    }
+
+    @Test
+    @DisplayName("Create file name")
+    void testCreateFileName() {
+        // given
+        String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
+        String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
+        String expectedFileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+
+        // when
+        String actualFileName = PlotService.createFileName(UUID.fromString(chatId), UUID.fromString(messageId));
+
+        // then
+        assertEquals(expectedFileName, actualFileName);
+    }
+
+    @Test
+    @DisplayName("Create file URL")
+    void testCreateFileUrl() {
+        // given
+        String fileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+        String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+
+        // when
+        String actualFileUrl = PlotService.createFileUrl(fileName);
+
+        // then
+        assertEquals(expectedUrl, actualFileUrl);
+    }
+
+    @Test
+    @DisplayName("Create file URL from IDs")
+    void testCreateFileUrlFromIds() {
+        // given
+        String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
+        String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
+        String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+
+        // when
+        String actualFileUrl = PlotService.createFileUrl(UUID.fromString(chatId), UUID.fromString(messageId));
+
+        // then
+        assertEquals(expectedUrl, actualFileUrl);
     }
 }

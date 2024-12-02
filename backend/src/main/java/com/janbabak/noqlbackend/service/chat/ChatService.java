@@ -72,8 +72,7 @@ public class ChatService {
                             try {
                                 LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
                                 String plotFileName = llmResponse.generatePlot()
-                                        ? PlotService.PLOTS_DIR_URL_PATH + "/" + chat.getId() + "-" + message.getId() +
-                                        PlotService.PLOT_IMAGE_FILE_EXTENSION // TODO: create method for this
+                                        ? PlotService.createFileUrl(chat.getId(), message.getId())
                                         : null;
 
                                 RetrievedData data = includeData

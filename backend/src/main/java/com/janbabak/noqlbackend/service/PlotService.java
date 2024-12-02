@@ -20,14 +20,14 @@ import java.util.stream.Stream;
 @Slf4j
 public class PlotService {
 
-    public static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
+    private static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
     private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5L;
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path PLOTS_DIR_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path SCRIPT_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
-    public static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
+    private static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
     @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
     @SuppressWarnings("FieldCanBeLocal")
@@ -128,7 +128,7 @@ public class PlotService {
      * @param messageId identifier of the message
      * @return name of the file
      */
-    public String createFileName(UUID chatId, UUID messageId) {
+    public static String createFileName(UUID chatId, UUID messageId) {
         return chatId + "--" + messageId + PLOT_IMAGE_FILE_EXTENSION;
     }
 
@@ -138,8 +138,19 @@ public class PlotService {
      * @param fileName name of the file with extension
      * @return URL path to the file
      */
-    public String createFileUrl(String fileName) {
+    public static String createFileUrl(String fileName) {
         return PLOTS_DIR_URL_PATH + "/" + fileName;
+    }
+
+    /**
+     * Create URL path to the file
+     *
+     * @param chatId    identifier of the chat
+     * @param messageId identifier of the message
+     * @return URL path to the file
+     */
+    public static String createFileUrl(UUID chatId, UUID messageId) {
+        return createFileUrl(createFileName(chatId, messageId));
     }
 
     /**
