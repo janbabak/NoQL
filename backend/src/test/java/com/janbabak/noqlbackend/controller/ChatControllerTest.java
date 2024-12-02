@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -121,7 +123,7 @@ class ChatControllerTest {
                 .name("Test chat")
                 .build();
 
-        when(chatService.findById(chatId)).thenReturn(chatDto);
+        when(chatService.findById(eq(chatId), any(), eq(true))).thenReturn(chatDto);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
@@ -137,7 +139,7 @@ class ChatControllerTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatService.findById(chatId)).thenThrow(EntityNotFoundException.class);
+        when(chatService.findById(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))

@@ -1,9 +1,9 @@
 import type { AxiosResponse } from 'axios'
 import Api from './api.ts'
 import { CreateDatabaseRequest, Database, UpdateDatabaseRequest } from '../../types/Database.ts'
-import { QueryRequest, QueryResponse } from '../../types/Query.ts'
+import { ConsoleResponse, QueryRequest } from '../../types/Query.ts'
 import { DatabaseStructure } from '../../types/DatabaseStructure.ts'
-import { ChatHistoryItem } from '../../types/Chat.ts'
+import { ChatHistoryItem, ChatResponse } from '../../types/Chat.ts'
 
 const databaseApi = {
   API: Api.getInstance(),
@@ -57,47 +57,14 @@ const databaseApi = {
     return this.API.get(this.DOMAIN + '/' + id + '/structure')
   },
 
-  /**
-   * Query the user's database by executing chat.
-   * @param databaseId database identifier
-   * @param request query request
-   * @param chatId chat identifier
-   * @param pageSize number of items in one page
-   */
   queryChat(databaseId: string, request: QueryRequest, chatId: string, pageSize: number)
-    : Promise<AxiosResponse<QueryResponse>> {
-
+    : Promise<AxiosResponse<ChatResponse>> {
     return this.API.post(
       `${this.DOMAIN}/${databaseId}/chat/${chatId}/query`,
       request, [
         {
           name: 'pageSize',
           value: pageSize
-        }
-      ]
-    )
-  },
-
-  /**
-   * Load chat result.
-   * @param databaseId database identifier
-   * @param chatId chat identifier
-   * @param messageId message to load result of identifier
-   * @param page page number (first page is 0)
-   * @param pageSize number of items in one page
-   */
-  loadChatResult(databaseId: string, chatId: string, messageId: string, page: number, pageSize: number):
-    Promise<AxiosResponse<QueryResponse>> {
-    console.log("messageId database api: ", messageId)
-    return this.API.get(`${this.DOMAIN}/${databaseId}/chat/${chatId}/message/${messageId}`,
-      [
-        {
-          name: 'pageSize',
-          value: pageSize
-        },
-        {
-          name: 'page',
-          value: page
         }
       ]
     )
@@ -112,7 +79,7 @@ const databaseApi = {
    * changed
    */
   queryQueryLanguageQuery(id: string, query: string, page: number = 0, pageSize: number = 10)
-    : Promise<AxiosResponse<QueryResponse>> {
+    : Promise<AxiosResponse<ConsoleResponse>> {
 
     return this.API.post(
       this.DOMAIN + '/' + id + '/query/queryLanguage',

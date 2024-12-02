@@ -1,5 +1,5 @@
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Chat, ChatHistoryItem } from '../../types/Chat.ts'
+import { ChatHistoryItem, Chat } from '../../types/Chat.ts'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { AxiosResponse } from 'axios'
 import chatApi from '../../services/api/chatApi.ts'
@@ -89,7 +89,7 @@ export const fetchChatHistory
 export const createNewChat
   = createAsyncThunk('chatHistory/createNewChat',
   async (databaseId: string): Promise<Chat> => {
-    return await chatApi.createNewChat(databaseId)
+    return await chatApi.createChat(databaseId)
       .then((response: AxiosResponse<Chat>) => response.data)
       .catch((error) => error)
   }

@@ -337,7 +337,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResponse'
+                $ref: '#/components/schemas/ChatResponse'
         '400':
           description: Bad request - invalid input
         '401':
@@ -346,68 +346,6 @@ paths:
           description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
-
-  /database/{databaseId}/chat/{chatId}/message/{messageId}:
-    get:
-      tags:
-        - Database
-      security:
-        - BearerAuth: [ ]
-      summary: Load result of message
-      deprecated: true
-      description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
-      parameters:
-        - $ref: '#/components/parameters/databaseIdPath'
-        - $ref: '#/components/parameters/chatIdPath'
-        - $ref: '#/components/parameters/messageIdPath'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      responses:
-        '200':
-          description: >
-            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
-            natural language query to a database query or generate the plot.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QueryResponse'
-        '401':
-          description: Unauthorized - invalid or expired access token
-        '403':
-          description: Forbidden - user is not an ADMIN or owner of the database
-        '404':
-          description: Database of chat of specified ID not found.
-
-  /database/{databaseId}/chat/{chatId}/message/{messageId}/data:
-    get:
-      tags:
-        - Database
-      security:
-        - BearerAuth: [ ]
-      summary: Load result of message
-      description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
-      parameters:
-        - $ref: '#/components/parameters/databaseIdPath'
-        - $ref: '#/components/parameters/chatIdPath'
-        - $ref: '#/components/parameters/messageIdPath'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      responses:
-        '200':
-          description: >
-            Query result with retrieved data. Or query result with error message if the LLM is not able to translate the
-            natural language query to a database query or generate the plot.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatResponseData'
-        '401':
-          description: Unauthorized - invalid or expired access token
-        '403':
-          description: Forbidden - user is not an ADMIN or owner of the database
-        '404':
-          description: Database of chat of specified ID not found.
-
 
   /database/{databaseId}/query/queryLanguage:
     post:
@@ -437,7 +375,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QueryResponse'
+                $ref: '#/components/schemas/ConsoleResponse'
               example:
                 data:
                   columnNames: [ "name", "email" ]
@@ -542,6 +480,33 @@ paths:
           description: Forbidden - user is not an ADMIN or owner of the database
         '404':
           description: Database of specified ID not found
+
+  /message/{messageId}/data:
+    get:
+      tags:
+        - Message
+      security:
+        - BearerAuth: [ ]
+      summary: Load result of message
+      description: Role USER can load chat only related to his own databases. Role ADMIN can query any database.
+      parameters:
+        - $ref: '#/components/parameters/messageIdPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      responses:
+        '200':
+          description: >
+            Query result with retrieved data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrievedData'
+        '401':
+          description: Unauthorized - invalid or expired access token
+        '403':
+          description: Forbidden - user is not an ADMIN or owner of the database
+        '404':
+          description: Database of chat of specified ID not found.
 
   /chat:
     post:
@@ -1112,35 +1077,6 @@ components:
             - $ref: '#/components/schemas/QueryErrorMessage'
             - example: null
 
-    ChatResponseData:
-      type: object
-      description: Retrieved data from the database query in form of table.
-      properties:
-        page:
-          type: integer
-          format: int64
-          example: 0
-        pageSize:
-          type: integer
-          format: int64
-          example: 10
-        totalCount:
-          type: integer
-          format: int64
-          example: 200
-        columnNames:
-          type: array
-          items:
-            type: string
-          example: [ "sex", "count" ]
-        rows:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-          example: [ [ "male", "8" ], [ "female", "2" ] ]
-
     RetrievedData:
       type: object
       description: Retrieved data from the database query in form of table.
@@ -1157,12 +1093,54 @@ components:
             items:
               type: string
           example: [ [ "male", "8" ], [ "female", "2" ] ]
+        page:
+          type: integer
+          format: int64
+          example: 0
+        pageSize:
+          type: integer
+          format: int64
+          example: 10
+        totalCount:
+          type: integer
+          format: int64
+          example: 200
 
     TotalCount:
       description: Total number of rows in the database query result (number of items in all pages).
       type: integer
       format: int64
       example: 2
+
+    ChatResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RetrievedData'
+        messageId:
+          $ref: '#/components/schemas/UUID'
+        nlQuery:
+          $ref: '#/components/schemas/NaturalLanguageQuery'
+        dbQuery:
+          $ref: '#/components/schemas/DatabaseLanguageQuery'
+        plotUrl:
+          type: string
+          description: URL to the plot if the users requested a plot
+          example: "http://localhost:8080/static/images/13eae4d2-6d7b-41c6-93d0-8f16e4721504-13eae4d2-6d7b-41c6-93d0-8f16e4721555.png"
+        timestamp:
+          $ref: '#/components/schemas/Timestamp'
+        error:
+          $ref: '#/components/schemas/QueryErrorMessage'
+
+    ConsoleResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RetrievedData'
+        dbQuery:
+            $ref: '#/components/schemas/DatabaseLanguageQuery'
+        error:
+            $ref: '#/components/schemas/QueryErrorMessage'
 
     ChatQueryWithResponse:
       type: object
@@ -1190,6 +1168,11 @@ components:
       type: string
       description: Natural language query
       example: "Plot sex of users older than 25"
+
+    DatabaseLanguageQuery:
+      type: string
+      description: Database query language (SQL, ...)
+      example: "SELECT * FROM customer;"
 
     LLMResult:
       type: object
@@ -1321,9 +1304,11 @@ components:
         messages:
           type: array
           items:
-            $ref: '#/components/schemas/ChatQueryWithResponse'
+            $ref: '#/components/schemas/ChatResponse'
         modificationDate:
           $ref: '#/components/schemas/Timestamp'
+        databaseId:
+          $ref: '#/components/schemas/UUID'
 
     ChatName:
       type: string

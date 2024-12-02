@@ -44,8 +44,9 @@ public class ChatController {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @GetMapping("/{chatId}")
-    public ChatDto getById(@PathVariable UUID chatId) throws EntityNotFoundException {
-        return chatService.findById(chatId);
+    public ChatDto getById(@PathVariable UUID chatId, @RequestParam(required = false) Integer pageSize)
+            throws EntityNotFoundException {
+        return chatService.findById(chatId, pageSize, true);
     }
 
     /**

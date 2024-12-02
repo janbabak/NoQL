@@ -61,7 +61,6 @@ class ChatServiceTest {
             .id(UUID.randomUUID())
             .build();
 
-
     @Test
     @DisplayName("Test find chat by id")
     void testFindChatById() throws EntityNotFoundException {
@@ -81,7 +80,7 @@ class ChatServiceTest {
         when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
-        ChatDto actual = chatService.findById(chatId);
+        ChatDto actual = chatService.findById(chatId, null, true);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
@@ -108,7 +107,8 @@ class ChatServiceTest {
                 .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
-        assertThrows(AccessDeniedException.class, () -> chatService.findById(chatId));
+        assertThrows(AccessDeniedException.class,
+                () -> chatService.findById(chatId, null, true));
     }
 
     @Test
@@ -120,7 +120,8 @@ class ChatServiceTest {
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.findById(chatId));
+        assertThrows(EntityNotFoundException.class,
+                () -> chatService.findById(chatId, null, true));
     }
 
     @Test

@@ -1,20 +1,35 @@
-import { ChatQueryWithResponse } from './Chat.ts'
-
 interface QueryRequest {
   query: string,
   model: string,
 }
 
-interface RetrievedData {
-  columnNames: string[]
-  rows: string[][]
-}
-
-interface QueryResponse {
+interface ConsoleResponse {
   data: RetrievedData | null
-  totalCount: number | null // total count of rows (response is paginated, so it does not contain all of them)
-  chatQueryWithResponse: ChatQueryWithResponse
-  errorMessage: string | null
+  dbQuery: string | null
+  error: string | null
 }
 
-export type { QueryRequest, QueryResponse, RetrievedData }
+interface ChatResponse {
+  data: RetrievedData | null
+  messageId: string,
+  nlQuery: string,
+  dbQuery: string | null,
+  plotUrl: string | null,
+  timestamp: Date,
+  error: string,
+}
+
+interface RetrievedData {
+  columnNames: string[],
+  rows: string[][],
+  page: number,
+  pageSize: number,
+  totalCount: number,
+}
+
+export type {
+  QueryRequest,
+  ConsoleResponse,
+  ChatResponse,
+  RetrievedData
+}

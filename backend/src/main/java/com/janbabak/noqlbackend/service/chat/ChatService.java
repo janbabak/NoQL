@@ -5,14 +5,13 @@ import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
+import com.janbabak.noqlbackend.model.chat.*;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
-import com.janbabak.noqlbackend.model.chat.ChatQueryWithResponseDto;
+import com.janbabak.noqlbackend.model.query.ChatResponse;
+import com.janbabak.noqlbackend.model.query.RetrievedData;
+import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
@@ -47,47 +46,58 @@ public class ChatService {
     /**
      * Find chat by chat id.
      *
-     * @param chatId chat identifier
+     * @param chatId      chat identifier
+     * @param pageSize    number of messages to return
+     * @param includeData if true, include retrieved data in the response, otherwise data field is null
      * @return chat
      * @throws EntityNotFoundException                                   chat of specified id not found
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatDto findById(UUID chatId) throws EntityNotFoundException {
+    public ChatDto findById(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
-        return new ChatDto(
-                chat.getId(),
-                chat.getName(),
-                chat.getMessages()
+        return ChatDto.builder()
+                .id(chat.getId())
+                .name(chat.getName())
+                .modificationDate(chat.getModificationDate())
+                .databaseId(chat.getDatabase().getId())
+                .messages(chat.getMessages()
                         .stream()
                         .map(message -> {
                             try {
                                 LLMResponse llmResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
                                 String plotFileName = llmResponse.generatePlot()
-                                        ? chat.getId() + "-" + message.getId()
+                                        ? PlotService.createFileUrl(chat.getId(), message.getId())
                                         : null;
 
-                                return new ChatQueryWithResponseDto(
+                                RetrievedData data = includeData
+                                        ? QueryService.retrieveDataFromMessage(
+                                        message, chat.getDatabase(), 0, pageSize)
+                                        : null;
+
+                                return new ChatResponse(
+                                        data,
                                         message.getId(),
                                         message.getNlQuery(),
-                                        new ChatQueryWithResponseDto.LLMResult(llmResponse, plotFileName),
-                                        message.getTimestamp());
+                                        llmResponse.databaseQuery(),
+                                        plotFileName,
+                                        message.getTimestamp(),
+                                        null);
                             } catch (JsonProcessingException e) {
                                 // should not happen since invalid JSONs are not saved
                                 log.error("Cannot parse message JSON from database, messageId={}", message.getId());
-                                return null;
+                                return ChatResponse.failedResponse(
+                                        "Cannot parse message JSON from database, messageId=" + message.getId());
                             }
                         })
-                        .toList(),
-                chat.getModificationDate(),
-                chat.getDatabase().getId());
+                        .toList())
+                .build();
     }
-
 
     /**
      * Find all chats associated with specified database sorted by the modification date in descending order.

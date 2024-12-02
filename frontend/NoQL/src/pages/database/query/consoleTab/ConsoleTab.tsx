@@ -1,16 +1,16 @@
-import { CONSOLE_TAB } from './Constants.ts'
-import styles from './Query.module.css'
+import { CONSOLE_TAB } from '../Constants.ts'
+import styles from '../Query.module.css'
 import { QueryEditor } from './QueryEditor.tsx'
 import IconButton from '@mui/material/IconButton'
 import PlayCircleFilledWhiteRoundedIcon from '@mui/icons-material/PlayCircleFilledWhiteRounded'
 import React, { memo, useState } from 'react'
-import databaseApi from '../../../services/api/databaseApi.ts'
-import { QueryResponse } from '../../../types/Query.ts'
-import { Result } from './Result.tsx'
+import databaseApi from '../../../../services/api/databaseApi.ts'
+import { ConsoleResponse } from '../../../../types/Query.ts'
 import { LinearProgress } from '@mui/material'
-import { AppDispatch } from '../../../state/store.ts'
+import { AppDispatch } from '../../../../state/store.ts'
 import { useDispatch } from 'react-redux'
-import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { ResultTable } from '../ResultTable.tsx'
 
 interface ConsoleTabProps {
   databaseId: string
@@ -25,36 +25,25 @@ const ConsoleTab = memo((
     tab,
     queryLanguageQuery,
     setQueryLanguageQuery
-  }: ConsoleTabProps)  => {
+  }: ConsoleTabProps) => {
 
   const dispatch: AppDispatch = useDispatch()
 
   const [
     queryResult,
     setQueryResult
-  ] = useState<QueryResponse | null>(null)
+  ] = useState<ConsoleResponse | null>(null)
 
   const [
     queryLoading,
     setQueryLoading
   ] = useState<boolean>(false)
 
-  const [
-    page,
-    setPage
-  ] = useState<number>(0)
-
-  const [
-    pageSize,
-    setPageSize
-  ] = useState<number>(10)
-
   async function executeQuery(): Promise<void> {
-    setPage(0)
     setQueryLoading(true)
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
-        databaseId, queryLanguageQuery, 0, pageSize)
+        databaseId, queryLanguageQuery, 0, queryResult?.data?.pageSize || 10) // TODO: default limit?
       setQueryResult(response.data)
     } catch (error: unknown) {
       showErrorWithMessageAndError(dispatch, 'Failed to execute query', error)
@@ -64,14 +53,11 @@ const ConsoleTab = memo((
   }
 
   async function onPageChange(page: number, pageSize: number): Promise<void> {
-    setPageSize(pageSize)
-    setPage(page)
-
     setQueryLoading(true)
     try {
       const response = await databaseApi.queryQueryLanguageQuery(
         databaseId,
-        queryResult?.chatQueryWithResponse.nlQuery || '',
+        queryResult?.dbQuery || '',
         page,
         pageSize)
 
@@ -101,21 +87,17 @@ const ConsoleTab = memo((
       className={styles.editorTab}
     >
       <QueryEditor value={queryLanguageQuery} setValue={setQueryLanguageQuery} />
-      { queryLoading && <LinearProgress /> }
+      {queryLoading && <LinearProgress />}
 
       {ExecuteButton}
 
-      <Result
-        queryResponse={queryResult}
-        editQueryInConsole={(_query: string) => console.log('implement')} // TODO: implement
-        showEditInConsoleButton={false}
-        page={page}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-        totalCount={queryResult?.totalCount || 1}
-        onPageChange={onPageChange}
-        loading={queryLoading}
-      />
+      {queryResult?.data &&
+        <ResultTable
+          data={queryResult?.data}
+          onPageChange={onPageChange}
+          loading={queryLoading}
+        />
+      }
     </div>
   )
 })

@@ -1,38 +1,38 @@
-import styles from './Query.module.css'
-import { Chat, ChatHistoryItem } from '../../../types/Chat.ts'
+import styles from '../Query.module.css'
+import { ChatHistoryItem, Chat } from '../../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'
 import { Menu, MenuItem, TextField } from '@mui/material'
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded'
 import IconButton from '@mui/material/IconButton'
-import React, { memo, SetStateAction, useEffect, useRef, useState } from 'react'
-import { ConfirmDialog } from '../../../components/ConfirmDialog.tsx'
+import React, { memo, useEffect, useRef, useState } from 'react'
+import { ConfirmDialog } from '../../../../components/ConfirmDialog.tsx'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../../state/store.ts'
-import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../state/./chat/chatHistorySlice.ts'
-import chatApi from '../../../services/api/chatApi.ts'
-import { QueryResponse } from '../../../types/Query.ts'
-import { setChat } from '../../../state/chat/chatSlice.ts'
-import { SkeletonStack } from '../../../components/loaders/SkeletonStack.tsx'
-import { showErrorWithMessageAndError } from '../../../components/snackbar/GlobalSnackbar.helpers.ts'
+import { AppDispatch, RootState } from '../../../../state/store.ts'
+import { setActiveChatIndex, createNewChat, fetchChatHistory } from '../../../../state/chat/chatHistorySlice.ts'
+import chatApi from '../../../../services/api/chatApi.ts'
+import { setChat } from '../../../../state/chat/chatSlice.ts'
+import { SkeletonStack } from '../../../../components/loaders/SkeletonStack.tsx'
+import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ChatHistoryProps {
-  loadChatResult: (chatId: string) => Promise<void>,
+  loadChat: (chatId: string) => Promise<void>,
   loadChatHistoryAndChatAndResult: (chatIndex: number) => Promise<void>
   databaseId: string,
-  setQueryResult: React.Dispatch<SetStateAction<QueryResponse | null>>
 }
 
+/**
+ * Chat history - list of previous chats.
+ */
 const ChatHistory = memo((
   {
-    loadChatResult,
+    loadChat,
     loadChatHistoryAndChatAndResult,
     databaseId,
-    setQueryResult
   }: ChatHistoryProps) => {
 
   const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {
@@ -43,7 +43,7 @@ const ChatHistory = memo((
     return state.chatHistoryReducer.loading
   })
 
-  const createChatLoadingRedux: boolean = useSelector((state: RootState) => {
+  const createChatLoading: boolean = useSelector((state: RootState) => {
     return state.chatHistoryReducer.createNewChatLoading
   })
 
@@ -135,13 +135,12 @@ const ChatHistory = memo((
 
   function openChat(id: string, index: number): void {
     dispatch(setActiveChatIndex(index))
-    void loadChatResult(id)
+    void loadChat(id)
   }
 
   async function createChat(): Promise<void> {
     const result = await dispatch(createNewChat(databaseId))
     dispatch(setChat(result.payload as Chat))
-    setQueryResult(null)
   }
 
   // focus input element that is rendered when chatToRenameId changes
@@ -183,8 +182,8 @@ const ChatHistory = memo((
       onClick={createChat}
       startIcon={<AddRoundedIcon />}
       variant="outlined"
-      loading={createChatLoadingRedux}
-      disabled={createChatLoadingRedux}
+      loading={createChatLoading}
+      disabled={createChatLoading}
       fullWidth
     >
       New chat

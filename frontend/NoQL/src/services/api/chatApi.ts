@@ -7,10 +7,15 @@ const chatApi = {
   DOMAIN: '/chat',
 
   getById(id: string): Promise<AxiosResponse<Chat>> {
-    return this.API.get(this.DOMAIN + '/' + id)
+    return this.API.get(this.DOMAIN + '/' + id, [
+      {
+        name: 'pageSize',
+        value: 10
+      }
+    ])
   },
 
-  createNewChat(databaseId: string): Promise<AxiosResponse<Chat>> {
+  createChat(databaseId: string): Promise<AxiosResponse<Chat>> {
     return this.API.post(this.DOMAIN, null, [
       {
         name: 'databaseId',
