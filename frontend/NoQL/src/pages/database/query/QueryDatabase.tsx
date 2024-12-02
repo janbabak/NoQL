@@ -48,7 +48,7 @@ const QueryDatabase = memo((
               aria-label="Chat and Console tabs"
             >
               <Tab label="Chat" sx={{ borderRadius: '0.25rem' }} />
-              <Tab label="Editor" sx={{ borderRadius: '0.25rem' }} />
+              <Tab label="Console" sx={{ borderRadius: '0.25rem' }} />
             </Tabs>
           </Box>
 

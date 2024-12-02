@@ -22,7 +22,6 @@ export function ChatItem({ message }: ChatItemProps) {
       {message.plotUrl != null &&
         <Plot plotUrl={message.plotUrl} />}
 
-      {/*TODO: loading*/}
       {message.data != null &&
         <ChatResultComponent message={message} />}
     </div>

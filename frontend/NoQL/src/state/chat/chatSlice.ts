@@ -56,7 +56,6 @@ const chatSlice = createSlice({
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatState>): void => {
     builder
-      // fetch chat new
       .addCase(fetchChat.fulfilled,
         (state: ChatState, action: PayloadAction<ChatNew>): void => {
           state.chatNew = action.payload
@@ -91,7 +90,7 @@ const chatSlice = createSlice({
 
 export const fetchChat = createAsyncThunk('chat/fetchChatNew',
   async (chatId: string): Promise<ChatNew> => {
-    return await chatApi.getByIdNew(chatId)
+    return await chatApi.getById(chatId)
       .then((response: AxiosResponse<ChatNew>) => response.data)
       .catch((error) => error)
   }

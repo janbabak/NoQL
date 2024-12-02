@@ -20,7 +20,7 @@ import { SkeletonStack } from '../../../../components/loaders/SkeletonStack.tsx'
 import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
 
 interface ChatHistoryProps {
-  loadChatResult: (chatId: string) => Promise<void>,
+  loadChat: (chatId: string) => Promise<void>,
   loadChatHistoryAndChatAndResult: (chatIndex: number) => Promise<void>
   databaseId: string,
 }
@@ -30,7 +30,7 @@ interface ChatHistoryProps {
  */
 const ChatHistory = memo((
   {
-    loadChatResult,
+    loadChat,
     loadChatHistoryAndChatAndResult,
     databaseId,
   }: ChatHistoryProps) => {
@@ -135,7 +135,7 @@ const ChatHistory = memo((
 
   function openChat(id: string, index: number): void {
     dispatch(setActiveChatIndex(index))
-    void loadChatResult(id)
+    void loadChat(id)
   }
 
   async function createChat(): Promise<void> {

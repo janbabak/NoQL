@@ -10,12 +10,7 @@ import { ChatHistoryItem, ChatNew, ChatResponse } from '../../../../types/Chat.t
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../../state/store.ts'
-import {
-  addMessageAndChangeName,
-  addMessage,
-  fetchChat,
-  setChatToNull
-} from '../../../../state/chat/chatSlice.ts'
+import { addMessage, addMessageAndChangeName, fetchChat, setChatToNull } from '../../../../state/chat/chatSlice.ts'
 import { fetchChatHistory, renameChat } from '../../../../state/chat/chatHistorySlice.ts'
 import { ModelSelect } from './chat/ModelSelect.tsx'
 import { showErrorWithMessageAndError } from '../../../../components/snackbar/GlobalSnackbar.helpers.ts'
@@ -39,7 +34,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
   const dispatch: AppDispatch = useDispatch()
 
-  const activeChatIndexRedux: number = useSelector((state: RootState) => { //TODO: rename to activeChatIndex
+  const activeChatIndex: number = useSelector((state: RootState) => {
     return state.chatHistoryReducer.activeChatIndex
   })
 
@@ -82,7 +77,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
   /**
    * Load chat history, then active chat content, then query the chat for the result.
-   * Creates new chat if there isn't any. // TODO that
+   * Creates new chat if there isn't any. // TODO: that
    */
   async function loadChatHistoryAndFetchChat(chatIndex: number): Promise<void> {
     // chat history
@@ -91,9 +86,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
     // @ts-ignore
     if (result.payload.length > chatIndex && chatIndex >= 0) {
       // @ts-ignore
-      const id = result.payload[chatIndex].id
-      // @ts-ignore
-       await dispatch(fetchChat(id))
+      await dispatch(fetchChat(result.payload[chatIndex].id))
     } else {
       dispatch(setChatToNull())
       return
@@ -124,7 +117,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
           query: naturalLanguageQuery.current.value,
           model: model
         },
-        chatHistory[activeChatIndexRedux].id,
+        chatHistory[activeChatIndex].id,
         10)
 
       // @ts-ignore
@@ -143,7 +136,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
           name: updatedName
         }))
         dispatch(renameChat({
-          index: activeChatIndexRedux,
+          index: activeChatIndex,
           name: updatedName
         }))
       } else {
@@ -158,10 +151,10 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
 
 
   /**
-   * Load query result of a chat - load it's content and query response.
+   * Load chat by id.
    * @param chatId chat id
    */
-  async function loadChatAndResult(chatId: string): Promise<void> {
+  async function loadChat(chatId: string): Promise<void> {
     await dispatch(fetchChat(chatId)) // TODO: move to chat history
   }
 
@@ -193,7 +186,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
     >
       <div className={styles.chatTabContainer}>
         <ChatHistory
-          loadChatResult={loadChatAndResult}
+          loadChat={loadChat}
           loadChatHistoryAndChatAndResult={loadChatHistoryAndFetchChat}
           databaseId={databaseId}
         />

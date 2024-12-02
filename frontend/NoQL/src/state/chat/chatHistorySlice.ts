@@ -89,7 +89,7 @@ export const fetchChatHistory
 export const createNewChat
   = createAsyncThunk('chatHistory/createNewChat',
   async (databaseId: string): Promise<Chat> => {
-    return await chatApi.createNewChat(databaseId)
+    return await chatApi.createChat(databaseId)
       .then((response: AxiosResponse<Chat>) => response.data)
       .catch((error) => error)
   }
