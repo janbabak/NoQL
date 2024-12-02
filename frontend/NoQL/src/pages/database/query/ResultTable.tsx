@@ -10,10 +10,10 @@ import {
   TableRow
 } from '@mui/material'
 import React, { memo } from 'react'
-import { ChatResponseData } from '../../../types/Chat.ts'
+import { RetrievedData } from '../../../types/Query.ts'
 
 interface Props {
-  data?: ChatResponseData,
+  data?: RetrievedData,
   onPageChange: (page: number, pageSize: number) => void,
   paginationOptions?: number[],
   loading: boolean,

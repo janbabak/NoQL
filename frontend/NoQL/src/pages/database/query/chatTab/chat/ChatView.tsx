@@ -1,4 +1,4 @@
-import { ChatNew, ChatResponse } from '../../../../../types/Chat.ts'
+import { Chat, ChatResponse } from '../../../../../types/Chat.ts'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../../../state/store.ts'
 import styles from '../../Query.module.css'
@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react'
  */
 export function ChatView() {
 
-  const chat: ChatNew | null = useSelector((state: RootState) => {
+  const chat: Chat | null = useSelector((state: RootState) => {
     return state.chatReducer.chatNew
   })
 

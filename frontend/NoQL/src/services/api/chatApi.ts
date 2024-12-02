@@ -1,12 +1,12 @@
 import Api from './api.ts'
 import { AxiosResponse } from 'axios'
-import { Chat, ChatNew } from '../../types/Chat.ts'
+import { Chat } from '../../types/Chat.ts'
 
 const chatApi = {
   API: Api.getInstance(),
   DOMAIN: '/chat',
 
-  getById(id: string): Promise<AxiosResponse<ChatNew>> {
+  getById(id: string): Promise<AxiosResponse<Chat>> {
     return this.API.get(this.DOMAIN + '/' + id, [
       {
         name: 'pageSize',

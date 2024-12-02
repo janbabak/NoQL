@@ -1,11 +1,12 @@
-import { ChatNew, ChatResponse, ChatResponseData } from '../../types/Chat.ts'
+import { Chat, ChatResponse } from '../../types/Chat.ts'
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import chatApi from '../../services/api/chatApi.ts'
 import { AxiosResponse } from 'axios'
 import messageApi from '../../services/api/messageApi.ts'
+import { RetrievedData } from '../../types/Query.ts'
 
 interface ChatState {
-  chatNew: ChatNew | null,
+  chatNew: Chat | null,
   loading: boolean,
   error: string | undefined,
 }
@@ -50,14 +51,14 @@ const chatSlice = createSlice({
     setChatToNull: (state: ChatState): void => {
       state.chatNew = null
     },
-    setChat: (state: ChatState, action: PayloadAction<ChatNew>): void => {
+    setChat: (state: ChatState, action: PayloadAction<Chat>): void => {
       state.chatNew = action.payload
     }
   },
   extraReducers: (builder: ActionReducerMapBuilder<ChatState>): void => {
     builder
       .addCase(fetchChat.fulfilled,
-        (state: ChatState, action: PayloadAction<ChatNew>): void => {
+        (state: ChatState, action: PayloadAction<Chat>): void => {
           state.chatNew = action.payload
           state.loading = false
           state.error = undefined
@@ -71,7 +72,7 @@ const chatSlice = createSlice({
           state.error = action.error.message
       })
       .addCase(loadChatMessageData.fulfilled,
-        (state: ChatState, action: PayloadAction<{data: ChatResponseData, messageId: string}>): void => {
+        (state: ChatState, action: PayloadAction<{data: RetrievedData, messageId: string}>): void => {
 
         if (!state.chatNew || !state.chatNew.messages) {
           return
@@ -89,9 +90,9 @@ const chatSlice = createSlice({
 })
 
 export const fetchChat = createAsyncThunk('chat/fetchChatNew',
-  async (chatId: string): Promise<ChatNew> => {
+  async (chatId: string): Promise<Chat> => {
     return await chatApi.getById(chatId)
-      .then((response: AxiosResponse<ChatNew>) => response.data)
+      .then((response: AxiosResponse<Chat>) => response.data)
       .catch((error) => error)
   }
 )
@@ -100,7 +101,7 @@ export const loadChatMessageData = createAsyncThunk(
   'chat/loadChatMessagePage',
   async (payload: { messageId: string, page: number, pageSize: number }) => {
     return await messageApi.getMessageData(payload.messageId, payload.page, payload.pageSize)
-      .then((response: AxiosResponse<ChatResponseData>) => {
+      .then((response: AxiosResponse<RetrievedData>) => {
         return {
           data: response.data,
           messageId: payload.messageId

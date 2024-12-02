@@ -1,5 +1,5 @@
 import { ActionReducerMapBuilder, createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Chat, ChatHistoryItem } from '../../types/Chat.ts'
+import { ChatHistoryItem, Chat } from '../../types/Chat.ts'
 import databaseApi from '../../services/api/databaseApi.ts'
 import { AxiosResponse } from 'axios'
 import chatApi from '../../services/api/chatApi.ts'

@@ -1,6 +1,6 @@
 import Api from './api.ts'
 import { AxiosResponse } from 'axios'
-import { ChatResponseData } from '../../types/Chat.ts'
+import { RetrievedData } from '../../types/Query.ts'
 
 const messageApi = {
   API: Api.getInstance(),
@@ -12,7 +12,7 @@ const messageApi = {
    * @param page page number (default 0)
    * @param pageSize number of items per page (default 10)
    */
-  getMessageData(id: string, page: number = 0, pageSize: number = 10): Promise<AxiosResponse<ChatResponseData>> {
+  getMessageData(id: string, page: number = 0, pageSize: number = 10): Promise<AxiosResponse<RetrievedData>> {
     return this.API.get(`${this.DOMAIN}/${id}/data`, [
       {
         name: 'page',

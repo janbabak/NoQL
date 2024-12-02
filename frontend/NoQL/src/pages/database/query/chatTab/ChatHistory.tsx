@@ -1,5 +1,5 @@
 import styles from '../Query.module.css'
-import { ChatHistoryItem, ChatNew } from '../../../../types/Chat.ts'
+import { ChatHistoryItem, Chat } from '../../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'
 import { Menu, MenuItem, TextField } from '@mui/material'
@@ -140,7 +140,7 @@ const ChatHistory = memo((
 
   async function createChat(): Promise<void> {
     const result = await dispatch(createNewChat(databaseId))
-    dispatch(setChat(result.payload as ChatNew))
+    dispatch(setChat(result.payload as Chat))
   }
 
   // focus input element that is rendered when chatToRenameId changes

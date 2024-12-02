@@ -6,7 +6,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import React, { memo, useEffect, useRef, useState } from 'react'
 import databaseApi from '../../../../services/api/databaseApi.ts'
 import { ChatHistory } from './ChatHistory.tsx'
-import { ChatHistoryItem, ChatNew, ChatResponse } from '../../../../types/Chat.ts'
+import { ChatHistoryItem, Chat, ChatResponse } from '../../../../types/Chat.ts'
 import { AxiosResponse } from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../../../../state/store.ts'
@@ -38,7 +38,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
     return state.chatHistoryReducer.activeChatIndex
   })
 
-  const chat: ChatNew | null = useSelector((state: RootState) => {
+  const chat: Chat | null = useSelector((state: RootState) => {
     return state.chatReducer.chatNew
   })
 
