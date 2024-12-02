@@ -1077,35 +1077,6 @@ components:
             - $ref: '#/components/schemas/QueryErrorMessage'
             - example: null
 
-    ChatResponseData:
-      type: object
-      description: Retrieved data from the database query in form of table.
-      properties:
-        page:
-          type: integer
-          format: int64
-          example: 0
-        pageSize:
-          type: integer
-          format: int64
-          example: 10
-        totalCount:
-          type: integer
-          format: int64
-          example: 200
-        columnNames:
-          type: array
-          items:
-            type: string
-          example: [ "sex", "count" ]
-        rows:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-          example: [ [ "male", "8" ], [ "female", "2" ] ]
-
     RetrievedData:
       type: object
       description: Retrieved data from the database query in form of table.
@@ -1165,7 +1136,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/ChatResponseData'
+          $ref: '#/components/schemas/RetrievedData'
         dbQuery:
             $ref: '#/components/schemas/DatabaseLanguageQuery'
         error:
