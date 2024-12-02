@@ -39,7 +39,7 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.json"),
-                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0"
+                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0--84728494-04b5-49e1-8b4e-7b3aeac8836a-0.png"
                 },
                 {
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
@@ -52,7 +52,7 @@ class PlotServiceTest {
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.json"),
-                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0"
+                        "d9223610-04b5-49e1-8b4e-7b3aeac8836a-0--12345678-04b5-49e1-8b4e-7b3aeac8836a-0.png"
                 }
         };
     }

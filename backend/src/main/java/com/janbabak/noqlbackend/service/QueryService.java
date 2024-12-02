@@ -41,7 +41,7 @@ public class QueryService {
     public final static String DATABASE_PLACEHOLDER = "database99889899";
     public final static String PORT_PLACEHOLDER = "ppp45345ppp";
     public final static String HOST_PLACEHOLDER = "localhost";
-    public final static String PLOT_FILE_NAME_PLACEHOLDER = "noQlGeneratedPlot";
+    public final static String PLOT_FILE_NAME_PLACEHOLDER = "noQlGeneratedPlot.png";
     /**
      * if host = {@code localhost} then it is replaced by this value, works on mac OS, not sure about other systems
      */
@@ -81,7 +81,7 @@ public class QueryService {
                         plot, chart or visualize the data, create a Python script that will select the data and
                         visualise them in a chart. Save the generated chart into a file called""")
                 .append(" ").append(PlotService.PLOTS_DIR_PATH).append("/")
-                .append(PLOT_FILE_NAME_PLACEHOLDER).append(PlotService.PLOT_IMAGE_FILE_EXTENSION)
+                .append(PLOT_FILE_NAME_PLACEHOLDER)
                 .append("""
                          and don't show it.
                         To connect to the database use host='""").append(HOST_PLACEHOLDER)
@@ -358,20 +358,20 @@ public class QueryService {
         ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(chatId,
                 new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
 
-        String plotFileName = llmResponse.generatePlot()
-                ? chatId.toString() + "-" + chatQueryWithResponse.getId()
-                : null;
+        String plotFileName = null;
 
         if (llmResponse.generatePlot()) {
             log.info("Generate plot");
 
-            plotFileName = plotService.generatePlot(llmResponse.pythonCode(), database, plotFileName); // TODO: verify than only name without full path is needed
+            plotFileName = plotService.generatePlot(
+                    llmResponse.pythonCode(), database, chatId, chatQueryWithResponse.getId());
         }
 
         RetrievedData retrievedData = null;
         Long totalCount;
 
-        if (!llmResponse.databaseQuery().isEmpty() || !llmResponse.generatePlot()) {
+        if (llmResponse.databaseQuery() != null && !llmResponse.databaseQuery().isEmpty()) {
+
             PaginatedQuery paginatedQuery = setPaginationInSqlQuery(
                     llmResponse.databaseQuery(), 0, pageSize, database);
 

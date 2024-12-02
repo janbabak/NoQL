@@ -433,7 +433,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        when(plotService.generatePlot(any(), any(), any())).thenReturn(plotFileName);
+        when(plotService.generatePlot(any(), any(), eq(chat.id()), any())).thenReturn(plotFileName);
 
         // when
         ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);

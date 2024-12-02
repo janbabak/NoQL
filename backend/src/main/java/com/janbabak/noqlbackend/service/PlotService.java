@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -66,14 +67,16 @@ public class PlotService {
      *
      * @param scriptContent content of python file responsible for plot generation (code)
      * @param database      database object - use its real credentials instead of placeholders
-     * @param fileName      name of the generated file
+     * @param chatId        identifier of the chat
+     * @param messageId     identifier of the message
      * @return name of the generated file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public String generatePlot(String scriptContent, Database database, String fileName)
+    public String generatePlot(String scriptContent, Database database, UUID chatId, UUID messageId)
             throws PlotScriptExecutionException {
 
-        fileName = PLOTS_DIR_URL_PATH + "/" + fileName + PLOT_IMAGE_FILE_EXTENSION;
+        String fileName = createFileName(chatId, messageId);
+
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
             ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
@@ -114,7 +117,29 @@ public class PlotService {
         } catch (IOException e) {
             throw new PlotScriptExecutionException(e.getMessage());
         }
-        return fileName;
+
+        return createFileUrl(fileName);
+    }
+
+    /**
+     * Create name of the file
+     *
+     * @param chatId    identifier of the chat
+     * @param messageId identifier of the message
+     * @return name of the file
+     */
+    public String createFileName(UUID chatId, UUID messageId) {
+        return chatId + "--" + messageId + PLOT_IMAGE_FILE_EXTENSION;
+    }
+
+    /**
+     * Create URL path to the file
+     *
+     * @param fileName name of the file with extension
+     * @return URL path to the file
+     */
+    public String createFileUrl(String fileName) {
+        return PLOTS_DIR_URL_PATH + "/" + fileName;
     }
 
     /**
