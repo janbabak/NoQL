@@ -39,7 +39,7 @@ public class QueryService {
     public final static String PASSWORD_PLACEHOLDER = "dkl45349?405";
     public final static String USER_PLACEHOLDER = "admin4445900234";
     public final static String DATABASE_PLACEHOLDER = "database99889899";
-    public final static String PORT_PLACEHOLDER = "ppp45345ppp";
+    public final static String PORT_PLACEHOLDER = "1111111111";
     public final static String HOST_PLACEHOLDER = "localhost";
     public final static String PLOT_FILE_NAME_PLACEHOLDER = "noQlGeneratedPlot.png";
     /**
