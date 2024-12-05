@@ -39,7 +39,7 @@ const ChatTab = memo(({ databaseId, tab }: ChatTabProps) => {
   })
 
   const chat: Chat | null = useSelector((state: RootState) => {
-    return state.chatReducer.chatNew
+    return state.chatReducer.chat
   })
 
   const chatHistory: ChatHistoryItem[] = useSelector((state: RootState) => {

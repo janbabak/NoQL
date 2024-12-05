@@ -12,11 +12,15 @@ import React, { useEffect, useRef } from 'react'
 export function ChatView() {
 
   const chat: Chat | null = useSelector((state: RootState) => {
-    return state.chatReducer.chatNew
+    return state.chatReducer.chat
   })
 
   const chatLoading: boolean = useSelector((state: RootState) => {
     return state.chatReducer.loading
+  })
+
+  const chatChanged: number = useSelector((state: RootState) => {
+    return state.chatReducer.chatChanged
   })
 
   const chatWindowRef: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null)
@@ -30,7 +34,7 @@ export function ChatView() {
 
   useEffect((): void => {
     scrollChatToTheBottom()
-  }, [chat?.messages])
+  }, [chatChanged])
 
   const ChatLoadingElement =
     <div className={styles.chatWindowLoading}>
