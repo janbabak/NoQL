@@ -1,0 +1,22 @@
+.plot {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    height: 25rem;
+}
+
+.chatWindow {
+    height: 25rem;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+.chatWindowLoading {
+    height: 25rem;
+}
+
+.modelSelect {
+    width: 11rem;
+    margin-bottom: 2rem;
+}

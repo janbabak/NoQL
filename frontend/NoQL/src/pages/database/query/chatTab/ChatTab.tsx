@@ -1,5 +1,5 @@
 import { CHAT_TAB } from '../Constants.ts'
-import styles from '../Query.module.css'
+import styles from './ChatTab.module.css'
 import { TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'

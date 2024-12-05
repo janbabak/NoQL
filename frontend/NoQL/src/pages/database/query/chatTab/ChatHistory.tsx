@@ -1,4 +1,4 @@
-import styles from '../Query.module.css'
+import styles from './ChatTab.module.css'
 import { ChatHistoryItem, Chat } from '../../../../types/Chat.ts'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import { LoadingButton } from '@mui/lab'

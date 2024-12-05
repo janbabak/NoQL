@@ -1,7 +1,7 @@
 import { FormControl, LinearProgress, MenuItem } from '@mui/material'
 import { Select, SelectChangeEvent } from '@mui/material-next'
 import React, { memo, useEffect, useState } from 'react'
-import styles from '../../Query.module.css'
+import styles from './Chat.module.css'
 import { ModelOption } from '../../../../../types/CustomModel.ts'
 import customModelApi from '../../../../../services/api/customModelApi.ts'
 import { showErrorWithMessageAndError } from '../../../../../components/snackbar/GlobalSnackbar.helpers.ts'
