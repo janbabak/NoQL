@@ -10,6 +10,7 @@
     overflow-y: scroll;
     overflow-x: hidden;
     scroll-behavior: smooth;
+    padding: 0.125rem; /* TODO: shifts chat view but buttons above are not aligned*/
 
     /*Hide scrollbar for IE, Edge and Firefox,*/
     -ms-overflow-style: none;  /* IE and Edge */
