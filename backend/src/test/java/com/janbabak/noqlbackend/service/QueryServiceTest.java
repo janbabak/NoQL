@@ -315,71 +315,64 @@ class QueryServiceTest {
     @SuppressWarnings("all")
     private static Object[][] testExtractQueryFromMarkdownResponseDataProvider() {
         return new Object[][]{
-                // responses with markdown
-                {
-                        // language=MD
-                        """
-                        Use the following command to retrieve all users.
-                        ```
-                        select * from public.user;
-                        ```""",
-                        // language=SQL
-                        "select * from public.user;"
-                },
-                {
-                        // language=MD
-                        """
-                        Here is the SQL query that retrieves all users from the 'user' table:
-
-                        ```sql
-                        SELECT * FROM public.user;
-                        ```\s
-
-                        This query selects all columns for all records in the 'user' table in the 'public' schema.""",
-                        // language=SQL
-                        "SELECT * FROM public.user;"
-                },
-                {
-                        // language=MD
-                        """
-                        To select the names of all users older than 30 and sort them by name, you can use the following SQL query:
-
-                        ```sql
-                        SELECT name
-                        FROM public.user
-                        WHERE age > 30
-                        ORDER BY name;
-                        ```\s
-
-                        This query selects the name of users from the 'user' table in the 'public' schema where the age is greater than 30 and then sorts the result by name in ascending order.""",
-                        // language=SQL
-                        """
-                        SELECT name
-                        FROM public.user
-                        WHERE age > 30
-                        ORDER BY name;"""
-                },
-                // correct response with proper sql
-                {
-                        // language=SQL
-                        """
-                        SELECT name
-                        FROM public.user
-                        WHERE age > 30
-                        ORDER BY name DESC;""",
-                        // language=SQL
-                        """
-                        SELECT name
-                        FROM public.user
-                        WHERE age > 30
-                        ORDER BY name DESC;"""
-                },
                 // incorrect response without markdown
                 {
                         "It looks like you are using a Postgresql database.",
                         "It looks like you are using a Postgresql database."
                 },
                 // real response without python script
+                {
+                        // language=MD
+                        """
+                        ```{
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }```
+                        """,
+                        // language=JSON
+                        """
+                        {
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }"""
+                },
+                {
+                        // language=MD
+                        """
+                        ```
+                        {
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }```
+                        """,
+                        // language=JSON
+                        """
+                        {
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }"""
+                },
+                {
+                        // language=MD
+                        """
+                        ```json{
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }```
+                        """,
+                        // language=JSON
+                        """
+                        {
+                          "databaseQuery": "SELECT * FROM public.database ORDER BY id ASC LIMIT 1;",
+                          "generatePlot": false,
+                          "pythonCode": ""
+                        }"""
+                },
                 {
                         // language=MD
                         """

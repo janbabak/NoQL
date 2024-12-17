@@ -42,7 +42,8 @@ public record RetrievedData(
         while (resultSet.next()) {
             List<String> row = new ArrayList<>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                row.add(resultSet.getString(i).trim());
+                String value = resultSet.getString(i);
+                row.add(value != null ? value.trim() : null);
             }
             rows.add(row);
         }

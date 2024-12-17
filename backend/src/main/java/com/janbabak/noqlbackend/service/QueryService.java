@@ -167,33 +167,38 @@ public class QueryService {
      */
     public String extractQueryFromMarkdownInResponse(@NotNull String response) {
 
-        int markdownIndex = response.indexOf("```");
+        final String jsonMarkdownPatterStart = "```json";
+        final String markdownPatterEnd = "```";
+        final String genericMarkdownPatterStart = "```";
+        String markdownPatterStart = jsonMarkdownPatterStart;
+
+        int markdownIndex = response.indexOf(markdownPatterStart);
 
         // markdown not detected
         if (markdownIndex == -1) {
-            return response;
+            markdownPatterStart = genericMarkdownPatterStart;
+            markdownIndex = response.indexOf(markdownPatterStart);
+            if (markdownIndex == -1) {
+                return response; // unable to parse
+            }
         }
 
-        String responseAfterMarkdownStart = response.substring(markdownIndex);
-        // I cannot cut only the ``` because it usually looks like ```json\n or something like that
-        int newLineIndex = responseAfterMarkdownStart.indexOf("\n");
-        if (newLineIndex == -1) {
-            newLineIndex = responseAfterMarkdownStart.indexOf(" ");
-        }
-        if (newLineIndex == -1 || newLineIndex + 1 > responseAfterMarkdownStart.length() - 1) {
+        if (response.length() < markdownIndex + markdownPatterStart.length()) {
             return response; // unable to parse
         }
-        String responseAfterNewLine = responseAfterMarkdownStart.substring(newLineIndex + 1);
-        markdownIndex = responseAfterNewLine.indexOf("```");
+        String responseAfterMarkdownStart = response.substring(
+                markdownIndex + markdownPatterStart.length());
+
+        markdownIndex = responseAfterMarkdownStart.indexOf(markdownPatterEnd);
         if (markdownIndex == -1) {
             return response; // unable to parse
         }
 
-        String extractedQuery = responseAfterNewLine.substring(0, markdownIndex).trim();
+        String extractedJson = responseAfterMarkdownStart.substring(0, markdownIndex).trim();
 
-        log.info("Extracted query={} from response={}", extractedQuery, response);
+        log.info("Extracted query={} from response={}", extractedJson, response);
 
-        return extractedQuery;
+        return extractedJson;
     }
 
     /**
