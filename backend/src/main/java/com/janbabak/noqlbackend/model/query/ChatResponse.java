@@ -45,11 +45,12 @@ public class ChatResponse {
     /**
      * Create response with error message and no data.
      *
-     * @param error error message
+     * @param error   error message
+     * @param nlQuery natural language query
      * @return response
      */
-    public static ChatResponse failedResponse(String error) {
+    public static ChatResponse failedResponse(String error, String nlQuery) {
         return new ChatResponse(
-                null, null, null, null, null, null, error);
+                null, null, nlQuery, null, null, null, error);
     }
 }
