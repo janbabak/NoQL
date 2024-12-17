@@ -564,7 +564,7 @@ class QueryServiceTest {
                 .id(chatId)
                 .build();
 
-        ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded");
+        ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded", "find all users");
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
         when(userService.decrementQueryLimit(any())).thenReturn(0);

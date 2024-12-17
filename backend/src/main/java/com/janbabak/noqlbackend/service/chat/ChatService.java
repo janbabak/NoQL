@@ -92,7 +92,8 @@ public class ChatService {
                                 // should not happen since invalid JSONs are not saved
                                 log.error("Cannot parse message JSON from database, messageId={}", message.getId());
                                 return ChatResponse.failedResponse(
-                                        "Cannot parse message JSON from database, messageId=" + message.getId());
+                                        "Cannot parse message JSON from database, messageId=" + message.getId(),
+                                        message.getNlQuery());
                             }
                         })
                         .toList())

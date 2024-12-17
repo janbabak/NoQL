@@ -420,7 +420,7 @@ public class QueryService {
 
         if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
-            return ChatResponse.failedResponse("Query limit exceeded");
+            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
         }
 
         BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
@@ -445,7 +445,7 @@ public class QueryService {
                 return showResultTableAndGeneratePlot(
                         queryRequest, chatId, llmResponseJson, specificDatabaseService, database, pageSize);
             } catch (JsonProcessingException e) {
-                errors.add("Cannot parse response JSON - bad syntax.");
+                errors.add("Cannot parse LLM response JSON");
                 log.error("Cannot parse response JSON: {}", llmResponseJson);
             } catch (SQLException e) {
                 errors.add("Error occurred when execution your query: " + e.getMessage());
@@ -458,6 +458,6 @@ public class QueryService {
 
         // last try failed - return message that is not persisted
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
-        return ChatResponse.failedResponse(lastError);
+        return ChatResponse.failedResponse(lastError, queryRequest.getQuery());
     }
 }
