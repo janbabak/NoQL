@@ -19,7 +19,7 @@ class LlamaApiServiceTest {
 
     static QueryRequest[] validRequestDataProvider() {
         return new QueryRequest[]{
-                new QueryRequest("Find the oldest user", "llama3-70b"),
+                new QueryRequest("Find the oldest user", "llama3.1-70b"),
                 new QueryRequest("Find the oldest user", "llama-13b-chat"),
         };
     }

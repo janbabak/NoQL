@@ -50,12 +50,12 @@ class LlmApiServiceFactoryTest {
                         GptApiService.class
                 },
                 {
-                        "llama3-70b",
+                        "llama3.1-70b",
                         LlamaApiService.class
                 },
                 {
                         "llama-13b-chat",
-                        LlamaApiService.class
+                        LlamaApiService.class // TODO: test all used models and remove old ones
                 }
         };
     }

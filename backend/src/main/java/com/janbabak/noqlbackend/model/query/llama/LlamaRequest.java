@@ -10,7 +10,8 @@ import java.util.List;
 
 public record LlamaRequest(
         String model,
-        List<LlmMessage> messages) {
+        List<LlmMessage> messages,
+        Integer max_tokens) {
 
     /**
      * Create query
@@ -26,7 +27,8 @@ public record LlamaRequest(
             String systemQuery,
             List<String> errors) {
 
-        this(queryRequest.getModel(), new ArrayList<>());
+        // generated response can be up to 3_000 tokens - default value had to be increased to fit all python code
+        this(queryRequest.getModel(), new ArrayList<>(), 3_000);
 
         // system instructions
         this.messages.add(new LlmMessage(Role.system, systemQuery));
