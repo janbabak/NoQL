@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -52,6 +51,6 @@ public class ChatResponse {
      */
     public static ChatResponse failedResponse(String error, String nlQuery) {
         return new ChatResponse(
-                null, null, nlQuery, null, null, Timestamp.from(Instant.now()), error);
+                null, null, nlQuery, null, null, null, error);
     }
 }
