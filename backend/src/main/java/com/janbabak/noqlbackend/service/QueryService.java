@@ -77,9 +77,10 @@ public class QueryService {
                 .append(" for the ")
                 .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
                 .append("""
-                         database. I will use this query for displaying the data in form of table. If the user wants to
-                        plot, chart or visualize the data, create a Python script that will select the data and
-                        visualise them in a chart. Save the generated chart into a file called""")
+                         database. Generate this query nicely formatted with line breaks.
+                        I will use this query for displaying the data in form of table. If the user wants to plot,
+                        chart or visualize the data, create a Python script that will select the data and visualise them
+                        in a chart. Save the generated chart into a file called""")
                 .append(" ").append(PlotService.PLOTS_DIR_PATH).append("/")
                 .append(PLOT_FILE_NAME_PLACEHOLDER)
                 .append("""
@@ -92,7 +93,7 @@ public class QueryService {
                 .append("""                       
                         Your response must be in JSON format
                         { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
-                                         
+                        
                         The database structure looks like this:""")
                 .append(dbStructure)
                 .toString();

@@ -88,7 +88,7 @@ class QueryServiceTest {
         // language=SQL
         String dbStructure = """
                 CREATE SCHEMA IF NOT EXISTS public;
-
+                
                 CREATE TABLE IF NOT EXISTS public.user
                 (
                     id integer,
@@ -101,16 +101,17 @@ class QueryServiceTest {
                 You are an assistant that helps users visualise data. You have two functions. The first function
                 is translation of natural language queries into a database language. The second function is
                 visualising data. If the user wants to show or display or find or retrieve some data, translate
-                it into an SQL query for the postgres database. I will use this query for displaying the data in form of table. If the user wants to
-                plot, chart or visualize the data, create a Python script that will select the data and
-                visualise them in a chart. Save the generated chart into a file called ./plotService/plots/noQlGeneratedPlot.png and don't show it.
+                it into an SQL query for the postgres database. Generate this query nicely formatted with line breaks.
+                I will use this query for displaying the data in form of table. If the user wants to plot,
+                chart or visualize the data, create a Python script that will select the data and visualise them
+                in a chart. Save the generated chart into a file called ./plotService/plots/noQlGeneratedPlot.png and don't show it.
                 To connect to the database use host='localhost', port=1111111111 , user='admin4445900234', password='dkl45349?405', database='database99889899'.
-
+                
                 Your response must be in JSON format
                 { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
-
+                
                 The database structure looks like this:CREATE SCHEMA IF NOT EXISTS public;
-
+                
                 CREATE TABLE IF NOT EXISTS public.user
                 (
                     id integer,
