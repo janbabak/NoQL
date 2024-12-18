@@ -57,6 +57,10 @@ class LlmApiServiceFactoryTest {
                         "llama3.1-70b",
                         LlamaApiService.class
                 },
+                {
+                        "custom-model",
+                        CustomModelApiService.class
+                },
         };
     }
 }

@@ -23,6 +23,12 @@ public enum LlmModel {
         this.label = label;
     }
 
+    /**
+     * Get model enum by its name.
+     *
+     * @param model model name (official api parameter)
+     * @return model enum
+     */
     public static LlmModel fromModel(String model) {
         for (LlmModel value : values()) {
             if (value.model.equals(model)) {
