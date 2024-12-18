@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service.api;
 
+import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +21,20 @@ public class LlmApiServiceFactory {
      * @return correct query API service
      */
     public QueryApi getQueryApiService(String model) {
-        return switch (model) {
-            case "gpt-4o", "gpt-4o-mini", "gpt-4", "gpt-4-turbo", "gpt-4-32k", "gpt-3.5-turbo" -> gptApiService;
-            case "llama3.1-405b", "llama3.1-70b", "llama-13b-chat" -> llamaApiService;
-            case "gemini-1.5-pro", "gemini-1.5-flash" -> geminiApiService;
-            case "claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022" -> claudeApiService;
-            default -> customModelApiService;
+        LlmModel llmModel = null;
+        try {
+            llmModel = LlmModel.fromModel(model);
+        } catch (IllegalArgumentException e) {
+            // do nothing
+        }
+        if (llmModel == null) {
+            return customModelApiService;
+        }
+        return switch (llmModel) {
+            case GPT_4o, GPT_4o_MINI, GPT_4_TURBO -> gptApiService;
+            case GEMINI_1DOT5_PRO, GEMINI_1DOT5_FLASH -> geminiApiService;
+            case CLAUDE_3_5_HAIKU_20241022 -> claudeApiService;
+            case LLAMA3DOT1_70B -> llamaApiService;
         };
     }
 }
