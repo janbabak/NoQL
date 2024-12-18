@@ -34,7 +34,7 @@ class LlmApiServiceFactoryTest {
                         GptApiService.class
                 },
                 {
-                        "gpt-4",
+                        "gpt-4o-mini",
                         GptApiService.class
                 },
                 {
@@ -42,21 +42,21 @@ class LlmApiServiceFactoryTest {
                         GptApiService.class
                 },
                 {
-                        "gpt-4-32k",
-                        GptApiService.class
+                        "gemini-1.5-pro",
+                        GeminiApiService.class
                 },
                 {
-                        "gpt-3.5-turbo",
-                        GptApiService.class
+                        "gemini-1.5-flash",
+                        GeminiApiService.class
+                },
+                {
+                        "claude-3-5-haiku-20241022",
+                        ClaudeApiService.class
                 },
                 {
                         "llama3.1-70b",
                         LlamaApiService.class
                 },
-                {
-                        "llama-13b-chat",
-                        LlamaApiService.class // TODO: test all used models and remove old ones
-                }
         };
     }
 }
