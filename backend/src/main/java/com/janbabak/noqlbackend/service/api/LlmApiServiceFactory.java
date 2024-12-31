@@ -1,6 +1,6 @@
 package com.janbabak.noqlbackend.service.api;
 
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import com.janbabak.noqlbackend.model.query.LlmModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
