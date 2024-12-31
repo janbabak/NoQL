@@ -8,7 +8,7 @@ import com.janbabak.noqlbackend.model.customModel.ModelOption;
 import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.model.entity.User;
-import com.janbabak.noqlbackend.model.query.gpt.LlmModel;
+import com.janbabak.noqlbackend.model.query.LlmModel;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

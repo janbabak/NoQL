@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.service.api;
 
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import org.apache.coyote.BadRequestException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -12,6 +13,7 @@ class LlamaApiServiceTest {
     private final LlamaApiService llamaApiService = new LlamaApiService();
 
     @ParameterizedTest
+    @DisplayName("Validate successful request")
     @MethodSource("validRequestDataProvider")
     void testValidateSuccessfulRequest(QueryRequest request) {
         assertDoesNotThrow(() -> llamaApiService.validateRequest(request));
@@ -25,6 +27,7 @@ class LlamaApiServiceTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Validate bad request")
     @MethodSource("badRequestDataProvider")
     void testValidateBadRequest(QueryRequest request) {
         assertThrows(BadRequestException.class, () -> llamaApiService.validateRequest(request));

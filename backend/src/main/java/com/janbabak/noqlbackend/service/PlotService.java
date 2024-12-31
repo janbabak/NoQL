@@ -23,7 +23,7 @@ public class PlotService {
     private static final String PLOT_IMAGE_FILE_EXTENSION = ".png";
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
-    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 5L;
+    private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 10L;
     private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
     public static final Path PLOTS_DIR_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
     private static final Path SCRIPT_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
@@ -107,7 +107,7 @@ public class PlotService {
                 if (exitCode != 0) { // fail
                     log.error("Plot scrip execution failed. exit code: {}, output: '{}', error: '{}'",
                             exitCode, output, error);
-                    throw new PlotScriptExecutionException(output.toString());
+                    throw new PlotScriptExecutionException(error.toString());
                 }
             } catch (InterruptedException e) {
                 log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",

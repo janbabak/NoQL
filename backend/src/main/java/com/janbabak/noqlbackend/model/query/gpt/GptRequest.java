@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.LlmMessage;
 import com.janbabak.noqlbackend.model.query.LlmMessage.Role;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
+import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * GPT request object which is sent to the GPT API.
  */
+@AllArgsConstructor
 public class GptRequest {
     public final String model; // GPT LLM
     public final List<LlmMessage> messages; // list of messages - can contain user, system, and assistant messages

@@ -1,7 +1,7 @@
-package com.janbabak.noqlbackend.model.query.gpt;
+package com.janbabak.noqlbackend.model.query;
 
 import lombok.Getter;
-
+//TODO: move out of gpt package
 /**
  * Large language model to be used for the translation.
  */
