@@ -152,6 +152,41 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Update user - email already taken")
+    void testUpdateUserEmailTaken() {
+        // given
+        UUID userId = UUID.randomUUID();
+
+        User user = User.builder()
+                .id(userId)
+                .firstName("john")
+                .lastName("doe")
+                .email("john.doe@email.com")
+                .password("password")
+                .role(Role.ROLE_USER)
+                .build();
+
+        UpdateUserRequest request = UpdateUserRequest.builder()
+                .email("john@email.com")
+                .build();
+
+        User existingUser = User.builder()
+                .id(UUID.randomUUID())
+                .email("john@email.com")
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(eq("john@email.com"))).thenReturn(Optional.of(existingUser));
+
+        // when
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> userService.updateUser(userId, request));
+
+        // then
+        assertEquals("User with this email already exists.", exception.getMessage());
+    }
+
+    @Test
     @DisplayName("Update user - user not found")
     void testUpdateUserUserNotFound() {
         // given
@@ -217,7 +252,7 @@ class UserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         assertEquals(9, userCaptor.getValue().getQueryLimit());
-        assertEquals(actual, 10);
+        assertEquals(10, actual);
     }
 
     @Test
@@ -236,7 +271,7 @@ class UserServiceTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         assertEquals(0, userCaptor.getValue().getQueryLimit());
-        assertEquals(actual, 0);
+        assertEquals(0, actual);
     }
 
     @Test
