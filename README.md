@@ -98,49 +98,49 @@ cd NoQL/
 
 - Development stack is used for backend development and frontend development. It uses a local database and other
   dependencies running in docker containers (like docker-compose services) and backend running locally on the host machine.
-  - It is necessary to create a `NoQL/backend/.env.local` file with the following content:
-
-    ```dotenv
-      # external services/apis
-    OPEN_AI_API_URL="https://api.openai.com/v1/chat/completions"
-    OPEN_AI_API_KEY="" # input your api key
+- It is necessary to create a `NoQL/backend/.env.local` file with the following content:
+  ```dotenv
+  # external services/apis
+  OPEN_AI_API_URL="https://api.openai.com/v1/chat/completions"
+  OPEN_AI_API_KEY="" # input your api key
   
-    GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models"
-    GEMINI_API_KEY="" # input your api key
+  GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models"
+  GEMINI_API_KEY="" # input your api key
   
-    LLAMA_API_URL="https://api.llama-api.com/chat/completions"
-    LLAMA_API_KEY="" # input your api key
+  LLAMA_API_URL="https://api.llama-api.com/chat/completions"
+  LLAMA_API_KEY="" # input your api key
   
-    CLAUDE_API_URL="https://api.anthropic.com/v1/messages"
-    CLAUDE_API_KEY="" # input your api key
-    ANTHROPIC_VERSION="2023-06-01"
+  CLAUDE_API_URL="https://api.anthropic.com/v1/messages"
+  CLAUDE_API_KEY="" # input your api key
+  ANTHROPIC_VERSION="2023-06-01"
   
-    NOQL_DB_NAME="database"
-    NOQL_DB_HOST="localhost"
-    NOQL_DB_PORT="5432"
-    NOQL_DB_USERNAME="user"
-    NOQL_DB_PASSWORD="password"
+  NOQL_DB_NAME="database"
+  NOQL_DB_HOST="localhost"
+  NOQL_DB_PORT="5432"
+  NOQL_DB_USERNAME="user"
+  NOQL_DB_PASSWORD="password"
   
-    # Local databases - should match the NOQL_DB_xxx credentials
-    POSTGRES_PASSWORD="password"
-    POSTGRES_USER="user"
-    POSTGRES_DB="database"
+  # Local databases - should match the NOQL_DB_xxx credentials
+  POSTGRES_PASSWORD="password"
+  POSTGRES_USER="user"
+  POSTGRES_DB="database"
   
-    # settings
-    PAGINATION_MAX_PAGE_SIZE=100
-    PAGINATION_DEFAULT_PAGE_SIZE=20
+  # settings
+  PAGINATION_MAX_PAGE_SIZE=100
+  PAGINATION_DEFAULT_PAGE_SIZE=20
   
-    TRANSLATION_RETRIES=1
-    PLOT_SERVICE_CONTAINER_NAME="plot-service-dev-stack"
-    DEFAULT_USER_QUERY_LIMIT=150
+  TRANSLATION_RETRIES=1
+  PLOT_SERVICE_CONTAINER_NAME="plot-service-dev-stack"
+  DEFAULT_USER_QUERY_LIMIT=150
   
-    # security
-    JWT_SECRET="fkajlak4jt34ktj34t98vu44d5d4p54o5d45m34ik5n345m34wm5l431145l434u64bgjsuicvkaplcvqyevasswilmvbti09478jujhhdsbfasdhfbu4" # could be changed
-    # 30 min
-    JWT_EXPIRATION=1800
-    # 7 days
-    JWT_REFRESH_EXPIRATION=604800
+  # security
+  JWT_SECRET="fkajlak4jt34ktj34t98vu44d5d4p54o5d45m34ik5n345m34wm5l431145l434u64bgjsuicvkaplcvqyevasswilmvbti09478jujhhdsbfasdhfbu4" # could be changed
+  # 30 min
+  JWT_EXPIRATION=1800
+  # 7 days
+  JWT_REFRESH_EXPIRATION=604800
   ```
+
 - Start [Dev stack](infra/dev-stack/README.md).
 - Set the development environment. The app will connect to the local database.
     ```bash
@@ -162,26 +162,5 @@ cd NoQL/
 - Start the frontend
   ```bash
   npm run dev
-  ```
-
-## AWS
-
-- Connect to the AWS EC2 instance over SSH
-  ```bash
-  ssh ec2-user@3.68.195.75
-  ```
-- Install java
-  ```bash
-  sudo yum update
-  sudo yum install java-17-amazon-corretto-headless.x86_64
-  ```
-- Copy the jar
-  ```bash
-  scp build/libs/backend-0.0.1-SNAPSHOT.jar ec2-user@3.68.195.75:/home/ec2-user
-  ```
-- Run the jar
-  ```bash
-  java -jar backend-0.0.1-SNAPSHOT.jar # the app ends when the session ends
-  java -jar backend-0.0.1-SNAPSHOT.jar > noql.log 2>&1 & # detached with logging
   ```
   
