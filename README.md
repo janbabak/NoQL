@@ -34,6 +34,7 @@ backend/                                  ... backend app root
 │  │  │  ├─ service/                      ... services
 │  │  │  ├─ validation/                   ... validation
 │  ├─ test/
+│  swagger/                               ... swagger API documentation
 customModel/                              ... custom LLM api (separate project - gpt proxy)
 exampleDatabase/                          ... old example database
 frontend/                                 ... frontend app root
@@ -142,11 +143,12 @@ cd NoQL/
   ```
 
 - Start [Dev stack](infra/dev-stack/README.md).
-- Set the development environment. The app will connect to the local database.
-    ```bash
-    export spring_profiles_active=local # TODO: create local profile
-    ```
-- Start the backend app:
+- Export environment variables.
+  ```text
+  set -o allexport
+  source backend/.env.local
+  set +o allexport
+  ```
 - Run the backend
   ```bash
   cd backend
