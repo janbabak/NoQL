@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -24,9 +25,11 @@ public class PlotService {
     private static final String PLOTS_DIRECTORY = "plots";
     private static final String PLOT_SCRIPT_NAME = "plot.py";
     private static final Long GENERATE_PLOT_TIMEOUT_SECONDS = 10L;
-    private static final Path WORKING_DIRECTORY_PATH = Path.of("./plotService");
-    public static final Path PLOTS_DIR_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOTS_DIRECTORY);
-    private static final Path SCRIPT_PATH = Path.of(WORKING_DIRECTORY_PATH + "/" + PLOT_SCRIPT_NAME);
+    private static final String WORKING_DIRECTORY_NAME = "plotService";
+    public static final String PLOT_DIRECTORY_DOCKER_PATH = "./plotService/plots";
+    public static Path PLOTS_DIR_PATH;
+    @SuppressWarnings("FieldCanBeLocal")
+    private static Path SCRIPT_PATH;
     private static final Path PLOTS_DIR_URL_PATH = Path.of("/static/images");
     @SuppressWarnings("FieldCanBeLocal")
     private static File workingDirectory;
@@ -38,20 +41,25 @@ public class PlotService {
     /**
      * Create working directory and plot script
      */
-    PlotService(Settings settings) {
+    PlotService(Settings settings, @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
+
+        log.debug("Plot service working directory is {}", appWorkingDirectory);
+
         this.settings = settings;
 
         // create working and plot directories
-        workingDirectory = WORKING_DIRECTORY_PATH.toFile();
+        workingDirectory = Path.of(appWorkingDirectory + "/" + WORKING_DIRECTORY_NAME).toFile();
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create working directory in plot service");
         }
+        PLOTS_DIR_PATH = Path.of(workingDirectory.getPath() + "/" + PLOTS_DIRECTORY);
         plotsDirectory = PLOTS_DIR_PATH.toFile();
         if (!plotsDirectory.exists() && !plotsDirectory.mkdirs()) {
             logAndThrowRuntimeError("Cannot create plot directory in plot service");
         }
 
         // create script
+        SCRIPT_PATH = Path.of(workingDirectory.getPath() + "/" + PLOT_SCRIPT_NAME);
         script = SCRIPT_PATH.toFile();
         try {
             if (!script.exists() && !script.createNewFile()) {
@@ -79,8 +87,10 @@ public class PlotService {
 
         try {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
-            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python %s"
-                    .formatted(settings.getPlotServiceContainerName(), SCRIPT_PATH));
+            log.debug("Starting process: docker exec {} python ./{}/{}",
+                    settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME);
+            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python ./%s/%s"
+                    .formatted(settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME));
 
             Process process = processBuilder.start();
 
