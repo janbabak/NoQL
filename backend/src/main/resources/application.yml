@@ -37,3 +37,5 @@ app:
       url: "${CLAUDE_API_URL}"
       apiKey: "${CLAUDE_API_KEY}"
       anthropicVersion: "${ANTHROPIC_VERSION}"
+  config:
+    workingDirectory: ${workingDirectory:.}

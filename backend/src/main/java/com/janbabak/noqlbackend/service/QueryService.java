@@ -81,7 +81,7 @@ public class QueryService {
                         I will use this query for displaying the data in form of table. If the user wants to plot,
                         chart or visualize the data, create a Python script that will select the data and visualise them
                         in a chart. Save the generated chart into a file called""")
-                .append(" ").append(PlotService.PLOTS_DIR_PATH).append("/")
+                .append(" ").append(PlotService.PLOT_DIRECTORY_DOCKER_PATH).append("/")
                 .append(PLOT_FILE_NAME_PLACEHOLDER)
                 .append("""
                          and don't show it.
