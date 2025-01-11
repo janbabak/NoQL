@@ -151,8 +151,7 @@ cd NoQL/
   ```
 - Run the backend
   ```bash
-  cd backend
-  ./gradlew bootRun
+  ./backend/gradlew -p backend bootRun
   ```
   
 ### Frontend

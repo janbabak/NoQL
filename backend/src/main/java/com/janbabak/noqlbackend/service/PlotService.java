@@ -40,6 +40,12 @@ public class PlotService {
 
     /**
      * Create working directory and plot script
+     *
+     * @param settings            application settings
+     * @param appWorkingDirectory path to the working directory (when running the app from the IDE default value from
+     *                            the application.yaml is used, when running using the
+     *                            {@code ./backend/gradlew -p backend bootRun} command, the value from build.gradle is
+     *                            used)
      */
     PlotService(Settings settings, @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
 
