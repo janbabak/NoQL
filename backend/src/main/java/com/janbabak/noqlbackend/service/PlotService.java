@@ -49,7 +49,7 @@ public class PlotService {
      */
     PlotService(Settings settings, @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
 
-        log.debug("Plot service working directory is {}", appWorkingDirectory);
+        log.debug("Plot service working directory is: {}", appWorkingDirectory);
 
         this.settings = settings;
 
