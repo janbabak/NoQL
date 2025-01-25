@@ -1052,16 +1052,17 @@ components:
           $ref: '#/components/schemas/LlmModel'
 
     LlmModel:
-      description: Language model to use for translation
+      description: Language model to use for translation (name of predefined model or UUID of custom model)
       type: string
       enum:
-        - GPT_4o
-        - GPT_4
-        - GPT_4_TURBO
-        - GPT_4_32K
-        - GPT_3_5_TURBO
-        - LLAMA3_70B
-        - LLAMA3_13B_CHAT # TODO fix
+        - gpt-4o
+        - gpt-4o-mini
+        - gpt-4-turbo
+        - gemini-1.5-pro
+        - gemini-1.5-flash
+        - claude-3-5-haiku-20241022
+        - llama3.1-70b
+        - UUID-of-your-custom-model
 
     QueryResponse:
       type: object
