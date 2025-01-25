@@ -18,6 +18,7 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -47,15 +48,16 @@ public class QueryService {
      */
     public final static String DOCKER_LOCALHOST = "host.docker.internal";
 
-    private final DatabaseRepository databaseRepository;
-    private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final LlmApiServiceFactory llmApiServiceFactory;
     private final Settings settings;
     private final ChatService chatService;
-    private final ChatQueryWithResponseService chatQueryWithResponseService;
     private final PlotService plotService;
     private final UserService userService;
+    private final AuthenticationService authenticationService;
+    private final ChatQueryWithResponseService chatQueryWithResponseService;
     private final ChatRepository chatRepository;
+    private final DatabaseRepository databaseRepository;
+    private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
@@ -244,12 +246,13 @@ public class QueryService {
             Integer page,
             Integer pageSize
     ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
-        // TODO: authorization??
 
         log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
@@ -281,10 +284,11 @@ public class QueryService {
             UUID messageId,
             Integer page,
             Integer pageSize) throws EntityNotFoundException {
-        // TODO: authorization??
 
         ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
 
         return retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
@@ -414,12 +418,13 @@ public class QueryService {
     public ChatResponse queryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, LLMException,
             DatabaseExecutionException, BadRequestException {
-        // TODO: authorization??
 
         log.info("Execute chat, database_id={}", databaseId);
 
         Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException(EntityNotFoundException.Entity.CHAT, chatId));
