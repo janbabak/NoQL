@@ -31,5 +31,5 @@ public record UpdateUserRequest(
 
         @Nullable
         @Min(0)
-        Integer queryLimit) { // TODO: easily hackable
+        Integer queryLimit) {
 }
