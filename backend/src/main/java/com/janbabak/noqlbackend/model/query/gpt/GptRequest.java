@@ -4,7 +4,6 @@ import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.LlmMessage;
 import com.janbabak.noqlbackend.model.query.LlmMessage.Role;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
-import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
