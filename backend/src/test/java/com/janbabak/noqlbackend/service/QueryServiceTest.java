@@ -448,9 +448,12 @@ class QueryServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> queryService.executeQueryLanguageSelectQuery(databaseId, query, 0, 10));
+
+        // then
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test

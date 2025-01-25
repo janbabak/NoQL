@@ -289,8 +289,9 @@ public class EntityServiceIntegrationTest {
 
         chatService.deleteChatById(chatId);
 
-        assertThrows(EntityNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findById(chatId, null, false));
+        assertEquals("Chat of id: \"" + chatId + "\" not found.", exception.getMessage());
         assertEquals(7, chatRepository.findAll().size());
         assertEquals(11, chatQueryWithResponseRepository.findAll().size());
         assertEquals(2, databaseService.findAll(testUser.getId()).size());
@@ -311,7 +312,9 @@ public class EntityServiceIntegrationTest {
 
         databaseService.deleteById(databaseId);
 
-        assertThrows(EntityNotFoundException.class, () -> databaseService.findById(databaseId));
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> databaseService.findById(databaseId));
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
         assertEquals(1, databaseService.findAll(testUser.getId()).size());
         assertEquals(4, chatRepository.findAll().size());
         assertEquals(5, chatQueryWithResponseRepository.findAll().size());
