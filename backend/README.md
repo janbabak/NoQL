@@ -19,9 +19,16 @@
 - `NOQL_DB_USERNAME` - (required) Database username
 - `NOQL_DB_PASSWORD` - (required) Database password.
 
+**Local Database (for testing)**
+- should be the same as the database above (or there has to be another db running)
+- `POSTGRES_PASSWORD` - (required) Database password
+- `POSTGRES_USER` - (required) Database username
+- `POSTGRES_DB` - (required) Database name
+
 **Other**
 
 - `TRANSLATION_RETRIES` - (required) Number of retries when translated query fails due to a syntax error
+- `PLOT_SERVICE_CONTAINER_NAME` - (required) Name of the container running the plot service
 - `DEFAULT_USER_QUERY_LIMIT` - Default number of queries that can be executed by newly registered user.
 
 **Security**
