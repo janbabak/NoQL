@@ -138,8 +138,12 @@ class DatabaseEntityServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> databaseEntityService.findById(databaseId));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> databaseEntityService.findById(databaseId));
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepository).findById(idCaptor.capture());
         assertEquals(databaseId, idCaptor.getValue());
@@ -323,9 +327,12 @@ class DatabaseEntityServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.update(databaseId, updateDatabaseRequest));
+
+        // then
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -418,9 +425,12 @@ class DatabaseEntityServiceTest {
         // when
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.getDatabaseStructureByDatabaseId(databaseId));
+
+        // then
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -474,8 +484,11 @@ class DatabaseEntityServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId));
+
+        // then
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 }

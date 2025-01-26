@@ -151,8 +151,12 @@ class AuthenticationServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> authenticationService.authenticate(authenticationRequest));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> authenticationService.authenticate(authenticationRequest));
+        assertEquals("User of identifier: \"" + email + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -231,8 +235,12 @@ class AuthenticationServiceTest {
         when(jwtService.extractUsername(refreshToken)).thenReturn(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> authenticationService.refreshToken(refreshToken));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> authenticationService.refreshToken(refreshToken));
+        assertEquals("User of identifier: \"" + email + "\" not found.", exception.getMessage());
     }
 
     @Test

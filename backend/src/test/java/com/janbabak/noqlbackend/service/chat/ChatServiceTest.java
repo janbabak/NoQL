@@ -119,9 +119,12 @@ class ChatServiceTest {
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findById(chatId, null, true));
+
+        // then
+        assertEquals("Chat of id: \"" + chatId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -197,8 +200,12 @@ class ChatServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> chatService.findChatsByDatabaseId(databaseId));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.findChatsByDatabaseId(databaseId));
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -261,8 +268,12 @@ class ChatServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> chatService.create(databaseId));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.create(databaseId));
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -380,8 +391,12 @@ class ChatServiceTest {
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> chatService.addMessageToChat(chatId, request));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.addMessageToChat(chatId, request));
+        assertEquals("Chat of id: \"" + chatId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -469,8 +484,12 @@ class ChatServiceTest {
 
         when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> chatService.renameChat(chatId, newName));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> chatService.renameChat(chatId, newName));
+        assertEquals("Chat of id: \"" + chatId + "\" not found.", exception.getMessage());
     }
 
     @Test

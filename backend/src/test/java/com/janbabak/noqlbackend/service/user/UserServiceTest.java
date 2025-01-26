@@ -71,7 +71,7 @@ class UserServiceTest {
                 () -> userService.findById(userId));
 
         // then
-        assertEquals("User of id: \"" + userId + "\" not found.", exception.getMessage()); // TODO: check in other tests
+        assertEquals("User of id: \"" + userId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -281,7 +281,11 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> userService.decrementQueryLimit(userId));
+
         // then
-        assertThrows(EntityNotFoundException.class, () -> userService.decrementQueryLimit(userId));
+        assertEquals("User of id: \"" + userId + "\" not found.", exception.getMessage());
     }
 }

@@ -66,7 +66,7 @@ public class CustomModelApiService implements QueryApi {
         ResponseEntity<CustomModelResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.exchange(model.getUrl(), HttpMethod.POST, request, CustomModelResponse.class);
+            responseEntity = restTemplate.postForEntity(model.getUrl(), request, CustomModelResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling Custom model API. {}", e.getMessage());
             throw new LLMException("Error while calling Custom model API, try it latter.");
@@ -94,7 +94,7 @@ public class CustomModelApiService implements QueryApi {
         try {
             return UUID.fromString(queryRequest.getModel());
         } catch (Exception e) {
-            throw new BadRequestException("Wrong model id"); // TODO: bad request or 404 model not found
+            throw new BadRequestException("Model is not in UUID format.");
         }
     }
 }

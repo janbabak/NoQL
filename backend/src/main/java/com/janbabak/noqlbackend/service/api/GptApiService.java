@@ -61,8 +61,7 @@ public class GptApiService implements QueryApi {
         ResponseEntity<GptResponse> responseEntity;
 
         try {
-            // TODO: post for entity
-            responseEntity = restTemplate.exchange(gptUrl, HttpMethod.POST, request, GptResponse.class);
+            responseEntity = restTemplate.postForEntity(gptUrl, request, GptResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling GPT API. {}", e.getMessage());
             throw new LLMException("Error while calling Llama API, try it latter.");

@@ -60,7 +60,7 @@ public class LlamaApiService implements QueryApi {
         ResponseEntity<LlamaResponse> responseEntity;
 
         try {
-            responseEntity = restTemplate.exchange(llamaUrl, HttpMethod.POST, request, LlamaResponse.class);
+            responseEntity = restTemplate.postForEntity(llamaUrl, request, LlamaResponse.class);
         } catch (RestClientException e) {
             log.error("Error while calling Llama API. {}", e.getMessage());
             throw new LLMException("Error while calling Llama API, try it latter.");

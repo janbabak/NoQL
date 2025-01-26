@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
 import org.apache.coyote.BadRequestException;
@@ -57,6 +58,10 @@ class QueryServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    @SuppressWarnings("unused") // used internally
+    AuthenticationService authenticationService;
 
     private final Database postgresDatabase;
 
@@ -448,9 +453,12 @@ class QueryServiceTest {
 
         when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
 
-        // then
-        assertThrows(EntityNotFoundException.class,
+        // when
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> queryService.executeQueryLanguageSelectQuery(databaseId, query, 0, 10));
+
+        // then
+        assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
     }
 
     @Test
@@ -481,7 +489,10 @@ class QueryServiceTest {
 
         ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
                 .id(messageId)
-                .chat(Chat.builder().id(UUID.randomUUID()).build())
+                .chat(Chat.builder()
+                        .id(UUID.randomUUID())
+                        .database(postgresDatabase)
+                        .build())
                 .llmResponse(llmResponse)
                 .build();
 
