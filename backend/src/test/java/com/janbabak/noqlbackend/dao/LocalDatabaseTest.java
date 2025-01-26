@@ -83,7 +83,7 @@ public class LocalDatabaseTest {
             return;
         }
 
-//        executeScripts(cleanupScript); TODO: resolve deadlock
+//        executeScripts(cleanupScript);
     }
 
     /**
