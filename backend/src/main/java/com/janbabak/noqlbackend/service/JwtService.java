@@ -3,8 +3,7 @@ package com.janbabak.noqlbackend.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import java.security.Key;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +12,9 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 @Service
 public class JwtService {
@@ -54,10 +56,10 @@ public class JwtService {
 
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000)) // * 1000 to convert to millis
+                .claims(extraClaims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration * 1000)) // * 1000 to convert to millis
                 .signWith(getSignInKey())
                 .compact();
     }
@@ -76,16 +78,15 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
+        return Jwts.parser()
+                .verifyWith(getSignInKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private Key getSignInKey() {
+    private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 }
