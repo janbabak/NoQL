@@ -37,6 +37,7 @@ public class DatabaseEntityService {
     private final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final AuthenticationService authenticationService;
+    private final DatabaseCredentialsEncryptionService encryptionService;
 
     /**
      * Find database by id.
