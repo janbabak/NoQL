@@ -108,7 +108,7 @@ public class DatabaseEntityService {
                 .port(request.getPort())
                 .database(request.getDatabase())
                 .userName(request.getUserName())
-                .password(request.getPassword())
+                .password(encryptionService.encryptCredentials(request.getPassword()))
                 .engine(request.getEngine())
                 .user(user)
                 .build();

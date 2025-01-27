@@ -6,7 +6,7 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@Data
+//@Data
 @EqualsAndHashCode(callSuper = true)
 public class PostgresDAO extends DatabaseDAO {
 

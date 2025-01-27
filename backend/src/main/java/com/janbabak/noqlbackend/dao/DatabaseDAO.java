@@ -3,7 +3,9 @@ package com.janbabak.noqlbackend.dao;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
@@ -15,22 +17,13 @@ import java.sql.*;
 @Slf4j
 @Data
 public abstract class DatabaseDAO {
+    private final DatabaseCredentialsEncryptionService encryptionService;
     protected Database databaseMetadata;
-
     protected Connection connection;
 
     public DatabaseDAO(Database database) {
         this.databaseMetadata = database;
         this.connection = null;
-    }
-
-    /**
-     * It's possible to initialize the object without setting its properties, but it is necessary to set them
-     * before establishing the connection.
-     */
-    public DatabaseDAO() {
-        databaseMetadata = new Database();
-        connection = null;
     }
 
     /**
