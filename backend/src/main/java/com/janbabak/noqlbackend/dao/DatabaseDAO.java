@@ -6,7 +6,10 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
 
@@ -16,15 +19,15 @@ import java.sql.*;
  */
 @Slf4j
 @Data
+@Service
+@Scope("prototype")
+@RequiredArgsConstructor
 public abstract class DatabaseDAO {
-    private final DatabaseCredentialsEncryptionService encryptionService;
-    protected Database databaseMetadata;
-    protected Connection connection;
 
-    public DatabaseDAO(Database database) {
-        this.databaseMetadata = database;
-        this.connection = null;
-    }
+    private final DatabaseCredentialsEncryptionService encryptionService;
+    @Setter
+    protected Database databaseMetadata = null;
+    protected Connection connection = null;
 
     /**
      * Retrieve database schemas, tables columns and primary keys.

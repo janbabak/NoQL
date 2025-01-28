@@ -18,6 +18,7 @@ import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
+import com.janbabak.noqlbackend.service.database.QueryDAO;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import jakarta.validation.constraints.NotNull;
@@ -58,6 +59,8 @@ public class QueryService {
     private final ChatRepository chatRepository;
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
+    private final DatabaseServiceFactory databaseServiceFactory;
+    private final QueryDAO queryDAO;
 
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
@@ -213,7 +216,7 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    private static Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
+    public static Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
@@ -254,7 +257,8 @@ public class QueryService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
+        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
+        databaseService.setDatabaseDaoMetadata(database);
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
@@ -290,50 +294,51 @@ public class QueryService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
 
-        return retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
+        return queryDAO.retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
 
-    /**
-     * Retrieve data from the message.
-     *
-     * @param message  message
-     * @param database database
-     * @param page     page number (starting by 0)
-     * @param pageSize number of items per page
-     * @return retrieved data
-     */
-    public static RetrievedData retrieveDataFromMessage(
-            ChatQueryWithResponse message,
-            Database database,
-            Integer page,
-            Integer pageSize) {
-
-        LLMResponse LLMResponse;
-        try {
-            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
-        } catch (JsonProcessingException | IllegalArgumentException e) {
-            return null; // should not happen since values that cannot be parsed aren't saved
-        }
-
-        // only plot without any select query to retrieve the data
-        if (LLMResponse.databaseQuery() == null || LLMResponse.databaseQuery().isEmpty()) {
-            return null;
-        }
-
-        BaseDatabaseService databaseService = DatabaseServiceFactory.getDatabaseService(database);
-        QueryService.PaginatedQuery paginatedQuery;
-        try {
-            paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
-        } catch (BadRequestException e) {
-            return null; // should not happen
-        }
-        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
-            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
-            return new RetrievedData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
-        } catch (DatabaseExecutionException | SQLException | DatabaseConnectionException e) {
-            return null; // should not happen since not executable responses aren't saved
-        }
-    }
+//    /**
+//     * Retrieve data from the message.
+//     *
+//     * @param message  message
+//     * @param database database
+//     * @param page     page number (starting by 0)
+//     * @param pageSize number of items per page
+//     * @return retrieved data
+//     */
+//    public RetrievedData retrieveDataFromMessage(
+//            ChatQueryWithResponse message,
+//            Database database,
+//            Integer page,
+//            Integer pageSize) {
+//
+//        LLMResponse LLMResponse;
+//        try {
+//            LLMResponse = createFromJson(message.getLlmResponse(), LLMResponse.class);
+//        } catch (JsonProcessingException | IllegalArgumentException e) {
+//            return null; // should not happen since values that cannot be parsed aren't saved
+//        }
+//
+//        // only plot without any select query to retrieve the data
+//        if (LLMResponse.databaseQuery() == null || LLMResponse.databaseQuery().isEmpty()) {
+//            return null;
+//        }
+//
+//        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
+//        databaseService.setDatabaseDaoMetadata(database);
+//        QueryService.PaginatedQuery paginatedQuery;
+//        try {
+//            paginatedQuery = setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
+//        } catch (BadRequestException e) {
+//            return null; // should not happen
+//        }
+//        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
+//            Long totalCount = getTotalCount(LLMResponse.databaseQuery(), databaseService);
+//            return new RetrievedData(result.resultSet(), paginatedQuery.page, paginatedQuery.pageSize, totalCount);
+//        } catch (DatabaseExecutionException | SQLException | DatabaseConnectionException e) {
+//            return null; // should not happen since not executable responses aren't saved
+//        }
+//    }
 
     /**
      * Retrieve data requested by the user in form of table or plot or both.
@@ -434,7 +439,7 @@ public class QueryService {
             return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
         }
 
-        BaseDatabaseService specificDatabaseService = DatabaseServiceFactory.getDatabaseService(database);
+        BaseDatabaseService specificDatabaseService = databaseServiceFactory.getDatabaseService(database);
         DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
         String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
         List<String> errors = new ArrayList<>();

@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.service.database;
 
+import com.janbabak.noqlbackend.dao.DatabaseDAO;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
@@ -38,6 +39,8 @@ public class DatabaseEntityService {
     private final ChatRepository chatRepository;
     private final AuthenticationService authenticationService;
     private final DatabaseCredentialsEncryptionService encryptionService;
+    private final DatabaseServiceFactory DatabaseServiceFactory;
+    private final DatabaseServiceFactory databaseServiceFactory;
 
     /**
      * Find database by id.
@@ -113,9 +116,9 @@ public class DatabaseEntityService {
                 .user(user)
                 .build();
 
-        DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
+        testConnection(database);
 
-        database =  databaseRepository.save(database);
+        database = databaseRepository.save(database);
 
         // create default chat
         if (request.getCreateDefaultChat()) {
@@ -158,7 +161,7 @@ public class DatabaseEntityService {
         if (data.getPassword() != null) database.setPassword(data.getPassword());
         if (data.getEngine() != null) database.setEngine(data.getEngine());
 
-        DatabaseServiceFactory.getDatabaseDAO(database).testConnection();
+        testConnection(database);
 
         return databaseRepository.save(database);
     }
@@ -174,7 +177,7 @@ public class DatabaseEntityService {
 
         Optional<Database> database = databaseRepository.findById(databaseId);
 
-        if (database.isPresent()){
+        if (database.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.get().getUserId());
             databaseRepository.deleteById(databaseId);
         }
@@ -218,5 +221,17 @@ public class DatabaseEntityService {
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
+    }
+
+    /**
+     * Test connection to the database.
+     *
+     * @param database database to test
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     */
+    private void testConnection(Database database) throws DatabaseConnectionException {
+        DatabaseDAO databaseDAO = databaseServiceFactory.getDatabaseDAO(database);
+        databaseDAO.setDatabaseMetadata(database);
+        databaseDAO.testConnection();
     }
 }

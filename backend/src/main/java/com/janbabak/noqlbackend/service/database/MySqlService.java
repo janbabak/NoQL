@@ -10,14 +10,18 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
 import com.janbabak.noqlbackend.model.entity.Database;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Service
+@Scope("prototype")
 public class MySqlService extends SqlDatabaseService {
 
-    public MySqlService(Database database) {
-        databaseDAO = new MySqlDAO(database);
+    public MySqlService(MySqlDAO mySqlDAO) {
+        databaseDAO = mySqlDAO;
     }
 
     protected void retrieveForeignKeys(SqlDatabaseStructure dbStructure)

@@ -11,16 +11,20 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
 import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
 
 /**
  * Retrieves Postgres database information.
  */
+@Service
+@Scope("prototype")
 public class PostgresService extends SqlDatabaseService {
 
-    public PostgresService(Database database) {
-        databaseDAO = new PostgresDAO(database);
+    public PostgresService(PostgresDAO postgresDAO) {
+        databaseDAO = postgresDAO;
     }
 
     /**
