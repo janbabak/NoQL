@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.database.MessageDataDAO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MessageController {
 
-    private final QueryService queryService;
+    private final MessageDataDAO messageDataDAO;
 
     /**
      * Load data of specified message
@@ -33,6 +33,6 @@ public class MessageController {
                                              @RequestParam(required = false) Integer page,
                                              @RequestParam(required = false) Integer pageSize)
             throws EntityNotFoundException {
-        return queryService.getDataByMessageId(messageId, page, pageSize);
+        return messageDataDAO.getDataByMessageId(messageId, page, pageSize);
     }
 }
