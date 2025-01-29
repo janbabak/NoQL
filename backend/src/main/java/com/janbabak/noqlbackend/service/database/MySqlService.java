@@ -9,7 +9,6 @@ import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Schema;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Table;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.Column;
 import com.janbabak.noqlbackend.model.database.SqlDatabaseStructure.ForeignKey;
-import com.janbabak.noqlbackend.model.entity.Database;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 

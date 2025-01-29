@@ -21,13 +21,12 @@ public class EncryptionUtil {
     private static final String AES_GCM_NO_PADDING = "AES/GCM/NoPadding";
     private static final int GCM_TAG_LENGTH = 16; // 128 bits
     private static final int GCM_IV_LENGTH = 12; // 96 bits
-    private static final int AES_KEY_SIZE = 256; // 256 bits
 
     /**
      * Encrypt a plaintext string.
      *
-     * @param plainText plaintext string to ecnrypt
-     * @param base64Key base64 encoded key
+     * @param plainText plaintext string to encrypt
+     * @param base64Key base64 encoded key (length before encoding is 256 bits)
      * @return base64 encoded encrypted data
      * @throws NoSuchPaddingException             if no such padding is available, should not happen
      * @throws NoSuchAlgorithmException           if no such algorithm is available, should not happen
@@ -36,9 +35,9 @@ public class EncryptionUtil {
      * @throws IllegalBlockSizeException          if the block size is invalid, should not happen
      * @throws BadPaddingException                should not happen
      */
-    public static String encrypt(String plainText, String base64Key)
-            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static String encrypt(String plainText, String base64Key) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
 
         SecretKey secretKey = getKeyFromBase64(base64Key);
         byte[] iv = generateIV();
@@ -59,7 +58,7 @@ public class EncryptionUtil {
      * Decrypt a base64 encoded ciphertext.
      *
      * @param cipherText base64 encoded ciphertext
-     * @param base64Key  base64 encoded key
+     * @param base64Key  base64 encoded key (length before encoding is 256 bits)
      * @return decrypted plaintext
      * @throws NoSuchPaddingException             if no such padding is available, should not happen
      * @throws NoSuchAlgorithmException           if no such algorithm is available, should not happen
@@ -68,9 +67,9 @@ public class EncryptionUtil {
      * @throws IllegalBlockSizeException          if the block size is invalid, should not happen
      * @throws BadPaddingException,               should not happen
      */
-    public static String decrypt(String cipherText, String base64Key)
-            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public static String decrypt(String cipherText, String base64Key) throws NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
+            IllegalBlockSizeException, BadPaddingException {
 
         SecretKey secretKey = getKeyFromBase64(base64Key);
         byte[] decodedData = Base64.getDecoder().decode(cipherText);

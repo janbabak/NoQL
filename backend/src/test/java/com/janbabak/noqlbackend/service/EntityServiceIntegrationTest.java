@@ -100,11 +100,6 @@ public class EntityServiceIntegrationTest {
         AuthenticationService.authenticateUser(testUser);
     }
 
-//    @AfterEach
-//    void tearDown() {
-//        databaseServiceFactoryMock.c; // deregister the mock in current thread
-//    }
-
     @Test
     @DisplayName("Test create, modify, and delete objects")
     void testCreateModifyAndDeleteObjectDatabase() throws DatabaseConnectionException, EntityNotFoundException {

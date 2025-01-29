@@ -6,7 +6,7 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -25,8 +25,10 @@ import java.sql.*;
 public abstract class DatabaseDAO {
 
     private final DatabaseCredentialsEncryptionService encryptionService;
-    @Setter
+
+    @Accessors(fluent = true)
     protected Database databaseMetadata = null;
+
     protected Connection connection = null;
 
     /**

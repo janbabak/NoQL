@@ -12,6 +12,10 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Service responsible for encryption and decryption of database credentials.
+ * The encryption key comes from environment variable {@code DATA_ENCRYPTION_KEY}.
+ */
 @Slf4j
 @Service
 public class DatabaseCredentialsEncryptionService {

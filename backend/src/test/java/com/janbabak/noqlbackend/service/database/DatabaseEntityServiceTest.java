@@ -12,7 +12,6 @@ import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,11 +59,6 @@ class DatabaseEntityServiceTest {
     private static final User testUser = User.builder()
             .id(UUID.randomUUID())
             .build();
-
-//    @AfterEach
-//    void tearDown() {
-//        databaseServiceFactoryMock  .close(); // deregister the mock in the current thread
-//    }
 
     private final SqlDatabaseStructure databaseStructure = new SqlDatabaseStructure(Map.of(
             "public", new SqlDatabaseStructure.Schema("public", Map.of(

@@ -39,7 +39,6 @@ public class DatabaseEntityService {
     private final ChatRepository chatRepository;
     private final AuthenticationService authenticationService;
     private final DatabaseCredentialsEncryptionService encryptionService;
-    private final DatabaseServiceFactory DatabaseServiceFactory;
     private final DatabaseServiceFactory databaseServiceFactory;
 
     /**
@@ -200,7 +199,7 @@ public class DatabaseEntityService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
+        return databaseServiceFactory.getDatabaseService(database).retrieveSchema().toDto();
     }
 
     /**
@@ -220,7 +219,7 @@ public class DatabaseEntityService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        return DatabaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
+        return databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript();
     }
 
     /**
@@ -231,7 +230,6 @@ public class DatabaseEntityService {
      */
     private void testConnection(Database database) throws DatabaseConnectionException {
         DatabaseDAO databaseDAO = databaseServiceFactory.getDatabaseDAO(database);
-        databaseDAO.setDatabaseMetadata(database);
         databaseDAO.testConnection();
     }
 }

@@ -11,7 +11,7 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
-import com.janbabak.noqlbackend.service.database.QueryDAO;
+import com.janbabak.noqlbackend.service.database.MessageDataDAO;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class ChatService {
     private final DatabaseRepository databaseRepository;
     private final PlotService plotService;
     private final AuthenticationService authenticationService;
-    private final QueryDAO queryDAO;
+    private final MessageDataDAO messageDataDAO;
     public static final String NEW_CHAT_NAME = "New chat";
     private final int CHAT_NAME_MAX_LENGTH = 32;
 
@@ -77,7 +77,7 @@ public class ChatService {
                                         : null;
 
                                 RetrievedData data = includeData
-                                        ? queryDAO.retrieveDataFromMessage(
+                                        ? messageDataDAO.retrieveDataFromMessage(
                                         message, chat.getDatabase(), 0, pageSize)
                                         : null;
 

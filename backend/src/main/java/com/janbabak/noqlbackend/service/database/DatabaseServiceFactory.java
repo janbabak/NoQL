@@ -38,8 +38,8 @@ public class DatabaseServiceFactory {
      */
     public @NotNull DatabaseDAO getDatabaseDAO(@NotNull Database database) {
         return switch (database.getEngine()) {
-            case POSTGRES -> postgresDAO;
-            case MYSQL -> mySqlDAO;
+            case POSTGRES -> postgresDAO.databaseMetadata(database);
+            case MYSQL -> mySqlDAO.databaseMetadata(database);
         };
     }
 }

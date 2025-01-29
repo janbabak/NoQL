@@ -2,14 +2,9 @@ package com.janbabak.noqlbackend.dao;
 
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
-import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Service;
 
-//@Data
-//@EqualsAndHashCode(callSuper = true)
 @Service
 public class PostgresDAO extends DatabaseDAO {
 

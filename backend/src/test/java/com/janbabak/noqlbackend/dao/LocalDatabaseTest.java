@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
@@ -74,10 +73,10 @@ public class LocalDatabaseTest {
     @BeforeAll
     protected void setUp() throws Exception {
         postgresDatabase = createDatabase(postgresContainer, DatabaseEngine.POSTGRES);
-        postgresDAO.setDatabaseMetadata(postgresDatabase);
+        postgresDAO.databaseMetadata(postgresDatabase);
 
         mySqlDatabase = createDatabase(mySqlContainer, DatabaseEngine.MYSQL);
-        mySqlDAO.setDatabaseMetadata(mySqlDatabase);
+        mySqlDAO.databaseMetadata(mySqlDatabase);
 
         Scripts initScripts = getInitializationScripts();
         if (initScripts == null) {

@@ -19,7 +19,7 @@ import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 
 @Service
 @RequiredArgsConstructor
-public class QueryDAO {
+public class MessageDataDAO {
 
     private final DatabaseServiceFactory databaseServiceFactory;
 
@@ -55,7 +55,8 @@ public class QueryDAO {
         databaseService.setDatabaseDaoMetadata(database);
         QueryService.PaginatedQuery paginatedQuery;
         try {
-            paginatedQuery = QueryService.setPaginationInSqlQuery(LLMResponse.databaseQuery(), page, pageSize, database);
+            paginatedQuery = QueryService.setPaginationInSqlQuery(
+                    LLMResponse.databaseQuery(), page, pageSize, database);
         } catch (BadRequestException e) {
             return null; // should not happen
         }
