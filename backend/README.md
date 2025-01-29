@@ -36,6 +36,7 @@
 - `JWT_SECRET` - (required) Secret key for JWT token generation (at least 512 bits)
 - `JWT_EXPIRATION` - Expiration time of JWT token in seconds. (Default is 1 day)
 - `JWT_REFRESH_EXPIRATION` - Expiration time of JWT refresh token in seconds. (Default is 7 days)
+- `DATA_ENCRYPTION_KEY` - (required) Key for data encryption (256 bits encoded in base64)
 
 **Api keys to external services**
 

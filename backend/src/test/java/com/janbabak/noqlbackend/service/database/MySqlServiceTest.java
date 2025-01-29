@@ -39,7 +39,6 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     }
 
     protected SqlDatabaseService getSqlService(Database database) {
-        mySqlService.setDatabaseDaoMetadata(database);
         return mySqlService;
     }
 

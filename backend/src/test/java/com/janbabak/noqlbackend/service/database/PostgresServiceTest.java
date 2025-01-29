@@ -40,7 +40,6 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     }
 
     protected SqlDatabaseService getSqlService(Database database) {
-        postgresService.setDatabaseDaoMetadata(database);
         return postgresService;
     }
 
