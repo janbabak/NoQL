@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -42,6 +43,8 @@ public class LocalDatabaseTest {
     protected PostgresDAO postgresDAO;
     @Autowired
     protected MySqlDAO mySqlDAO;
+    @Autowired
+    DatabaseCredentialsEncryptionService encryptionService;
     protected Database postgresDatabase;
     protected Database mySqlDatabase;
 
@@ -140,7 +143,7 @@ public class LocalDatabaseTest {
                 .host(container.getHost())
                 .database(container.getDatabaseName())
                 .userName(container.getUsername())
-                .password(container.getPassword())
+                .password(encryptionService.encryptCredentials(container.getPassword()))
                 .port(container.getFirstMappedPort())
                 .chats(new ArrayList<>())
                 .engine(engine)

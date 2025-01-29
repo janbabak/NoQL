@@ -1,5 +1,7 @@
 package com.janbabak.noqlbackend.service.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,6 +14,7 @@ import java.util.Base64;
 /**
  * Utility class for encryption and decryption of strings using AES/GCM/NoPadding.
  */
+@Slf4j
 public class EncryptionUtil {
 
     private static final String AES = "AES";

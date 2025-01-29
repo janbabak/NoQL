@@ -141,7 +141,9 @@ public abstract class DatabaseDAO {
     protected void connect(Boolean readOnly) throws DatabaseConnectionException {
         try {
             connection = DriverManager.getConnection(
-                    createConnectionUrl(), databaseMetadata.getUserName(), databaseMetadata.getPassword());
+                    createConnectionUrl(),
+                    databaseMetadata.getUserName(),
+                    encryptionService.decryptCredentials(databaseMetadata.getPassword()));
             connection.setReadOnly(readOnly);
             connection.setAutoCommit(!readOnly);
         } catch (SQLException e) {

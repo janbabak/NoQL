@@ -158,7 +158,7 @@ public class DatabaseEntityService {
         if (data.getPort() != null) database.setPort(data.getPort());
         if (data.getDatabase() != null) database.setDatabase(data.getDatabase());
         if (data.getUserName() != null) database.setUserName(data.getUserName());
-        if (data.getPassword() != null) database.setPassword(data.getPassword());
+        if (data.getPassword() != null) database.setPassword(encryptionService.encryptCredentials(data.getPassword()));
         if (data.getEngine() != null) database.setEngine(data.getEngine());
 
         testConnection(database);
