@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -16,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest
 class MySqlServiceTest extends AbstractSqlServiceTest {
+
+    @Autowired
+    private MySqlService mySqlService;
 
     MySqlServiceTest() {
         super();
@@ -35,7 +39,8 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     }
 
     protected SqlDatabaseService getSqlService(Database database) {
-        return new MySqlService(database);
+        mySqlService.setDatabaseDaoMetadata(database);
+        return mySqlService;
     }
 
     protected String getDefaultSchema() {

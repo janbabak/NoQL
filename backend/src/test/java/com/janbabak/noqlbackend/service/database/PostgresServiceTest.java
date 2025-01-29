@@ -6,6 +6,7 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -17,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @SpringBootTest
 class PostgresServiceTest extends AbstractSqlServiceTest {
+
+    @Autowired
+    private PostgresService postgresService;
 
     PostgresServiceTest() {
         super();
@@ -36,7 +40,8 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     }
 
     protected SqlDatabaseService getSqlService(Database database) {
-        return new PostgresService(database);
+        postgresService.setDatabaseDaoMetadata(database);
+        return postgresService;
     }
 
     protected String getDefaultSchema() {

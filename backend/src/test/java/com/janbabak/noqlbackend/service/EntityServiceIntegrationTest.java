@@ -21,8 +21,6 @@ import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import org.junit.jupiter.api.*;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,6 +33,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test services that work with ORM entities.
@@ -62,8 +61,7 @@ public class EntityServiceIntegrationTest {
     @Autowired
     private AuthenticationService authenticationService;
 
-    private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
-            Mockito.mockStatic(DatabaseServiceFactory.class);
+    private final DatabaseServiceFactory databaseServiceFactoryMock = mock(DatabaseServiceFactory.class);
 
     private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
 
@@ -93,10 +91,10 @@ public class EntityServiceIntegrationTest {
         AuthenticationService.authenticateUser(testUser);
     }
 
-    @AfterEach
-    void tearDown() {
-        databaseServiceFactoryMock.close(); // deregister the mock in current thread
-    }
+//    @AfterEach
+//    void tearDown() {
+//        databaseServiceFactoryMock.c; // deregister the mock in current thread
+//    }
 
 
     @Test
@@ -170,9 +168,7 @@ public class EntityServiceIntegrationTest {
                 .userId(testAdmin.getId())
                 .build();
 
-        databaseServiceFactoryMock
-                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
-                .thenReturn(databaseDaoMock);
+        when(databaseServiceFactoryMock.getDatabaseDAO(any())).thenReturn(databaseDaoMock);
 
         Database createdPostgres = databaseService.create(createPostgresRequest);
         Database createdMsql = databaseService.create(createMysqlRequest);

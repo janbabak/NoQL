@@ -9,23 +9,31 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@Profile("test")
 class DatabaseServiceFactoryTest {
+
+    @Autowired
+    private DatabaseServiceFactory databaseServiceFactory;
 
     @Test
     @DisplayName("Test get database service with null database.")
     @SuppressWarnings("all")
     void testGetDatabaseServiceBadRequest() {
-        assertThrows(NullPointerException.class, () -> DatabaseServiceFactory.getDatabaseService(null));
+        assertThrows(NullPointerException.class, () -> databaseServiceFactory.getDatabaseService(null));
     }
 
     @ParameterizedTest
     @MethodSource("testGetDatabaseServiceDataProvider")
     @DisplayName("Test get database service based on the database engine.")
     void testGetDatabaseService(Database database, Class<? extends BaseDatabaseService> expected) {
-        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseService(database));
+        assertInstanceOf(expected, databaseServiceFactory.getDatabaseService(database));
     }
 
     static Object[][] testGetDatabaseServiceDataProvider() {
@@ -51,14 +59,14 @@ class DatabaseServiceFactoryTest {
     @DisplayName("Test get database DAO with null database.")
     @SuppressWarnings("all")
     void testGetDatabaseDaoBadRequest() {
-        assertThrows(NullPointerException.class, () -> DatabaseServiceFactory.getDatabaseDAO(null));
+        assertThrows(NullPointerException.class, () -> databaseServiceFactory.getDatabaseDAO(null));
     }
 
     @ParameterizedTest
     @MethodSource("testGetDatabaseDaoDataProvider")
     @DisplayName("Test get database DAO based on the database engine.")
     void testGetDatabaseDao(Database database, Class<? extends DatabaseDAO> expected) {
-        assertInstanceOf(expected, DatabaseServiceFactory.getDatabaseDAO(database));
+        assertInstanceOf(expected, databaseServiceFactory.getDatabaseDAO(database));
     }
 
     static Object[][] testGetDatabaseDaoDataProvider() {
