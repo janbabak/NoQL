@@ -49,6 +49,10 @@ class DatabaseEntityServiceTest {
     @SuppressWarnings("unused") // used in the databaseEntityService
     private AuthenticationService authenticationService;
 
+    @Mock
+    @SuppressWarnings("unused") // used in the databaseEntityService
+    private DatabaseCredentialsEncryptionService encryptionService;
+
     private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
 
     private final DatabaseServiceFactory databaseServiceFactoryMock = mock(DatabaseServiceFactory.class);
