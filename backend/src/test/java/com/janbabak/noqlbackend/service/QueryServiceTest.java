@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.service.database.QueryDAO;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
@@ -62,6 +63,10 @@ class QueryServiceTest {
     @Mock
     @SuppressWarnings("unused") // used internally
     AuthenticationService authenticationService;
+
+    @Mock
+    @SuppressWarnings("unused") // used internally
+    QueryDAO queryDAO;
 
     private final Database postgresDatabase;
 
