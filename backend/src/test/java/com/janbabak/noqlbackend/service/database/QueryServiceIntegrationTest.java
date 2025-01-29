@@ -73,6 +73,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @Autowired
+    private DatabaseCredentialsEncryptionService encryptionService;
+
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
     private User testUser;
@@ -119,7 +122,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .port(postgresDatabase.getPort())
                 .database(postgresDatabase.getDatabase())
                 .userName(postgresDatabase.getUserName())
-                .password(postgresDatabase.getPassword())
+                .password(encryptionService.decryptCredentials(postgresDatabase.getPassword()))
                 .engine(postgresDatabase.getEngine())
                 .userId(testUser.getId())
                 .build();
@@ -130,7 +133,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .port(mySqlDatabase.getPort())
                 .database(mySqlDatabase.getDatabase())
                 .userName(mySqlDatabase.getUserName())
-                .password(mySqlDatabase.getPassword())
+                .password(encryptionService.decryptCredentials(mySqlDatabase.getPassword()))
                 .engine(mySqlDatabase.getEngine())
                 .userId(testUser.getId())
                 .build();
