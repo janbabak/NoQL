@@ -41,7 +41,7 @@ class ChatControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ChatService chatService;
+    private ChatService chatServiceMock;
 
     private final String ROOT_URL = "/chat";
 
@@ -67,7 +67,7 @@ class ChatControllerTest {
                         }
                         """.formatted(chatId);
 
-        when(chatService.create(databaseId)).thenReturn(chatDto);
+        when(chatServiceMock.create(databaseId)).thenReturn(chatDto);
 
         // then
         mockMvc.perform(post(ROOT_URL)
@@ -87,7 +87,7 @@ class ChatControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(chatService.create(databaseId)).thenThrow(EntityNotFoundException.class);
+        when(chatServiceMock.create(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(post(ROOT_URL)
@@ -123,7 +123,7 @@ class ChatControllerTest {
                 .name("Test chat")
                 .build();
 
-        when(chatService.findById(eq(chatId), any(), eq(true))).thenReturn(chatDto);
+        when(chatServiceMock.findById(eq(chatId), any(), eq(true))).thenReturn(chatDto);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
@@ -139,7 +139,7 @@ class ChatControllerTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatService.findById(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
+        when(chatServiceMock.findById(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
@@ -204,7 +204,7 @@ class ChatControllerTest {
         UUID chatId = UUID.randomUUID();
         String name = "Find all users";
 
-        doThrow(EntityNotFoundException.class).when(chatService).renameChat(chatId, name);
+        doThrow(EntityNotFoundException.class).when(chatServiceMock).renameChat(chatId, name);
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
@@ -275,7 +275,7 @@ class ChatControllerTest {
                                  }""")
                 .build();
 
-        when(chatService.addMessageToChat(chatId, request)).thenReturn(null);
+        when(chatServiceMock.addMessageToChat(chatId, request)).thenReturn(null);
 
 
         // then
@@ -305,7 +305,7 @@ class ChatControllerTest {
                                  }""")
                 .build();
 
-        when(chatService.addMessageToChat(chatId, request)).thenThrow(EntityNotFoundException.class);
+        when(chatServiceMock.addMessageToChat(chatId, request)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)

@@ -46,22 +46,22 @@ class QueryServiceTest {
     private QueryService queryService;
 
     @Mock
-    private DatabaseRepository databaseRepository;
+    private DatabaseRepository databaseRepositoryMock;
 
     @Mock
     @SuppressWarnings("unused") // used internally
-    private ChatRepository chatRepository;
+    private ChatRepository chatRepositoryMock;
 
     @Mock
-    private UserService userService;
-
-    @Mock
-    @SuppressWarnings("unused") // used internally
-    AuthenticationService authenticationService;
+    private UserService userServiceMock;
 
     @Mock
     @SuppressWarnings("unused") // used internally
-    MessageDataDAO messageDataDAO;
+    AuthenticationService authenticationServiceMock;
+
+    @Mock
+    @SuppressWarnings("unused") // used internally
+    MessageDataDAO messageDataDAOMock;
 
     private final Database postgresDatabase;
 
@@ -451,7 +451,7 @@ class QueryServiceTest {
         String query = "SELECT * FROM public.user;";
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -472,7 +472,7 @@ class QueryServiceTest {
 
         String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
@@ -507,9 +507,9 @@ class QueryServiceTest {
 
         ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded", "find all users");
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(userService.decrementQueryLimit(any())).thenReturn(0);
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
+        when(userServiceMock.decrementQueryLimit(any())).thenReturn(0);
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
         ChatResponse actual = queryService.queryChat(databaseId, chatId, request, 10);

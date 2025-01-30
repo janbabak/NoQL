@@ -29,10 +29,10 @@ class UserServiceTest {
     private UserService userService;
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepository userRepositoryMock;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoderMock;
 
     @Mock
     @SuppressWarnings("unused") // used in userService
@@ -46,14 +46,14 @@ class UserServiceTest {
 
         User user = User.builder().id(userId).build();
 
-        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(user));
+        when(userRepositoryMock.findById(userId)).thenReturn(java.util.Optional.of(user));
 
         // when
         User actual = userService.findById(userId);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(userRepository).findById(idCaptor.capture());
+        verify(userRepositoryMock).findById(idCaptor.capture());
         assertEquals(userId, idCaptor.getValue());
         assertEquals(user, actual);
     }
@@ -64,7 +64,7 @@ class UserServiceTest {
         // given
         UUID userId = UUID.randomUUID();
 
-        when(userRepository.findById(userId)).thenReturn(java.util.Optional.empty());
+        when(userRepositoryMock.findById(userId)).thenReturn(java.util.Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -95,7 +95,7 @@ class UserServiceTest {
         User user2 = User.builder().id(UUID.randomUUID()).build();
         List<User> users = List.of(user1, user2);
 
-        when(userRepository.findAll()).thenReturn(users);
+        when(userRepositoryMock.findAll()).thenReturn(users);
 
         // when
         List<User> actual = userService.findAll();
@@ -133,20 +133,20 @@ class UserServiceTest {
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
-                .password(passwordEncoder.encode("password2"))
+                .password(passwordEncoderMock.encode("password2"))
                 .role(Role.ROLE_USER)
                 .queryLimit(1000)
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(updatedUser);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.save(user)).thenReturn(updatedUser);
 
         // when
         User actual = userService.updateUser(userId, request);
 
         // then
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
+        verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(updatedUser, userCaptor.getValue());
         assertEquals(updatedUser, actual);
     }
@@ -175,8 +175,8 @@ class UserServiceTest {
                 .email("john@email.com")
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.findByEmail(eq("john@email.com"))).thenReturn(Optional.of(existingUser));
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.findByEmail(eq("john@email.com"))).thenReturn(Optional.of(existingUser));
 
         // when
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -194,7 +194,7 @@ class UserServiceTest {
 
         UpdateUserRequest request = UpdateUserRequest.builder().firstName("new name").build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -225,14 +225,14 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         userService.deleteUser(userId);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(userRepository).deleteById(idCaptor.capture());
+        verify(userRepositoryMock).deleteById(idCaptor.capture());
         assertEquals(userId, idCaptor.getValue());
     }
 
@@ -243,14 +243,14 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).queryLimit(10).build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         int actual = userService.decrementQueryLimit(userId);
 
         // then
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
+        verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(9, userCaptor.getValue().getQueryLimit());
         assertEquals(10, actual);
     }
@@ -262,14 +262,14 @@ class UserServiceTest {
         UUID userId = UUID.randomUUID();
         User user = User.builder().id(userId).queryLimit(0).build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         int actual = userService.decrementQueryLimit(userId);
 
         // then
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
+        verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(0, userCaptor.getValue().getQueryLimit());
         assertEquals(0, actual);
     }
@@ -279,7 +279,7 @@ class UserServiceTest {
     void testDecrementQueryLimitUserNotFound() {
         // given
         UUID userId = UUID.randomUUID();
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,

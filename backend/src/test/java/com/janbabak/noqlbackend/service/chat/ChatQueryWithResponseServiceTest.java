@@ -33,18 +33,18 @@ class ChatQueryWithResponseServiceTest {
     private ChatQueryWithResponseService chatQueryWithResponseService;
 
     @Mock
-    private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
+    private ChatQueryWithResponseRepository chatQueryWithResponseRepositoryMock;
 
     @Mock
-    private ChatRepository chatRepository;
-
-    @Mock
-    @SuppressWarnings("unused") // used internally
-    AuthenticationService authenticationService;
+    private ChatRepository chatRepositoryMock;
 
     @Mock
     @SuppressWarnings("unused") // used internally
-    MessageDataDAO messageDataDAO;
+    AuthenticationService authenticationServiceMock;
+
+    @Mock
+    @SuppressWarnings("unused") // used internally
+    MessageDataDAO messageDataDAOMock;
 
     private final Database postgresDatabase;
 
@@ -98,8 +98,8 @@ class ChatQueryWithResponseServiceTest {
                                 { "databaseQuery": "find user Jana", "generatePlot": false, "pythonCode": null }""")
                         .build());
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(chatQueryWithResponseRepository.findAllByChatOrderByTimestamp(chat)).thenReturn(chatQueryWithResponses);
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatQueryWithResponseRepositoryMock.findAllByChatOrderByTimestamp(chat)).thenReturn(chatQueryWithResponses);
 
         // when
         List<ChatQueryWithResponse> actual = chatQueryWithResponseService.getMessagesFromChat(chatId);
@@ -114,7 +114,7 @@ class ChatQueryWithResponseServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -132,7 +132,7 @@ class ChatQueryWithResponseServiceTest {
         int page = 0;
         String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
 
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
+        when(chatQueryWithResponseRepositoryMock.findById(messageId)).thenReturn(Optional.empty());
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
@@ -158,7 +158,7 @@ class ChatQueryWithResponseServiceTest {
                 .llmResponse(llmResponse)
                 .build();
 
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
+        when(chatQueryWithResponseRepositoryMock.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
 
         // then
         assertNull(chatQueryWithResponseService.getDataByMessageId(messageId, 0, 10));

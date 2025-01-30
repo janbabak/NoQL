@@ -41,10 +41,13 @@ public class LocalDatabaseTest {
 
     @Autowired
     protected PostgresDAO postgresDAO;
+
     @Autowired
     protected MySqlDAO mySqlDAO;
+
     @Autowired
     DatabaseCredentialsEncryptionService encryptionService;
+
     protected Database postgresDatabase;
     protected Database mySqlDatabase;
 

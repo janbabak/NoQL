@@ -48,7 +48,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private UserService userService;
+    private UserService userServiceMock;
 
     private final String ROOT_URL = "/user";
 
@@ -83,7 +83,7 @@ class UserControllerTest {
 
         List<User> users = List.of(user1, user2);
 
-        when(userService.findAll()).thenReturn(users);
+        when(userServiceMock.findAll()).thenReturn(users);
 
         // then
         mockMvc.perform(get(ROOT_URL))
@@ -97,7 +97,7 @@ class UserControllerTest {
     @WithMockUser(roles = "USER")
     void getAllForbidden() throws Exception {
         //given
-        when(userService.findAll()).thenThrow(new AccessDeniedException("Access denied"));
+        when(userServiceMock.findAll()).thenThrow(new AccessDeniedException("Access denied"));
 
         // then
         mockMvc.perform(get(ROOT_URL))
@@ -119,7 +119,7 @@ class UserControllerTest {
     @WithMockUser(roles = "USER")
     void getById() throws Exception {
         // given
-        when(userService.findById(testUser.getId())).thenReturn(testUser);
+        when(userServiceMock.findById(testUser.getId())).thenReturn(testUser);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{userId}", testUser.getId()))
@@ -142,7 +142,7 @@ class UserControllerTest {
     @WithMockUser(roles = "USER")
     void getByIdUserNotFound() throws Exception {
         // given
-        when(userService.findById(testUser.getId())).thenThrow(new EntityNotFoundException(USER, testUser.getId()));
+        when(userServiceMock.findById(testUser.getId())).thenThrow(new EntityNotFoundException(USER, testUser.getId()));
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{userId}", testUser.getId()))
@@ -159,7 +159,7 @@ class UserControllerTest {
         UUID userId = UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02");
 
         if (success) {
-            when(userService.updateUser(eq(userId), any())).thenReturn(updatedUser);
+            when(userServiceMock.updateUser(eq(userId), any())).thenReturn(updatedUser);
         }
 
         // then

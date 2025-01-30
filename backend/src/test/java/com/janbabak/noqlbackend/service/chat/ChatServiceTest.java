@@ -38,20 +38,20 @@ class ChatServiceTest {
     private ChatService chatService;
 
     @Mock
-    private ChatRepository chatRepository;
+    private ChatRepository chatRepositoryMock;
 
     @Mock
-    private ChatQueryWithResponseRepository messageRepository;
+    private ChatQueryWithResponseRepository messageRepositoryMock;
 
     @Mock
-    private DatabaseRepository databaseRepository;
+    private DatabaseRepository databaseRepositoryMock;
 
     @Mock
-    private PlotService plotService;
+    private PlotService plotServiceMock;
 
     @Mock
     @SuppressWarnings("unused") // used in the ChatService
-    private AuthenticationService authenticationService;
+    private AuthenticationService authenticationServiceMock;
 
     private final User testUser = User.builder()
             .id(UUID.randomUUID())
@@ -77,14 +77,14 @@ class ChatServiceTest {
         ChatDto expected = new ChatDto(
                 chatId, "Test chat", new ArrayList<>(), null, null);
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
         ChatDto actual = chatService.findById(chatId, null, true);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(chatRepository).findById(idCaptor.capture());
+        verify(chatRepositoryMock).findById(idCaptor.capture());
         assertEquals(chatId, idCaptor.getValue());
         assertEquals(expected, actual);
     }
@@ -102,9 +102,9 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser2).build())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
         assertThrows(AccessDeniedException.class,
@@ -117,7 +117,7 @@ class ChatServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -159,15 +159,15 @@ class ChatServiceTest {
                 new ChatHistoryItem(chat1.getId(), "Find the oldest user"),
                 new ChatHistoryItem(chat2.getId(), "find emails of all users"));
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)).thenReturn(chats);
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
+        when(chatRepositoryMock.findAllByDatabaseOrderByModificationDateDesc(database)).thenReturn(chats);
 
         // when
         List<ChatHistoryItem> actual = chatService.findChatsByDatabaseId(databaseId);
 
         // then
         ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
-        verify(chatRepository).findAllByDatabaseOrderByModificationDateDesc(databaseArgumentCaptor.capture());
+        verify(chatRepositoryMock).findAllByDatabaseOrderByModificationDateDesc(databaseArgumentCaptor.capture());
         assertEquals(database, databaseArgumentCaptor.getValue());
         assertEquals(expected, actual);
     }
@@ -185,8 +185,8 @@ class ChatServiceTest {
                 .build();
 
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
 
         // then
         assertThrows(AccessDeniedException.class, () -> chatService.findChatsByDatabaseId(databaseId));
@@ -198,7 +198,7 @@ class ChatServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -230,8 +230,8 @@ class ChatServiceTest {
         ChatDto expected = new ChatDto(
                 chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(chatRepository.save(any())).thenReturn(chat);
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
+        when(chatRepositoryMock.save(any())).thenReturn(chat);
 
         // when
         ChatDto actual = chatService.create(databaseId);
@@ -252,9 +252,9 @@ class ChatServiceTest {
                 .user(testUser2)
                 .build();
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
         assertThrows(AccessDeniedException.class, () -> chatService.create(databaseId));
@@ -266,7 +266,7 @@ class ChatServiceTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -302,8 +302,8 @@ class ChatServiceTest {
                 .llmResponse(request.llmResult())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(messageRepository.save(any())).thenReturn(expected);
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
+        when(messageRepositoryMock.save(any())).thenReturn(expected);
 
         // when
         ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
@@ -331,9 +331,9 @@ class ChatServiceTest {
                 """
                         { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
         // then
         assertThrows(AccessDeniedException.class, () -> chatService.addMessageToChat(chatId, request));
     }
@@ -364,15 +364,15 @@ class ChatServiceTest {
                 .llmResponse(request.llmResult())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
-        when(messageRepository.save(any())).thenReturn(expected);
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
+        when(messageRepositoryMock.save(any())).thenReturn(expected);
 
         // when
         ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
 
         // then
         ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
-        verify(chatRepository).save(chatCaptor.capture());
+        verify(chatRepositoryMock).save(chatCaptor.capture());
         assertEquals("Create a histogram of distributi", chatCaptor.getValue().getName());
         assertEquals(expected, actual);
     }
@@ -389,7 +389,7 @@ class ChatServiceTest {
                 """
                         { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -414,14 +414,14 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
         chatService.renameChat(chatId, newName);
 
         // then
         ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
-        verify(chatRepository).save(chatCaptor.capture());
+        verify(chatRepositoryMock).save(chatCaptor.capture());
         assertEquals(newName, chatCaptor.getValue().getName());
     }
 
@@ -440,9 +440,9 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser2).build())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
         assertThrows(AccessDeniedException.class, () -> chatService.renameChat(chatId, newName));
@@ -463,14 +463,14 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
         chatService.renameChat(chatId, newName);
 
         // then
         ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
-        verify(chatRepository).save(chatCaptor.capture());
+        verify(chatRepositoryMock).save(chatCaptor.capture());
         assertEquals("Histogram of user's age distribu", chatCaptor.getValue().getName());
     }
 
@@ -482,7 +482,7 @@ class ChatServiceTest {
 
         String newName = "User's age distribution";
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.empty());
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -498,7 +498,7 @@ class ChatServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(Chat.builder()
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(Chat.builder()
                 .id(chatId)
                 .database(Database.builder().user(testUser).build())
                 .build()));
@@ -509,8 +509,8 @@ class ChatServiceTest {
         // then
         ArgumentCaptor<UUID> repositoryIdCaptor = ArgumentCaptor.forClass(UUID.class);
         ArgumentCaptor<String> plotIdCaptor = ArgumentCaptor.forClass(String.class);
-        verify(chatRepository).deleteById(repositoryIdCaptor.capture());
-        verify(plotService).deletePlots(plotIdCaptor.capture());
+        verify(chatRepositoryMock).deleteById(repositoryIdCaptor.capture());
+        verify(plotServiceMock).deletePlots(plotIdCaptor.capture());
         assertEquals(chatId, repositoryIdCaptor.getValue());
         assertEquals(chatId.toString(), plotIdCaptor.getValue());
     }
@@ -521,12 +521,12 @@ class ChatServiceTest {
         // given
         UUID chatId = UUID.randomUUID();
 
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(Chat.builder()
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(Chat.builder()
                 .id(chatId)
                 .database(Database.builder().user(testUser2).build())
                 .build()));
         doThrow(new AccessDeniedException("Access Denied"))
-                .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
+                .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
 
         // then
         assertThrows(AccessDeniedException.class, () -> chatService.deleteChatById(chatId));

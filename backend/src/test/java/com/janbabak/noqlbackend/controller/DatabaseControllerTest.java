@@ -56,7 +56,7 @@ class DatabaseControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private DatabaseEntityService databaseService;
+    private DatabaseEntityService databaseServiceMock;
 
     @MockBean
     @SuppressWarnings("unused") // mock is used internally
@@ -103,7 +103,7 @@ class DatabaseControllerTest {
                 .build();
         List<Database> databases = List.of(localPostgres, localMysql);
 
-        when(databaseService.findAll(null)).thenReturn(databases);
+        when(databaseServiceMock.findAll(null)).thenReturn(databases);
 
         // then
         mockMvc.perform(get(ROOT_URL))
@@ -125,7 +125,7 @@ class DatabaseControllerTest {
     @DisplayName("Get database by id")
     @WithMockUser(roles = "USER")
     void testGetDatabaseById() throws Exception {
-        when(databaseService.findById(localPostgres.getId())).thenReturn(localPostgres);
+        when(databaseServiceMock.findById(localPostgres.getId())).thenReturn(localPostgres);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}", localPostgres.getId()))
@@ -141,7 +141,7 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseService.findById(databaseId)).thenThrow(EntityNotFoundException.class);
+        when(databaseServiceMock.findById(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}", databaseId))
@@ -166,7 +166,7 @@ class DatabaseControllerTest {
             throws Exception {
 
         if (success) {
-            when(databaseService.create(any())).thenReturn(createdDatabase);
+            when(databaseServiceMock.create(any())).thenReturn(createdDatabase);
         }
 
         // then
@@ -322,7 +322,7 @@ class DatabaseControllerTest {
         UUID databaseId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
         if (success) {
-            when(databaseService.update(eq(databaseId), any())).thenReturn(updatedDatabase);
+            when(databaseServiceMock.update(eq(databaseId), any())).thenReturn(updatedDatabase);
         }
 
         // then
@@ -707,7 +707,7 @@ class DatabaseControllerTest {
                                         new Column("id", "integer", true)
                                 ))))));
 
-        when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenReturn(databaseStructure);
+        when(databaseServiceMock.getDatabaseStructureByDatabaseId(databaseId)).thenReturn(databaseStructure);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
@@ -723,7 +723,7 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseService.getDatabaseStructureByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
+        when(databaseServiceMock.getDatabaseStructureByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
@@ -771,7 +771,7 @@ class DatabaseControllerTest {
                 	name CHARACTER VARYING
                 );""";
 
-        when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenReturn(createScript);
+        when(databaseServiceMock.getDatabaseCreateScriptByDatabaseId(databaseId)).thenReturn(createScript);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
@@ -787,7 +787,7 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseService.getDatabaseCreateScriptByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
+        when(databaseServiceMock.getDatabaseCreateScriptByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
