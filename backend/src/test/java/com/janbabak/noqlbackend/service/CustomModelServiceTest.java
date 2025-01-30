@@ -34,14 +34,14 @@ class CustomModelServiceTest {
     private CustomModelService customModelService;
 
     @Mock
-    private CustomModelRepository customModelRepository;
+    private CustomModelRepository customModelRepositoryMock;
 
     @Mock
-    UserRepository userRepository;
+    UserRepository userRepositoryMock;
 
     @Mock
     @SuppressWarnings("unused") // used int the customModelService
-    private AuthenticationService authenticationService;
+    private AuthenticationService authenticationServiceMock;
 
     private final User testUser = User.builder()
             .id(UUID.randomUUID())
@@ -61,14 +61,14 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        when(customModelRepository.findById(customModelId)).thenReturn(Optional.of(customModel));
+        when(customModelRepositoryMock.findById(customModelId)).thenReturn(Optional.of(customModel));
 
         // when
         CustomModel actual = customModelService.findById(customModelId);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(customModelRepository).findById(idCaptor.capture());
+        verify(customModelRepositoryMock).findById(idCaptor.capture());
         assertEquals(customModelId, idCaptor.getValue());
         assertEquals(customModel, actual);
     }
@@ -104,8 +104,8 @@ class CustomModelServiceTest {
         List<CustomModel> allCustomModels = List.of(customModel1, customModel2, customModel3);
         List<CustomModel> testUsersCustomModels = List.of(customModel1, customModel2);
 
-        when(customModelRepository.findAll()).thenReturn(allCustomModels);
-        when(customModelRepository.findAllByUserId(testUser.getId())).thenReturn(testUsersCustomModels);
+        when(customModelRepositoryMock.findAll()).thenReturn(allCustomModels);
+        when(customModelRepositoryMock.findAllByUserId(testUser.getId())).thenReturn(testUsersCustomModels);
 
         // when
         List<CustomModel> actualAllModels = customModelService.findAll();
@@ -140,7 +140,7 @@ class CustomModelServiceTest {
 
         List<CustomModel> customModels = List.of(customModel1, customModel2);
 
-        when(customModelRepository.findAllByUserId(testUser.getId())).thenReturn(customModels);
+        when(customModelRepositoryMock.findAllByUserId(testUser.getId())).thenReturn(customModels);
 
         // when
         List<ModelOption> actual = customModelService.getAllModels(testUser.getId());
@@ -167,15 +167,15 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        when(customModelRepository.save(any())).thenReturn(customModel);
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        when(customModelRepositoryMock.save(any())).thenReturn(customModel);
+        when(userRepositoryMock.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
         // when
         CustomModel actual = customModelService.create(request);
 
         // then
         ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
-        verify(customModelRepository).save(customModelCaptor.capture());
+        verify(customModelRepositoryMock).save(customModelCaptor.capture());
         assertEquals(customModel, customModelCaptor.getValue());
         assertEquals(customModel, actual);
     }
@@ -208,15 +208,15 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        when(customModelRepository.findById(customModelId)).thenReturn(Optional.of(customModel));
-        when(customModelRepository.save(customModel)).thenReturn(updatedCustomModel);
+        when(customModelRepositoryMock.findById(customModelId)).thenReturn(Optional.of(customModel));
+        when(customModelRepositoryMock.save(customModel)).thenReturn(updatedCustomModel);
 
         // when
         CustomModel actual = customModelService.update(customModelId, updateCustomModelReqeust);
 
         // then
         ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
-        verify(customModelRepository).save(customModelCaptor.capture());
+        verify(customModelRepositoryMock).save(customModelCaptor.capture());
         assertEquals(updatedCustomModel, customModelCaptor.getValue());
         assertEquals(updatedCustomModel, actual);
     }
@@ -231,14 +231,14 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        when(customModelRepository.findById(customModelId)).thenReturn(Optional.of(customModel));
+        when(customModelRepositoryMock.findById(customModelId)).thenReturn(Optional.of(customModel));
 
         // when
         customModelService.delete(customModelId);
 
         // then
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(customModelRepository).deleteById(idCaptor.capture());
+        verify(customModelRepositoryMock).deleteById(idCaptor.capture());
         assertEquals(customModelId, idCaptor.getValue());
     }
 }

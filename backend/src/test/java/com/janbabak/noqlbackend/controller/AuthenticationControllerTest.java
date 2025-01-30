@@ -42,7 +42,7 @@ class AuthenticationControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private AuthenticationService authenticationService;
+    private AuthenticationService authenticationServiceMock;
 
     private final String ROOT_URL = "/auth";
 
@@ -57,7 +57,7 @@ class AuthenticationControllerTest {
                        Boolean success) throws Exception {
 
         if (success) {
-            when(authenticationService.authenticate(requestObj)).thenReturn(responseObj);
+            when(authenticationServiceMock.authenticate(requestObj)).thenReturn(responseObj);
         }
 
         // then
@@ -159,7 +159,7 @@ class AuthenticationControllerTest {
                   Boolean success) throws Exception {
 
         if (success) {
-            when(authenticationService.register(requestObj, Role.ROLE_USER))
+            when(authenticationServiceMock.register(requestObj, Role.ROLE_USER))
                     .thenReturn(responseObj);
         }
 
@@ -193,7 +193,7 @@ class AuthenticationControllerTest {
                         .build())
                 .build();
 
-        when(authenticationService.refreshToken(refreshToken)).thenReturn(expectedResponse);
+        when(authenticationServiceMock.refreshToken(refreshToken)).thenReturn(expectedResponse);
 
         // then
         mockMvc.perform(post(ROOT_URL + "/refreshToken")

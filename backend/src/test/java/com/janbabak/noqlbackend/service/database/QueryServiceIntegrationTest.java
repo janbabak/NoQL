@@ -59,10 +59,10 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     private QueryService queryService;
 
     @MockBean
-    private PlotService plotService;
+    private PlotService plotServiceMock;
 
     @MockBean
-    LlmApiServiceFactory llmApiServiceFactory;
+    LlmApiServiceFactory llmApiServiceFactoryMock;
 
     @Autowired
     private DatabaseEntityService databaseService;
@@ -72,6 +72,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
     @Autowired
     private AuthenticationService authenticationService;
+
+    @Autowired
+    private DatabaseCredentialsEncryptionService encryptionService;
 
     QueryApi queryApi = Mockito.mock(QueryApi.class);
 
@@ -119,7 +122,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .port(postgresDatabase.getPort())
                 .database(postgresDatabase.getDatabase())
                 .userName(postgresDatabase.getUserName())
-                .password(postgresDatabase.getPassword())
+                .password(encryptionService.decryptCredentials(postgresDatabase.getPassword()))
                 .engine(postgresDatabase.getEngine())
                 .userId(testUser.getId())
                 .build();
@@ -130,7 +133,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .port(mySqlDatabase.getPort())
                 .database(mySqlDatabase.getDatabase())
                 .userName(mySqlDatabase.getUserName())
-                .password(mySqlDatabase.getPassword())
+                .password(encryptionService.decryptCredentials(mySqlDatabase.getPassword()))
                 .engine(mySqlDatabase.getEngine())
                 .userId(testUser.getId())
                 .build();
@@ -431,9 +434,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         }
         String plotFileName = "/static/images/" + chat.id() + "-unknown-message-id.png";
 
-        when(llmApiServiceFactory.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
+        when(llmApiServiceFactoryMock.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
         when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        when(plotService.generatePlot(any(), any(), eq(chat.id()), any())).thenReturn(plotFileName);
+        when(plotServiceMock.generatePlot(any(), any(), eq(chat.id()), any())).thenReturn(plotFileName);
 
         // when
         ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);

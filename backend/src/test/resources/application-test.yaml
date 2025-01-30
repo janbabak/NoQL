@@ -29,6 +29,7 @@ app:
       secretKey: "${JWT_SECRET:secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret}"
       expiration: "${JWT_EXPIRATION:86400}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
+    dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
   externalServices:
     openAiApi:
       url: "xxx"

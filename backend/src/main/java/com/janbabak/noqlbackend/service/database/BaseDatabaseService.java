@@ -6,6 +6,8 @@ import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseStructure;
+import com.janbabak.noqlbackend.model.entity.Database;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +16,18 @@ import org.springframework.stereotype.Service;
  * Different database engines are handled by different implementations.
  */
 @Service
+@RequiredArgsConstructor
 public abstract class BaseDatabaseService {
     protected DatabaseDAO databaseDAO; // initialized by the descendant class
 
     @SuppressWarnings("all")
     @Autowired
     protected DatabaseRepository databaseRepository;
+
+    public BaseDatabaseService setDatabaseDaoMetadata(Database database) {
+        databaseDAO.databaseMetadata(database);
+        return this;
+    }
 
     /**
      * Execute SQL or some other query (depends on the underling database engine)

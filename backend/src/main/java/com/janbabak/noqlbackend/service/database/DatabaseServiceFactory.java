@@ -5,8 +5,17 @@ import com.janbabak.noqlbackend.dao.MySqlDAO;
 import com.janbabak.noqlbackend.dao.PostgresDAO;
 import com.janbabak.noqlbackend.model.entity.Database;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class DatabaseServiceFactory {
+
+    private final PostgresDAO postgresDAO;
+    private final MySqlDAO mySqlDAO;
+    private final PostgresService postgresService;
+    private final MySqlService mySqlService;
 
     /**
      * Get database service based on the database engine.
@@ -14,10 +23,10 @@ public class DatabaseServiceFactory {
      * @param database database metadata.
      * @return correct database service
      */
-    public static @NotNull BaseDatabaseService getDatabaseService(@NotNull Database database) {
+    public @NotNull BaseDatabaseService getDatabaseService(@NotNull Database database) {
         return switch (database.getEngine()) {
-            case POSTGRES -> new PostgresService(database);
-            case MYSQL -> new MySqlService(database);
+            case POSTGRES -> postgresService.setDatabaseDaoMetadata(database);
+            case MYSQL -> mySqlService.setDatabaseDaoMetadata(database);
         };
     }
 
@@ -27,10 +36,10 @@ public class DatabaseServiceFactory {
      * @param database database metadata
      * @return correct DAO
      */
-    public static @NotNull DatabaseDAO getDatabaseDAO(@NotNull Database database) {
+    public @NotNull DatabaseDAO getDatabaseDAO(@NotNull Database database) {
         return switch (database.getEngine()) {
-            case POSTGRES -> new PostgresDAO(database);
-            case MYSQL -> new MySqlDAO(database);
+            case POSTGRES -> postgresDAO.databaseMetadata(database);
+            case MYSQL -> mySqlDAO.databaseMetadata(database);
         };
     }
 }

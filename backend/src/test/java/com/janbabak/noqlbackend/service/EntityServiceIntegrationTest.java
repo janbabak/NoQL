@@ -17,14 +17,16 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import org.junit.jupiter.api.*;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -34,7 +36,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 /**
  * Test services that work with ORM entities.
@@ -45,6 +47,7 @@ import static org.mockito.Mockito.mock;
 public class EntityServiceIntegrationTest {
 
     @Autowired
+    @InjectMocks
     private DatabaseEntityService databaseService;
 
     @Autowired
@@ -60,12 +63,16 @@ public class EntityServiceIntegrationTest {
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
+    private DatabaseCredentialsEncryptionService encryptionService;
+
+    @Autowired
     private AuthenticationService authenticationService;
 
-    private final MockedStatic<DatabaseServiceFactory> databaseServiceFactoryMock =
-            Mockito.mockStatic(DatabaseServiceFactory.class);
+    @MockBean
+    private DatabaseServiceFactory databaseServiceFactoryMock;
 
-    private final DatabaseDAO databaseDaoMock = mock(DatabaseDAO.class);
+    @Mock
+    private DatabaseDAO databaseDaoMock;
 
     private User testUser;
 
@@ -92,12 +99,6 @@ public class EntityServiceIntegrationTest {
 
         AuthenticationService.authenticateUser(testUser);
     }
-
-    @AfterEach
-    void tearDown() {
-        databaseServiceFactoryMock.close(); // deregister the mock in current thread
-    }
-
 
     @Test
     @DisplayName("Test create, modify, and delete objects")
@@ -170,9 +171,7 @@ public class EntityServiceIntegrationTest {
                 .userId(testAdmin.getId())
                 .build();
 
-        databaseServiceFactoryMock
-                .when(() -> DatabaseServiceFactory.getDatabaseDAO(any()))
-                .thenReturn(databaseDaoMock);
+        when(databaseServiceFactoryMock.getDatabaseDAO(any())).thenReturn(databaseDaoMock);
 
         Database createdPostgres = databaseService.create(createPostgresRequest);
         Database createdMsql = databaseService.create(createMysqlRequest);
@@ -273,7 +272,7 @@ public class EntityServiceIntegrationTest {
         // verify that the database was updated
         assertEquals(request.getName(), updatedDatabase.getName());
         assertEquals(request.getHost(), updatedDatabase.getHost());
-        assertEquals(request.getPassword(), updatedDatabase.getPassword());
+        assertEquals(request.getPassword(), encryptionService.decryptCredentials(updatedDatabase.getPassword()));
         assertEquals(request.getPort(), updatedDatabase.getPort());
     }
 

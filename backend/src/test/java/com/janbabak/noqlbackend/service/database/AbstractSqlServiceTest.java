@@ -79,6 +79,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     protected void setUp() throws Exception {
         super.setUp();
         SqlDatabaseService databaseService = getSqlService(getDatabase());
+        databaseService.setDatabaseDaoMetadata(getDatabase());
         databaseStructure = databaseService.retrieveSchema();
     }
 

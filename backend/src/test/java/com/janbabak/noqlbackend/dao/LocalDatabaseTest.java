@@ -4,9 +4,13 @@ import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -21,6 +25,8 @@ import java.util.Arrays;
  * It uses Testcontainers to run databases in Docker container.<br />
  * It doesn't change the Spring profile, so the database is not used by ORM repositories.
  */
+@SpringBootTest
+@ActiveProfiles("test")
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class LocalDatabaseTest {
@@ -33,8 +39,15 @@ public class LocalDatabaseTest {
 
     private static final String COMMAND_SEPARATOR = "-- command separator";
 
+    @Autowired
     protected PostgresDAO postgresDAO;
+
+    @Autowired
     protected MySqlDAO mySqlDAO;
+
+    @Autowired
+    DatabaseCredentialsEncryptionService encryptionService;
+
     protected Database postgresDatabase;
     protected Database mySqlDatabase;
 
@@ -63,10 +76,10 @@ public class LocalDatabaseTest {
     @BeforeAll
     protected void setUp() throws Exception {
         postgresDatabase = createDatabase(postgresContainer, DatabaseEngine.POSTGRES);
-        postgresDAO = new PostgresDAO(postgresDatabase);
+        postgresDAO.databaseMetadata(postgresDatabase);
 
         mySqlDatabase = createDatabase(mySqlContainer, DatabaseEngine.MYSQL);
-        mySqlDAO = new MySqlDAO(mySqlDatabase);
+        mySqlDAO.databaseMetadata(mySqlDatabase);
 
         Scripts initScripts = getInitializationScripts();
         if (initScripts == null) {
@@ -133,7 +146,7 @@ public class LocalDatabaseTest {
                 .host(container.getHost())
                 .database(container.getDatabaseName())
                 .userName(container.getUsername())
-                .password(container.getPassword())
+                .password(encryptionService.encryptCredentials(container.getPassword()))
                 .port(container.getFirstMappedPort())
                 .chats(new ArrayList<>())
                 .engine(engine)

@@ -3,8 +3,13 @@ package com.janbabak.noqlbackend.dao;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
 
 import java.sql.*;
 
@@ -14,24 +19,17 @@ import java.sql.*;
  */
 @Slf4j
 @Data
+@Service
+@Scope("prototype")
+@RequiredArgsConstructor
 public abstract class DatabaseDAO {
-    protected Database databaseMetadata;
 
-    protected Connection connection;
+    private final DatabaseCredentialsEncryptionService encryptionService;
 
-    public DatabaseDAO(Database database) {
-        this.databaseMetadata = database;
-        this.connection = null;
-    }
+    @Accessors(fluent = true)
+    protected Database databaseMetadata = null;
 
-    /**
-     * It's possible to initialize the object without setting its properties, but it is necessary to set them
-     * before establishing the connection.
-     */
-    public DatabaseDAO() {
-        databaseMetadata = new Database();
-        connection = null;
-    }
+    protected Connection connection = null;
 
     /**
      * Retrieve database schemas, tables columns and primary keys.
@@ -145,7 +143,9 @@ public abstract class DatabaseDAO {
     protected void connect(Boolean readOnly) throws DatabaseConnectionException {
         try {
             connection = DriverManager.getConnection(
-                    createConnectionUrl(), databaseMetadata.getUserName(), databaseMetadata.getPassword());
+                    createConnectionUrl(),
+                    databaseMetadata.getUserName(),
+                    encryptionService.decryptCredentials(databaseMetadata.getPassword()));
             connection.setReadOnly(readOnly);
             connection.setAutoCommit(!readOnly);
         } catch (SQLException e) {

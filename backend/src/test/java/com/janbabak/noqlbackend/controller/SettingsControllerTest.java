@@ -30,17 +30,17 @@ class SettingsControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private Settings settings;
+    private Settings settingsMock;
 
     @Test
     @DisplayName("Get settings with ADMIN role")
     @WithMockUser(roles = "ADMIN")
     void getSettings() throws Exception {
-        when(settings.getMaxPageSize()).thenReturn(50);
-        when(settings.getDefaultPageSize()).thenReturn(10);
-        when(settings.getTranslationRetries()).thenReturn(3);
-        when(settings.getPlotServiceContainerName()).thenReturn("plot-service-dev-stack");
-        when(settings.getDefaultUserQueryLimit()).thenReturn(10);
+        when(settingsMock.getMaxPageSize()).thenReturn(50);
+        when(settingsMock.getDefaultPageSize()).thenReturn(10);
+        when(settingsMock.getTranslationRetries()).thenReturn(3);
+        when(settingsMock.getPlotServiceContainerName()).thenReturn("plot-service-dev-stack");
+        when(settingsMock.getDefaultUserQueryLimit()).thenReturn(10);
 
         // then
         mockMvc.perform(get("/settings"))

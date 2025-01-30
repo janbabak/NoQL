@@ -46,7 +46,7 @@ class CustomModelControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private CustomModelService customModelService;
+    private CustomModelService customModelServiceMock;
 
     private final String ROOT_URL = "/model";
 
@@ -77,7 +77,7 @@ class CustomModelControllerTest {
 
         List<CustomModel> customModels = List.of(localModel, gptProxy);
 
-        when(customModelService.findAll(testUser.getId())).thenReturn(customModels);
+        when(customModelServiceMock.findAll(testUser.getId())).thenReturn(customModels);
 
         // then
         mockMvc.perform(get(ROOT_URL).param("userId", testUser.getId().toString()))
@@ -110,7 +110,7 @@ class CustomModelControllerTest {
                         .value("6678fc72-1a55-4146-b74b-b3f5aac677df")
                         .build());
 
-        when(customModelService.getAllModels(testUser.getId())).thenReturn(allModels);
+        when(customModelServiceMock.getAllModels(testUser.getId())).thenReturn(allModels);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/all").param("userId", testUser.getId().toString()))
@@ -132,7 +132,7 @@ class CustomModelControllerTest {
     @DisplayName("Get custom model by id")
     @WithMockUser(roles = "USER")
     void testGetCustomModelById() throws Exception {
-        when(customModelService.findById(localModel.getId())).thenReturn(localModel);
+        when(customModelServiceMock.findById(localModel.getId())).thenReturn(localModel);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{localModelId}", localModel.getId()))
@@ -148,7 +148,7 @@ class CustomModelControllerTest {
         // given
         UUID customModelId = UUID.randomUUID();
 
-        when(customModelService.findById(customModelId)).thenThrow(EntityNotFoundException.class);
+        when(customModelServiceMock.findById(customModelId)).thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{localModelId}", customModelId))
@@ -173,7 +173,7 @@ class CustomModelControllerTest {
             throws Exception {
 
         if (success) {
-            when(customModelService.create(any())).thenReturn(createdModel);
+            when(customModelServiceMock.create(any())).thenReturn(createdModel);
         }
 
         // then
@@ -298,7 +298,7 @@ class CustomModelControllerTest {
         UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
         if (success) {
-            when(customModelService.update(eq(customModelId), any())).thenReturn(updatedModel);
+            when(customModelServiceMock.update(eq(customModelId), any())).thenReturn(updatedModel);
         }
 
         // then

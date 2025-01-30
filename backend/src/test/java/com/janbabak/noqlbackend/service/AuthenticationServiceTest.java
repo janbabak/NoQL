@@ -37,25 +37,25 @@ class AuthenticationServiceTest {
     private AuthenticationService authenticationService;
 
     @Mock
-    private UserRepository userRepository;
+    private UserRepository userRepositoryMock;
 
     @Mock
     @SuppressWarnings("unused") // used in authenticationService
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoderMock;
 
     @Mock
-    private JwtService jwtService;
-
-    @Mock
-    @SuppressWarnings("unused") // used in authenticationService
-    private AuthenticationManager authenticationManager;
-
-    @Mock
-    private AuthenticationFacadeInterface authenticationFacadeInterface;
+    private JwtService jwtServiceMock;
 
     @Mock
     @SuppressWarnings("unused") // used in authenticationService
-    private Settings settings;
+    private AuthenticationManager authenticationManagerMock;
+
+    @Mock
+    private AuthenticationFacadeInterface authenticationFacadeInterfaceMock;
+
+    @Mock
+    @SuppressWarnings("unused") // used in authenticationService
+    private Settings settingsMock;
 
     private final Authentication authentication = mock(Authentication.class);
 
@@ -78,10 +78,10 @@ class AuthenticationServiceTest {
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(user)).thenReturn(accessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepositoryMock.save(any(User.class))).thenReturn(user);
+        when(jwtServiceMock.generateToken(user)).thenReturn(accessToken);
+        when(jwtServiceMock.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
         AuthenticationResponse actual = authenticationService.register(registerRequest, Role.ROLE_USER);
@@ -106,7 +106,7 @@ class AuthenticationServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.of(user));
 
         // then
         assertThrows(UserAlreadyExistsException.class,
@@ -131,9 +131,9 @@ class AuthenticationServiceTest {
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn(accessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtServiceMock.generateToken(user)).thenReturn(accessToken);
+        when(jwtServiceMock.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
         AuthenticationResponse actual = authenticationService.authenticate(authenticationRequest);
@@ -149,7 +149,7 @@ class AuthenticationServiceTest {
         String email = "john@gmail.com";
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, "password");
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -176,11 +176,11 @@ class AuthenticationServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtService.isTokenValid(refreshToken, user)).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn(accessToken);
-        when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
+        when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtServiceMock.isTokenValid(refreshToken, user)).thenReturn(true);
+        when(jwtServiceMock.generateToken(user)).thenReturn(accessToken);
+        when(jwtServiceMock.generateRefreshToken(user)).thenReturn(newRefreshToken);
 
         // when
         AuthenticationResponse actual = authenticationService.refreshToken(refreshToken);
@@ -196,7 +196,7 @@ class AuthenticationServiceTest {
     void refreshTokenInvalid() {
         // given
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        when(jwtService.extractUsername(refreshToken)).thenReturn(null);
+        when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(null);
 
         // then
         assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(refreshToken));
@@ -217,9 +217,9 @@ class AuthenticationServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtService.isTokenValid(refreshToken, user)).thenReturn(false);
+        when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.of(user));
+        when(jwtServiceMock.isTokenValid(refreshToken, user)).thenReturn(false);
 
         // then
         assertThrows(AccessDeniedException.class, () -> authenticationService.refreshToken(refreshToken));
@@ -232,8 +232,8 @@ class AuthenticationServiceTest {
         String email = "john@gmail.com";
         String refreshToken = "validRefreshToken";
 
-        when(jwtService.extractUsername(refreshToken)).thenReturn(email);
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(email);
+        when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -258,8 +258,8 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn(email);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
 
         // when
         User actual = authenticationService.checkIfRequestingSelf(userId);
@@ -282,8 +282,8 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn("different@email.com");
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
 
         // then
         assertNull(authenticationService.checkIfRequestingSelf(userId));
@@ -304,9 +304,9 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn(email);
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         boolean actual = authenticationService.isAdminOrSelfRequest(userId);
@@ -320,7 +320,7 @@ class AuthenticationServiceTest {
     void isAdminOrSelfRequestTestIsAdmin() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(true);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
 
         // when
         boolean actual = authenticationService.isAdminOrSelfRequest(userId);
@@ -344,9 +344,9 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn(email);
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         boolean actual = authenticationService.isAdminOrSelfRequest(userId);
@@ -370,9 +370,9 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn(email);
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // then
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -383,7 +383,7 @@ class AuthenticationServiceTest {
     void ifNotAdminOrSelfRequestThrowAccessDeniedIsAdmin() {
         // given
         UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(true);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
 
         // then
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -404,9 +404,9 @@ class AuthenticationServiceTest {
                 .build();
 
         when(authentication.getName()).thenReturn(email);
-        when(authenticationFacadeInterface.getAuthentication()).thenReturn(authentication);
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // then
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
@@ -417,14 +417,14 @@ class AuthenticationServiceTest {
     @Test
     @DisplayName("Check if user is admin")
     void isAdmin() {
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(true);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
         assertTrue(authenticationService.isAdmin());
     }
 
     @Test
     @DisplayName("Test that exceptions is thrown when user is not admin")
     void ifNotAdminThrowAccessDeniedThrown() {
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(false);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class,
                 () -> authenticationService.ifNotAdminThrowAccessDenied());
@@ -434,7 +434,7 @@ class AuthenticationServiceTest {
     @Test
     @DisplayName("Test that exceptions is not thrown when user is admin")
     void ifNotAdminThrowAccessDeniedNotThrown() {
-        when(authenticationFacadeInterface.isAdmin()).thenReturn(true);
+        when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
         authenticationService.ifNotAdminThrowAccessDenied();
     }
 }

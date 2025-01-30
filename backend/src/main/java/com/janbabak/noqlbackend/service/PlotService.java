@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service;
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,21 +38,26 @@ public class PlotService {
     private static File plotsDirectory;
     private static File script;
     private final Settings settings;
+    private final DatabaseCredentialsEncryptionService encryptionService;
 
     /**
      * Create working directory and plot script
      *
      * @param settings            application settings
+     * @param encryptionService   service for encrypting/decrypting database credentials
      * @param appWorkingDirectory path to the working directory (when running the app from the IDE default value from
      *                            the application.yaml is used, when running using the
      *                            {@code ./backend/gradlew -p backend bootRun} command, the value from build.gradle is
      *                            used)
      */
-    PlotService(Settings settings, @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
+    PlotService(Settings settings,
+                DatabaseCredentialsEncryptionService encryptionService,
+                @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
 
         log.debug("Plot service working directory is: {}", appWorkingDirectory);
 
         this.settings = settings;
+        this.encryptionService = encryptionService;
 
         // create working and plot directories
         workingDirectory = Path.of(appWorkingDirectory + "/" + WORKING_DIRECTORY_NAME).toFile();
@@ -178,10 +184,11 @@ public class PlotService {
      * @return script with real credentials
      */
     String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
-        scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER, database.getPassword());
         scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
         scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
         scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, fileName);
+        scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER,
+                encryptionService.decryptCredentials(database.getPassword()));
         scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
                 database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
         return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());

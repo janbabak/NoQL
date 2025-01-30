@@ -140,6 +140,7 @@ cd NoQL/
   JWT_EXPIRATION=1800
   # 7 days
   JWT_REFRESH_EXPIRATION=604800
+  DATA_ENCRYPTION_KEY="djfasgu98g438yth43iuhg34jnfmf343nfij34fij43fm34fnij34fi34f"
   ```
 
 - Start [Dev stack](infra/dev-stack/README.md).

@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service;
 
-import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
@@ -9,12 +8,12 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Chat;
-import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
+import com.janbabak.noqlbackend.service.database.MessageDataDAO;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
@@ -47,21 +46,22 @@ class QueryServiceTest {
     private QueryService queryService;
 
     @Mock
-    private DatabaseRepository databaseRepository;
+    private DatabaseRepository databaseRepositoryMock;
 
     @Mock
     @SuppressWarnings("unused") // used internally
-    private ChatRepository chatRepository;
+    private ChatRepository chatRepositoryMock;
 
     @Mock
-    private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
-
-    @Mock
-    private UserService userService;
+    private UserService userServiceMock;
 
     @Mock
     @SuppressWarnings("unused") // used internally
-    AuthenticationService authenticationService;
+    AuthenticationService authenticationServiceMock;
+
+    @Mock
+    @SuppressWarnings("unused") // used internally
+    MessageDataDAO messageDataDAOMock;
 
     private final Database postgresDatabase;
 
@@ -451,7 +451,7 @@ class QueryServiceTest {
         String query = "SELECT * FROM public.user;";
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.empty());
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -459,70 +459,6 @@ class QueryServiceTest {
 
         // then
         assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Test load message data - message not found")
-    void testGetDataByMessageIdNotFound() {
-        // given
-        UUID messageId = UUID.randomUUID();
-        int page = 0;
-        String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
-
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.empty());
-
-        // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> queryService.getDataByMessageId(messageId, page, 10));
-
-        assertEquals(expectedErrorMsg, exception.getMessage());
-    }
-
-
-    @ParameterizedTest
-    @MethodSource("testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider")
-    @DisplayName("Test load message data - LLM response has empty query")
-    void testGetDataByMessageIdLlmResponseHasEmptyQueryTest(String llmResponse) throws EntityNotFoundException {
-
-        // given
-        UUID messageId = UUID.randomUUID();
-
-        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
-                .id(messageId)
-                .chat(Chat.builder()
-                        .id(UUID.randomUUID())
-                        .database(postgresDatabase)
-                        .build())
-                .llmResponse(llmResponse)
-                .build();
-
-        when(chatQueryWithResponseRepository.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
-
-        // then
-        assertNull(queryService.getDataByMessageId(messageId, 0, 10));
-    }
-
-    static Object[][] testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider() {
-        return new Object[][]{
-                {
-                        null
-                },
-                {
-                        ""
-                },
-                {
-                        "{}"
-                },
-                {
-                        // language=JSON
-                        """
-                                {
-                                  "databaseQuery": "",
-                                  "generatePlot": false,
-                                  "pythonCode": ""
-                                }"""
-                }
-        };
     }
 
     @Test
@@ -536,7 +472,7 @@ class QueryServiceTest {
 
         String expectedErrorMsg = "Chat of id: \"" + chatId + "\" not found.";
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(postgresDatabase));
 
         // then
         Exception exception = assertThrows(EntityNotFoundException.class,
@@ -571,9 +507,9 @@ class QueryServiceTest {
 
         ChatResponse expected = ChatResponse.failedResponse("Query limit exceeded", "find all users");
 
-        when(databaseRepository.findById(databaseId)).thenReturn(Optional.of(database));
-        when(userService.decrementQueryLimit(any())).thenReturn(0);
-        when(chatRepository.findById(chatId)).thenReturn(Optional.of(chat));
+        when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
+        when(userServiceMock.decrementQueryLimit(any())).thenReturn(0);
+        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
         ChatResponse actual = queryService.queryChat(databaseId, chatId, request, 10);

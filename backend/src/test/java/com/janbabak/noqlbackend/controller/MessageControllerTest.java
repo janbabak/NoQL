@@ -2,7 +2,7 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.JwtService;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -37,7 +37,7 @@ class MessageControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private QueryService queryService;
+    private ChatQueryWithResponseService chatQueryWithResponseServiceMock;
 
     private final String ROOT_URL = "/message";
 
@@ -59,7 +59,7 @@ class MessageControllerTest {
                         List.of("Lenny", "lenny@gmail.com", "65")))
                 .build();
 
-        when(queryService.getDataByMessageId(messageId, page, pageSize)).thenReturn(response);
+        when(chatQueryWithResponseServiceMock.getDataByMessageId(messageId, page, pageSize)).thenReturn(response);
 
         // then
         mockMvc.perform(

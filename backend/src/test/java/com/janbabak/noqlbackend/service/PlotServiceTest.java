@@ -1,9 +1,11 @@
 package com.janbabak.noqlbackend.service;
 
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PlotServiceTest {
 
     @Autowired
     private PlotService plotService;
+
+    @Autowired
+    private DatabaseCredentialsEncryptionService encryptionService;
 
     @ParameterizedTest
     @MethodSource("replaceCredentialsDataProvider")
@@ -29,7 +35,7 @@ class PlotServiceTest {
         assertEquals(expectedScript, actualScript);
     }
 
-    static Object[][] replaceCredentialsDataProvider() {
+    Object[][] replaceCredentialsDataProvider() {
         return new Object[][] {
                 {
                         FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
@@ -38,7 +44,7 @@ class PlotServiceTest {
                                 .port(5432)
                                 .database("myEshop")
                                 .userName("jan")
-                                .password("secret111")
+                                .password(encryptionService.encryptCredentials("secret111"))
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.json"),
@@ -51,7 +57,7 @@ class PlotServiceTest {
                                 .port(5432)
                                 .database("myEshop")
                                 .userName("jan")
-                                .password("secret111")
+                                .password(encryptionService.encryptCredentials("secret111"))
                                 .build(),
                         FileUtils.getFileContent(
                                 "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.json"),
