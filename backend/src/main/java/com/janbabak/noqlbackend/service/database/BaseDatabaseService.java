@@ -24,8 +24,9 @@ public abstract class BaseDatabaseService {
     @Autowired
     protected DatabaseRepository databaseRepository;
 
-    public void setDatabaseDaoMetadata(Database database) {
+    public BaseDatabaseService setDatabaseDaoMetadata(Database database) {
         databaseDAO.databaseMetadata(database);
+        return this;
     }
 
     /**

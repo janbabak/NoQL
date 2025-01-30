@@ -258,7 +258,6 @@ public class QueryService {
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-        databaseService.setDatabaseDaoMetadata(database);
         String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {

@@ -25,8 +25,8 @@ public class DatabaseServiceFactory {
      */
     public @NotNull BaseDatabaseService getDatabaseService(@NotNull Database database) {
         return switch (database.getEngine()) {
-            case POSTGRES -> postgresService;
-            case MYSQL -> mySqlService;
+            case POSTGRES -> postgresService.setDatabaseDaoMetadata(database);
+            case MYSQL -> mySqlService.setDatabaseDaoMetadata(database);
         };
     }
 
