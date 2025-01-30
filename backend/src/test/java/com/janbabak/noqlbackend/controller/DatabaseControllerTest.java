@@ -787,7 +787,8 @@ class DatabaseControllerTest {
         // given
         UUID databaseId = UUID.randomUUID();
 
-        when(databaseServiceMock.getDatabaseCreateScriptByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
+        when(databaseServiceMock.getDatabaseCreateScriptByDatabaseId(databaseId))
+                .thenThrow(EntityNotFoundException.class);
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))

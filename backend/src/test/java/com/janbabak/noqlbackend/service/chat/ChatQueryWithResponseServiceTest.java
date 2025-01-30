@@ -99,7 +99,8 @@ class ChatQueryWithResponseServiceTest {
                         .build());
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
-        when(chatQueryWithResponseRepositoryMock.findAllByChatOrderByTimestamp(chat)).thenReturn(chatQueryWithResponses);
+        when(chatQueryWithResponseRepositoryMock.findAllByChatOrderByTimestamp(chat))
+                .thenReturn(chatQueryWithResponses);
 
         // when
         List<ChatQueryWithResponse> actual = chatQueryWithResponseService.getMessagesFromChat(chatId);
