@@ -90,23 +90,27 @@ public class AuthenticationService {
      *
      * @param refreshToken refresh token
      * @return response with new access and refresh token
-     * @throws EntityNotFoundException user not found.
      */
-    public AuthenticationResponse refreshToken(String refreshToken) throws EntityNotFoundException {
-        String userEmail = jwtService.extractUsername(refreshToken);
-        if (userEmail != null) {
-            User user = userRepository.findByEmail(userEmail).orElseThrow(
-                    () -> new EntityNotFoundException(USER, userEmail));
+    public AuthenticationResponse refreshToken(String refreshToken) {
+        try {
+            String userEmail = jwtService.extractUsername(refreshToken);
+            if (userEmail != null) {
+                User user = userRepository.findByEmail(userEmail).orElseThrow(
+                        () -> new EntityNotFoundException(USER, userEmail));
 
-            if (jwtService.isTokenValid(refreshToken, user)) {
-                String accessToken = jwtService.generateToken(user);
-                String newRefreshToken = jwtService.generateRefreshToken(user);
-                return AuthenticationResponse.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(newRefreshToken)
-                        .user(user)
-                        .build();
+                if (jwtService.isTokenValid(refreshToken, user)) {
+                    String accessToken = jwtService.generateToken(user);
+                    String newRefreshToken = jwtService.generateRefreshToken(user);
+                    return AuthenticationResponse.builder()
+                            .accessToken(accessToken)
+                            .refreshToken(newRefreshToken)
+                            .user(user)
+                            .build();
+                }
             }
+        } catch (Exception e) {
+            log.error("Error during token refresh: {}", e.getMessage());
+            throw new AccessDeniedException("Access denied - " + e.getMessage());
         }
         throw new AccessDeniedException("Access denied.");
     }

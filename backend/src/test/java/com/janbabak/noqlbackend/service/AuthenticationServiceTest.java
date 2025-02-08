@@ -161,7 +161,7 @@ class AuthenticationServiceTest {
 
     @Test
     @DisplayName("Refresh token - valid token")
-    void refreshTokenValid() throws EntityNotFoundException {
+    void refreshTokenValid() {
         // given
         String email = "john@gmail.com";
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
@@ -236,11 +236,11 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
                 () -> authenticationService.refreshToken(refreshToken));
 
         // then
-        assertEquals("User of identifier: \"" + email + "\" not found.", exception.getMessage());
+        assertEquals("Access denied - User of identifier: \"john@gmail.com\" not found.", exception.getMessage());
     }
 
     @Test

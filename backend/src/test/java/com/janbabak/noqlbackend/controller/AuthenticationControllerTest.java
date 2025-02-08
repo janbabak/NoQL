@@ -1,5 +1,6 @@
 package com.janbabak.noqlbackend.controller;
 
+import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.user.AuthenticationRequest;
 import com.janbabak.noqlbackend.model.user.AuthenticationResponse;
 import com.janbabak.noqlbackend.model.Role;
@@ -18,6 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,14 +51,14 @@ class AuthenticationControllerTest {
     private final String ROOT_URL = "/auth";
 
     @ParameterizedTest
-    @DisplayName("Authenticate user")
+    @DisplayName("Authenticate user - good and bad request")
     @MethodSource("authenticateDataProvider")
     @WithAnonymousUser
     void authenticate(String requestJson,
-                       AuthenticationRequest requestObj,
-                       String responseJson,
-                       AuthenticationResponse responseObj,
-                       Boolean success) throws Exception {
+                      AuthenticationRequest requestObj,
+                      String responseJson,
+                      AuthenticationResponse responseObj,
+                      Boolean success) throws Exception {
 
         if (success) {
             when(authenticationServiceMock.authenticate(requestObj)).thenReturn(responseObj);
@@ -148,8 +152,58 @@ class AuthenticationControllerTest {
         };
     }
 
+    @Test
+    @DisplayName("Authenticate user - user not found")
+    @WithAnonymousUser
+    void authenticateUserNotFound() throws Exception {
+        // given
+        // language=JSON
+        String requestJson = """
+                {
+                    "email": "user@email.com",
+                    "password": "password12345"
+                }""";
+
+        when(authenticationServiceMock.authenticate(any()))
+                .thenThrow(new EntityNotFoundException("User of id xxx not found."));
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(requestJson)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Authenticate user - bad credentials")
+    @WithAnonymousUser
+    void authenticateBadCredentials() throws Exception {
+        // given
+        // language=JSON
+        String requestJson = """
+                {
+                    "email": "user@email.com",
+                    "password": "password12345"
+                }""";
+
+        when(authenticationServiceMock.authenticate(any()))
+                .thenThrow(new BadCredentialsException("Bad credentials"));
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(requestJson)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
     @ParameterizedTest
-    @DisplayName("Test register new user")
+    @DisplayName("Test register new user - good and bad request")
     @MethodSource("registerDataProvider")
     @WithAnonymousUser
     void register(String requestJson,
@@ -172,39 +226,6 @@ class AuthenticationControllerTest {
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(responseJson, true));
-    }
-
-    @Test
-    @DisplayName("Test refresh token")
-    @WithAnonymousUser
-    void refreshToken() throws Exception {
-        // given
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
-
-        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
-                .accessToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw")
-                .refreshToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTc2NX0.HT5KK391gGf5oohjKOH_ky0Pp9ze43l4CLeygQCkwf7R4iLlv1oJ9PU4U6Ct3_SBxrSn1AW7T_kWqcEjF0Vrdg")
-                .user(User.builder()
-                        .id(UUID.fromString("b2e50470-fe61-4bf7-999f-b34d0908b9be"))
-                        .firstName("John")
-                        .lastName("Doe")
-                        .email("john.doe@email.com")
-                        .role(Role.ROLE_USER)
-                        .build())
-                .build();
-
-        when(authenticationServiceMock.refreshToken(refreshToken)).thenReturn(expectedResponse);
-
-        // then
-        mockMvc.perform(post(ROOT_URL + "/refreshToken")
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(refreshToken)
-                        .with(csrf())
-                )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().json(JsonUtils.toJson(expectedResponse), true));
     }
 
     static Object[][] registerDataProvider() {
@@ -295,5 +316,80 @@ class AuthenticationControllerTest {
                         false
                 }
         };
+    }
+
+    @Test
+    @DisplayName("Test refresh token - successful request")
+    @WithAnonymousUser
+    void refreshToken() throws Exception {
+        // given
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
+
+        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
+                .accessToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw")
+                .refreshToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTc2NX0.HT5KK391gGf5oohjKOH_ky0Pp9ze43l4CLeygQCkwf7R4iLlv1oJ9PU4U6Ct3_SBxrSn1AW7T_kWqcEjF0Vrdg")
+                .user(User.builder()
+                        .id(UUID.fromString("b2e50470-fe61-4bf7-999f-b34d0908b9be"))
+                        .firstName("John")
+                        .lastName("Doe")
+                        .email("john.doe@email.com")
+                        .role(Role.ROLE_USER)
+                        .build())
+                .build();
+
+        when(authenticationServiceMock.refreshToken(refreshToken)).thenReturn(expectedResponse);
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/refreshToken")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(refreshToken)
+                        .with(csrf())
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(JsonUtils.toJson(expectedResponse), true));
+    }
+
+    @Test
+    @DisplayName("Test refresh token - invalid token")
+    @WithAnonymousUser
+    void refreshTokenInvalidToken() throws Exception {
+        // given
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
+
+        when(authenticationServiceMock.refreshToken(refreshToken))
+                .thenThrow(new AccessDeniedException("MalformedJwtException"));
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/refreshToken")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(refreshToken)
+                        .with(csrf())
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Test refresh token - user not found")
+    @WithAnonymousUser
+    void refreshTokenUserNotFound() throws Exception {
+        // given
+        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
+
+        when(authenticationServiceMock.refreshToken(refreshToken))
+                .thenThrow(new EntityNotFoundException("User of id xxx not found."));
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/refreshToken")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(refreshToken)
+                        .with(csrf())
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
