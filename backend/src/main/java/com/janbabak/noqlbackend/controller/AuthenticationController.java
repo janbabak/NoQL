@@ -53,10 +53,9 @@ public class AuthenticationController {
      *
      * @param refreshToken refreshToken
      * @return response with new access and refresh token
-     * @throws EntityNotFoundException user not found.
      */
     @PostMapping("/refreshToken")
-    public AuthenticationResponse refreshToken(@RequestBody String refreshToken) throws EntityNotFoundException {
+    public AuthenticationResponse refreshToken(@RequestBody String refreshToken) {
         return authenticationService.refreshToken(refreshToken);
     }
 }

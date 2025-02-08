@@ -380,7 +380,7 @@ class AuthenticationControllerTest {
         String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
 
         when(authenticationServiceMock.refreshToken(refreshToken))
-                .thenThrow(new EntityNotFoundException("User of id xxx not found."));
+                .thenThrow(new AccessDeniedException("Access denied - user of specified id not found."));
 
         // then
         mockMvc.perform(post(ROOT_URL + "/refreshToken")
@@ -390,6 +390,6 @@ class AuthenticationControllerTest {
                         .with(csrf())
                 )
                 .andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 }

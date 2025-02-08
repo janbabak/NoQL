@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -46,7 +47,7 @@ class ChatControllerTest {
     private final String ROOT_URL = "/chat";
 
     @Test
-    @DisplayName("Create chat")
+    @DisplayName("Create chat - success")
     @WithMockUser(roles = "USER")
     void testCreateChat() throws Exception {
         // given
@@ -81,9 +82,9 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Create chat in not existing database")
+    @DisplayName("Create chat - database not found")
     @WithMockUser(roles = "USER")
-    void testCreateChatNotExistingDatabase() throws Exception {
+    void testCreateChatDatabaseNotFound() throws Exception {
         // given
         UUID databaseId = UUID.randomUUID();
 
@@ -100,9 +101,29 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Create chat with anonymous user")
+    @DisplayName("Create chat - user not owner of database")
+    @WithMockUser(roles = "USER")
+    void testCreateChatUserNotOwnerOfDatabase() throws Exception {
+        // given
+        UUID databaseId = UUID.randomUUID();
+
+        when(chatServiceMock.create(databaseId))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(post(ROOT_URL)
+                        .param("databaseId", databaseId.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create chat - anonymous user")
     @WithAnonymousUser
-    void testCreateChatWithAnonymousUser() throws Exception {
+    void testCreateChatAnonymousUser() throws Exception {
         mockMvc.perform(post(ROOT_URL)
                         .param("databaseId", UUID.randomUUID().toString())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,8 +134,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Get chat by id")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @DisplayName("Get chat by id - success")
+    @WithMockUser(roles = "USER")
     void testGetChatById() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -133,8 +154,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Get chat by id not found")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @DisplayName("Get chat by id - not found")
+    @WithMockUser(roles = "USER")
     void testGetChatByIdNotFound() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -148,16 +169,32 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Get chat by id with anonymous user")
+    @DisplayName("Get chat by id - anonymous user")
     @WithAnonymousUser
-    void testGetChatByIdWithAnonymousUser() throws Exception {
+    void testGetChatByIdAnonymousUser() throws Exception {
         mockMvc.perform(get(ROOT_URL + "/{chatId}", UUID.randomUUID()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Delete chat by id")
+    @DisplayName("Get chat by id - user not owner of chat")
+    @WithMockUser(roles = "USER")
+    void testGetChatByIdUserNotOwnerOfChat() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        when(chatServiceMock.findById(eq(chatId), any(), eq(true)))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{chatId}", chatId))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Delete chat by id - success")
     @WithMockUser(roles = "USER")
     void testDeleteChatById() throws Exception {
         // given
@@ -171,9 +208,9 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Delete chat with anonymous user")
+    @DisplayName("Delete chat - anonymous user")
     @WithAnonymousUser
-    void testDeleteChatByIdWithAnonymousUser() throws Exception {
+    void testDeleteChatByIdAnonymousUser() throws Exception {
         mockMvc.perform(delete(ROOT_URL + "/{chatId}", UUID.randomUUID())
                         .with(csrf()))
                 .andDo(print())
@@ -181,7 +218,24 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename chat by id")
+    @DisplayName("Delete chat by id - usen not owner of chat")
+    @WithMockUser(roles = "USER")
+    void testDeleteChatByIdUserNotOwnerOfChat() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+
+        doThrow(new AccessDeniedException("Access denied"))
+                .when(chatServiceMock).deleteChatById(chatId);
+
+        // then
+        mockMvc.perform(delete(ROOT_URL + "/{chatId}", chatId)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Rename chat by id - success")
     @WithMockUser(roles = "USER")
     void testRenameChat() throws Exception {
         // given
@@ -197,7 +251,7 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename chat not found")
+    @DisplayName("Rename chat - not found")
     @WithMockUser(roles = "USER")
     void testRenameChatNotFound() throws Exception {
         // given
@@ -215,7 +269,7 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename chat by id with too long name")
+    @DisplayName("Rename chat - name too long")
     @WithMockUser(roles = "USER")
     void testRenameChatNameTooLong() throws Exception {
         // given
@@ -231,8 +285,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename chat by id with empty name")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @DisplayName("Rename chat - empty name")
+    @WithMockUser(roles = "USER")
     void testRenameChatEmtpyName() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -247,9 +301,9 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Rename chat with anonymous user")
+    @DisplayName("Rename chat - anonymous user")
     @WithAnonymousUser
-    void testRenameChatWithAnonymousUser() throws Exception {
+    void testRenameChatAnonymousUser() throws Exception {
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", UUID.randomUUID())
                         .param("name", "Find all users")
                         .with(csrf()))
@@ -258,8 +312,27 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Add message to chat")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
+    @DisplayName("Rename chat - user not owner of chat")
+    @WithMockUser(roles = "USER")
+    void testRenameChatUserNotOwnerOfChat() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+        String name = "Find all users";
+
+        doThrow(new AccessDeniedException("Access denied"))
+                .when(chatServiceMock).renameChat(chatId, name);
+
+        // then
+        mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
+                        .param("name", name)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Add message to chat - success")
+    @WithMockUser(roles = "USER")
     void testAddMessageToChat() throws Exception {
         // given
         UUID chatId = UUID.randomUUID();
@@ -288,7 +361,7 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Add message to chat not found")
+    @DisplayName("Add message to chat - chat not found")
     @WithMockUser(roles = "USER")
     void testAddMessageToChatNotFound() throws Exception {
         // given
@@ -317,14 +390,44 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("Add message to chat with anonymous user")
+    @DisplayName("Add message to chat - anonymous user")
     @WithAnonymousUser
-    void testAddMessageToChatWithAnonymousUser() throws Exception {
+    void testAddMessageToChaAnonymousUser() throws Exception {
         mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(CreateChatQueryWithResponseRequest.builder().build()))
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Add message to chat - user not owner of chat")
+    @WithMockUser(roles = "USER")
+    void testAddMessageToChatUserNotOwnerOfChat() throws Exception {
+        // given
+        UUID chatId = UUID.randomUUID();
+        CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
+                .nlQuery("Find all users older than 25")
+                .llmResult(
+                        // language=JSON
+                        """
+                                {
+                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
+                                     "generatePlot": false,
+                                     "pythonCode": null
+                                 }""")
+                .build();
+
+        when(chatServiceMock.addMessageToChat(chatId, request))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(toJson(request))
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
     }
 }
