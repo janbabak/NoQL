@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -63,7 +65,7 @@ class CustomModelControllerTest {
             .build();
 
     @Test
-    @DisplayName("Get all custom models")
+    @DisplayName("Get all custom models - by user id")
     @WithMockUser(roles = "USER")
     void testGetAllCustomModels() throws Exception {
         // given
@@ -87,16 +89,39 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Get all custom models with anonymous user")
+    @DisplayName("Get all custom models - no user id")
+    @WithMockUser(roles = "USER")
+    void testGetAllCustomModelsNoUserId() throws Exception {
+        // given
+        when(customModelServiceMock.findAll(null))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(get(ROOT_URL))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get all custom models - anonymous user, no user id")
     @WithAnonymousUser
-    void testGetAllCustomModelsWithAnonymousUser() throws Exception {
+    void testGetAllCustomModelsAnonymousUser() throws Exception {
         mockMvc.perform(get(ROOT_URL))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Get all models")
+    @DisplayName("Get all custom models - anonymous user, filter by user id")
+    @WithAnonymousUser
+    void testGetAllCustomModelsAnonymousUserFilterByUserId() throws Exception {
+        mockMvc.perform(get(ROOT_URL).param("userId", testUser.getId().toString()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Get all models - success")
     @WithMockUser(roles = "USER")
     void testGetAllModels() throws Exception {
         // given
@@ -120,16 +145,39 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Get all models with anonymous user")
+    @DisplayName("Get all models - no user id")
+    @WithMockUser(roles = "USER")
+    void testGetAllModelsNoUserId() throws Exception {
+        // given
+        when(customModelServiceMock.getAllModels(null))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/all"))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get all models - anonymous user, no user id")
     @WithAnonymousUser
-    void testGetAllModelsWithAnonymousUser() throws Exception {
+    void testGetAllModelsAnonymousUser() throws Exception {
         mockMvc.perform(get(ROOT_URL + "/all"))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Get custom model by id")
+    @DisplayName("Get all models - anonymous user, filter by user id")
+    @WithAnonymousUser
+    void testGetAllModelsAnonymousUserFilterByUserId() throws Exception {
+        mockMvc.perform(get(ROOT_URL + "/all").param("userId", testUser.getId().toString()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Get custom model by id - success")
     @WithMockUser(roles = "USER")
     void testGetCustomModelById() throws Exception {
         when(customModelServiceMock.findById(localModel.getId())).thenReturn(localModel);
@@ -142,7 +190,7 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Get custom model by id not found")
+    @DisplayName("Get custom model by id - not found")
     @WithMockUser(roles = "USER")
     void testGetCustomModelByIdNotFound() throws Exception {
         // given
@@ -157,17 +205,33 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Get custom model by id with anonymous user")
+    @DisplayName("Get custom model by id - user is not owner")
+    @WithMockUser(roles = "USER")
+    void testGetCustomModelByIdUserNotOwner() throws Exception {
+        // given
+        UUID customModelId = UUID.randomUUID();
+
+        when(customModelServiceMock.findById(customModelId))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        // then
+        mockMvc.perform(get(ROOT_URL + "/{localModelId}", customModelId))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get custom model by id - anonymous user")
     @WithAnonymousUser
-    void testGetCustomModelByIdWithAnonymousUser() throws Exception {
+    void testGetCustomModelByIdAnonymousUser() throws Exception {
         mockMvc.perform(get(ROOT_URL + "/{localModelId}", localModel.getId()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @ParameterizedTest
+    @DisplayName("Create custom model - success and bad request")
     @MethodSource("createCustomModelDataProvider")
-    @DisplayName("Create custom model")
     @WithMockUser(roles = "USER")
     void testCreateCustomModel(String request, CustomModel createdModel, String response, Boolean success)
             throws Exception {
@@ -185,19 +249,6 @@ class CustomModelControllerTest {
                 .andDo(print())
                 .andExpect(success ? status().isCreated() : status().isBadRequest())
                 .andExpect(content().json(response, true));
-    }
-
-    @Test
-    @DisplayName("Create custom model with anonymous user")
-    @WithAnonymousUser
-    void testCreateCustomModelWithAnonymousUser() throws Exception {
-        mockMvc.perform(post(ROOT_URL)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
     }
 
     /**
@@ -272,7 +323,7 @@ class CustomModelControllerTest {
                         """
                         {
                             "name": "test name is longer than maximum length",
-                            "host": "https://www.cvut.cz/llm",
+                            "host": "https://www.cvut.cz/llmNameWhichIsSoLongThatItIsLongerThanMaximumLengthoooooooooooooooooooooooooooIiiiiiiidfisfdshfjshfjaskhfjksdhfsdjhfjahflkajshfjksadhfsdjkafhasdjkfhsdjkfhsadjkfhasjkldhfaksjfajsdfkajsfkasjfkldsjfklsdjfalskjdfkld;asjfkdjfkalsjfkkkkkkkkkk",
                             "port": 8888,
                             "userId": "af11c153-2948-4922-bca7-3e407a40da02"
                         }""",
@@ -280,16 +331,56 @@ class CustomModelControllerTest {
                         // language=JSON
                         """
                         {
-                            "name": "length must be between 1 and 32"
+                            "name": "length must be between 1 and 32",
+                            "host":"length must be between 1 and 253"
                         }""",
                         false
                 },
         };
     }
 
+    @Test
+    @DisplayName("Create custom model - anonymous user")
+    @WithAnonymousUser
+    void testCreateCustomModelAnonymousUser() throws Exception {
+        mockMvc.perform(post(ROOT_URL)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Create custom model - user now owner")
+    @WithMockUser(roles = "USER")
+    void testCreateCustomModelUserNotOwner() throws Exception {
+        // given
+        // language=JSON
+        String request = """
+                {
+                      "name": "Local model",
+                      "host": "localhost",
+                      "port": 8085,
+                      "userId": "af11c153-2948-4922-bca7-3e407a40da02"
+                }""";
+
+        when(customModelServiceMock.create(any()))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        mockMvc.perform(post(ROOT_URL)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
     @ParameterizedTest
+    @DisplayName("Update custom model - success and fail")
     @MethodSource("updatedCustomModelDataProvider")
-    @DisplayName("Update custom model")
     @WithMockUser(roles = "USER")
     void testUpdateCustomModel(String request, CustomModel updatedModel, String response, Boolean success)
             throws Exception {
@@ -396,9 +487,9 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Update custom model with anonymous user")
+    @DisplayName("Update custom model - anonymous user")
     @WithAnonymousUser
-    void testUpdateCustomModelWithAnonymousUser() throws Exception {
+    void testUpdateCustomModelAnonymousUser() throws Exception {
         mockMvc.perform(put(ROOT_URL + "/{localModelId}", localModel.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -409,7 +500,61 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Delete custom model by id")
+    @DisplayName("Update custom model - user now owner")
+    @WithMockUser(roles = "USER")
+    void testUpdateCustomModelUserNotOwner() throws Exception {
+        // given
+        UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
+
+        // language=JSON
+        String request = """
+                {
+                     "name": "Local model updated",
+                     "host": "localhost",
+                     "port": 8086
+                }""";
+
+        when(customModelServiceMock.update(eq(customModelId), any()))
+                .thenThrow(new AccessDeniedException("Access denied"));
+
+        mockMvc.perform(put(ROOT_URL + "/{localModelId}", customModelId)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update custom model - not found")
+    @WithMockUser(roles = "USER")
+    void testUpdateCustomModelNotFound() throws Exception {
+        // given
+        UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
+
+        // language=JSON
+        String request = """
+                {
+                     "name": "Local model updated",
+                     "host": "localhost",
+                     "port": 8086
+                }""";
+
+        when(customModelServiceMock.update(eq(customModelId), any()))
+                .thenThrow(new EntityNotFoundException("Model of specified id not found."));
+
+        mockMvc.perform(put(ROOT_URL + "/{localModelId}", customModelId)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request)
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Delete custom model by id - success")
     @WithMockUser(roles = "USER")
     void testDeleteCustomModelById() throws Exception {
         // given
@@ -423,13 +568,26 @@ class CustomModelControllerTest {
     }
 
     @Test
-    @DisplayName("Delete custom model with anonymous user")
+    @DisplayName("Delete custom model - anonymous user")
     @WithAnonymousUser
-    void testDeleteCustomModelWithAnonymousUser() throws Exception {
+    void testDeleteCustomModelAnonymousUser() throws Exception {
         mockMvc.perform(delete(ROOT_URL + "/{localModelId}", localModel.getId())
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Delete custom model - user not owner")
+    @WithMockUser(roles = "USER")
+    void testDeleteCustomModelUserNotOwner() throws Exception {
+        doThrow(new AccessDeniedException("Access denied"))
+                .when(customModelServiceMock).delete(localModel.getId());
+
+        mockMvc.perform(delete(ROOT_URL + "/{localModelId}", localModel.getId())
+                        .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
     }
 
 }
