@@ -39,15 +39,15 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	implementation 'org.json:json:20240303'
-
-	compileOnly 'org.projectlombok:lombok'
-
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'dev.langchain4j:langchain4j:1.9.1'
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.9.1'
+    implementation 'mysql:mysql-connector-java:8.0.33' // latest version (26. 1. 2025)
 
 	runtimeOnly 'org.postgresql:postgresql:42.7.3'
- 	implementation 'mysql:mysql-connector-java:8.0.33' // latest version (26. 1. 2025)
-
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2:2.2.224'
