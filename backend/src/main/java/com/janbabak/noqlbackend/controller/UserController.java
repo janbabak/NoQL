@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * User resource
+ */
 @RestController
 @RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class UserController {
 
     private final UserService userService;

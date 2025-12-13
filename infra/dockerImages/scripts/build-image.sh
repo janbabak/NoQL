@@ -39,8 +39,8 @@ updateManifest() {
     echo "Updating manifest..."
 
     docker manifest create ${IMAGE_NAME}:$VERSION \
-        --amend ${IMAGE_NAME}-arm64:$VERSION \
-        --amend ${IMAGE_NAME}-amd64:$VERSION
+        ${IMAGE_NAME}-arm64:$VERSION \
+        ${IMAGE_NAME}-amd64:$VERSION
 
     docker manifest push ${IMAGE_NAME}:$VERSION
 }

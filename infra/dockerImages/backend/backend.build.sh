@@ -2,7 +2,7 @@
 
 # build the backend docker image
 
-VERSION=0.0.2
+VERSION=0.0.3
 IMAGE_NAME=janbabak/noql-backend
 DOCKER_FILE=infra/dockerImages/backend/backend.Dockerfile
 

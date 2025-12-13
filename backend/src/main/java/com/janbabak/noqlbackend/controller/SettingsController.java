@@ -7,9 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Settings resource
+ */
 @RestController
 @RequestMapping(value = "/settings", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class SettingsController {
 
     private final Settings settings;

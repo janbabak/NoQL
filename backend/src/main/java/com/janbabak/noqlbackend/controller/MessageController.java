@@ -9,10 +9,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Message resource
+ */
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class MessageController {
 
     private final ChatQueryWithResponseService chatQueryWithResponseService;

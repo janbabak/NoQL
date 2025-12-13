@@ -44,7 +44,7 @@ dependencies {
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-	runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.postgresql:postgresql:42.7.3'
  	implementation 'mysql:mysql-connector-java:8.0.33' // latest version (26. 1. 2025)
 
 	annotationProcessor 'org.projectlombok:lombok'

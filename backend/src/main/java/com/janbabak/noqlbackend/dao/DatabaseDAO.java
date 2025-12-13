@@ -20,7 +20,7 @@ import java.sql.*;
 @Slf4j
 @Data
 @Service
-@Scope("prototype")
+@Scope("prototype") // because we need a new instance for each database (metadata is stored in the instance)
 @RequiredArgsConstructor
 public abstract class DatabaseDAO {
 

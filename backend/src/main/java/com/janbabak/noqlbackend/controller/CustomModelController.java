@@ -17,9 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Custom model resource
+ */
 @RestController
 @RequestMapping(value = "/model", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class CustomModelController {
 
     private final CustomModelService customModelService;

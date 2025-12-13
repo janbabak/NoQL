@@ -28,6 +28,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(value = "/database", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class DatabaseController {
 
     private final DatabaseEntityService databaseService;
@@ -125,6 +126,18 @@ public class DatabaseController {
     @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
     public ChatResponse queryChat(
+            @PathVariable UUID databaseId,
+            @PathVariable UUID chatId,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestBody @Valid QueryRequest queryRequest
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
+            LLMException, BadRequestException {
+        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
+    }
+
+    @PostMapping("query/{databaseId}/chat/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ChatResponse queryChat2(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,

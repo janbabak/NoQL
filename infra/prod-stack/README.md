@@ -3,20 +3,20 @@
 ## Environment variables
 
 ```bash
-export PROD_STACK_SSH = <ec2-instance-url> 
+export PROD_STACK_SSH=<ec2-instance-url> 
 ```
 
 ## Setup EC2 instance
 
 ```bash
-ssh $PROD_STACK_SSH
+ssh ec2-user@$PROD_STACK_SSH
 mkdir infra
 ```
 
 ## Copy docker compose file
 
 ```bash
-scp -r infra/prod-stack $PROD_STACK_SSH:/home/ec2-user/infra/prod-stack
+scp -r infra/prod-stack ec2-user@$PROD_STACK_SSH:/home/ec2-user/infra/prod-stack
 ```
 
 ## Setup docker
@@ -43,7 +43,8 @@ sudo chmod +x /usr/local/bin/docker-compose # fix permissions
 ## Start the stack
 
 ```bash
-docker-compose -f prod-stack.docker-compose.yaml up
+cd prod-stack
+ docker-compose -f prod-stack.docker-compose.yaml up
 ```
 
 ## Delete the stack
