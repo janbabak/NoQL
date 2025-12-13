@@ -13,10 +13,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Chat resource
+ */
 @RestController
 @CrossOrigin
 @RequestMapping(value = "/chat", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class ChatController {
 
     private final ChatService chatService;
