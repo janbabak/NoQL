@@ -31,43 +31,41 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
         StringBuilder script = new StringBuilder();
 
         // schemas
-        for (Map.Entry<String, Schema> schemaEntry : schemas.entrySet()) {
+        schemas().forEach((schemaName, schema) -> {
             script
                     .append("\nCREATE SCHEMA IF NOT EXISTS \"")
-                    .append(schemaEntry.getValue().name())
+                    .append(schemaName)
                     .append("\";\n");
 
             // tables
-            for (Map.Entry<String, Table> tableEntry : schemaEntry.getValue().tables().entrySet()) {
+            schema.tables.forEach((tableName, table) -> {
                 script
                         .append("\nCREATE TABLE IF NOT EXISTS ")
-                        .append(schemaEntry.getValue().name())
+                        .append(schemaName)
                         .append(".")
-                        .append(tableEntry.getValue().name())
+                        .append(tableName)
                         .append("\n(");
 
-                List<String> primaryKeys = tableEntry.getValue().getPrimaryKeys();
+                List<String> primaryKeys = table.getPrimaryKeys();
 
                 // columns
-                for (Column column : tableEntry.getValue().getColumnsSortedByPrimaryKey()) {
-                    script
-                            .append("\n\t")
-                            .append(column.getName())
-                            .append(" ")
-                            .append(column.getDataType().toUpperCase())
-                            .append(primaryKeys.size() == 1 && column.getIsPrimaryKey()
-                                    ? " PRIMARY KEY," // table has only 1 primary key and this column is the primary key
-                                    : "")
-                            .append(column.getForeignKey() != null
-                                    ? column.getForeignKey().getReferencingString()
-                                    : "");
-                }
+                table.getColumnsSortedByPrimaryKey().forEach(column -> script
+                        .append("\n\t")
+                        .append(column.getName())
+                        .append(" ")
+                        .append(column.getDataType().toUpperCase())
+                        .append(primaryKeys.size() == 1 && column.getIsPrimaryKey()
+                                ? " PRIMARY KEY," // table has only 1 primary key and this column is the primary key
+                                : "")
+                        .append(column.getForeignKey() != null
+                                ? column.getForeignKey().getReferencingString()
+                                : ""));
 
                 script.append(primaryKeys.size() > 1 // table has multiple primary keys
                         ? "\n\tPRIMARY KEY (" + String.join(", ", primaryKeys) + ")\n);\n"
                         : "\n);\n");
-            }
-        }
+            });
+        });
 
         return script.toString().trim();
     }
