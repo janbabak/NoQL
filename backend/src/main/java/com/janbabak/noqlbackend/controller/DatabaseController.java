@@ -12,6 +12,8 @@ import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
+import com.janbabak.noqlbackend.service.langChain.AssistantTools;
+import com.janbabak.noqlbackend.service.langChain.LLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class DatabaseController {
     private final DatabaseEntityService databaseService;
     private final QueryService queryService;
     private final ChatService chatService;
+    private final LLMService llmService;
 
     /**
      * Get all databases.
@@ -145,6 +148,12 @@ public class DatabaseController {
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
             LLMException, BadRequestException {
         return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
+    }
+
+    @PostMapping("/experimental/query")
+    @ResponseStatus(HttpStatus.OK)
+    public AssistantTools.QueryResult experimentalQuery(@RequestBody String query) {
+        return llmService.runQuery(query);
     }
 
     /**
