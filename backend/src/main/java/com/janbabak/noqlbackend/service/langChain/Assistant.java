@@ -1,11 +1,15 @@
 package com.janbabak.noqlbackend.service.langChain;
 
 
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 
+import java.util.List;
+
 interface Assistant {
 
-    @SystemMessage("Your role is to assist users in generating database queries and data visualizations based on their requests.")
     String chat(@UserMessage String userMessage);
+
+    String chat(List<ChatMessage> messages);
 }

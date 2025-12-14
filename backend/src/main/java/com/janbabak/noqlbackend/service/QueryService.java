@@ -19,6 +19,7 @@ import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
+import com.janbabak.noqlbackend.service.langChain.LLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import jakarta.validation.constraints.NotNull;
@@ -56,6 +57,7 @@ public class QueryService {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
+    private final LLMService llmService;
     private final ChatRepository chatRepository;
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
@@ -431,5 +433,38 @@ public class QueryService {
         // last try failed - return message that is not persisted
         String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
         return ChatResponse.failedResponse(lastError, queryRequest.getQuery());
+    }
+
+    public RetrievedData experimentalQueryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
+            throws EntityNotFoundException, DatabaseConnectionException, LLMException,
+            DatabaseExecutionException, BadRequestException {
+
+        log.info("Execute chat, database_id={}", databaseId);
+
+        Database database = databaseRepository.findById(databaseId)
+                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
+
+        chatRepository.findById(chatId)
+                .orElseThrow(() -> new EntityNotFoundException(EntityNotFoundException.Entity.CHAT, chatId));
+
+        if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
+            log.info("Query limit exceeded");
+//            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
+            return null;
+        }
+
+        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
+
+        return llmService.executeUserRequest(
+                queryRequest.getQuery(),
+                createSystemQuery(
+                        databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
+                        database),
+                database,
+                queryRequest.getModel(),
+                pageSize,
+                chatHistory);
     }
 }

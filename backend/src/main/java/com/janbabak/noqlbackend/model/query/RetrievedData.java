@@ -26,8 +26,7 @@ public record RetrievedData(
      * @param totalCount total count of rows (response is paginated, so it does not contain all of them)
      * @throws SQLException when the result set is not valid
      */
-    public RetrievedData(ResultSet resultSet, Integer page, Integer pageSize, Long totalCount)
-            throws SQLException {
+    public RetrievedData(ResultSet resultSet, Integer page, Integer pageSize, Long totalCount) throws SQLException {
 
         this(new ArrayList<>(), new ArrayList<>(), page, pageSize, totalCount);
 

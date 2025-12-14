@@ -150,10 +150,15 @@ public class DatabaseController {
         return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
-    @PostMapping("/experimental/query")
+    @PostMapping("/experimentalQuery/{databaseId}/chat/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public AssistantTools.QueryResult experimentalQuery(@RequestBody String query) {
-        return llmService.runQuery(query);
+    public RetrievedData experimentalQuery(
+            @PathVariable UUID databaseId,
+            @PathVariable UUID chatId,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestBody @Valid QueryRequest queryRequest
+    ) throws DatabaseConnectionException, DatabaseExecutionException, LLMException, BadRequestException, EntityNotFoundException {
+        return queryService.experimentalQueryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**
