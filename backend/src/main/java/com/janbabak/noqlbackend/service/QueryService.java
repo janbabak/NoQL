@@ -446,7 +446,7 @@ public class QueryService {
         return ChatResponse.failedResponse(lastError, queryRequest.getQuery());
     }
 
-    public LLMService.LLMServiceResult experimentalQueryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
+    public ChatResponse experimentalQueryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
         log.info("Execute chat, database_id={}", databaseId);
@@ -461,14 +461,15 @@ public class QueryService {
 
         if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
-//            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
-            return null;
+            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
         }
 
         List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
-        String plotFileName = PlotService.createFileName(chatId, UUID.randomUUID());
+        ChatQueryWithResponse chatQueryWithResponse = chatService.addEmptyMessageToChat(chatId);
+        String plotFileName = PlotService.createFileName(chatId, chatQueryWithResponse.getId());
 
-        var response = llmService.executeUserRequest(
+        // TODO: create request object
+        LLMService.LLMServiceResult response = llmService.executeUserRequest(
                 queryRequest.getQuery(),
                 createSystemQuery(
                         databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
@@ -479,10 +480,13 @@ public class QueryService {
                 pageSize,
                 chatHistory);
 
-        if (response.toolResult().getPlotGenerated()) {
-            log.info("Plot generated at {}, URL: {}", plotFileName, PlotService.createFileUrl(plotFileName));
-        }
+         chatQueryWithResponse = chatQueryWithResponseService.updateEmptyMessage(
+                 chatQueryWithResponse, queryRequest.getQuery(), response);
 
-        return response;
+        String plotUrl = chatQueryWithResponse.getPlotScript() != null
+                ? PlotService.createFileUrl(plotFileName)
+                : null;
+
+        return new ChatResponse(response.toolResult().getRetrievedData(), chatQueryWithResponse, plotUrl);
     }
 }

@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.function.Consumer;
+
 @Slf4j
 public class AssistantTools {
 
@@ -48,11 +50,16 @@ public class AssistantTools {
      */
     @Tool("Execute query on database")
     public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
+        toolResult.setDbQuery(query);
         try {
             RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
-            toolResult.setRetrievedData(retrievedData).setError(null);
+            toolResult
+                    .setRetrievedData(retrievedData)
+                    .setDbQueryExecutedSuccessSuccessfully(true)
+                    .setDbQueryExecutionErrorMessage(null);
         } catch (Exception e) {
-            return handleError("Error while executing query", e);
+            toolResult.setDbQueryExecutedSuccessSuccessfully(false);
+            return handleError("Error while executing query", e, toolResult::setDbQueryExecutionErrorMessage);
         }
         log.info("Query executed successfully: {}", query);
         return ToolExecutionResult.success("Query executed successfully");
@@ -67,21 +74,25 @@ public class AssistantTools {
      */
     @Tool("Generate plot from data")
     public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
+        toolResult.setScript(pythonCode);
         try {
             plotService.generatePlot(pythonCode, database, plotFileName);
-            toolResult.setPlotGenerated(true).setError(null);
+            toolResult
+                    .setPlotGeneratedSuccessfully(true)
+                    .setDbQueryExecutionErrorMessage(null);
         } catch (PlotScriptExecutionException e) {
-            return handleError("Error while executing plot", e);
+            toolResult.setPlotGeneratedSuccessfully(false);
+            return handleError("Error while executing plot", e, toolResult::setPlotGenerationErrorMessage);
         }
         log.info("Plot successfully generated, script: {}", plotFileName);
         return new ToolExecutionResult(true, null, "Plot successfully generated");
     }
 
-    private ToolExecutionResult handleError(String context, Exception exception) {
-        String error = context + ": " + exception.getMessage();
-        log.error(error);
-        toolResult.setError(error);
-        return ToolExecutionResult.failure(error);
+    private ToolExecutionResult handleError(String context, Exception exception, Consumer<String> errorSetter) {
+        String errorMessage = context + ": " + exception.getMessage();
+        log.error(errorMessage);
+        errorSetter.accept(errorMessage);
+        return ToolExecutionResult.failure(errorMessage);
     }
 
     /**
@@ -90,9 +101,13 @@ public class AssistantTools {
     @Data
     @Accessors(chain = true)
     public static class ToolResult {
+        private Boolean dbQueryExecutedSuccessSuccessfully = null;
+        private String dbQuery = null;
+        private Boolean plotGeneratedSuccessfully = false;
+        private String dbQueryExecutionErrorMessage = null;
+        private String script = null;
         private RetrievedData retrievedData = null;
-        private Boolean plotGenerated = false;
-        private String error = null;
+        private String plotGenerationErrorMessage = null;
     }
 
     /**

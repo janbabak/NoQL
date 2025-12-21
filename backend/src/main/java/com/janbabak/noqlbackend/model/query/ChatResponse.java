@@ -18,6 +18,7 @@ public class ChatResponse {
     private String nlQuery; // natural language query
     private String dbQuery; // database query
     private String plotUrl;
+    private String description;
     private Timestamp timestamp;
     private String error;
 
@@ -39,8 +40,36 @@ public class ChatResponse {
                 chatQueryWithResponse.getNlQuery(),
                 llmResponse.databaseQuery(),
                 llmResponse.generatePlot() ? plotFileName : null,
+                null,
                 chatQueryWithResponse.getTimestamp(),
                 null);
+    }
+
+    public ChatResponse(RetrievedData data, ChatQueryWithResponse chatQueryWithResponse, String plotUrl) {
+        this(
+                data,
+                chatQueryWithResponse.getId(),
+                chatQueryWithResponse.getNlQuery(),
+                chatQueryWithResponse.getDbQuery(),
+                plotUrl,
+                chatQueryWithResponse.getResultDescription(),
+                chatQueryWithResponse.getTimestamp(),
+                null);
+
+        String error = null;
+        if (chatQueryWithResponse.getDbExecutionErrorMessage() != null) {
+            error = "Errors: \n" + chatQueryWithResponse.getDbExecutionErrorMessage();
+        }
+        if (chatQueryWithResponse.getPlotGenerationErrorMessage() != null) {
+            if (error == null) {
+                error = "Errors: \n" + chatQueryWithResponse.getPlotGenerationErrorMessage();
+            } else {
+                error += "\n" + chatQueryWithResponse.getPlotGenerationErrorMessage();
+            }
+        }
+        if (error != null) {
+            this.error = error;
+        }
     }
 
     /**
@@ -52,6 +81,6 @@ public class ChatResponse {
      */
     public static ChatResponse failedResponse(String error, String nlQuery) {
         return new ChatResponse(
-                null, null, nlQuery, null, null, null, error);
+                null, null, nlQuery, null, null, null, null, error);
     }
 }

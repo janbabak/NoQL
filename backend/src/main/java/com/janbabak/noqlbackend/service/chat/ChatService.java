@@ -87,6 +87,7 @@ public class ChatService {
                                         message.getNlQuery(),
                                         llmResponse.databaseQuery(),
                                         plotFileName,
+                                        message.getResultDescription(),
                                         message.getTimestamp(),
                                         null);
                             } catch (JsonProcessingException e) {
@@ -161,6 +162,7 @@ public class ChatService {
      * @throws EntityNotFoundException                                   chat of specified id not found.
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
+    @Deprecated
     @Transactional
     public ChatQueryWithResponse addMessageToChat(UUID chatId, CreateChatQueryWithResponseRequest request)
             throws EntityNotFoundException {
@@ -184,6 +186,33 @@ public class ChatService {
             chat.setName(message.getNlQuery().length() < CHAT_NAME_MAX_LENGTH
                     ? message.getNlQuery() : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
+        chatRepository.save(chat);
+        return messageRepository.save(message);
+    }
+
+    /**
+     * Add empty message to chat to get its ID before processing.
+     *
+     * @param chatId chat identifier
+     * @return created empty message
+     * @throws EntityNotFoundException chat of specified id not found.
+     */
+    @Transactional
+    public ChatQueryWithResponse addEmptyMessageToChat(UUID chatId)
+            throws EntityNotFoundException {
+
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+
+        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
+
+        Timestamp timestamp = Timestamp.from(Instant.now());
+        ChatQueryWithResponse message = ChatQueryWithResponse.builder()
+                .chat(chat)
+                .build();
+
+        chat.addMessage(message);
+        chat.setModificationDate(timestamp);
+
         chatRepository.save(chat);
         return messageRepository.save(message);
     }

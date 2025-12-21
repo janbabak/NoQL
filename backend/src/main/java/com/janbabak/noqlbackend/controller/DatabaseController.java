@@ -151,7 +151,7 @@ public class DatabaseController {
 
     @PostMapping("/experimentalQuery/{databaseId}/chat/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public LLMService.LLMServiceResult experimentalQuery(
+    public ChatResponse experimentalQuery(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,

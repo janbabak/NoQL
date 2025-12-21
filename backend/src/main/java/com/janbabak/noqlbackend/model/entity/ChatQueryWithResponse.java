@@ -25,14 +25,45 @@ public class ChatQueryWithResponse {
     private Chat chat;
 
     /** natural language query */
-    @NotBlank
     private String nlQuery;
 
     /** JSON in form of string<br />
      * {@code { databaseQuery: string, generatePlot: boolean, pythonCode: string }}
      */
+    @Deprecated
     @Column(length = 2048)
-    private String llmResponse;
+    private String llmResponse; // TODO: remove
 
+    /**
+     * Generated description of the result for the user
+     */
+    @Column(length = 1024)
+    private String resultDescription;
+
+    /**
+     * generated database language query
+     */
+    @Column(length = 512)
+    private String dbQuery;
+
+    @Column
+    private Boolean dbQueryExecutionSuccess;
+
+    @Column(length = 1024)
+    private String dbExecutionErrorMessage;
+
+    /**
+     * Generated python code for plot generation
+     */
+    @Column(length = 2048)
+    private String plotScript;
+
+    @Column
+    private Boolean plotGenerationSuccess;
+
+    @Column(length = 1024)
+    private String plotGenerationErrorMessage;
+
+    @Column
     private Timestamp timestamp;
 }

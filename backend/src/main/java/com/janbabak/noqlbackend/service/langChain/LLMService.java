@@ -85,10 +85,11 @@ public class LLMService {
             messages.add(SystemMessage.from(systemQuery));
         }
 
-        for (ChatQueryWithResponse chatEntry : chatHistory) {
-            messages.add(UserMessage.from(chatEntry.getNlQuery()));
-            messages.add(AiMessage.from(chatEntry.getLlmResponse()));
-        }
+//        TODO:
+//        for (ChatQueryWithResponse chatEntry : chatHistory) {
+//            messages.add(UserMessage.from(chatEntry.getNlQuery()));
+//            messages.add(AiMessage.from(chatEntry.getLlmResponse()));
+//        }
 
         messages.add(UserMessage.from(userQuery));
 
