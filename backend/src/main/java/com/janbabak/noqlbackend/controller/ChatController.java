@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,20 +77,5 @@ public class ChatController {
     public void rename(@PathVariable UUID chatId, @RequestParam @Valid @Length(min = 1, max = 32) String name)
             throws EntityNotFoundException {
         chatService.renameChat(chatId, name);
-    }
-
-    /**
-     * Add message to a chat. Does not verify if the JSON is valid.
-     *
-     * @param chatId  chat identifier
-     * @param request message
-     * @throws EntityNotFoundException                                   chat of specified id not found.
-     * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
-     */
-    @PostMapping("/{chatId}/messages")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void addMessage(@PathVariable UUID chatId, @RequestBody @Valid CreateChatQueryWithResponseRequest request)
-            throws EntityNotFoundException {
-        chatService.addMessageToChat(chatId, request);
     }
 }

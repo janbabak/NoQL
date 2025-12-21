@@ -32,7 +32,7 @@ public record ClaudeRequest(
         // chat history
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
             this.messages().add(new Message("user", chatQueryWithResponse.getNlQuery()));
-            this.messages().add(new Message("assistant", chatQueryWithResponse.getLlmResponse()));
+            this.messages().add(new Message("assistant", chatQueryWithResponse.toString()));
         }
 
         // query

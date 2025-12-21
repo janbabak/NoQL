@@ -604,32 +604,6 @@ paths:
         '403':
           description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
 
-  /chat/{chatId}/messages:
-    post:
-      tags:
-        - Chat
-      security:
-        - BearerAuth: [ ]
-      summary: Add message to chat.
-      description: >
-        Add message to chat. Used only for development purposes. Does not verify if the message is valid.
-        Role USER can add messages only to his own chats. Role ADMIN can add messages to any chat.
-      parameters:
-        - $ref: '#/components/parameters/chatIdPath'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateChatQueryWithResponseRequest'
-      responses:
-        '204':
-          description: No content
-        '401':
-          description: Unauthorized - invalid or expired access token
-        '403':
-          description: Forbidden - user is not an ADMIN or owner of database to which the chat is associated
-
   /settings:
     get:
       tags:

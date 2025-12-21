@@ -87,68 +87,6 @@ public class PlotService {
      *
      * @param scriptContent content of python file responsible for plot generation (code)
      * @param database      database object - use its real credentials instead of placeholders
-     * @param chatId        identifier of the chat
-     * @param messageId     identifier of the message
-     * @return name of the generated file
-     * @throws PlotScriptExecutionException script returned not successful return code or failed
-     */
-    @Deprecated
-    public String generatePlot(String scriptContent, Database database, UUID chatId, UUID messageId)
-            throws PlotScriptExecutionException {
-
-        String fileName = createFileName(chatId, messageId);
-
-        try {
-            createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
-            log.debug("Starting process: docker exec {} python ./{}/{}",
-                    settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME);
-            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python ./%s/%s"
-                    .formatted(settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME));
-
-            Process process = processBuilder.start();
-
-            // read output and return it if failure
-            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            StringBuilder output = new StringBuilder();
-            StringBuilder error = new StringBuilder();
-            String line;
-            while ((line = outputReader.readLine()) != null) {
-                output.append(line);
-            }
-            outputReader.close();
-
-            while ((line = errorReader.readLine()) != null) {
-                error.append(line);
-            }
-            errorReader.close();
-
-            try {
-                process.waitFor(GENERATE_PLOT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                int exitCode = process.exitValue();
-                process.destroy();
-                if (exitCode != 0) { // fail
-                    log.error("Plot scrip execution failed. exit code: {}, output: '{}', error: '{}'",
-                            exitCode, output, error);
-                    throw new PlotScriptExecutionException(error.toString());
-                }
-            } catch (InterruptedException e) {
-                log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",
-                        output, error, e.getMessage());
-                throw new PlotScriptExecutionException(output.toString());
-            }
-        } catch (IOException e) {
-            throw new PlotScriptExecutionException(e.getMessage());
-        }
-
-        return createFileUrl(fileName);
-    }
-
-    /**
-     * Generate plot
-     *
-     * @param scriptContent content of python file responsible for plot generation (code)
-     * @param database      database object - use its real credentials instead of placeholders
      * @param fileName      name of the file to save plot
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */

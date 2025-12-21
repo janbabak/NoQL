@@ -36,7 +36,7 @@ public record LlamaRequest(
         // chat history
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
             this.messages.add(new LlmMessage(Role.user, chatQueryWithResponse.getNlQuery()));
-            this.messages.add(new LlmMessage(Role.assistant, chatQueryWithResponse.getLlmResponse()));
+            this.messages.add(new LlmMessage(Role.assistant, chatQueryWithResponse.toString()));
         }
 
         // query

@@ -31,7 +31,7 @@ public record GeminiRequest(
         // chat history
         for (ChatQueryWithResponse chatQueryWithResponse : chatHistory) {
             this.contents.add(new GeminiMessage(GeminiMessage.Role.user, chatQueryWithResponse.getNlQuery()));
-            this.contents.add(new GeminiMessage(GeminiMessage.Role.assistant, chatQueryWithResponse.getLlmResponse()));
+            this.contents.add(new GeminiMessage(GeminiMessage.Role.assistant, chatQueryWithResponse.toString()));
         }
 
         // query

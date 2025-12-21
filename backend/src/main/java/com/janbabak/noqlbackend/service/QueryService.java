@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
 import com.janbabak.noqlbackend.dao.repository.ChatRepository;
@@ -9,11 +8,8 @@ import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.chat.*;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.database.DatabaseStructure;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.*;
-import com.janbabak.noqlbackend.service.api.LlmApiServiceFactory;
-import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
@@ -22,7 +18,6 @@ import com.janbabak.noqlbackend.service.database.MessageDataDAO;
 import com.janbabak.noqlbackend.service.langChain.LLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -33,7 +28,6 @@ import java.util.*;
 
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
 import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.MESSAGE;
-import static com.janbabak.noqlbackend.service.utils.JsonUtils.createFromJson;
 
 @Slf4j
 @Service
@@ -50,10 +44,7 @@ public class QueryService {
      */
     public final static String DOCKER_LOCALHOST = "host.docker.internal";
 
-    private final LlmApiServiceFactory llmApiServiceFactory;
-    private final Settings settings;
     private final ChatService chatService;
-    private final PlotService plotService;
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
@@ -63,41 +54,6 @@ public class QueryService {
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final DatabaseServiceFactory databaseServiceFactory;
     private final MessageDataDAO messageDataDAO;
-
-    @Deprecated
-    @SuppressWarnings("all")
-    public static String createSystemQuery(String dbStructure, Database database) {
-        return new StringBuilder(
-                """
-                        You are an assistant that helps users visualise data. You have two functions. The first function
-                        is translation of natural language queries into a database language. The second function is
-                        visualising data. If the user wants to show or display or find or retrieve some data, translate
-                        it into""")
-                .append(database.isSQL() ? " an SQL query" : " an query language query")
-                .append(" for the ")
-                .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
-                .append("""
-                         database. Generate this query nicely formatted with line breaks.
-                        I will use this query for displaying the data in form of table. If the user wants to plot,
-                        chart or visualize the data, create a Python script that will select the data and visualise them
-                        in a chart. Save the generated chart into a file called""")
-                .append(" ").append(PlotService.PLOT_DIRECTORY_DOCKER_PATH).append("/")
-                .append(PLOT_FILE_NAME_PLACEHOLDER)
-                .append("""
-                         and don't show it.
-                        To connect to the database use host='""").append(HOST_PLACEHOLDER)
-                .append("', port=").append(PORT_PLACEHOLDER)
-                .append(" , user='").append(USER_PLACEHOLDER)
-                .append("', password='").append(PASSWORD_PLACEHOLDER)
-                .append("', database='").append(DATABASE_PLACEHOLDER).append("'.\n\n")
-                .append("""                       
-                        Your response must be in JSON format
-                        { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
-                        
-                        The database structure looks like this:""")
-                .append(dbStructure)
-                .toString();
-    }
 
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
@@ -212,50 +168,6 @@ public class QueryService {
     }
 
     /**
-     * Sometimes the model does not return just the query itself, but puts it into a markdown and add some text. <br />
-     * Extract the executable query from the response that can look like this: <br />
-     * {@code Use the following command to retrieve all users. ```json\n{ query: "...", ...}```} <br />
-     *
-     * @param response model's response
-     * @return executable query
-     */
-    public String extractQueryFromMarkdownInResponse(@NotNull String response) {
-
-        final String jsonMarkdownPatterStart = "```json";
-        final String markdownPatterEnd = "```";
-        final String genericMarkdownPatterStart = "```";
-        String markdownPatterStart = jsonMarkdownPatterStart;
-
-        int markdownIndex = response.indexOf(markdownPatterStart);
-
-        // markdown not detected
-        if (markdownIndex == -1) {
-            markdownPatterStart = genericMarkdownPatterStart;
-            markdownIndex = response.indexOf(markdownPatterStart);
-            if (markdownIndex == -1) {
-                return response; // unable to parse
-            }
-        }
-
-        if (response.length() < markdownIndex + markdownPatterStart.length()) {
-            return response; // unable to parse
-        }
-        String responseAfterMarkdownStart = response.substring(
-                markdownIndex + markdownPatterStart.length());
-
-        markdownIndex = responseAfterMarkdownStart.indexOf(markdownPatterEnd);
-        if (markdownIndex == -1) {
-            return response; // unable to parse
-        }
-
-        String extractedJson = responseAfterMarkdownStart.substring(0, markdownIndex).trim();
-
-        log.info("Extracted query={} from response={}", extractedJson, response);
-
-        return extractedJson;
-    }
-
-    /**
      * Get total number of rows that SQL select query returns.
      *
      * @param selectQuery     select statement
@@ -344,70 +256,6 @@ public class QueryService {
         return messageDataDAO.retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
 
-    /**
-     * Retrieve data requested by the user in form of table or plot or both.
-     *
-     * @param queryRequest    query request
-     * @param chatId          chat identifier
-     * @param llmResponseJson LLM unparsed response
-     * @param databaseService specific database service
-     * @param database        database
-     * @param pageSize        number of rows per page
-     * @return query response with retrieved data and now plot
-     * @throws BadRequestException          pageSize value is greater than maximum allowed value
-     * @throws DatabaseConnectionException  cannot establish database connection
-     * @throws DatabaseExecutionException   query execution failed - syntax error, ...
-     * @throws SQLException                 error when retrieving data
-     * @throws EntityNotFoundException      chat not found
-     * @throws PlotScriptExecutionException plot execution failed - bad syntax, IO error, ...
-     * @throws JsonProcessingException      LLM response cannot be parsed from JSON - syntax error
-     */
-    private ChatResponse showResultTableAndGeneratePlot(
-            QueryRequest queryRequest,
-            UUID chatId,
-            String llmResponseJson,
-            BaseDatabaseService databaseService,
-            Database database,
-            Integer pageSize) throws BadRequestException, DatabaseConnectionException,
-            DatabaseExecutionException, SQLException, EntityNotFoundException, PlotScriptExecutionException,
-            JsonProcessingException {
-
-        LLMResponse llmResponse = createFromJson(llmResponseJson, LLMResponse.class);
-
-        ChatQueryWithResponse chatQueryWithResponse = chatService.addMessageToChat(chatId,
-                new CreateChatQueryWithResponseRequest(queryRequest.getQuery(), llmResponseJson));
-
-        String plotFileName = null;
-
-        if (llmResponse.generatePlot()) {
-            log.info("Generate plot");
-
-            plotFileName = plotService.generatePlot(
-                    llmResponse.pythonCode(), database, chatId, chatQueryWithResponse.getId());
-        }
-
-        RetrievedData retrievedData = null;
-        Long totalCount;
-
-        if (llmResponse.databaseQuery() != null && !llmResponse.databaseQuery().isEmpty()) {
-
-            PaginatedQuery paginatedQuery = setPaginationInSqlQuery(
-                    llmResponse.databaseQuery(), 0, pageSize, database);
-
-            try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query)) {
-                totalCount = getTotalCount(llmResponse.databaseQuery(), databaseService);
-
-                retrievedData = new RetrievedData(
-                        result.resultSet(),
-                        paginatedQuery.page,
-                        paginatedQuery.pageSize,
-                        totalCount);
-            }
-        }
-
-        return new ChatResponse(retrievedData, chatQueryWithResponse, llmResponse, plotFileName);
-    }
-
 
     /**
      * Query natural chat with natural language query. The query is translated to specific dialect via LLM
@@ -422,66 +270,8 @@ public class QueryService {
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  retrieving database schema failure
-     * @throws LLMException                large language model failure
      */
     public ChatResponse queryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, LLMException,
-            DatabaseExecutionException, BadRequestException {
-
-        log.info("Execute chat, database_id={}", databaseId);
-
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
-
-        authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
-
-        chatRepository.findById(chatId)
-                .orElseThrow(() -> new EntityNotFoundException(EntityNotFoundException.Entity.CHAT, chatId));
-
-        if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
-            log.info("Query limit exceeded");
-            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
-        }
-
-        BaseDatabaseService specificDatabaseService = databaseServiceFactory.getDatabaseService(database);
-        DatabaseStructure databaseStructure = specificDatabaseService.retrieveSchema();
-        String systemQuery = createSystemQuery(databaseStructure.generateCreateScript(), database);
-        List<String> errors = new ArrayList<>();
-        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
-        String llmResponseJson;
-
-        QueryApi queryApi = llmApiServiceFactory.getQueryApiService(queryRequest.getModel());
-
-        for (int attempt = 1; attempt <= settings.translationRetries; attempt++) {
-            llmResponseJson = queryApi.queryModel(chatHistory, queryRequest, systemQuery, errors);
-            if (llmResponseJson == null) {
-                errors.add("Response is null");
-                continue;
-            } else {
-                llmResponseJson = extractQueryFromMarkdownInResponse(llmResponseJson);
-            }
-
-            try {
-                return showResultTableAndGeneratePlot(
-                        queryRequest, chatId, llmResponseJson, specificDatabaseService, database, pageSize);
-            } catch (JsonProcessingException e) {
-                errors.add("Cannot parse LLM response JSON");
-                log.error("Cannot parse response JSON: {}", llmResponseJson);
-            } catch (SQLException e) {
-                errors.add("Error occurred when execution your query: " + e.getMessage());
-            } catch (PlotScriptExecutionException e) {
-                errors.add(e.getMessage());
-            } catch (DatabaseExecutionException e) {
-                errors.add("Generated query execution failed");
-            }
-        }
-
-        // last try failed - return message that is not persisted
-        String lastError = !errors.isEmpty() ? errors.get(errors.size() - 1) : null;
-        return ChatResponse.failedResponse(lastError, queryRequest.getQuery());
-    }
-
-    public ChatResponse experimentalQueryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
         log.info("Execute chat, database_id={}", databaseId);

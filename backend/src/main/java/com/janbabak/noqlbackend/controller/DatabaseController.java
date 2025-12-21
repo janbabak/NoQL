@@ -121,8 +121,6 @@ public class DatabaseController {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
-     * @throws LLMException                LLM request failed
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping("/{databaseId}/chat/{chatId}/query")
@@ -132,32 +130,8 @@ public class DatabaseController {
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
             @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
-            LLMException, BadRequestException {
-        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    @PostMapping("query/{databaseId}/chat/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatResponse queryChat2(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
-            LLMException, BadRequestException {
-        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    @PostMapping("/experimentalQuery/{databaseId}/chat/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatResponse experimentalQuery(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestBody @Valid QueryRequest queryRequest
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
-        return queryService.experimentalQueryChat(databaseId, chatId, queryRequest, pageSize);
+        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**
