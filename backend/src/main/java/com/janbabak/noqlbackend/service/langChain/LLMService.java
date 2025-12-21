@@ -3,7 +3,6 @@ package com.janbabak.noqlbackend.service.langChain;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.PlotService;
-import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.data.message.AiMessage;
 import com.janbabak.noqlbackend.service.langChain.AssistantTools.ToolResult;
 import dev.langchain4j.data.message.ChatMessage;
@@ -85,15 +84,52 @@ public class LLMService {
             messages.add(SystemMessage.from(systemQuery));
         }
 
-//        TODO:
-//        for (ChatQueryWithResponse chatEntry : chatHistory) {
-//            messages.add(UserMessage.from(chatEntry.getNlQuery()));
-//            messages.add(AiMessage.from(chatEntry.getLlmResponse()));
-//        }
+        for (ChatQueryWithResponse chatEntry : chatHistory) {
+            messages.add(UserMessage.from(chatEntry.getNlQuery()));
+            messages.add(AiMessage.from(buildLLMResponseMessage(chatEntry)));
+        }
 
         messages.add(UserMessage.from(userQuery));
 
         return messages;
+    }
+
+    /**
+     * Build message that is sent to LLM as AI response in the chat history.
+     */
+    private String buildLLMResponseMessage(ChatQueryWithResponse chatEntry) {
+        StringBuilder stringBuilder = new StringBuilder("LLM Response: ")
+                .append(chatEntry.getResultDescription())
+                .append("\n\n Executed tools:\n");
+
+        if (chatEntry.getDbQuery() != null) {
+            stringBuilder.append("\nMethod call: executeQuery(\"");
+            stringBuilder.append(chatEntry.getDbQuery());
+            stringBuilder.append("\")\n");
+            stringBuilder.append("Success: ");
+            stringBuilder.append(chatEntry.getDbQueryExecutionSuccess());
+
+            if (chatEntry.getDbExecutionErrorMessage() != null) {
+                stringBuilder.append("\nErrors: ");
+                stringBuilder.append(chatEntry.getDbExecutionErrorMessage());
+                stringBuilder.append("\n");
+            }
+        }
+
+        if (chatEntry.getDbQuery() != null) {
+            stringBuilder.append("\nMethod call: generatePlot(\"");
+            stringBuilder.append(chatEntry.getPlotScript());
+            stringBuilder.append("\")\n");
+            stringBuilder.append("Success: ");
+            stringBuilder.append(chatEntry.getPlotGenerationSuccess());
+
+            if (chatEntry.getPlotGenerationErrorMessage() != null) {
+                stringBuilder.append("\nErrors: ");
+                stringBuilder.append(chatEntry.getPlotGenerationErrorMessage());
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     public record LLMServiceResult(
