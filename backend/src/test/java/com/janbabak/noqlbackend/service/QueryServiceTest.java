@@ -103,19 +103,35 @@ class QueryServiceTest {
                 );""";
 
         String expectedSystemQuery = """
-                You are an assistant that helps users visualise data. You have two functions. The first function
-                is translation of natural language queries into a database language. The second function is
-                visualising data. If the user wants to show or display or find or retrieve some data, translate
-                it into an SQL query for the postgres database. Generate this query nicely formatted with line breaks.
-                I will use this query for displaying the data in form of table. If the user wants to plot,
-                chart or visualize the data, create a Python script that will select the data and visualise them
-                in a chart. Save the generated chart into a file called ./plotService/plots/noQlGeneratedPlot.png and don't show it.
-                To connect to the database use host='localhost', port=1111111111 , user='admin4445900234', password='dkl45349?405', database='database99889899'.
+                You are an AI agent that helps users with data analysis and visualisation by translating their requests
+                in natural language into database queries and Python scripts for data visualisation.
                 
-                Your response must be in JSON format
-                { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
+                You have the following tools at your disposal:
                 
-                The database structure looks like this:CREATE SCHEMA IF NOT EXISTS public;
+                The first function is 'executeQuery' that executes query in valid database query language. In
+                this case SQL query for the postgres database. If users asks for data, you can generate a
+                query based on their input in natural language, call this function with the query as parameter. The
+                system will present retrieved data to users in form of table. Generate this query nicely formatted with
+                line breaks so it can be presented to users with the data table.
+                
+                The second function is 'generatePlot' that creates a plot from data in the database. If users
+                want to visualize data to see them in form of chart such as pie chart, bar chart, line chart,
+                scatter plot, and others charts, you can generate a Python script that selects the data and visualize
+                them in a chart using the matplotlib library. Save the generated chart into a file called
+                ./plotService/plots/noQlGeneratedPlot.png and don't show it. This Python script will be executed and the resulting
+                plot will be presented to users, don't worry about the presentation. To connect to the database use
+                host='localhost', port=1111111111, user='admin4445900234', password='dkl45349?405', database='database99889899'.
+                
+                Users may ask for just one of these two functions or both of them. If users ask for data, the first
+                function should be called. If users ask for plot, the second function should be called. If user asks for
+                data visualisation in form of chart and he can benefit from seeing the data in form of table, you can
+                call both functions. If users want to see a chart but don't specify the type of chart, choose the most
+                suitable chart type based on the data and context.
+                
+                Response with brief explanation of the results to help users understand them better.
+                
+                To help you generate better queries and plots, here is the structure of the database:
+                CREATE SCHEMA IF NOT EXISTS public;
                 
                 CREATE TABLE IF NOT EXISTS public.user
                 (
@@ -123,7 +139,8 @@ class QueryServiceTest {
                     name character varying,
                     surname character varying,
                     age integer
-                );""";
+                );
+                """;
 
         // when
         String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase);
