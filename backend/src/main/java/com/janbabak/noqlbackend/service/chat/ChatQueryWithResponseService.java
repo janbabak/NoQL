@@ -7,11 +7,15 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
+import com.janbabak.noqlbackend.service.langChain.LLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,5 +63,29 @@ public class ChatQueryWithResponseService {
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
 
         return messageDataDAO.retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
+    }
+
+    /**
+     * Update empty message that was created just to get ID
+     */
+    @Transactional
+    public ChatQueryWithResponse updateEmptyMessage( // TODO: test
+            ChatQueryWithResponse message, String nlQuery, LLMService.LLMServiceResult llmResult) {
+
+        Timestamp timestamp = Timestamp.from(Instant.now());
+
+        message.setNlQuery(nlQuery);
+        message.setResultDescription(llmResult.llmResponse());
+        message.setDbQuery(llmResult.toolResult().getDbQuery());
+        message.setDbQueryExecutionSuccess(llmResult.toolResult().getDbQueryExecutedSuccessSuccessfully());
+        message.setDbExecutionErrorMessage(llmResult.toolResult().getDbQueryExecutionErrorMessage());
+        message.setPlotScript(llmResult.toolResult().getScript());
+        message.setPlotGenerationSuccess(llmResult.toolResult().getPlotGeneratedSuccessfully());
+        message.setPlotGenerationErrorMessage(llmResult.toolResult().getPlotGenerationErrorMessage());
+        message.setTimestamp(timestamp);
+
+        message.getChat().setModificationDate(timestamp);
+
+        return chatQueryWithResponseRepository.save(message);
     }
 }

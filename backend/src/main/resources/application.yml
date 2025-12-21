@@ -21,7 +21,7 @@ app:
   security:
     jwt:
       secretKey: "${JWT_SECRET:secret}"
-      expiration: "${JWT_EXPIRATION:1800}"
+      expiration: "${JWT_EXPIRATION:365160}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
     dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
   externalServices:
