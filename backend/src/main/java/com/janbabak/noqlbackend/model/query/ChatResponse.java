@@ -31,7 +31,8 @@ public class ChatResponse {
      */
     public ChatResponse(RetrievedData data,
                         ChatQueryWithResponse chatQueryWithResponse,
-                        LLMResponse llmResponse, String plotFileName) {
+                        LLMResponse llmResponse,
+                        String plotFileName) {
         this(
                 data,
                 chatQueryWithResponse.getId(),

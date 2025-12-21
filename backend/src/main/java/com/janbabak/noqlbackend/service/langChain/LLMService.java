@@ -2,8 +2,8 @@ package com.janbabak.noqlbackend.service.langChain;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.query.RetrievedData;
 import dev.langchain4j.data.message.AiMessage;
+import com.janbabak.noqlbackend.service.langChain.AssistantTools.ToolResult;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -32,8 +32,13 @@ public class LLMService {
 
     private final ExperimentalQueryService queryService;
 
-    public RetrievedData executeUserRequest(String userQuery, String systemQuery, Database database,
-            String modelId, int pageSize, List<ChatQueryWithResponse> chatHistory) {
+    public LLMServiceResult executeUserRequest(
+            String userQuery,
+            String systemQuery,
+            Database database,
+            String modelId,
+            int pageSize,
+            List<ChatQueryWithResponse> chatHistory) {
 
         ChatModel model = getModel(modelId);
         AssistantTools assistantTools = new AssistantTools(database, 0, pageSize, queryService);
@@ -46,14 +51,12 @@ public class LLMService {
         List<ChatMessage> messages = buildMessages(userQuery, systemQuery, chatHistory);
 
         String response = assistant.chat(messages);
+        log.info("LLM response: {}", response);
 
-        log.info("LLM raw response: {}", response);
+        ToolResult toolResult = assistantTools.getToolResult();
+        log.info("LLM tool result: {}", toolResult);
 
-        RetrievedData retrievedData = assistantTools.getRetrievedData();
-
-        log.info("LLM tool result: {}", retrievedData);
-
-        return retrievedData;
+        return new LLMServiceResult(response, toolResult);
     }
 
     private ChatModel getModel(String modelId) {
@@ -85,5 +88,11 @@ public class LLMService {
         messages.add(UserMessage.from(userQuery));
 
         return messages;
+    }
+
+    public record LLMServiceResult(
+            String llmResponse, // response from LLM, comment about the execution
+            ToolResult toolResult // real result of the tool execution
+    ) {
     }
 }

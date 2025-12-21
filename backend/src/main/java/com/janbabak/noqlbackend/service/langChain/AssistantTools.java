@@ -4,8 +4,9 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -19,7 +20,7 @@ public class AssistantTools {
     private final int pageSize;
 
     @Getter
-    private RetrievedData retrievedData;
+    private ToolResult toolResult;
 
     public AssistantTools(Database database,
                           int page,
@@ -29,33 +30,64 @@ public class AssistantTools {
         this.page = page;
         this.pageSize = pageSize;
         this.queryService = queryService;
+        this.toolResult = new ToolResult();
     }
 
-    @Getter
-    @AllArgsConstructor
+    /**
+     * Stores real results of tool execution.
+     */
+    @Data
+    @Accessors(chain = true)
     public static class ToolResult {
-        private boolean success;
-        private String data;
-        private String error;
+        private RetrievedData retrievedData = null;
+        private String plotUrl = null;
+        private String error = null;
     }
 
+    /**
+     * Result of tool execution - info for the LLM about success or failure of the tool execution.
+     */
+    public record ToolExecutionResult(
+            boolean success,
+            String data,
+            String error) {
+
+        public static ToolExecutionResult success(String data) {
+            return new ToolExecutionResult(true, data, null);
+        }
+
+        public static ToolExecutionResult failure(String error) {
+            return new ToolExecutionResult(false, null, error);
+        }
+    }
+
+    /**
+     * Method is called by the LLM to execute a query on the database.
+     * Real result is stored in {@link #toolResult} field.
+     *
+     * @param query database query in valid database query language
+     * @return tool execution result - info for the LLM about success or failure of the tool execution.
+     */
     @Tool("Execute query on database")
-    public ToolResult executeSqlQuery(@P("Query to execute - must use valid database query language") String query) {
+    public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
         try {
-            retrievedData = queryService.executeQuery(query, database, page, pageSize);
+            RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
+            toolResult
+                    .setRetrievedData(retrievedData)
+                    .setError(null);
         } catch (Exception e) {
-            log.error("Error executing query: {}", e.getMessage());
-            return new ToolResult(false, null, e.getMessage());
+            String error = "Error while executing query: " + e.getMessage();
+            log.error(error);
+            toolResult.setError(error);
+            return ToolExecutionResult.failure(error);
         }
         log.info("Query executed successfully: {}", query);
-        return new ToolResult(true, "Query executed successfully", null);
+        return ToolExecutionResult.success("Query executed successfully");
     }
 
-    ;
-
     @Tool("Generate plot from data")
-    public ToolResult generatePlot(@P("Data to plot in CSV format") String pythonCode) {
+    public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
         log.error("Not implemented yet: generatePlot: {}", pythonCode);
-        return new ToolResult(true, null, "Plot successfully generated");
+        return new ToolExecutionResult(true, null, "Plot successfully generated");
     }
 }

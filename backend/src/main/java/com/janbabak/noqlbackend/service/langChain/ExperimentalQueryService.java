@@ -28,7 +28,7 @@ public class ExperimentalQueryService {
 
 
     public RetrievedData executeQuery(String query, Database database, int page, int pageSize)
-            throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException  {
+            throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException, SQLException {
 
         validateQuery(query);
 
@@ -38,9 +38,6 @@ public class ExperimentalQueryService {
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query())) {
             Long totalCount = getTotalCount(query, databaseService);
             return new RetrievedData(result.resultSet(), paginatedQuery.page(), paginatedQuery.pageSize(), totalCount);
-        } catch (SQLException e) {
-            log.error("SQL Exception during query execution: {}", e.getMessage());
-            return null;
         }
     }
 

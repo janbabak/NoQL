@@ -12,7 +12,6 @@ import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
-import com.janbabak.noqlbackend.service.langChain.AssistantTools;
 import com.janbabak.noqlbackend.service.langChain.LLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
@@ -152,7 +151,7 @@ public class DatabaseController {
 
     @PostMapping("/experimentalQuery/{databaseId}/chat/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public RetrievedData experimentalQuery(
+    public LLMService.LLMServiceResult experimentalQuery(
             @PathVariable UUID databaseId,
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
