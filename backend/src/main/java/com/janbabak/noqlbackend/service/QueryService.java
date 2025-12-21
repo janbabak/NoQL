@@ -466,15 +466,23 @@ public class QueryService {
         }
 
         List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
+        String plotFileName = PlotService.createFileName(chatId, UUID.randomUUID());
 
-        return llmService.executeUserRequest(
+        var response = llmService.executeUserRequest(
                 queryRequest.getQuery(),
                 createSystemQuery(
                         databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
                         database),
                 database,
+                plotFileName,
                 queryRequest.getModel(),
                 pageSize,
                 chatHistory);
+
+        if (response.toolResult().getPlotGenerated()) {
+            log.info("Plot generated at {}, URL: {}", plotFileName, PlotService.createFileUrl(plotFileName));
+        }
+
+        return response;
     }
 }

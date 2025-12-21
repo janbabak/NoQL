@@ -2,6 +2,8 @@ package com.janbabak.noqlbackend.service.langChain;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
+import com.janbabak.noqlbackend.service.PlotService;
+import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.data.message.AiMessage;
 import com.janbabak.noqlbackend.service.langChain.AssistantTools.ToolResult;
 import dev.langchain4j.data.message.ChatMessage;
@@ -31,17 +33,20 @@ public class LLMService {
     private String openAiApiKey;
 
     private final ExperimentalQueryService queryService;
+    private final PlotService plotService;
 
     public LLMServiceResult executeUserRequest(
             String userQuery,
             String systemQuery,
             Database database,
+            String plotFileName,
             String modelId,
             int pageSize,
             List<ChatQueryWithResponse> chatHistory) {
 
         ChatModel model = getModel(modelId);
-        AssistantTools assistantTools = new AssistantTools(database, 0, pageSize, queryService);
+        AssistantTools assistantTools = new AssistantTools(
+                database, plotFileName, 0, pageSize, queryService, plotService);
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(model)

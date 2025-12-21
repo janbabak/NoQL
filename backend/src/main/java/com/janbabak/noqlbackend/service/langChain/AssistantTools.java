@@ -1,7 +1,9 @@
 package com.janbabak.noqlbackend.service.langChain;
 
+import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
+import com.janbabak.noqlbackend.service.PlotService;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import lombok.Data;
@@ -13,52 +15,28 @@ import lombok.extern.slf4j.Slf4j;
 public class AssistantTools {
 
     private final ExperimentalQueryService queryService;
-
-    @SuppressWarnings("FieldMayBeFinal")
-    private Database database;
+    private final PlotService plotService;
+    private final Database database;
     private final int page;
     private final int pageSize;
+    private final String plotFileName;
 
     @Getter
     private ToolResult toolResult;
 
     public AssistantTools(Database database,
+                          String plotFileName,
                           int page,
                           int pageSize,
-                          ExperimentalQueryService queryService) {
+                          ExperimentalQueryService queryService,
+                          PlotService plotService) {
         this.database = database;
+        this.plotFileName = plotFileName;
         this.page = page;
         this.pageSize = pageSize;
         this.queryService = queryService;
+        this.plotService = plotService;
         this.toolResult = new ToolResult();
-    }
-
-    /**
-     * Stores real results of tool execution.
-     */
-    @Data
-    @Accessors(chain = true)
-    public static class ToolResult {
-        private RetrievedData retrievedData = null;
-        private String plotUrl = null;
-        private String error = null;
-    }
-
-    /**
-     * Result of tool execution - info for the LLM about success or failure of the tool execution.
-     */
-    public record ToolExecutionResult(
-            boolean success,
-            String data,
-            String error) {
-
-        public static ToolExecutionResult success(String data) {
-            return new ToolExecutionResult(true, data, null);
-        }
-
-        public static ToolExecutionResult failure(String error) {
-            return new ToolExecutionResult(false, null, error);
-        }
     }
 
     /**
@@ -72,22 +50,65 @@ public class AssistantTools {
     public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
         try {
             RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
-            toolResult
-                    .setRetrievedData(retrievedData)
-                    .setError(null);
+            toolResult.setRetrievedData(retrievedData).setError(null);
         } catch (Exception e) {
-            String error = "Error while executing query: " + e.getMessage();
-            log.error(error);
-            toolResult.setError(error);
-            return ToolExecutionResult.failure(error);
+            return handleError("Error while executing query", e);
         }
         log.info("Query executed successfully: {}", query);
         return ToolExecutionResult.success("Query executed successfully");
     }
 
+    /**
+     * Method is called by the LLM to generate a plot from data using provided Python code.
+     * If the plot was generated successfully, the {@link #toolResult} field is updated accordingly.
+     *
+     * @param pythonCode Python code to generate the plot
+     * @return tool execution result - info for the LLM about success or failure of the tool execution.
+     */
     @Tool("Generate plot from data")
     public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
-        log.error("Not implemented yet: generatePlot: {}", pythonCode);
+        try {
+            plotService.generatePlot(pythonCode, database, plotFileName);
+            toolResult.setPlotGenerated(true).setError(null);
+        } catch (PlotScriptExecutionException e) {
+            return handleError("Error while executing plot", e);
+        }
+        log.info("Plot successfully generated, script: {}", plotFileName);
         return new ToolExecutionResult(true, null, "Plot successfully generated");
+    }
+
+    private ToolExecutionResult handleError(String context, Exception exception) {
+        String error = context + ": " + exception.getMessage();
+        log.error(error);
+        toolResult.setError(error);
+        return ToolExecutionResult.failure(error);
+    }
+
+    /**
+     * Stores real results of tool execution.
+     */
+    @Data
+    @Accessors(chain = true)
+    public static class ToolResult {
+        private RetrievedData retrievedData = null;
+        private Boolean plotGenerated = false;
+        private String error = null;
+    }
+
+    /**
+     * Result of tool execution - info for the LLM about success or failure of the tool execution.
+     */
+    public record ToolExecutionResult(
+            boolean success,
+            String message,
+            String error) {
+
+        public static ToolExecutionResult success(String message) {
+            return new ToolExecutionResult(true, message, null);
+        }
+
+        public static ToolExecutionResult failure(String error) {
+            return new ToolExecutionResult(false, null, error);
+        }
     }
 }
