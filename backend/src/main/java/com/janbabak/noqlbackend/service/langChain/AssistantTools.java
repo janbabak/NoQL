@@ -48,6 +48,7 @@ public class AssistantTools {
      * @param query database query in valid database query language
      * @return tool execution result - info for the LLM about success or failure of the tool execution.
      */
+    @SuppressWarnings("unused")
     @Tool("Execute query on database")
     public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
         toolResult.setDbQuery(query);

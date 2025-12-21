@@ -2,6 +2,7 @@ package com.janbabak.noqlbackend.model.query;
 
 import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class ChatResponse {
      * @param llmResponse           response from large language model
      * @param plotFileName          name of the file that contains the plot without extension if exist
      */
+    @Deprecated
     public ChatResponse(RetrievedData data,
                         ChatQueryWithResponse chatQueryWithResponse,
                         LLMResponse llmResponse,
@@ -56,6 +58,14 @@ public class ChatResponse {
                 chatQueryWithResponse.getTimestamp(),
                 null);
 
+        String error = getError(chatQueryWithResponse);
+        if (error != null) {
+            this.error = error;
+        }
+    }
+
+    @Nullable
+    private static String getError(ChatQueryWithResponse chatQueryWithResponse) {
         String error = null;
         if (chatQueryWithResponse.getDbExecutionErrorMessage() != null) {
             error = "Errors: \n" + chatQueryWithResponse.getDbExecutionErrorMessage();
@@ -67,9 +77,7 @@ public class ChatResponse {
                 error += "\n" + chatQueryWithResponse.getPlotGenerationErrorMessage();
             }
         }
-        if (error != null) {
-            this.error = error;
-        }
+        return error;
     }
 
     /**

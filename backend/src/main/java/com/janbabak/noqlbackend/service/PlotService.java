@@ -150,10 +150,9 @@ public class PlotService {
      * @param scriptContent content of python file responsible for plot generation (code)
      * @param database      database object - use its real credentials instead of placeholders
      * @param fileName      name of the file to save plot
-     * @return name of the generated file
      * @throws PlotScriptExecutionException script returned not successful return code or failed
      */
-    public String generatePlot(String scriptContent, Database database, String fileName)
+    public void generatePlot(String scriptContent, Database database, String fileName)
             throws PlotScriptExecutionException {
 
         try {
@@ -198,8 +197,6 @@ public class PlotService {
         } catch (IOException e) {
             throw new PlotScriptExecutionException(e.getMessage());
         }
-
-        return createFileUrl(fileName);
     }
 
     /**

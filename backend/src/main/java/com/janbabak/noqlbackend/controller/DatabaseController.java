@@ -156,7 +156,7 @@ public class DatabaseController {
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
             @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, LLMException, BadRequestException, EntityNotFoundException {
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
         return queryService.experimentalQueryChat(databaseId, chatId, queryRequest, pageSize);
     }
 

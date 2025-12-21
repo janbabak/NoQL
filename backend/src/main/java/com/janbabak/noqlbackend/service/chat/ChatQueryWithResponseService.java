@@ -69,7 +69,7 @@ public class ChatQueryWithResponseService {
      * Update empty message that was created just to get ID
      */
     @Transactional
-    public ChatQueryWithResponse updateEmptyMessage(
+    public ChatQueryWithResponse updateEmptyMessage( // TODO: test
             ChatQueryWithResponse message, String nlQuery, LLMService.LLMServiceResult llmResult) {
 
         Timestamp timestamp = Timestamp.from(Instant.now());
