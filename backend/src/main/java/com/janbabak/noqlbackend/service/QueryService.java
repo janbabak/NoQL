@@ -64,6 +64,41 @@ public class QueryService {
     private final DatabaseServiceFactory databaseServiceFactory;
     private final MessageDataDAO messageDataDAO;
 
+    @Deprecated
+    @SuppressWarnings("all")
+    public static String createSystemQuery(String dbStructure, Database database) {
+        return new StringBuilder(
+                """
+                        You are an assistant that helps users visualise data. You have two functions. The first function
+                        is translation of natural language queries into a database language. The second function is
+                        visualising data. If the user wants to show or display or find or retrieve some data, translate
+                        it into""")
+                .append(database.isSQL() ? " an SQL query" : " an query language query")
+                .append(" for the ")
+                .append(database.getEngine().toString().toLowerCase(Locale.ROOT))
+                .append("""
+                         database. Generate this query nicely formatted with line breaks.
+                        I will use this query for displaying the data in form of table. If the user wants to plot,
+                        chart or visualize the data, create a Python script that will select the data and visualise them
+                        in a chart. Save the generated chart into a file called""")
+                .append(" ").append(PlotService.PLOT_DIRECTORY_DOCKER_PATH).append("/")
+                .append(PLOT_FILE_NAME_PLACEHOLDER)
+                .append("""
+                         and don't show it.
+                        To connect to the database use host='""").append(HOST_PLACEHOLDER)
+                .append("', port=").append(PORT_PLACEHOLDER)
+                .append(" , user='").append(USER_PLACEHOLDER)
+                .append("', password='").append(PASSWORD_PLACEHOLDER)
+                .append("', database='").append(DATABASE_PLACEHOLDER).append("'.\n\n")
+                .append("""                       
+                        Your response must be in JSON format
+                        { databaseQuery: string, generatePlot: boolean, pythonCode: string }.
+                        
+                        The database structure looks like this:""")
+                .append(dbStructure)
+                .toString();
+    }
+
     /**
      * Create system query that commands the LLM with instructions. Use placeholders for connection to the database
      * that will be replaced latter by the actual values for security reasons.
@@ -73,7 +108,7 @@ public class QueryService {
      * @return system query
      */
     @SuppressWarnings("all")
-    public static String createSystemQuery(String dbStructure, Database database) {
+    public static String createExperimentalSystemQuery(String dbStructure, Database database) {
         return """
                 You are an AI agent that helps users with data analysis and visualisation by translating their requests
                 in natural language into database queries and Python scripts for data visualisation.
@@ -471,7 +506,7 @@ public class QueryService {
         // TODO: create request object
         LLMService.LLMServiceResult response = llmService.executeUserRequest(
                 queryRequest.getQuery(),
-                createSystemQuery(
+                createExperimentalSystemQuery(
                         databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
                         database),
                 database,

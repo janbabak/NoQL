@@ -143,7 +143,7 @@ class QueryServiceTest {
                 """;
 
         // when
-        String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase);
+        String actualSystemQuery = QueryService.createExperimentalSystemQuery(dbStructure, postgresDatabase);
 
         // then
         assertEquals(expectedSystemQuery, actualSystemQuery);
