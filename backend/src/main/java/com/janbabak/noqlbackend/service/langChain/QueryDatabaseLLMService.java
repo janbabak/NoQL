@@ -13,6 +13,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,9 +27,10 @@ public class QueryDatabaseLLMService extends BaseLLMService {
     private final QueryExecutionService queryService;
     private final PlotService plotService;
 
-    public LLMServiceResult executeUserRequest(LLMServiceRequest request){
+    public LLMServiceResult executeUserRequest(LLMServiceRequest request) throws BadRequestException {
 
-        ChatModel model = getModel(request.modelId);
+//        ChatModel model = getModel(request.modelId);
+        ChatModel model = getModel("gpt-5-nano");
         int page = 0;
         QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
                 request.database,
@@ -72,6 +74,9 @@ public class QueryDatabaseLLMService extends BaseLLMService {
         }
 
         for (ChatQueryWithResponse chatEntry : request.chatHistory) {
+            if (chatEntry.getNlQuery() == null || chatEntry.getNlQuery().isBlank()) {
+                continue;
+            }
             messages.add(UserMessage.from(chatEntry.getNlQuery()));
             messages.add(AiMessage.from(buildLLMResponseMessage(chatEntry)));
         }

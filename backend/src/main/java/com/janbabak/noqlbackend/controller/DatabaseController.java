@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -128,7 +129,7 @@ public class DatabaseController {
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
             @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException, BadRequestException {
         return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
