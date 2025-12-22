@@ -69,7 +69,7 @@ public class ChatQueryWithResponse {
     }
 
     public Boolean plotSuccessfullyGenerated() {
-        return plotGenerated() != null && plotGenerationSuccess;
+        return plotGenerated() && plotGenerationSuccess;
     }
 
     /**
@@ -80,6 +80,6 @@ public class ChatQueryWithResponse {
     }
 
     public Boolean dbQuerySuccessfullyExecuted() {
-        return dbQueryExecuted() != null && dbQueryExecutionSuccess;
+        return dbQueryExecuted() && dbQueryExecutionSuccess;
     }
 }

@@ -14,7 +14,7 @@ import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.chat.ChatTestUtilService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;

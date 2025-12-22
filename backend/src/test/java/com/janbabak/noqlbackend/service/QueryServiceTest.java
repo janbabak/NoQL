@@ -13,9 +13,10 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.ChatResponse;
 import com.janbabak.noqlbackend.model.query.QueryRequest;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
-import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
+import com.janbabak.noqlbackend.service.query.QueryService.PaginatedQuery;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -142,7 +143,7 @@ class QueryServiceTest {
                 """;
 
         // when
-        String actualSystemQuery = QueryService.createExperimentalSystemQuery(dbStructure, postgresDatabase);
+        String actualSystemQuery = QueryService.createSystemQuery(dbStructure, postgresDatabase);
 
         // then
         assertEquals(expectedSystemQuery, actualSystemQuery);

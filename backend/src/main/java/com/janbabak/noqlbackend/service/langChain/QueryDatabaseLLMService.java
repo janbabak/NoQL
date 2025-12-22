@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service.langChain;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.PlotService;
+import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.data.message.AiMessage;
 import com.janbabak.noqlbackend.service.langChain.QueryDatabaseAssistantTools.QueryDatabaseToolResult;
 import dev.langchain4j.data.message.ChatMessage;
@@ -22,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QueryDatabaseLLMService extends BaseLLMService {
 
-    private final ExperimentalQueryService queryService;
+    private final QueryExecutionService queryService;
     private final PlotService plotService;
 
     public LLMServiceResult executeUserRequest(

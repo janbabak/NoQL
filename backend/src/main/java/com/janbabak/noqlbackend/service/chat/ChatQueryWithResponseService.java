@@ -32,6 +32,13 @@ public class ChatQueryWithResponseService {
     private final ChatRepository chatRepository;
     private final MessageDataDAO messageDataDAO;
 
+    public ChatQueryWithResponse findById(UUID messageId) throws EntityNotFoundException {
+        log.info("Get message by id={}.", messageId);
+
+        return chatQueryWithResponseRepository.findById(messageId)
+                .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
+    }
+
     /**
      * Retrieve all messages belonging to the chat.
      *

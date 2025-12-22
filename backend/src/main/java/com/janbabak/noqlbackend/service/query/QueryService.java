@@ -1,17 +1,15 @@
-package com.janbabak.noqlbackend.service;
+package com.janbabak.noqlbackend.service.query;
 
 import com.janbabak.noqlbackend.dao.ResultSetWrapper;
-import com.janbabak.noqlbackend.dao.repository.ChatQueryWithResponseRepository;
-import com.janbabak.noqlbackend.dao.repository.ChatRepository;
-import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
-import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.*;
+import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
+import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
 import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
@@ -25,8 +23,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 import java.util.*;
 
-import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.DATABASE;
-import static com.janbabak.noqlbackend.error.exception.EntityNotFoundException.Entity.MESSAGE;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.*;
 
 @Slf4j
 @Service
@@ -45,12 +42,10 @@ public class QueryService {
 
     private final ChatService chatService;
     private final UserService userService;
-    private final AuthenticationService authenticationService;
+    private final DatabaseEntityService databaseEntityService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
+    private final AuthenticationService authenticationService;
     private final QueryDatabaseLLMService llmService;
-    private final ChatRepository chatRepository;
-    private final DatabaseRepository databaseRepository;
-    private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
     private final DatabaseServiceFactory databaseServiceFactory;
     private final MessageDataDAO messageDataDAO;
 
@@ -63,7 +58,7 @@ public class QueryService {
      * @return system query
      */
     @SuppressWarnings("all")
-    public static String createExperimentalSystemQuery(String dbStructure, Database database) {
+    public static String createSystemQuery(String dbStructure, Database database) {
         return """
                 You are an AI agent that helps users with data analysis and visualisation by translating their requests
                 in natural language into database queries and Python scripts for data visualisation.
@@ -107,86 +102,6 @@ public class QueryService {
                 .replace("${DB_STRUCTURE}", dbStructure);
     }
 
-    public record PaginatedQuery(String query, Integer page, Integer pageSize) {
-    }
-
-    /**
-     * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
-     *
-     * @param query    database language query
-     * @param page     number of page (first page has index 0), if null, default value is 0
-     * @param pageSize number of items in one page,<br />
-     *                 if null default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
-     *                 max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
-     * @param database database object
-     * @return database language query with pagination, page number and page size
-     * @throws BadRequestException pageSize value is greater than maximum allowed value
-     */
-    public static PaginatedQuery setPaginationInSqlQuery(String query, Integer page, Integer pageSize, Database database)
-            throws BadRequestException {
-        // defaults
-        if (page == null) {
-            page = 0;
-        }
-        if (page < 0) {
-            String error = "Page number cannot be negative, page=" + page;
-            log.error(error);
-            throw new BadRequestException(error);
-        }
-        if (pageSize == null) {
-            pageSize = Settings.getDefaultPageSizeStatic();
-        }
-        if (pageSize > Settings.getMaxPageSizeStatic()) {
-            String error = "Page size is greater than maximum allowed value=" + Settings.getMaxPageSizeStatic();
-            log.error(error);
-            throw new BadRequestException(error);
-        }
-
-        query = query.trim();
-
-        query = switch (database.getEngine()) {
-            case POSTGRES, MYSQL -> "SELECT * FROM (%s) AS query LIMIT %d OFFSET %d;"
-                    .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
-        };
-
-        return new PaginatedQuery(query, page, pageSize);
-    }
-
-    // package private for testing
-    static String trimAndRemoveTrailingSemicolon(String query) {
-        query = query.trim();
-
-        if (query.isEmpty()) {
-            return query;
-        }
-
-        // removes trailing semicolon if it is present
-        return query.charAt(query.length() - 1) == ';'
-                ? query.substring(0, query.length() - 1).trim()
-                : query;
-    }
-
-    /**
-     * Get total number of rows that SQL select query returns.
-     *
-     * @param selectQuery     select statement
-     * @param databaseService service that can handle the query
-     * @return total number of rows
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws DatabaseExecutionException  query execution failed (syntax error)
-     */
-    public static Long getTotalCount(String selectQuery, BaseDatabaseService databaseService)
-            throws DatabaseConnectionException, DatabaseExecutionException {
-
-        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-        String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;".formatted(selectQuery);
-        try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
-            return result.resultSet().next() ? result.resultSet().getLong(1) : null;
-        } catch (SQLException e) {
-            throw new DatabaseExecutionException("Cannot parse total count value from query");
-        }
-    }
-
     /**
      * Execute query language select query.
      * Select query is read only, and it returns a result that is automatically paginated.
@@ -211,22 +126,21 @@ public class QueryService {
 
         log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+        Database database = databaseEntityService.findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query;
+        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query();
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
             return ConsoleResponse.builder()
+                    .dbQuery(query)
                     .data(new RetrievedData(
                             result.resultSet(),
                             page,
                             pageSize,
-                            getTotalCount(query, databaseService)))
-                    .dbQuery(query)
+                            getTotalCount(query, database, databaseService)))
                     .build();
         } catch (DatabaseExecutionException | SQLException e) {
             return ConsoleResponse.failedResponse(e.getMessage());
@@ -242,16 +156,11 @@ public class QueryService {
      * @return query response
      * @throws EntityNotFoundException database or chat not found
      */
-    public RetrievedData getDataByMessageId(
-            UUID messageId,
-            Integer page,
-            Integer pageSize) throws EntityNotFoundException {
+    public RetrievedData getDataByMessageId(UUID messageId, Integer page, Integer pageSize)
+            throws EntityNotFoundException {
 
-        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
-                .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
-
+        ChatQueryWithResponse message = chatQueryWithResponseService.findById(messageId);
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
-
         return messageDataDAO.retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
 
@@ -275,13 +184,11 @@ public class QueryService {
 
         log.info("Execute chat, database_id={}", databaseId);
 
-        Database database = databaseRepository.findById(databaseId)
-                .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
+        Database database = databaseEntityService.findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        chatRepository.findById(chatId)
-                .orElseThrow(() -> new EntityNotFoundException(EntityNotFoundException.Entity.CHAT, chatId));
+        chatService.findById(chatId, 0, false); // check if chat exists
 
         if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
@@ -295,7 +202,7 @@ public class QueryService {
         // TODO: create request object
         QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(
                 queryRequest.getQuery(),
-                createExperimentalSystemQuery(
+                createSystemQuery(
                         databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
                         database),
                 database,
@@ -304,8 +211,8 @@ public class QueryService {
                 pageSize,
                 chatHistory);
 
-         chatQueryWithResponse = chatQueryWithResponseService.updateEmptyMessage(
-                 chatQueryWithResponse, queryRequest.getQuery(), response);
+        chatQueryWithResponse = chatQueryWithResponseService.updateEmptyMessage(
+                chatQueryWithResponse, queryRequest.getQuery(), response);
 
         String plotUrl = chatQueryWithResponse.getPlotScript() != null
                 ? PlotService.createFileUrl(plotFileName)

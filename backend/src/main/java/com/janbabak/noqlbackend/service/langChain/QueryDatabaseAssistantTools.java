@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.PlotService;
+import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import lombok.Data;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class QueryDatabaseAssistantTools {
 
-    private final ExperimentalQueryService queryService;
+    private final QueryExecutionService queryService;
     private final PlotService plotService;
     private final Database database;
     private final int page;
@@ -30,7 +31,7 @@ public class QueryDatabaseAssistantTools {
                                        String plotFileName,
                                        int page,
                                        int pageSize,
-                                       ExperimentalQueryService queryService,
+                                       QueryExecutionService queryService,
                                        PlotService plotService) {
         this.database = database;
         this.plotFileName = plotFileName;

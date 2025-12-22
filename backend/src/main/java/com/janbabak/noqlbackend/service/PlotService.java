@@ -4,6 +4,7 @@ import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

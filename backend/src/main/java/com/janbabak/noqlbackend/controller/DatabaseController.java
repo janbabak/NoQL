@@ -9,7 +9,7 @@ import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;

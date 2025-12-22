@@ -1,50 +1,22 @@
-package com.janbabak.noqlbackend.service.langChain;
+package com.janbabak.noqlbackend.service.query;
 
 import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.model.Settings;
 import com.janbabak.noqlbackend.model.entity.Database;
-import com.janbabak.noqlbackend.model.query.RetrievedData;
-import com.janbabak.noqlbackend.service.QueryService;
-import com.janbabak.noqlbackend.service.QueryService.PaginatedQuery;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
-import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
-import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 
-import static com.janbabak.noqlbackend.service.QueryService.getTotalCount;
-
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class ExperimentalQueryService {
+@UtilityClass
+public class QueryUtils {
 
-    private final DatabaseServiceFactory databaseServiceFactory;
-
-
-    public RetrievedData executeQuery(String query, Database database, int page, int pageSize)
-            throws BadRequestException, DatabaseConnectionException, DatabaseExecutionException, SQLException {
-
-        validateQuery(query);
-
-        PaginatedQuery paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-
-        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query())) {
-            Long totalCount = getTotalCount(query, databaseService);
-            return new RetrievedData(result.resultSet(), paginatedQuery.page(), paginatedQuery.pageSize(), totalCount);
-        }
-    }
-
-    private void validateQuery(String query) {
-        if (query == null || query.isBlank()) {
-            throw new IllegalArgumentException("Query cannot be null or blank");
-        }
+    public record PaginatedQuery(String query, Integer page, Integer pageSize) {
     }
 
     /**
@@ -59,7 +31,7 @@ public class ExperimentalQueryService {
      * @return database language query with pagination, page number and page size
      * @throws BadRequestException pageSize value is greater than maximum allowed value
      */
-    public static QueryService.PaginatedQuery setPaginationInSqlQuery(
+    public static PaginatedQuery setPaginationInSqlQuery(
             String query,
             Integer page,
             Integer pageSize,
@@ -90,11 +62,10 @@ public class ExperimentalQueryService {
                     .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
         };
 
-        return new QueryService.PaginatedQuery(query, page, pageSize);
+        return new PaginatedQuery(query, page, pageSize);
     }
 
-    // package private for testing
-    static String trimAndRemoveTrailingSemicolon(String query) {
+    public static String trimAndRemoveTrailingSemicolon(String query) {
         query = query.trim();
 
         if (query.isEmpty()) {
@@ -105,5 +76,37 @@ public class ExperimentalQueryService {
         return query.charAt(query.length() - 1) == ';'
                 ? query.substring(0, query.length() - 1).trim()
                 : query;
+    }
+
+
+    /**
+     * Get total number of rows that SQL select query returns.
+     *
+     * @param selectQuery     select statement
+     * @param database        database to query
+     * @param databaseService service that can handle the query
+     * @return total number of rows
+     * @throws DatabaseConnectionException cannot establish connection with the database
+     * @throws DatabaseExecutionException  query execution failed (syntax error)
+     */
+    public static Long getTotalCount(String selectQuery, Database database, BaseDatabaseService databaseService)
+            throws DatabaseConnectionException, DatabaseExecutionException, BadRequestException {
+
+        return switch (database.getEngine()) {
+            case POSTGRES, MYSQL -> getTotalCountSql(selectQuery, databaseService);
+            default -> throw new BadRequestException(
+                    "Getting total count not supported for database engine: " + database.getEngine());
+        };
+    }
+
+    public static Long getTotalCountSql(String selectQuery, BaseDatabaseService databaseService)
+            throws DatabaseConnectionException, DatabaseExecutionException {
+        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
+        String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;".formatted(selectQuery);
+        try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
+            return result.resultSet().next() ? result.resultSet().getLong(1) : null;
+        } catch (SQLException e) {
+            throw new DatabaseExecutionException("Cannot parse total count value from query");
+        }
     }
 }
