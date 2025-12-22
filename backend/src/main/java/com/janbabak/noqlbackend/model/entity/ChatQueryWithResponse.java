@@ -68,6 +68,7 @@ public class ChatQueryWithResponse {
         return plotScript != null && !plotScript.isEmpty();
     }
 
+    @SuppressWarnings("unused")
     public Boolean plotSuccessfullyGenerated() {
         return plotGenerated() && plotGenerationSuccess;
     }
