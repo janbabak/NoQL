@@ -6,6 +6,7 @@ import lombok.Builder;
 /**
  * Used as an option in frontend select element
  */
+@Deprecated
 @Builder
 public record ModelOption(
         String label,

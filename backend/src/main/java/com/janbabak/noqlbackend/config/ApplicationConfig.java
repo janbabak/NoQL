@@ -15,11 +15,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
+@SuppressWarnings("unused") // Used by Spring Security
 public class ApplicationConfig {
 
     private final UserRepository userRepository;
 
     @Bean
+    @SuppressWarnings("unused") // Used by Spring Security
     public AuthenticationProvider authenticationProvider() {
         final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
@@ -29,6 +31,7 @@ public class ApplicationConfig {
     }
 
     @Bean
+    @SuppressWarnings("unused") // Used by Spring Security
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }

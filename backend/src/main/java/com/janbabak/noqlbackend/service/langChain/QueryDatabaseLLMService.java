@@ -3,93 +3,80 @@ package com.janbabak.noqlbackend.service.langChain;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.service.PlotService;
+import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.data.message.AiMessage;
-import com.janbabak.noqlbackend.service.langChain.AssistantTools.ToolResult;
+import com.janbabak.noqlbackend.service.langChain.QueryDatabaseAssistantTools.QueryDatabaseToolResult;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilderFactory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.time.Duration.ofSeconds;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class LLMService {
+public class QueryDatabaseLLMService extends BaseLLMService {
 
-    @SuppressWarnings("all") // value is never assigned
-    @Value("${app.externalServices.openAiApi.apiKey}")
-    private String openAiApiKey;
-
-    private final ExperimentalQueryService queryService;
+    private final QueryExecutionService queryService;
     private final PlotService plotService;
 
-    public LLMServiceResult executeUserRequest(
+    public LLMServiceResult executeUserRequest(LLMServiceRequest request){
+
+        ChatModel model = getModel(request.modelId);
+        int page = 0;
+        QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
+                request.database,
+                request.plotFileName,
+                page,
+                request.pageSize,
+                queryService,
+                plotService);
+
+        Assistant assistant = AiServices.builder(Assistant.class)
+                .chatModel(model)
+                .tools(assistantTools)
+                .build();
+        List<ChatMessage> messages = buildMessages(request);
+
+        String response = assistant.chat(messages);
+        log.info("LLM response: {}", response);
+
+        QueryDatabaseToolResult toolResult = assistantTools.getToolResult();
+        log.info("LLM tool result: {}", toolResult);
+
+        return new LLMServiceResult(response, toolResult);
+    }
+
+    public record LLMServiceRequest(
             String userQuery,
             String systemQuery,
             Database database,
             String plotFileName,
             String modelId,
             int pageSize,
-            List<ChatQueryWithResponse> chatHistory) {
-
-        ChatModel model = getModel(modelId);
-        AssistantTools assistantTools = new AssistantTools(
-                database, plotFileName, 0, pageSize, queryService, plotService);
-
-        Assistant assistant = AiServices.builder(Assistant.class)
-                .chatModel(model)
-                .tools(assistantTools)
-                .build();
-
-        List<ChatMessage> messages = buildMessages(userQuery, systemQuery, chatHistory);
-
-        String response = assistant.chat(messages);
-        log.info("LLM response: {}", response);
-
-        ToolResult toolResult = assistantTools.getToolResult();
-        log.info("LLM tool result: {}", toolResult);
-
-        return new LLMServiceResult(response, toolResult);
+            List<ChatQueryWithResponse> chatHistory
+    ) {
     }
 
-    private ChatModel getModel(String modelId) {
-        // TODO: implement model selection based on modelId
-
-        return OpenAiChatModel.builder()
-                .apiKey(openAiApiKey)
-                .modelName("gpt-4o-mini")
-                .temperature(0.0)
-                .timeout(ofSeconds(60))
-                .logRequests(true)
-                .logResponses(true)
-                .httpClientBuilder(new SpringRestClientBuilderFactory().create())
-                .build();
-    }
-
-    private List<ChatMessage> buildMessages(String userQuery, String systemQuery, List<ChatQueryWithResponse> chatHistory) {
+    private List<ChatMessage> buildMessages(LLMServiceRequest request) {
         List<ChatMessage> messages = new ArrayList<>();
 
-        if (systemQuery != null && !systemQuery.isBlank()) {
-            messages.add(SystemMessage.from(systemQuery));
+        if (request.systemQuery != null && !request.systemQuery.isBlank()) {
+            messages.add(SystemMessage.from(request.systemQuery));
         }
 
-        for (ChatQueryWithResponse chatEntry : chatHistory) {
+        for (ChatQueryWithResponse chatEntry : request.chatHistory) {
             messages.add(UserMessage.from(chatEntry.getNlQuery()));
             messages.add(AiMessage.from(buildLLMResponseMessage(chatEntry)));
         }
 
-        messages.add(UserMessage.from(userQuery));
+        messages.add(UserMessage.from(request.userQuery));
 
         return messages;
     }
@@ -134,7 +121,7 @@ public class LLMService {
 
     public record LLMServiceResult(
             String llmResponse, // response from LLM, comment about the execution
-            ToolResult toolResult // real result of the tool execution
+            QueryDatabaseToolResult toolResult // real result of the tool execution
     ) {
     }
 }

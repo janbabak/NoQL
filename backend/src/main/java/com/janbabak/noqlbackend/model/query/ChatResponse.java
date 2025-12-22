@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.model.query;
 
-import com.janbabak.noqlbackend.model.chat.LLMResponse;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
@@ -22,30 +21,6 @@ public class ChatResponse {
     private String description;
     private Timestamp timestamp;
     private String error;
-
-    /**
-     * Create response with data.
-     *
-     * @param data                  retrieved data from database
-     * @param chatQueryWithResponse chat query with response stored in database
-     * @param llmResponse           response from large language model
-     * @param plotFileName          name of the file that contains the plot without extension if exist
-     */
-    @Deprecated
-    public ChatResponse(RetrievedData data,
-                        ChatQueryWithResponse chatQueryWithResponse,
-                        LLMResponse llmResponse,
-                        String plotFileName) {
-        this(
-                data,
-                chatQueryWithResponse.getId(),
-                chatQueryWithResponse.getNlQuery(),
-                llmResponse.databaseQuery(),
-                llmResponse.generatePlot() ? plotFileName : null,
-                null,
-                chatQueryWithResponse.getTimestamp(),
-                null);
-    }
 
     public ChatResponse(RetrievedData data, ChatQueryWithResponse chatQueryWithResponse, String plotUrl) {
         this(

@@ -13,7 +13,7 @@ import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

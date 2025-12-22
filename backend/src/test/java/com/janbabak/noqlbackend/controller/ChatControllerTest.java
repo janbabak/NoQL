@@ -2,7 +2,6 @@ package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.service.JwtService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static com.janbabak.noqlbackend.service.utils.JsonUtils.toJson;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -252,77 +250,6 @@ class ChatControllerTest {
     void testRenameChatWithAnonymousUser() throws Exception {
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", UUID.randomUUID())
                         .param("name", "Find all users")
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("Add message to chat")
-    @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
-    void testAddMessageToChat() throws Exception {
-        // given
-        UUID chatId = UUID.randomUUID();
-        CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
-                .nlQuery("Find all users older than 25")
-                .llmResult(
-                        // language=JSON
-                        """
-                                {
-                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
-                                     "generatePlot": false,
-                                     "pythonCode": null
-                                 }""")
-                .build();
-
-        when(chatServiceMock.addMessageToChat(chatId, request)).thenReturn(null);
-
-
-        // then
-        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    @DisplayName("Add message to chat not found")
-    @WithMockUser(roles = "USER")
-    void testAddMessageToChatNotFound() throws Exception {
-        // given
-        UUID chatId = UUID.randomUUID();
-        CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
-                .nlQuery("Find all users older than 25")
-                .llmResult(
-                        // language=JSON
-                        """
-                                {
-                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
-                                     "generatePlot": false,
-                                     "pythonCode": null
-                                 }""")
-                .build();
-
-        when(chatServiceMock.addMessageToChat(chatId, request)).thenThrow(EntityNotFoundException.class);
-
-        // then
-        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", chatId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(request))
-                        .with(csrf()))
-                .andDo(print())
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("Add message to chat with anonymous user")
-    @WithAnonymousUser
-    void testAddMessageToChatWithAnonymousUser() throws Exception {
-        mockMvc.perform(post(ROOT_URL + "/{chatId}/messages", UUID.randomUUID())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(CreateChatQueryWithResponseRequest.builder().build()))
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());

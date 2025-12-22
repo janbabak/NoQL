@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
+@Deprecated
 @Builder
 public record CreateCustomModelRequest(
         @NotBlank(groups = FirstValidationGroup.class)

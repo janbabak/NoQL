@@ -21,12 +21,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class ChatQueryWithResponseRepositoryTest {
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private DatabaseRepository databaseRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private UserRepository userRepository;
 
     @AfterEach
@@ -74,23 +77,31 @@ class ChatQueryWithResponseRepositoryTest {
 
         ChatQueryWithResponse message1 = ChatQueryWithResponse.builder()
                 .chat(chat1)
-                .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+                .nlQuery("Show data from table")
+                .dbQuery("SELECT * FROM table")
+                .dbQueryExecutionSuccess(true)
                 .timestamp(Timestamp.valueOf("2024-05-26 10:10:10.0"))
                 .build();
         ChatQueryWithResponse message2 = ChatQueryWithResponse.builder()
-                .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+                .nlQuery("Get all records from table")
+                .dbQuery("SELECT all FROM table")
+                .dbQueryExecutionSuccess(false)
+                .dbExecutionErrorMessage("Error executing query")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:11:10.0"))
                 .build();
         ChatQueryWithResponse message3 = ChatQueryWithResponse.builder()
-                .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+                .nlQuery("plot users by age")
+                .plotScript("import matplotlib.pyplot as plt; ...")
+                .plotGenerationSuccess(false)
+                .plotGenerationErrorMessage("Error generating plot")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:10:10.0"))
                 .build();
         ChatQueryWithResponse message4 = ChatQueryWithResponse.builder()
-                .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+                .nlQuery("Find all entries")
+                .dbQuery("SELECT * FROM table")
+                .dbQueryExecutionSuccess(true)
+                .plotScript("import matplotlib.pyplot as plt; ...")
+                .plotGenerationSuccess(true)
                 .timestamp(Timestamp.valueOf("2024-05-28 10:10:10.0"))
                 .build();
         chat1.addMessages(List.of(message1, message2, message3));

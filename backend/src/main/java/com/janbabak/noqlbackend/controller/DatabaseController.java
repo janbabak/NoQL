@@ -4,19 +4,17 @@ package com.janbabak.noqlbackend.controller;
 import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
 import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.error.exception.LLMException;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
 import com.janbabak.noqlbackend.model.database.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
-import com.janbabak.noqlbackend.service.QueryService;
+import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
-import com.janbabak.noqlbackend.service.langChain.LLMService;
+import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +33,7 @@ public class DatabaseController {
     private final DatabaseEntityService databaseService;
     private final QueryService queryService;
     private final ChatService chatService;
-    private final LLMService llmService;
+    private final QueryDatabaseLLMService llmService;
 
     /**
      * Get all databases.
@@ -121,8 +119,6 @@ public class DatabaseController {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
-     * @throws LLMException                LLM request failed
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping("/{databaseId}/chat/{chatId}/query")
@@ -132,32 +128,8 @@ public class DatabaseController {
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
             @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
-            LLMException, BadRequestException {
-        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    @PostMapping("query/{databaseId}/chat/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatResponse queryChat2(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException,
-            LLMException, BadRequestException {
-        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
-    }
-
-    @PostMapping("/experimentalQuery/{databaseId}/chat/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatResponse experimentalQuery(
-            @PathVariable UUID databaseId,
-            @PathVariable UUID chatId,
-            @RequestParam(required = false) Integer pageSize,
-            @RequestBody @Valid QueryRequest queryRequest
     ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
-        return queryService.experimentalQueryChat(databaseId, chatId, queryRequest, pageSize);
+        return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
     /**
@@ -169,8 +141,6 @@ public class DatabaseController {
      * @param pageSize   number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -179,8 +149,7 @@ public class DatabaseController {
             @PathVariable UUID databaseId,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+            @RequestParam(required = false) Integer pageSize) throws EntityNotFoundException {
         return queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
     }
 

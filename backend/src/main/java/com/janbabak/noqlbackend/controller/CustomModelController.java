@@ -20,6 +20,7 @@ import java.util.UUID;
 /**
  * Custom model resource
  */
+@Deprecated
 @RestController
 @RequestMapping(value = "/model", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor

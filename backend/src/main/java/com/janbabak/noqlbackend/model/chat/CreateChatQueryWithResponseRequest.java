@@ -7,6 +7,7 @@ import lombok.Builder;
  * llm result is JSON in form of string<br />
  * {@code { databaseQuery: string, generatePlot: boolean, pythonCode: string }}
  */
+@Deprecated
 @Builder
 public record CreateChatQueryWithResponseRequest(
         @NotBlank

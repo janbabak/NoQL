@@ -85,17 +85,13 @@ class ChatQueryWithResponseServiceTest {
                         .id(UUID.randomUUID())
                         .chat(chat)
                         .nlQuery("Find user Jan")
-                        // language=JSON
-                        .llmResponse("""
-                                { "databaseQuery": "find user Jan", "generatePlot": false, "pythonCode": null }""")
+                        .dbQuery("SELECT * FROM eshop_user WHERE first_name = 'Jan';")
                         .build(),
                 ChatQueryWithResponse.builder()
                         .id(UUID.randomUUID())
                         .chat(chat)
                         .nlQuery("Find user Jana")
-                        // language=JSON
-                        .llmResponse("""
-                                { "databaseQuery": "find user Jana", "generatePlot": false, "pythonCode": null }""")
+                        .dbQuery("SELECT * FROM eshop_user WHERE first_name = 'Jana';")
                         .build());
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
@@ -145,18 +141,18 @@ class ChatQueryWithResponseServiceTest {
     @ParameterizedTest
     @MethodSource("testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider")
     @DisplayName("Test load message data - LLM response has empty query")
-    void testGetDataByMessageIdLlmResponseHasEmptyQueryTest(String llmResponse) throws EntityNotFoundException {
+    void testGetDataByMessageIdLlmResponseHasEmptyQueryTest(String query) throws EntityNotFoundException {
 
         // given
         UUID messageId = UUID.randomUUID();
 
         ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
                 .id(messageId)
+                .dbQuery(query)
                 .chat(Chat.builder()
                         .id(UUID.randomUUID())
                         .database(postgresDatabase)
                         .build())
-                .llmResponse(llmResponse)
                 .build();
 
         when(chatQueryWithResponseRepositoryMock.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));
@@ -165,26 +161,10 @@ class ChatQueryWithResponseServiceTest {
         assertNull(chatQueryWithResponseService.getDataByMessageId(messageId, 0, 10));
     }
 
-    static Object[][] testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider() {
-        return new Object[][]{
-                {
-                        null
-                },
-                {
-                        ""
-                },
-                {
-                        "{}"
-                },
-                {
-                        // language=JSON
-                        """
-                                {
-                                  "databaseQuery": "",
-                                  "generatePlot": false,
-                                  "pythonCode": ""
-                                }"""
-                }
+    static Object[] testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider() {
+        return new Object[] {
+               null,
+                ""
         };
     }
 }

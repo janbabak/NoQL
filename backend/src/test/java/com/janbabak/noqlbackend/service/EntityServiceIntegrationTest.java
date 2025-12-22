@@ -8,15 +8,16 @@ import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.error.exception.UserAlreadyExistsException;
 import com.janbabak.noqlbackend.model.Role;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.database.CreateDatabaseRequest;
 import com.janbabak.noqlbackend.model.database.DatabaseEngine;
 import com.janbabak.noqlbackend.model.database.UpdateDatabaseRequest;
+import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
+import com.janbabak.noqlbackend.service.chat.ChatTestUtilService;
 import com.janbabak.noqlbackend.service.database.DatabaseCredentialsEncryptionService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
@@ -51,24 +52,34 @@ public class EntityServiceIntegrationTest {
     private DatabaseEntityService databaseService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatService chatService;
 
     @Autowired
+    ChatTestUtilService chatTestUtilService;
+
+    @Autowired
+    @SuppressWarnings("unused")
     private ChatRepository chatRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatQueryWithResponseService chatQueryWithResponseService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private AuthenticationService authenticationService;
 
     @MockBean
+    @SuppressWarnings("unused")
     private DatabaseServiceFactory databaseServiceFactoryMock;
 
     @Mock
@@ -217,20 +228,15 @@ public class EntityServiceIntegrationTest {
      * @throws EntityNotFoundException should not happen
      */
     void addMessagesToChat(UUID chatId, int numberOfMessages) throws EntityNotFoundException {
-        CreateChatQueryWithResponseRequest request = CreateChatQueryWithResponseRequest.builder()
-                .nlQuery("Find all users older than 25")
-                .llmResult(
-                        // language=JSON
-                        """
-                                {
-                                     "databaseQuery": "SELECT * FROM users WHERE age > 25",
-                                     "generatePlot": false,
-                                     "pythonCode": null
-                                 }""")
-                .build();
-
         for (int i = 0; i < numberOfMessages; i++) {
-            chatService.addMessageToChat(chatId, request);
+            ChatQueryWithResponse message = ChatQueryWithResponse.builder()
+                    .nlQuery("Find all users older than 25")
+                    .resultDescription("Displaying all users older than 25.")
+                    .dbQuery("SELECT * FROM users WHERE age > 25")
+                    .dbQueryExecutionSuccess(true)
+                    .build();
+
+            chatTestUtilService.addMessageToChat(chatId, message);
         }
 
         // verify that the messages were added

@@ -1,22 +1,26 @@
 package com.janbabak.noqlbackend.service.langChain;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.PlotService;
+import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
 @Slf4j
-public class AssistantTools {
+public class QueryDatabaseAssistantTools {
 
-    private final ExperimentalQueryService queryService;
+    private final QueryExecutionService queryService;
     private final PlotService plotService;
     private final Database database;
     private final int page;
@@ -24,21 +28,21 @@ public class AssistantTools {
     private final String plotFileName;
 
     @Getter
-    private ToolResult toolResult;
+    private QueryDatabaseToolResult toolResult;
 
-    public AssistantTools(Database database,
-                          String plotFileName,
-                          int page,
-                          int pageSize,
-                          ExperimentalQueryService queryService,
-                          PlotService plotService) {
+    public QueryDatabaseAssistantTools(Database database,
+                                       String plotFileName,
+                                       int page,
+                                       int pageSize,
+                                       QueryExecutionService queryService,
+                                       PlotService plotService) {
         this.database = database;
         this.plotFileName = plotFileName;
         this.page = page;
         this.pageSize = pageSize;
         this.queryService = queryService;
         this.plotService = plotService;
-        this.toolResult = new ToolResult();
+        this.toolResult = new QueryDatabaseToolResult();
     }
 
     /**
@@ -50,7 +54,7 @@ public class AssistantTools {
      */
     @SuppressWarnings("unused")
     @Tool("Execute query on database")
-    public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
+    public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query)  {
         toolResult.setDbQuery(query);
         try {
             RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
@@ -58,7 +62,7 @@ public class AssistantTools {
                     .setRetrievedData(retrievedData)
                     .setDbQueryExecutedSuccessSuccessfully(true)
                     .setDbQueryExecutionErrorMessage(null);
-        } catch (Exception e) {
+        } catch (DatabaseConnectionException | SQLException | DatabaseExecutionException | BadRequestException e) {
             toolResult.setDbQueryExecutedSuccessSuccessfully(false);
             return handleError("Error while executing query", e, toolResult::setDbQueryExecutionErrorMessage);
         }
@@ -73,6 +77,7 @@ public class AssistantTools {
      * @param pythonCode Python code to generate the plot
      * @return tool execution result - info for the LLM about success or failure of the tool execution.
      */
+    @SuppressWarnings("unused")
     @Tool("Generate plot from data")
     public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
         toolResult.setScript(pythonCode);
@@ -100,14 +105,30 @@ public class AssistantTools {
      * Stores real results of tool execution.
      */
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Accessors(chain = true)
-    public static class ToolResult {
+    public static class QueryDatabaseToolResult {
+        @Builder.Default
         private Boolean dbQueryExecutedSuccessSuccessfully = null;
+
+        @Builder.Default
         private String dbQuery = null;
+
+        @Builder.Default
         private Boolean plotGeneratedSuccessfully = false;
+
+        @Builder.Default
         private String dbQueryExecutionErrorMessage = null;
+
+        @Builder.Default
         private String script = null;
+
+        @Builder.Default
         private RetrievedData retrievedData = null;
+
+        @Builder.Default
         private String plotGenerationErrorMessage = null;
     }
 

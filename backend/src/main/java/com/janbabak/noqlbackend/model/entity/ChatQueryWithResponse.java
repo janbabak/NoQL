@@ -23,15 +23,10 @@ public class ChatQueryWithResponse {
     @ManyToOne
     private Chat chat;
 
-    /** natural language query */
-    private String nlQuery;
-
-    /** JSON in form of string<br />
-     * {@code { databaseQuery: string, generatePlot: boolean, pythonCode: string }}
+    /**
+     * Natural language query
      */
-    @Deprecated
-    @Column(length = 2048)
-    private String llmResponse; // TODO: remove
+    private String nlQuery;
 
     /**
      * Generated description of the result for the user
@@ -40,7 +35,7 @@ public class ChatQueryWithResponse {
     private String resultDescription;
 
     /**
-     * generated database language query
+     * Generated database language query
      */
     @Column(length = 512)
     private String dbQuery;
@@ -65,4 +60,27 @@ public class ChatQueryWithResponse {
 
     @Column
     private Timestamp timestamp;
+
+    /**
+     * @return true if plotScript was generated (successfully or not)
+     */
+    public Boolean plotGenerated() {
+        return plotScript != null && !plotScript.isEmpty();
+    }
+
+    @SuppressWarnings("unused")
+    public Boolean plotSuccessfullyGenerated() {
+        return plotGenerated() && plotGenerationSuccess;
+    }
+
+    /**
+     * @return true if dbQuery was executed (successfully or not)
+     */
+    public Boolean dbQueryExecuted() {
+        return dbQuery != null && !dbQuery.isEmpty();
+    }
+
+    public Boolean dbQuerySuccessfullyExecuted() {
+        return dbQueryExecuted() && dbQueryExecutionSuccess;
+    }
 }

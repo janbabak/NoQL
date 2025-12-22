@@ -22,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlotServiceTest {
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlotService plotService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @ParameterizedTest
@@ -38,7 +40,7 @@ class PlotServiceTest {
     Object[][] replaceCredentialsDataProvider() {
         return new Object[][] {
                 {
-                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
+                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.py"),
                         Database.builder()
                                 .host("localhost")
                                 .port(5432)
@@ -47,11 +49,11 @@ class PlotServiceTest {
                                 .password(encryptionService.encryptCredentials("secret111"))
                                 .build(),
                         FileUtils.getFileContent(
-                                "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.json"),
+                                "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials1.py"),
                         "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png"
                 },
                 {
-                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"),
+                        FileUtils.getFileContent("./src/test/resources/llmResponses/plotSexOfUsersSuccess.py"),
                         Database.builder()
                                 .host("https://my-eshop.com")
                                 .port(5432)
@@ -60,7 +62,7 @@ class PlotServiceTest {
                                 .password(encryptionService.encryptCredentials("secret111"))
                                 .build(),
                         FileUtils.getFileContent(
-                                "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.json"),
+                                "./src/test/resources/llmResponses/plotSexOfUsersWithCredentials2.py"),
                         "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png"
                 }
         };
