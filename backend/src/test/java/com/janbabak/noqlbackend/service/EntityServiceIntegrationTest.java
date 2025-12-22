@@ -52,27 +52,34 @@ public class EntityServiceIntegrationTest {
     private DatabaseEntityService databaseService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatService chatService;
 
     @Autowired
     ChatTestUtilService chatTestUtilService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatRepository chatRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatQueryWithResponseService chatQueryWithResponseService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private AuthenticationService authenticationService;
 
     @MockBean
+    @SuppressWarnings("unused")
     private DatabaseServiceFactory databaseServiceFactoryMock;
 
     @Mock
