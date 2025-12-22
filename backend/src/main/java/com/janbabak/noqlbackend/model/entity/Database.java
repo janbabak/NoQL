@@ -116,4 +116,20 @@ public class Database {
             addChat(chat);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Database{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", database='" + database + '\'' +
+                ", userName='" + userName + '\'' +
+                ", password='" + password + '\'' +
+                ", engine=" + engine +
+                ", chatsSize=" + chats.size() +
+                ", user=" + user +
+                '}';
+    }
 }

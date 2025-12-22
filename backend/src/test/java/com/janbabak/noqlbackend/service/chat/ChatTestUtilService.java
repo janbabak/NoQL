@@ -51,7 +51,8 @@ public class ChatTestUtilService {
 
         if (Objects.equals(chat.getName(), NEW_CHAT_NAME)) {
             chat.setName(message.getNlQuery().length() < CHAT_NAME_MAX_LENGTH
-                    ? message.getNlQuery() : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
+                    ? message.getNlQuery()
+                    : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
         chatRepository.save(chat);
         messageRepository.save(message);
