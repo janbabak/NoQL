@@ -61,11 +61,25 @@ public class ChatQueryWithResponse {
     @Column
     private Timestamp timestamp;
 
+    /**
+     * @return true if plotScript was generated (successfully or not)
+     */
     public Boolean plotGenerated() {
         return plotScript != null && !plotScript.isEmpty();
     }
 
+    public Boolean plotSuccessfullyGenerated() {
+        return plotGenerated() != null && plotGenerationSuccess;
+    }
+
+    /**
+     * @return true if dbQuery was executed (successfully or not)
+     */
     public Boolean dbQueryExecuted() {
         return dbQuery != null && !dbQuery.isEmpty();
+    }
+
+    public Boolean dbQuerySuccessfullyExecuted() {
+        return dbQueryExecuted() != null && dbQueryExecutionSuccess;
     }
 }

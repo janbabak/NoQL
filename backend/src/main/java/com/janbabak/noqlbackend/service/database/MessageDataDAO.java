@@ -36,7 +36,7 @@ public class MessageDataDAO {
             Integer page,
             Integer pageSize) {
 
-        if (!message.getDbQueryExecutionSuccess()) {
+        if (!message.dbQuerySuccessfullyExecuted()) {
             return null;
         }
 
