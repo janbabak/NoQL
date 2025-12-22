@@ -32,12 +32,11 @@ public class ChatTestUtilService {
      *
      * @param chatId  chat identifier
      * @param message message to add
-     * @return created message with response
      * @throws EntityNotFoundException                                   chat of specified id not found.
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     @Transactional
-    public ChatQueryWithResponse addMessageToChat(UUID chatId, ChatQueryWithResponse message)
+    public void addMessageToChat(UUID chatId, ChatQueryWithResponse message)
             throws EntityNotFoundException {
 
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
@@ -46,6 +45,7 @@ public class ChatTestUtilService {
 
         Timestamp timestamp = Timestamp.from(Instant.now());
         message.setTimestamp(timestamp);
+        message.setChat(chat);
         chat.addMessage(message);
         chat.setModificationDate(timestamp);
 
@@ -54,6 +54,6 @@ public class ChatTestUtilService {
                     ? message.getNlQuery() : message.getNlQuery().substring(0, CHAT_NAME_MAX_LENGTH));
         }
         chatRepository.save(chat);
-        return messageRepository.save(message);
+        messageRepository.save(message);
     }
 }

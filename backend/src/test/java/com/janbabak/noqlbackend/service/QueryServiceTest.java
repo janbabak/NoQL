@@ -151,68 +151,7 @@
 //
 //
 //
-//    @ParameterizedTest
-//    @MethodSource("trimAndRemoveTrailingSemicolonDataProvider")
-//    @DisplayName("Test trim and remove trailing semicolon")
-//    void testTrimAndRemoveTrailingSemicolon(String query, String expectedQuery) {
-//        // when
-//        String actualValue = QueryService.trimAndRemoveTrailingSemicolon(query);
 //
-//        // then
-//        assertEquals(expectedQuery, actualValue);
-//    }
-//
-//    @SuppressWarnings("all")
-//    static Object[][] trimAndRemoveTrailingSemicolonDataProvider() {
-//        return new Object[][]{
-//                {
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3;",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "\nSELECT name FROM cvut.student WHERE grade < 3;\t",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "   SELECT name FROM cvut.student WHERE grade < 3;\n",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "\tSELECT name FROM cvut.student WHERE grade < 3; ",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "\nSELECT name FROM cvut.student WHERE grade < 3;    \n",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3\t   \n;    \n",
-//                        // language=SQL
-//                        "SELECT name FROM cvut.student WHERE grade < 3"
-//                },
-//                {
-//                        "",
-//                        ""
-//                }
-//        };
-//    }
 //
 //    @Test
 //    @DisplayName("Test execute query - language query database not found")

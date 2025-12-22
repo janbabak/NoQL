@@ -26,24 +26,23 @@ public class QueryDatabaseLLMService extends BaseLLMService {
     private final QueryExecutionService queryService;
     private final PlotService plotService;
 
-    public LLMServiceResult executeUserRequest(
-            String userQuery,
-            String systemQuery,
-            Database database,
-            String plotFileName,
-            String modelId,
-            int pageSize,
-            List<ChatQueryWithResponse> chatHistory) {
+    public LLMServiceResult executeUserRequest(LLMServiceRequest request){
 
-        ChatModel model = getModel(modelId);
+        ChatModel model = getModel(request.modelId);
+        int page = 0;
         QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
-                database, plotFileName, 0, pageSize, queryService, plotService);
+                request.database,
+                request.plotFileName,
+                page,
+                request.pageSize,
+                queryService,
+                plotService);
 
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(model)
                 .tools(assistantTools)
                 .build();
-        List<ChatMessage> messages = buildMessages(userQuery, systemQuery, chatHistory);
+        List<ChatMessage> messages = buildMessages(request);
 
         String response = assistant.chat(messages);
         log.info("LLM response: {}", response);
@@ -54,19 +53,30 @@ public class QueryDatabaseLLMService extends BaseLLMService {
         return new LLMServiceResult(response, toolResult);
     }
 
-    private List<ChatMessage> buildMessages(String userQuery, String systemQuery, List<ChatQueryWithResponse> chatHistory) {
+    public record LLMServiceRequest(
+            String userQuery,
+            String systemQuery,
+            Database database,
+            String plotFileName,
+            String modelId,
+            int pageSize,
+            List<ChatQueryWithResponse> chatHistory
+    ) {
+    }
+
+    private List<ChatMessage> buildMessages(LLMServiceRequest request) {
         List<ChatMessage> messages = new ArrayList<>();
 
-        if (systemQuery != null && !systemQuery.isBlank()) {
-            messages.add(SystemMessage.from(systemQuery));
+        if (request.systemQuery != null && !request.systemQuery.isBlank()) {
+            messages.add(SystemMessage.from(request.systemQuery));
         }
 
-        for (ChatQueryWithResponse chatEntry : chatHistory) {
+        for (ChatQueryWithResponse chatEntry : request.chatHistory) {
             messages.add(UserMessage.from(chatEntry.getNlQuery()));
             messages.add(AiMessage.from(buildLLMResponseMessage(chatEntry)));
         }
 
-        messages.add(UserMessage.from(userQuery));
+        messages.add(UserMessage.from(request.userQuery));
 
         return messages;
     }

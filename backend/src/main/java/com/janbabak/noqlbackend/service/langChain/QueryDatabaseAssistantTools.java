@@ -9,8 +9,7 @@ import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
@@ -105,14 +104,30 @@ public class QueryDatabaseAssistantTools {
      * Stores real results of tool execution.
      */
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Accessors(chain = true)
     public static class QueryDatabaseToolResult {
+        @Builder.Default
         private Boolean dbQueryExecutedSuccessSuccessfully = null;
+
+        @Builder.Default
         private String dbQuery = null;
+
+        @Builder.Default
         private Boolean plotGeneratedSuccessfully = false;
+
+        @Builder.Default
         private String dbQueryExecutionErrorMessage = null;
+
+        @Builder.Default
         private String script = null;
+
+        @Builder.Default
         private RetrievedData retrievedData = null;
+
+        @Builder.Default
         private String plotGenerationErrorMessage = null;
     }
 

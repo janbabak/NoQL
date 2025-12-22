@@ -111,8 +111,6 @@ public class QueryService {
      *                   max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
     public ConsoleResponse executeQueryLanguageSelectQuery(UUID databaseId, String query, Integer page, Integer pageSize)
             throws EntityNotFoundException {
@@ -182,17 +180,19 @@ public class QueryService {
         ChatQueryWithResponse chatQueryWithResponse = chatService.addEmptyMessageToChat(chatId);
         String plotFileName = PlotService.createFileName(chatId, chatQueryWithResponse.getId());
 
-        // TODO: create request object
-        QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(
+        String createScript = databaseServiceFactory.getDatabaseService(database)
+                .retrieveSchema().generateCreateScript();
+
+        QueryDatabaseLLMService.LLMServiceRequest llmServiceRequest = new QueryDatabaseLLMService.LLMServiceRequest(
                 queryRequest.getQuery(),
-                createSystemQuery(
-                        databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),
-                        database),
+                createSystemQuery(createScript, database),
                 database,
                 plotFileName,
                 queryRequest.getModel(),
                 pageSize,
                 chatHistory);
+
+        QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(llmServiceRequest);
 
         chatQueryWithResponse = chatQueryWithResponseService.updateEmptyMessage(
                 chatQueryWithResponse, queryRequest.getQuery(), response);
