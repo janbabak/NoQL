@@ -1,5 +1,7 @@
 package com.janbabak.noqlbackend.service.langChain;
 
+import com.janbabak.noqlbackend.error.exception.DatabaseConnectionException;
+import com.janbabak.noqlbackend.error.exception.DatabaseExecutionException;
 import com.janbabak.noqlbackend.error.exception.PlotScriptExecutionException;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
@@ -11,7 +13,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 
+import java.sql.SQLException;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -51,7 +55,7 @@ public class QueryDatabaseAssistantTools {
      */
     @SuppressWarnings("unused")
     @Tool("Execute query on database")
-    public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query) {
+    public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query)  {
         toolResult.setDbQuery(query);
         try {
             RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
@@ -59,7 +63,7 @@ public class QueryDatabaseAssistantTools {
                     .setRetrievedData(retrievedData)
                     .setDbQueryExecutedSuccessSuccessfully(true)
                     .setDbQueryExecutionErrorMessage(null);
-        } catch (Exception e) {
+        } catch (DatabaseConnectionException | SQLException | DatabaseExecutionException | BadRequestException e) {
             toolResult.setDbQueryExecutedSuccessSuccessfully(false);
             return handleError("Error while executing query", e, toolResult::setDbQueryExecutionErrorMessage);
         }

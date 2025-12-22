@@ -1,6 +1,5 @@
 package com.janbabak.noqlbackend.service.query;
 
-import com.janbabak.noqlbackend.dao.ResultSetWrapper;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
@@ -8,7 +7,6 @@ import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.chat.ChatQueryWithResponseService;
 import com.janbabak.noqlbackend.service.chat.ChatService;
-import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
@@ -22,8 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.*;
-
-import static com.janbabak.noqlbackend.service.query.QueryUtils.*;
 
 @Slf4j
 @Service
@@ -44,6 +40,7 @@ public class QueryService {
     private final UserService userService;
     private final DatabaseEntityService databaseEntityService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
+    private final QueryExecutionService queryExecutionService;
     private final AuthenticationService authenticationService;
     private final QueryDatabaseLLMService llmService;
     private final DatabaseServiceFactory databaseServiceFactory;
@@ -117,32 +114,18 @@ public class QueryService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws BadRequestException         pageSize value is greater than maximum allowed value
      */
-    public ConsoleResponse executeQueryLanguageSelectQuery(
-            UUID databaseId,
-            String query,
-            Integer page,
-            Integer pageSize
-    ) throws EntityNotFoundException, DatabaseConnectionException, BadRequestException {
+    public ConsoleResponse executeQueryLanguageSelectQuery(UUID databaseId, String query, Integer page, Integer pageSize)
+            throws EntityNotFoundException {
 
         log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
         Database database = databaseEntityService.findById(databaseId);
-
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-        String paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database).query();
-
-        try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery)) {
-            return ConsoleResponse.builder()
-                    .dbQuery(query)
-                    .data(new RetrievedData(
-                            result.resultSet(),
-                            page,
-                            pageSize,
-                            getTotalCount(query, database, databaseService)))
-                    .build();
-        } catch (DatabaseExecutionException | SQLException e) {
+        try {
+            RetrievedData data = queryExecutionService.executeQuery(query, database, page, pageSize);
+            return new ConsoleResponse(data, query, null);
+        } catch (BadRequestException | DatabaseConnectionException | DatabaseExecutionException | SQLException e) {
             return ConsoleResponse.failedResponse(e.getMessage());
         }
     }

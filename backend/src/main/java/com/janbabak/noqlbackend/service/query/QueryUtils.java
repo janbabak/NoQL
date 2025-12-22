@@ -101,8 +101,10 @@ public class QueryUtils {
 
     public static Long getTotalCountSql(String selectQuery, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException {
+
         selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
         String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;".formatted(selectQuery);
+
         try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
             return result.resultSet().next() ? result.resultSet().getLong(1) : null;
         } catch (SQLException e) {
