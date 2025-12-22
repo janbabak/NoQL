@@ -230,7 +230,7 @@ public class EntityServiceIntegrationTest {
                 .build();
 
         for (int i = 0; i < numberOfMessages; i++) {
-            chatService.addMessageToChat(chatId, request);
+//            chatService.addMessageToChat(chatId, request);
         }
 
         // verify that the messages were added

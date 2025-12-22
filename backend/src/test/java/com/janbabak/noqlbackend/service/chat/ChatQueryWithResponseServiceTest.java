@@ -86,16 +86,16 @@ class ChatQueryWithResponseServiceTest {
                         .chat(chat)
                         .nlQuery("Find user Jan")
                         // language=JSON
-                        .llmResponse("""
-                                { "databaseQuery": "find user Jan", "generatePlot": false, "pythonCode": null }""")
+//                        .llmResponse("""
+//                                { "databaseQuery": "find user Jan", "generatePlot": false, "pythonCode": null }""")
                         .build(),
                 ChatQueryWithResponse.builder()
                         .id(UUID.randomUUID())
                         .chat(chat)
                         .nlQuery("Find user Jana")
                         // language=JSON
-                        .llmResponse("""
-                                { "databaseQuery": "find user Jana", "generatePlot": false, "pythonCode": null }""")
+//                        .llmResponse("""
+//                                { "databaseQuery": "find user Jana", "generatePlot": false, "pythonCode": null }""")
                         .build());
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
@@ -156,7 +156,7 @@ class ChatQueryWithResponseServiceTest {
                         .id(UUID.randomUUID())
                         .database(postgresDatabase)
                         .build())
-                .llmResponse(llmResponse)
+//                .llmResponse(llmResponse)
                 .build();
 
         when(chatQueryWithResponseRepositoryMock.findById(messageId)).thenReturn(Optional.of(chatQueryWithResponse));

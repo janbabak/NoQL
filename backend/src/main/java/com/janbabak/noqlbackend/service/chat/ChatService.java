@@ -40,8 +40,7 @@ public class ChatService {
     private final MessageDataDAO messageDataDAO;
     public static final String NEW_CHAT_NAME = "New chat";
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final int CHAT_NAME_MAX_LENGTH = 32;
+    public static final int CHAT_NAME_MAX_LENGTH = 32;
 
     /**
      * Find chat by chat id.

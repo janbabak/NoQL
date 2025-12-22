@@ -75,22 +75,22 @@ class ChatQueryWithResponseRepositoryTest {
         ChatQueryWithResponse message1 = ChatQueryWithResponse.builder()
                 .chat(chat1)
                 .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+//                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-26 10:10:10.0"))
                 .build();
         ChatQueryWithResponse message2 = ChatQueryWithResponse.builder()
                 .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+//                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:11:10.0"))
                 .build();
         ChatQueryWithResponse message3 = ChatQueryWithResponse.builder()
                 .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+//                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:10:10.0"))
                 .build();
         ChatQueryWithResponse message4 = ChatQueryWithResponse.builder()
                 .nlQuery("SELECT * FROM table")
-                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
+//                .llmResponse("{databaseQuery: \"SELECT * FROM table\"}, pythonCode: null, generatePlot: false")
                 .timestamp(Timestamp.valueOf("2024-05-28 10:10:10.0"))
                 .build();
         chat1.addMessages(List.of(message1, message2, message3));

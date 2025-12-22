@@ -11,10 +11,10 @@ import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.model.user.RegisterRequest;
+import com.janbabak.noqlbackend.service.chat.ChatTestUtilService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.QueryService;
-import com.janbabak.noqlbackend.service.api.QueryApi;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.utils.FileUtils;
 import org.apache.coyote.BadRequestException;
@@ -25,21 +25,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link QueryService}. Tests the interaction between the service and the database.
@@ -60,9 +55,6 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @MockBean
     private PlotService plotServiceMock;
 
-    @MockBean
-    LlmApiServiceFactory llmApiServiceFactoryMock;
-
     @Autowired
     private DatabaseEntityService databaseService;
 
@@ -70,12 +62,13 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     private ChatService chatService;
 
     @Autowired
+    private ChatTestUtilService chatTestUtilService;
+
+    @Autowired
     private AuthenticationService authenticationService;
 
     @Autowired
     private DatabaseCredentialsEncryptionService encryptionService;
-
-    QueryApi queryApi = Mockito.mock(QueryApi.class);
 
     private User testUser;
 
@@ -208,7 +201,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @param page               page number
      * @param pageSize           number of items per page
      * @param expectedTotalCount total count of rows
-     * @param messageRequests    list of messages to save into database
+     * @param messages           list of messages to save into database
      * @param expectedResponse   expected response
      */
     @ParameterizedTest
@@ -218,7 +211,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             Integer page,
             Integer pageSize,
             Long expectedTotalCount,
-            List<CreateChatQueryWithResponseRequest> messageRequests,
+            List<ChatQueryWithResponse> messages,
             RetrievedData expectedResponse
     ) throws EntityNotFoundException {
 
@@ -226,9 +219,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         UUID databaseId = getDatabase().getId();
 
         ChatDto chat = chatService.create(databaseId);
-        List<ChatQueryWithResponse> messages = new ArrayList<>();
-        for (CreateChatQueryWithResponseRequest messageRequest : messageRequests) {
-            messages.add(chatService.addMessageToChat(chat.id(), messageRequest));
+        for (var message : messages) {
+            messages.add(chatTestUtilService.addMessageToChat(chat.id(), message));
         }
         ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
@@ -258,19 +250,27 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         10, // page size
                         2L, // expected total count
                         List.of( // messages
-                                new CreateChatQueryWithResponseRequest(
-                                        "find emails of all users",
-                                        // language=JSON
-                                        """
-                                                {
-                                                    "databaseQuery": "SELECT email FROM eshop_user;",
-                                                    "generatePlot": false,
-                                                    "pythonCode": ""
-                                                }"""),
-                                new CreateChatQueryWithResponseRequest(
-                                        "plot sex of users older than 24",
-                                        FileUtils.getFileContent(
-                                                "./src/test/resources/llmResponses/plotSexOfUsersSuccess.json"))),
+                                ChatQueryWithResponse.builder()
+                                        .nlQuery("Find emails of all users")
+                                        .resultDescription("Found emails of all users")
+                                        .dbQuery("SELECT email FROM eshop_user;")
+                                        .dbQueryExecutionSuccess(true)
+                                        .dbExecutionErrorMessage(null)
+                                        .plotScript(null)
+                                        .plotGenerationSuccess(null)
+                                        .plotGenerationErrorMessage(null)
+                                        .build(),
+                                ChatQueryWithResponse.builder()
+                                        .nlQuery("Plot sex of users older than 24")
+                                        .resultDescription("This bar chart shows users sex")
+                                        .dbQuery(null)
+                                        .dbQueryExecutionSuccess(null)
+                                        .dbExecutionErrorMessage(null)
+                                        .plotScript(FileUtils.getFileContent(
+                                                "./src/test/resources/llmResponses/plotSexOfUsersSuccess.py"))
+                                        .plotGenerationSuccess(true)
+                                        .plotGenerationErrorMessage(null)
+                                        .build()),
                         // expected response
                         RetrievedData.builder()
                                 .page(0)
@@ -286,24 +286,27 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         1, // page
                         10, // page size
                         22L, // expected total count
-                        List.of(new CreateChatQueryWithResponseRequest( // messages
-                                        "find emails of all users",
-                                        // language=JSON
-                                        """
-                                                {
-                                                    "databaseQuery": "SELECT email FROM eshop_user;",
-                                                    "generatePlot": false,
-                                                    "pythonCode": ""
-                                                }"""),
-                                new CreateChatQueryWithResponseRequest(
-                                        "sort them in descending order",
-                                        // language=JSON
-                                        """
-                                                {
-                                                    "databaseQuery": "SELECT email FROM eshop_user ORDER BY email DESC;",
-                                                    "generatePlot": false,
-                                                    "pythonCode": ""
-                                                }""")),
+                        List.of(  // messages
+                                ChatQueryWithResponse.builder()
+                                        .nlQuery("Find emails of all users")
+                                        .resultDescription("Found emails of all users")
+                                        .dbQuery("SELECT email FROM eshop_user;")
+                                        .dbQueryExecutionSuccess(true)
+                                        .dbExecutionErrorMessage(null)
+                                        .plotScript(null)
+                                        .plotGenerationSuccess(null)
+                                        .plotGenerationErrorMessage(null)
+                                        .build(),
+                                ChatQueryWithResponse.builder()
+                                        .nlQuery("Sort them in descending order")
+                                        .resultDescription("Emails soreted in descending order")
+                                        .dbQuery("SELECT email FROM eshop_user ORDER BY email DESC;")
+                                        .dbQueryExecutionSuccess(true)
+                                        .dbExecutionErrorMessage(null)
+                                        .plotScript(null)
+                                        .plotGenerationSuccess(null)
+                                        .plotGenerationErrorMessage(null)
+                                        .build()),
                         // expected reseponse
                         RetrievedData.builder()
                                 .page(1)
@@ -418,7 +421,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             Integer pageSize,
             Long totalCount,
             Boolean plotResult,
-            List<CreateChatQueryWithResponseRequest> messages,
+            List<ChatQueryWithResponse> messages,
             QueryRequest request,
             String llmResponse,
             ChatResponse expectedResponse
@@ -428,14 +431,14 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
         // given
         UUID databaseId = getDatabase().getId();
         ChatDto chat = chatService.create(databaseId);
-        for (CreateChatQueryWithResponseRequest message : messages) {
-            chatService.addMessageToChat(chat.id(), message);
+        for (ChatQueryWithResponse message : messages) {
+            chatTestUtilService.addMessageToChat(chat.id(), message);
         }
         String plotFileName = "/static/images/" + chat.id() + "-unknown-message-id.png";
 
-        when(llmApiServiceFactoryMock.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
-        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
-        when(plotServiceMock.generatePlot(any(), any(), eq(chat.id()), any())).thenReturn(plotFileName);
+//        when(llmApiServiceFactoryMock.getQueryApiService(eq("gpt-4o"))).thenReturn(queryApi);
+//        when(queryApi.queryModel(any(), eq(request), any(), eq(new ArrayList<>()))).thenReturn(llmResponse);
+//        when(plotServiceMock.generatePlot(any(), any(), eq(chat.id()), any())).thenReturn(plotFileName);
 
         // when
         ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);
@@ -498,15 +501,17 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         8, // page size
                         22L, // total count
                         false, // plot result
-                        List.of(new CreateChatQueryWithResponseRequest( // messages
-                                "find emails of all users",
-                                // language=JSON
-                                """
-                                        {
-                                            "databaseQuery": "SELECT email FROM eshop_user;",
-                                            "generatePlot": false,
-                                            "pythonCode": ""
-                                        }""")),
+                        List.of(
+                                ChatQueryWithResponse.builder()
+                                        .nlQuery("Find emails of all users")
+                                        .resultDescription("Found emails of all users")
+                                        .dbQuery("SELECT email FROM eshop_user;")
+                                        .dbQueryExecutionSuccess(true)
+                                        .dbExecutionErrorMessage(null)
+                                        .plotScript(null)
+                                        .plotGenerationSuccess(null)
+                                        .plotGenerationErrorMessage(null)
+                                        .build()),
                         // query request
                         new QueryRequest("sort them in descending order", "gpt-4o"),
                         // language=JSON LLM response
