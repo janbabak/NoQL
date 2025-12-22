@@ -6,7 +6,6 @@ import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
 import com.janbabak.noqlbackend.model.chat.ChatDto;
 import com.janbabak.noqlbackend.model.chat.ChatHistoryItem;
-import com.janbabak.noqlbackend.model.chat.CreateChatQueryWithResponseRequest;
 import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -277,8 +276,8 @@ class ChatServiceTest {
     }
 
     @Test
-    @DisplayName("Test add message to chat")
-    void testAddMessageToChat() throws EntityNotFoundException {
+    @DisplayName("Test add empty message to chat")
+    void testAddEmptyMessageToChat() throws EntityNotFoundException {
         // given
         UUID chatId = UUID.randomUUID();
 
@@ -289,31 +288,23 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
-                "Visualize age of users",
-                // language=JSON
-                """
-                        { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
-
         ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
                 .id(UUID.randomUUID())
                 .chat(chat)
-                .nlQuery(request.nlQuery())
-//                .llmResponse(request.llmResult())
                 .build();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
         when(messageRepositoryMock.save(any())).thenReturn(expected);
 
         // when
-//        ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
+        ChatQueryWithResponse actual = chatService.addEmptyMessageToChat(chatId);
 
         // then
-//        assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
-    @DisplayName("Test add message to chat - user is not owner of the chat")
+    @DisplayName("Test add empty message to chat - user is not owner of the chat")
     void testAddMessageToChatUserIsNotOwner() {
         // given
         UUID chatId = UUID.randomUUID();
@@ -325,56 +316,11 @@ class ChatServiceTest {
                 .database(Database.builder().user(testUser2).build())
                 .build();
 
-        CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
-                "Visualize age of users",
-                // language=JSON
-                """
-                        { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
-
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
         doThrow(new AccessDeniedException("Access Denied"))
                 .when(authenticationServiceMock).ifNotAdminOrSelfRequestThrowAccessDenied(testUser2.getId());
         // then
-//        assertThrows(AccessDeniedException.class, () -> chatService.addMessageToChat(chatId, request));
-    }
-
-    @Test
-    @DisplayName("Test add message to new chat and change chat name")
-    void testAddMessageToNewChatAndChangeItsName() throws EntityNotFoundException {
-        // given
-        UUID chatId = UUID.randomUUID();
-
-        Chat chat = Chat.builder()
-                .id(chatId)
-                .name("New chat")
-                .messages(new ArrayList<>())
-                .database(Database.builder().user(testUser).build())
-                .build();
-
-        CreateChatQueryWithResponseRequest request = new CreateChatQueryWithResponseRequest(
-                "Create a histogram of distribution of age of users",
-                // language=JSON
-                """
-                        { "databaseQuery": "string", "generatePlot": true, "pythonCode": "import something etc." }""");
-
-        ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
-                .id(UUID.randomUUID())
-                .chat(chat)
-                .nlQuery(request.nlQuery())
-//                .llmResponse(request.llmResult())
-                .build();
-
-        when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
-        when(messageRepositoryMock.save(any())).thenReturn(expected);
-
-        // when
-//        ChatQueryWithResponse actual = chatService.addMessageToChat(chatId, request);
-
-        // then
-        ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
-        verify(chatRepositoryMock).save(chatCaptor.capture());
-        assertEquals("Create a histogram of distributi", chatCaptor.getValue().getName());
-//        assertEquals(expected, actual);
+        assertThrows(AccessDeniedException.class, () -> chatService.addEmptyMessageToChat(chatId));
     }
 
     @Test
