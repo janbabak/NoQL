@@ -7,7 +7,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
-import com.janbabak.noqlbackend.service.langChain.LLMService;
+import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +70,7 @@ public class ChatQueryWithResponseService {
      */
     @Transactional
     public ChatQueryWithResponse updateEmptyMessage( // TODO: test
-            ChatQueryWithResponse message, String nlQuery, LLMService.LLMServiceResult llmResult) {
+            ChatQueryWithResponse message, String nlQuery, QueryDatabaseLLMService.LLMServiceResult llmResult) {
 
         Timestamp timestamp = Timestamp.from(Instant.now());
 

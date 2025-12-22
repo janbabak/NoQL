@@ -6,7 +6,6 @@ import com.janbabak.noqlbackend.dao.repository.ChatRepository;
 import com.janbabak.noqlbackend.dao.repository.DatabaseRepository;
 import com.janbabak.noqlbackend.error.exception.*;
 import com.janbabak.noqlbackend.model.Settings;
-import com.janbabak.noqlbackend.model.chat.*;
 import com.janbabak.noqlbackend.model.entity.Database;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.*;
@@ -15,7 +14,7 @@ import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.BaseDatabaseService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
-import com.janbabak.noqlbackend.service.langChain.LLMService;
+import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +47,7 @@ public class QueryService {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final ChatQueryWithResponseService chatQueryWithResponseService;
-    private final LLMService llmService;
+    private final QueryDatabaseLLMService llmService;
     private final ChatRepository chatRepository;
     private final DatabaseRepository databaseRepository;
     private final ChatQueryWithResponseRepository chatQueryWithResponseRepository;
@@ -294,7 +293,7 @@ public class QueryService {
         String plotFileName = PlotService.createFileName(chatId, chatQueryWithResponse.getId());
 
         // TODO: create request object
-        LLMService.LLMServiceResult response = llmService.executeUserRequest(
+        QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(
                 queryRequest.getQuery(),
                 createExperimentalSystemQuery(
                         databaseServiceFactory.getDatabaseService(database).retrieveSchema().generateCreateScript(),

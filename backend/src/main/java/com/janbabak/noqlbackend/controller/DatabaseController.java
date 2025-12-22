@@ -11,7 +11,7 @@ import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
-import com.janbabak.noqlbackend.service.langChain.LLMService;
+import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class DatabaseController {
     private final DatabaseEntityService databaseService;
     private final QueryService queryService;
     private final ChatService chatService;
-    private final LLMService llmService;
+    private final QueryDatabaseLLMService llmService;
 
     /**
      * Get all databases.

@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.function.Consumer;
 
 @Slf4j
-public class AssistantTools {
+public class QueryDatabaseAssistantTools {
 
     private final ExperimentalQueryService queryService;
     private final PlotService plotService;
@@ -24,21 +24,21 @@ public class AssistantTools {
     private final String plotFileName;
 
     @Getter
-    private ToolResult toolResult;
+    private QueryDatabaseToolResult toolResult;
 
-    public AssistantTools(Database database,
-                          String plotFileName,
-                          int page,
-                          int pageSize,
-                          ExperimentalQueryService queryService,
-                          PlotService plotService) {
+    public QueryDatabaseAssistantTools(Database database,
+                                       String plotFileName,
+                                       int page,
+                                       int pageSize,
+                                       ExperimentalQueryService queryService,
+                                       PlotService plotService) {
         this.database = database;
         this.plotFileName = plotFileName;
         this.page = page;
         this.pageSize = pageSize;
         this.queryService = queryService;
         this.plotService = plotService;
-        this.toolResult = new ToolResult();
+        this.toolResult = new QueryDatabaseToolResult();
     }
 
     /**
@@ -101,7 +101,7 @@ public class AssistantTools {
      */
     @Data
     @Accessors(chain = true)
-    public static class ToolResult {
+    public static class QueryDatabaseToolResult {
         private Boolean dbQueryExecutedSuccessSuccessfully = null;
         private String dbQuery = null;
         private Boolean plotGeneratedSuccessfully = false;

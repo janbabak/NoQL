@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 
+@Deprecated
 @Builder
 public record UpdateCustomModelReqeust(
         @Nullable
