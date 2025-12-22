@@ -22,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlotServiceTest {
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlotService plotService;
 
     @Autowired
+    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @ParameterizedTest
