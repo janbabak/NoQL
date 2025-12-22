@@ -89,6 +89,7 @@ public class QueryUtils {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
+    @SuppressWarnings("all") // default branch unnecessary
     public static Long getTotalCount(String selectQuery, Database database, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException, BadRequestException {
 

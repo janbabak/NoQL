@@ -15,7 +15,6 @@ import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -142,8 +141,6 @@ public class DatabaseController {
      * @param pageSize   number of items in one page
      * @return query result
      * @throws EntityNotFoundException     queried database not found.
-     * @throws DatabaseConnectionException cannot establish connection with the database
-     * @throws BadRequestException         pageSize value is greater than maximum allowed value
      * @throws AccessDeniedException       if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
@@ -152,8 +149,7 @@ public class DatabaseController {
             @PathVariable UUID databaseId,
             @RequestBody String query,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer pageSize
-    ) throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
+            @RequestParam(required = false) Integer pageSize) throws EntityNotFoundException {
         return queryService.executeQueryLanguageSelectQuery(databaseId, query, page, pageSize);
     }
 

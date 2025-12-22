@@ -77,6 +77,7 @@ public class QueryDatabaseAssistantTools {
      * @param pythonCode Python code to generate the plot
      * @return tool execution result - info for the LLM about success or failure of the tool execution.
      */
+    @SuppressWarnings("unused")
     @Tool("Generate plot from data")
     public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
         toolResult.setScript(pythonCode);
