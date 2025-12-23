@@ -3,6 +3,7 @@ package com.janbabak.noqlbackend.service.langChain;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.apache.coyote.BadRequestException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,6 +20,7 @@ public class BaseLLMServiceTest {
     private BaseLLMService llmService;
 
     @Test
+    @DisplayName("Test get model by invalid model id")
     public void testGetModelInvalidModelId() {
 
         String unsupportedModelId = "unsupported-model";
@@ -33,8 +35,9 @@ public class BaseLLMServiceTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Test get model by valid model id")
     @MethodSource("provideValidModelIds")
-    public void testGetModelValidOpenAiModelId(String modelId, Class<?> clazz) throws BadRequestException {
+    public void testGetModelValidModelId(String modelId, Class<?> clazz) throws BadRequestException {
         var model = llmService.getModel(modelId);
         assertNotNull(model);
         assertInstanceOf(clazz, model);

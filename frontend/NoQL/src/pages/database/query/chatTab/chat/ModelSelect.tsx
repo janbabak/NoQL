@@ -26,7 +26,7 @@ const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
     { label: 'GPT 5 nano', value: 'gpt-5-nano' },
     { label: 'GPT 4o mini', value: 'gpt-4o-mini' },
     { label: 'GPT 4o', value: 'gpt-4o' },
-    { label: 'Claude 4.5 haiku', value: 'claude-haiku-4-5-20251001' }
+    { label: 'Claude 4.5 haiku', value: 'claude-haiku-4-5-20251001' },
   ])
 
   const [

@@ -30,12 +30,15 @@ import static org.mockito.Mockito.*;
 class QueryDatabaseLLMServiceTest {
 
     @SpyBean
+    @SuppressWarnings("unused")
     private QueryDatabaseLLMService queryDatabaseLLMServiceSpy;
 
     @MockBean
+    @SuppressWarnings("unused")
     private QueryExecutionService queryExecutionService;
 
     @MockBean
+    @SuppressWarnings("unused")
     private PlotService plotService;
 
     private final QueryDatabaseLLMService.LLMServiceRequest request =

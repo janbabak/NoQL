@@ -53,13 +53,10 @@ public class QueryDatabaseLLMService extends BaseLLMService {
         return new LLMServiceResult(response, toolResult);
     }
 
-    Assistant buildAssistant(String modelId, QueryDatabaseAssistantTools assistantTools)
-            throws BadRequestException {
-
-        return AiServices.builder(Assistant.class)
-                .chatModel(getModel(modelId))
-                .tools(assistantTools)
-                .build();
+    public record LLMServiceResult(
+            String llmResponse, // response from LLM, comment about the execution
+            QueryDatabaseToolResult toolResult // real result of the tool execution
+    ) {
     }
 
     @Builder
@@ -72,6 +69,16 @@ public class QueryDatabaseLLMService extends BaseLLMService {
             int pageSize,
             List<ChatQueryWithResponse> chatHistory
     ) {
+    }
+
+    // package private for testing
+    Assistant buildAssistant(String modelId, QueryDatabaseAssistantTools assistantTools)
+            throws BadRequestException {
+
+        return AiServices.builder(Assistant.class)
+                .chatModel(getModel(modelId))
+                .tools(assistantTools)
+                .build();
     }
 
     /**
@@ -132,11 +139,5 @@ public class QueryDatabaseLLMService extends BaseLLMService {
                 .toolExecutionRequests(toolExecutionRequests)
                 .attributes(attributes)
                 .build();
-    }
-
-    public record LLMServiceResult(
-            String llmResponse, // response from LLM, comment about the execution
-            QueryDatabaseToolResult toolResult // real result of the tool execution
-    ) {
     }
 }
