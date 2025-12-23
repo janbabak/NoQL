@@ -42,7 +42,5 @@ app:
       supported-models:
       # - "gemini-2.5-pro"
       # - "gemini-2.5-flash"
-    llamaApi:
-      apiKey: "${LLAMA_API_KEY}"
   config:
-    workingDirectory: ${workingDirectory:.}
+    workingDirectory: "${workingDirectory:.}"

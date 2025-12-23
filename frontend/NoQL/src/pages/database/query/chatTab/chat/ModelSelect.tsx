@@ -21,13 +21,12 @@ const ModelSelect = memo(({ model, setModel }: ModelSelectProps) => {
     setModelOptions
   ] = useState<ModelOption[]>([
     // fallback if not loaded from backend
-    { label: 'GPT 4o', value: 'gpt-4o' },
+    { label: 'GPT 5 mini', value: 'gpt-5-mini' },
+    { label: 'GPT 5.2', value: 'gpt-5.2' },
+    { label: 'GPT 5 nano', value: 'gpt-5-nano' },
     { label: 'GPT 4o mini', value: 'gpt-4o-mini' },
-    { label: 'GPT 4 Turbo', value: 'gpt-4-turbo' },
-    { label: 'Gemini 1.5 flash', value: 'gemini-1.5-flash' },
-    { label: 'Gemini 1.5 pro', value: 'gemini-1.5-pro' },
-    { label: 'Claude 3.5 haiku', value: 'claude-3.5-haiku-20241022' },
-    { label: 'Llama 3.1 70B', value: 'llama3.1-70b' },
+    { label: 'GPT 4o', value: 'gpt-4o' },
+    { label: 'Claude 4.5 haiku', value: 'claude-haiku-4-5-20251001' }
   ])
 
   const [
