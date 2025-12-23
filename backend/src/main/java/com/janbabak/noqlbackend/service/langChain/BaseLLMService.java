@@ -1,9 +1,11 @@
 package com.janbabak.noqlbackend.service.langChain;
 
+import com.janbabak.noqlbackend.config.llm.AnthropiConfig;
 import com.janbabak.noqlbackend.config.llm.GeminiConfig;
-import com.janbabak.noqlbackend.config.llm.OpenAiApiConfig;
+import com.janbabak.noqlbackend.config.llm.OpenAiConfig;
 import dev.langchain4j.http.client.HttpClientBuilder;
 import dev.langchain4j.http.client.spring.restclient.SpringRestClientBuilderFactory;
+import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -20,11 +22,15 @@ public class BaseLLMService {
 
     @Autowired
     @SuppressWarnings("all")
-    private OpenAiApiConfig openAiApiConfig;
+    private OpenAiConfig openAiConfig;
 
     @Autowired
     @SuppressWarnings("all")
     private GeminiConfig geminiConfig;
+
+    @Autowired
+    @SuppressWarnings("all")
+    private AnthropiConfig anthropicConfig;
 
     private final Duration TIMEOUT = ofSeconds(60);
     private final int MAX_TOKENS = 4096;
@@ -38,8 +44,11 @@ public class BaseLLMService {
      * @throws BadRequestException if the model ID is unsupported
      */
     protected ChatModel getModel(String modelId) throws BadRequestException {
-        if (openAiApiConfig.getSupportedModels().contains(modelId)) {
+        if (openAiConfig.getSupportedModels().contains(modelId)) {
             return buildOpenAiModel(modelId);
+        }
+        if (anthropicConfig.getSupportedModels().contains(modelId)) {
+            return buildAnthropicModel(modelId);
         }
         if (geminiConfig.getSupportedModels().contains(modelId)) {
             return buildGoogleGeminiModel(modelId);
@@ -52,7 +61,7 @@ public class BaseLLMService {
 
     private OpenAiChatModel buildOpenAiModel(String modelId) {
         return OpenAiChatModel.builder()
-                .apiKey(openAiApiConfig.getApiKey())
+                .apiKey(openAiConfig.getApiKey())
                 .modelName(modelId)
                 .timeout(TIMEOUT)
                 .maxTokens(MAX_TOKENS)
@@ -70,6 +79,18 @@ public class BaseLLMService {
                 .timeout(TIMEOUT)
                 .maxOutputTokens(MAX_TOKENS)
                 .allowCodeExecution(true)
+                .httpClientBuilder(httpClientBuilder)
+                .build();
+    }
+
+    private AnthropicChatModel buildAnthropicModel(String modelId) {
+        return AnthropicChatModel.builder()
+                .apiKey(anthropicConfig.getApiKey())
+                .modelName(modelId)
+                .timeout(TIMEOUT)
+                .maxTokens(MAX_TOKENS)
+                .logRequests(true)
+                .logResponses(true)
                 .httpClientBuilder(httpClientBuilder)
                 .build();
     }

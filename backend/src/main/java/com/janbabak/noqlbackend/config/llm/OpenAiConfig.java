@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "app.external-services.open-ai-api")
-public class OpenAiApiConfig {
+public class OpenAiConfig {
 
     private String apiKey;
     private List<String> supportedModels;

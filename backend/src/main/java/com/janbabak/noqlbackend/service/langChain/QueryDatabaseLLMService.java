@@ -29,7 +29,7 @@ public class QueryDatabaseLLMService extends BaseLLMService {
 
     public LLMServiceResult executeUserRequest(LLMServiceRequest request) throws BadRequestException {
 
-        ChatModel model = getModel("gpt-5-mini");
+        ChatModel model = getModel("claude-haiku-4-5-20251001"); // TODO: get model from request
         int page = 0;
         QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
                 request.database,

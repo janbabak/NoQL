@@ -33,17 +33,16 @@ app:
         - "gpt-5-mini"
         - "gpt-5.2"
         - "gpt-5-nano"
+    anthropic-api:
+      api-key: "${CLAUDE_API_KEY}"
+      supported-models:
+        - "claude-haiku-4-5-20251001"
     gemini-api:
       api-key: "${GEMINI_API_KEY}"
       supported-models:
-#        - "gemini-2.5-pro"
-#        - "gemini-2.5-flash"
+      # - "gemini-2.5-pro"
+      # - "gemini-2.5-flash"
     llamaApi:
-      url: "${LLAMA_API_URL}"
       apiKey: "${LLAMA_API_KEY}"
-    claudeApi:
-      url: "${CLAUDE_API_URL}"
-      apiKey: "${CLAUDE_API_KEY}"
-      anthropicVersion: "${ANTHROPIC_VERSION}"
   config:
     workingDirectory: ${workingDirectory:.}
