@@ -15,6 +15,7 @@ import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -120,6 +121,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
      * @throws AccessDeniedException       if user is not admin or owner of the database.
+     * @throws BadRequestException         invalid request (model id...)
      */
     @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
@@ -128,7 +130,7 @@ public class DatabaseController {
             @PathVariable UUID chatId,
             @RequestParam(required = false) Integer pageSize,
             @RequestBody @Valid QueryRequest queryRequest
-    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
+    ) throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException, BadRequestException {
         return queryService.queryChat(databaseId, chatId, queryRequest, pageSize);
     }
 
@@ -140,8 +142,8 @@ public class DatabaseController {
      * @param page       page number (first pages is 0)
      * @param pageSize   number of items in one page
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws AccessDeniedException       if user is not admin or owner of the database.
+     * @throws EntityNotFoundException queried database not found.
+     * @throws AccessDeniedException   if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)

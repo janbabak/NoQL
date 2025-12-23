@@ -24,19 +24,23 @@ app:
       expiration: "${JWT_EXPIRATION:365160}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
     dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
-  externalServices:
-    openAiApi:
-      url: "${OPEN_AI_API_URL}"
-      apiKey: "${OPEN_AI_API_KEY}"
-    geminiApi:
-      url: "${GEMINI_API_URL}"
-      apiKey: "${GEMINI_API_KEY}"
-    llamaApi:
-      url: "${LLAMA_API_URL}"
-      apiKey: "${LLAMA_API_KEY}"
-    claudeApi:
-      url: "${CLAUDE_API_URL}"
-      apiKey: "${CLAUDE_API_KEY}"
-      anthropicVersion: "${ANTHROPIC_VERSION}"
+  external-services:
+    open-ai-api:
+      api-key: "${OPEN_AI_API_KEY}"
+      supported-models:
+        - "gpt-4o-mini"
+        - "gpt-4o"
+        - "gpt-5-mini"
+        - "gpt-5.2"
+        - "gpt-5-nano"
+    anthropic-api:
+      api-key: "${CLAUDE_API_KEY}"
+      supported-models:
+        - "claude-haiku-4-5-20251001"
+    gemini-api:
+      api-key: "${GEMINI_API_KEY}"
+      supported-models:
+      # - "gemini-2.5-pro"
+      # - "gemini-2.5-flash"
   config:
-    workingDirectory: ${workingDirectory:.}
+    workingDirectory: "${workingDirectory:.}"

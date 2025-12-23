@@ -166,7 +166,8 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     @ParameterizedTest
     @MethodSource("databaseDataProvider")
     @DisplayName("Test execute query language query")
-    @SuppressWarnings("all") // sql warnings
+    @SuppressWarnings("all")
+        // sql warnings
     void testExecuteQueryLanguageQuery(Database database)
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
@@ -353,7 +354,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             QueryRequest request,
             QueryDatabaseLLMService.LLMServiceResult llmResponse,
             ChatResponse expectedResponse
-    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+    ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, BadRequestException {
 
         // given
         UUID databaseId = getDatabase().getId();

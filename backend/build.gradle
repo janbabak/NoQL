@@ -42,6 +42,8 @@ dependencies {
     implementation 'dev.langchain4j:langchain4j:1.9.1'
     implementation 'dev.langchain4j:langchain4j-open-ai:1.9.1'
     implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.9.1-beta17'
+    implementation 'dev.langchain4j:langchain4j-google-ai-gemini:1.9.1'
+    implementation 'dev.langchain4j:langchain4j-anthropic:1.9.1'
     implementation 'mysql:mysql-connector-java:8.0.33' // latest version (26. 1. 2025)
 
 	runtimeOnly 'org.postgresql:postgresql:42.7.3'

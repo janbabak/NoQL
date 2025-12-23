@@ -159,9 +159,10 @@ public class QueryService {
      * @throws EntityNotFoundException     queried database not found.
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  retrieving database schema failure
+     * @throws BadRequestException         invalid model id
      */
     public ChatResponse queryChat(UUID databaseId, UUID chatId, QueryRequest queryRequest, Integer pageSize)
-            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
+            throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, BadRequestException {
 
         log.info("Execute chat, database_id={}", databaseId);
 

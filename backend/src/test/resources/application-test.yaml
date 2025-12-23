@@ -30,17 +30,21 @@ app:
       expiration: "${JWT_EXPIRATION:86400}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
     dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
-  externalServices:
-    openAiApi:
-      url: "xxx"
-      apiKey: "xxx"
-    geminiApi:
-      url: "xxx"
-      apiKey: "xxx"
-    llamaApi:
-      url: "xxx"
-      apiKey: "xxx"
-    claudeApi:
-      url: "xxx"
-      apiKey: "xxx"
-      anthropicVersion: "xxx"
+  external-services:
+    open-ai-api:
+      api-key: "xxx"
+      supported-models:
+        - "gpt-4o-mini"
+        - "gpt-4o"
+        - "gpt-5-mini"
+        - "gpt-5.2"
+        - "gpt-5-nano"
+    anthropic-api:
+      api-key: "xxx"
+      supported-models:
+        - "claude-haiku-4-5-20251001"
+    gemini-api:
+      api-key: "xxx"
+      supported-models:
+      # - "gemini-2.5-pro"
+      # - "gemini-2.5-flash"
