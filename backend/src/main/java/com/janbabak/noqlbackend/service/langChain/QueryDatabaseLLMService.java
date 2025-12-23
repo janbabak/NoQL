@@ -91,9 +91,9 @@ public class QueryDatabaseLLMService extends BaseLLMService {
     private String buildLLMResponseMessage(ChatQueryWithResponse chatEntry) {
         StringBuilder stringBuilder = new StringBuilder("LLM Response: ")
                 .append(chatEntry.getResultDescription())
-                .append("\n\n Executed tools:\n");
+                .append("\n\nExecuted tools:\n");
 
-        if (chatEntry.getDbQuery() != null) {
+        if (chatEntry.dbQueryExecuted()) {
             stringBuilder.append("\nMethod call: executeQuery(\"");
             stringBuilder.append(chatEntry.getDbQuery());
             stringBuilder.append("\")\n");
@@ -103,11 +103,13 @@ public class QueryDatabaseLLMService extends BaseLLMService {
             if (chatEntry.getDbExecutionErrorMessage() != null) {
                 stringBuilder.append("\nErrors: ");
                 stringBuilder.append(chatEntry.getDbExecutionErrorMessage());
+            }
+            if (chatEntry.plotGenerated()) {
                 stringBuilder.append("\n");
             }
         }
 
-        if (chatEntry.getDbQuery() != null) {
+        if (chatEntry.plotGenerated()) {
             stringBuilder.append("\nMethod call: generatePlot(\"");
             stringBuilder.append(chatEntry.getPlotScript());
             stringBuilder.append("\")\n");
