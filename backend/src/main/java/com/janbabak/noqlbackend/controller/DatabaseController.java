@@ -121,6 +121,7 @@ public class DatabaseController {
      * @throws DatabaseExecutionException  retrieving database schema failure
      * @throws EntityNotFoundException     database not found
      * @throws AccessDeniedException       if user is not admin or owner of the database.
+     * @throws BadRequestException         invalid request (model id...)
      */
     @PostMapping("/{databaseId}/chat/{chatId}/query")
     @ResponseStatus(HttpStatus.OK)
@@ -141,8 +142,8 @@ public class DatabaseController {
      * @param page       page number (first pages is 0)
      * @param pageSize   number of items in one page
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
-     * @throws AccessDeniedException       if user is not admin or owner of the database.
+     * @throws EntityNotFoundException queried database not found.
+     * @throws AccessDeniedException   if user is not admin or owner of the database.
      */
     @PostMapping(path = "/{databaseId}/query/queryLanguage", consumes = MediaType.TEXT_PLAIN_VALUE)
     @ResponseStatus(HttpStatus.OK)
