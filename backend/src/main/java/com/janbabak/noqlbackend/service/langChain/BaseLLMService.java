@@ -64,7 +64,7 @@ public class BaseLLMService {
                 .apiKey(openAiConfig.getApiKey())
                 .modelName(modelId)
                 .timeout(TIMEOUT)
-                .maxTokens(MAX_TOKENS)
+                .maxCompletionTokens(MAX_TOKENS)
                 .logRequests(true)
                 .logResponses(true)
                 .httpClientBuilder(httpClientBuilder)
