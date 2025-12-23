@@ -1,32 +1,150 @@
 package com.janbabak.noqlbackend.service.langChain;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
+import com.janbabak.noqlbackend.service.PlotService;
+import com.janbabak.noqlbackend.service.query.QueryExecutionService;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.ChatModel;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class QueryDatabaseLLMServiceTest {
 
-    @Autowired
-    private QueryDatabaseLLMService queryDatabaseLLMService;
+    @SpyBean
+    private QueryDatabaseLLMService queryDatabaseLLMServiceSpy;
+
+    @MockBean
+    private QueryExecutionService queryExecutionService;
+
+    @MockBean
+    private PlotService plotService;
+
+    private final QueryDatabaseLLMService.LLMServiceRequest request =
+            QueryDatabaseLLMService.LLMServiceRequest.builder()
+                    .userQuery("Find emails of all users")
+                    .systemQuery("You are an expert SQL assistant.")
+                    .modelId("gpt-4o-mini")
+                    .chatHistory(List.of(
+                            ChatQueryWithResponse.builder()
+                                    .nlQuery("Plot sex of users")
+                                    .plotScript("import matplotlib.pyplot as plt; ...")
+                                    .plotGenerationSuccess(false)
+                                    .plotGenerationErrorMessage("Matplotlib is not installed.")
+                                    .resultDescription("Could not generate the plot due to an error.")
+                                    .build(),
+                            ChatQueryWithResponse.builder()
+                                    .nlQuery("Find all users")
+                                    .dbQuery("SELECT * FROM users;")
+                                    .dbQueryExecutionSuccess(true)
+                                    .resultDescription("Found these users.")
+                                    .build()))
+                    .build();
+
+    @Test
+    @DisplayName("Test execute user request")
+    @SneakyThrows
+    void testExecuteUserRequest() {
+        Assistant assistantMock = mock(Assistant.class);
+        when(assistantMock.chat(anyList()))
+                .thenReturn("Mocked LLM response");
+
+        doReturn(mock(ChatModel.class))
+                .when(queryDatabaseLLMServiceSpy)
+                .getModel(anyString());
+
+        doReturn(assistantMock)
+                .when(queryDatabaseLLMServiceSpy)
+                .buildAssistant(anyString(), any());
+
+        // when
+        QueryDatabaseLLMService.LLMServiceResult result =
+                queryDatabaseLLMServiceSpy.executeUserRequest(request);
+
+        // then
+        assertEquals("Mocked LLM response", result.llmResponse());
+        assertNotNull(result.toolResult());
+
+        // Optionally verify that chat() was called with the correct messages
+        verify(assistantMock, times(1)).chat(anyList());
+    }
+
+    @Test
+    @DisplayName("Test build Messages")
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    void testBuildMessages() {
+        // given
+        Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
+                "buildMessages", QueryDatabaseLLMService.LLMServiceRequest.class);
+        method.setAccessible(true);
+
+        List<ChatMessage> expectedMessages = List.of(
+                SystemMessage.from("You are an expert SQL assistant."),
+                UserMessage.from("Plot sex of users"),
+                AiMessage.builder()
+                        .text("Could not generate the plot due to an error.")
+                        .toolExecutionRequests(List.of(
+                                ToolExecutionRequest.builder()
+                                        .name("generatePlot")
+                                        .arguments("import matplotlib.pyplot as plt; ...")
+                                        .build()))
+                        .attributes(mapOf(
+                                "generatePlotSuccess", false,
+                                "generatePlotError", "Matplotlib is not installed."))
+                        .build(),
+                UserMessage.from("Find all users"),
+                AiMessage.builder()
+                        .text("Found these users.")
+                        .toolExecutionRequests(List.of(
+                                ToolExecutionRequest.builder()
+                                        .name("executeQuery")
+                                        .arguments("SELECT * FROM users;")
+                                        .build()))
+                        .attributes(mapOf("executeQuerySuccess", true))
+                        .build(),
+                UserMessage.from("Find emails of all users")
+        );
+
+        // when
+        List<ChatMessage> actualMessages = (List<ChatMessage>) method.invoke(queryDatabaseLLMServiceSpy, request);
+
+        // then
+        assertEquals(expectedMessages, actualMessages);
+    }
 
     @ParameterizedTest
     @SneakyThrows
     @DisplayName("Test build LLM response message method")
     @MethodSource("testBuildLLMResponseMessageData")
-    void testBuildLLMResponseMessage(ChatQueryWithResponse chatEntry, String expected) {
+    void testBuildLLMResponseMessage(ChatQueryWithResponse chatEntry, AiMessage expected) {
+        // given
         Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
-                "buildLLMResponseMessage", ChatQueryWithResponse.class);
+                "buildAiMessage", ChatQueryWithResponse.class);
         method.setAccessible(true);
-        String actual = (String) method.invoke(queryDatabaseLLMService, chatEntry);
+
+        // when
+        AiMessage actual = (AiMessage) method.invoke(queryDatabaseLLMServiceSpy, chatEntry);
+
+        // theen
         assertEquals(expected, actual);
     }
 
@@ -40,13 +158,15 @@ class QueryDatabaseLLMServiceTest {
                                 .dbQueryExecutionSuccess(true)
                                 .resultDescription("Found these users.")
                                 .build(),
-                        """
-                        LLM Response: Found these users.
-                        
-                        Executed tools:
-                        
-                        Method call: executeQuery("SELECT * FROM users;")
-                        Success: true"""
+                        AiMessage.builder()
+                                .text("Found these users.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT * FROM users;")
+                                                .build()))
+                                .attributes(mapOf("executeQuerySuccess", true))
+                                .build()
                 },
                 // Database query failed
                 {
@@ -57,14 +177,17 @@ class QueryDatabaseLLMServiceTest {
                                 .dbExecutionErrorMessage("Table 'user' does not exist.")
                                 .resultDescription("Could not find users due to an error.")
                                 .build(),
-                        """
-                        LLM Response: Could not find users due to an error.
-                       
-                        Executed tools:
-                        
-                        Method call: executeQuery("SELECT * FROM user;")
-                        Success: false
-                        Errors: Table 'user' does not exist."""
+                        AiMessage.builder()
+                                .text("Could not find users due to an error.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT * FROM user;")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "executeQuerySuccess", false,
+                                        "executeQueryError", "Table 'user' does not exist."))
+                                .build()
                 },
                 // Plot successfully generated
                 {
@@ -74,13 +197,15 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationSuccess(true)
                                 .resultDescription("Generated the plot successfully.")
                                 .build(),
-                        """
-                        LLM Response: Generated the plot successfully.
-                        
-                        Executed tools:
-                        
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: true"""
+                        AiMessage.builder()
+                                .text("Generated the plot successfully.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf("generatePlotSuccess", true))
+                                .build()
                 },
                 // Plot generation failed
                 {
@@ -91,14 +216,17 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationErrorMessage("Matplotlib is not installed.")
                                 .resultDescription("Could not generate the plot due to an error.")
                                 .build(),
-                        """
-                        LLM Response: Could not generate the plot due to an error.
-                        
-                        Executed tools:
-                        
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: false
-                        Errors: Matplotlib is not installed."""
+                        AiMessage.builder()
+                                .text("Could not generate the plot due to an error.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "generatePlotSuccess", false,
+                                        "generatePlotError", "Matplotlib is not installed."))
+                                .build()
                 },
                 // Database query and plot generation successfully executed
                 {
@@ -110,16 +238,21 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationSuccess(true)
                                 .resultDescription("Generated the plot successfully.")
                                 .build(),
-                        """
-                        LLM Response: Generated the plot successfully.
-                       
-                        Executed tools:
-                        
-                        Method call: executeQuery("SELECT sex, COUNT(*) FROM users GROUP BY sex;")
-                        Success: true
-                        
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: true"""
+                        AiMessage.builder()
+                                .text("Generated the plot successfully.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT sex, COUNT(*) FROM users GROUP BY sex;")
+                                                .build(),
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "executeQuerySuccess", true,
+                                        "generatePlotSuccess", true))
+                                .build()
                 },
                 // Database query and plot generation failed
                 {
@@ -133,18 +266,23 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationErrorMessage("Matplotlib is not installed.")
                                 .resultDescription("Could not generate the plot due to errors.")
                                 .build(),
-                        """
-                        LLM Response: Could not generate the plot due to errors.
-                        
-                        Executed tools:
-                        
-                        Method call: executeQuery("SELECT sex, COUNT(*) FROM user GROUP BY sex;")
-                        Success: false
-                        Errors: Table 'user' does not exist.
-                        
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: false
-                        Errors: Matplotlib is not installed."""
+                        AiMessage.builder()
+                                .text("Could not generate the plot due to errors.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT sex, COUNT(*) FROM user GROUP BY sex;")
+                                                .build(),
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "executeQuerySuccess", false,
+                                        "executeQueryError", "Table 'user' does not exist.",
+                                        "generatePlotSuccess", false,
+                                        "generatePlotError", "Matplotlib is not installed."))
+                                .build()
                 },
                 // Database query successfully executed and plot generation failed
                 {
@@ -157,17 +295,22 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationErrorMessage("Matplotlib is not installed.")
                                 .resultDescription("Could not generate the plot due to an error.")
                                 .build(),
-                        """
-                        LLM Response: Could not generate the plot due to an error.
-
-                        Executed tools:
-
-                        Method call: executeQuery("SELECT sex, COUNT(*) FROM users GROUP BY sex;")
-                        Success: true
-
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: false
-                        Errors: Matplotlib is not installed."""
+                        AiMessage.builder()
+                                .text("Could not generate the plot due to an error.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT sex, COUNT(*) FROM users GROUP BY sex;")
+                                                .build(),
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "executeQuerySuccess", true,
+                                        "generatePlotSuccess", false,
+                                        "generatePlotError", "Matplotlib is not installed."))
+                                .build()
                 },
                 // Database query execution failed and plot successfully generated
                 {
@@ -180,18 +323,40 @@ class QueryDatabaseLLMServiceTest {
                                 .plotGenerationSuccess(true)
                                 .resultDescription("Generated the plot successfully.")
                                 .build(),
-                        """
-                        LLM Response: Generated the plot successfully.
-   
-                        Executed tools:
-                        
-                        Method call: executeQuery("SELECT sex, COUNT(*) FROM user GROUP BY sex;")
-                        Success: false
-                        Errors: Table 'user' does not exist.
-                        
-                        Method call: generatePlot("import matplotlib.pyplot as plt; ...")
-                        Success: true"""
+                        AiMessage.builder()
+                                .text("Generated the plot successfully.")
+                                .toolExecutionRequests(List.of(
+                                        ToolExecutionRequest.builder()
+                                                .name("executeQuery")
+                                                .arguments("SELECT sex, COUNT(*) FROM user GROUP BY sex;")
+                                                .build(),
+                                        ToolExecutionRequest.builder()
+                                                .name("generatePlot")
+                                                .arguments("import matplotlib.pyplot as plt; ...")
+                                                .build()))
+                                .attributes(mapOf(
+                                        "executeQuerySuccess", false,
+                                        "executeQueryError", "Table 'user' does not exist.",
+                                        "generatePlotSuccess", true))
+                                .build()
                 }
         };
+    }
+
+    /**
+     * @param keyValues String1, Object1, String2, Object2, ...
+     */
+    private static Map<String, Object> mapOf(Object... keyValues) {
+        if (keyValues.length % 2 != 0) {
+            throw new IllegalArgumentException("Must provide an even number of arguments (key-value pairs).");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < keyValues.length; i += 2) {
+            String key = (String) keyValues[i];
+            Object value = keyValues[i + 1];
+            map.put(key, value);
+        }
+        return map;
     }
 }
