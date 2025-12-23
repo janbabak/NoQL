@@ -24,13 +24,20 @@ app:
       expiration: "${JWT_EXPIRATION:365160}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
     dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
-  externalServices:
-    openAiApi:
-      url: "${OPEN_AI_API_URL}"
-      apiKey: "${OPEN_AI_API_KEY}"
-    geminiApi:
-      url: "${GEMINI_API_URL}"
-      apiKey: "${GEMINI_API_KEY}"
+  external-services:
+    open-ai-api:
+      api-key: "${OPEN_AI_API_KEY}"
+      supported-models:
+        - "gpt-4o-mini"
+        - "gpt-4o"
+        - "gpt-5-mini"
+        - "gpt-5.2"
+        - "gpt-5-nano"
+    gemini-api:
+      api-key: "${GEMINI_API_KEY}"
+      supported-models:
+#        - "gemini-2.5-pro"
+#        - "gemini-2.5-flash"
     llamaApi:
       url: "${LLAMA_API_URL}"
       apiKey: "${LLAMA_API_KEY}"
