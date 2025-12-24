@@ -2,6 +2,8 @@ import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse 
 import { log } from '../loging/logger.ts'
 import { localStorageService } from '../LocalStorageService.ts'
 import { authenticationApi } from './authenticationApi.ts'
+import { ENV } from '@/env'
+
 
 /** query parameter */
 interface ApiParameter {
@@ -11,8 +13,8 @@ interface ApiParameter {
 
 class Api {
   axiosInstance: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT_MILIS)
+    baseURL: ENV.BACKEND_URL,
+    timeout: Number(ENV.API_TIMEOUT_MILLIS)
   })
 
   /** forbid constructor, because api is a singleton */

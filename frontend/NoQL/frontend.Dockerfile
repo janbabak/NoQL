@@ -9,6 +9,10 @@ RUN npm ci
 
 # Copy source files and build
 COPY . .
+
+# Ignore .env files during build
+RUN rm -f .env*
+
 RUN npm run build:prod
 
 # ---------- Runtime stage ----------
@@ -23,8 +27,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy build output from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80
+# Copy env.template.js to runtime to inject envs
+COPY env.template.js /usr/share/nginx/html/env.template.js
+
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Inject environment variables and start nginx
+CMD sh -c "envsubst < /usr/share/nginx/html/env.template.js > /usr/share/nginx/html/env.js && nginx -g 'daemon off;'"

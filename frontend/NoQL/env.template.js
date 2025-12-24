@@ -1,0 +1,4 @@
+window._env_ = {
+  BACKEND_URL: "${BACKEND_URL}",
+  API_TIMEOUT_MILLIS: "${API_TIMEOUT_MILLIS}"
+};

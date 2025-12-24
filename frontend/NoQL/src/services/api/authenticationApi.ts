@@ -1,13 +1,14 @@
 import axios, { AxiosResponse } from 'axios'
 import { AuthenticationRequest, AuthenticationResponse, RegisterRequest } from '../../types/Authentication.ts'
 import { localStorageService } from '../LocalStorageService.ts'
+import { ENV } from '@/env'
 
 export const authenticationApi = {
   DOMAIN: '/auth',
 
   axiosInstance: axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
-    timeout: parseInt(import.meta.env.VITE_API_TIMEOUT_MILIS)
+    baseURL: ENV.BACKEND_URL,
+    timeout: Number(ENV.API_TIMEOUT_MILLIS)
   }),
 
   /**
