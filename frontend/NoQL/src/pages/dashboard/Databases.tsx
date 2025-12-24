@@ -77,7 +77,7 @@ const Databases = memo(() => {
 
   const DatabasesList =
     <ul>{
-      databases.map((db: Database) =>
+      databases?.map((db: Database) =>
         <DatabaseCard
           database={db}
           key={db.id}

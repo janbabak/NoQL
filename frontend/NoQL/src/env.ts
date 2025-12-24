@@ -1,3 +1,4 @@
+// src/env.ts
 type RuntimeEnv = {
   BACKEND_URL: string
   API_TIMEOUT_MILLIS: string
@@ -5,7 +6,7 @@ type RuntimeEnv = {
 
 const runtimeEnv = (window as any)._env_ as RuntimeEnv | undefined
 
-export const ENV = {
-  BACKEND_URL: runtimeEnv?.BACKEND_URL ?? '',
-  API_TIMEOUT_MILLIS: runtimeEnv?.API_TIMEOUT_MILLIS ?? '0'
+export const ENV: RuntimeEnv = runtimeEnv ?? {
+  BACKEND_URL: import.meta.env.VITE_BACKEND_URL ?? '',
+  API_TIMEOUT_MILLIS: import.meta.env.VITE_API_TIMEOUT_MILLIS ?? '0'
 }

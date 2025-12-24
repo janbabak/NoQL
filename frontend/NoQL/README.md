@@ -1,5 +1,17 @@
 # React + TypeScript + Vite
 
+## Build docker image
+
+- Build image without pushing
+  ```bash
+  npm run buildFrontendDockerImage
+  ```
+
+- Build and push
+  ```bash
+  npm run buildAndPushDockerImage
+  ```
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
