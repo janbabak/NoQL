@@ -15,6 +15,7 @@ import java.util.UUID;
 
 @Entity
 @Data
+@ToString(exclude = {"database", "messages"})
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
