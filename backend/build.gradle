@@ -76,7 +76,7 @@ tasks.named('test') {
 	}
 }
 
-tasks.register('buildBackendDockerImage', Exec) {
+tasks.register('buildDockerImage', Exec) {
     group = "docker"
     description = "Build backend Docker image (push by default, disable with -Ppush=false)"
 

@@ -60,9 +60,9 @@
 
 - **Build** backend docker image
      ```bash
-     ./gradlew buildBackendDockerImage -Ppush=false
+     ./gradlew buildDockerImage -Ppush=false
      ```
 - **Build** and **Push** backend docker image
      ```bash
-     ./gradlew buildBackendDockerImage
+     ./gradlew buildDockerImage
      ```
