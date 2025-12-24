@@ -99,7 +99,7 @@ tasks.register('buildBackendDockerImage', Exec) {
         if (pushEnabled) {
             commandLine "bash", buildScriptPath, imageName, imageVersion, dockerFilePath
         } else {
-            commandLine "bash", buildScriptPath, imageName, imageVersion, dockerFilePath, "-x"
+            commandLine "bash", buildScriptPath, imageName, imageVersion, dockerFilePath, "-x", "push"
         }
     }
 
