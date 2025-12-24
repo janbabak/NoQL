@@ -3,15 +3,16 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
+# Install dependencies
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copy source files and build
 COPY . .
-
 RUN npm run build:prod
 
 # ---------- Runtime stage ----------
-FROM nginx:alpine
+FROM nginx:alpine AS runtime
 
 # Remove default nginx config
 RUN rm /etc/nginx/conf.d/default.conf
@@ -22,6 +23,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy build output from previous stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Expose port 80
 EXPOSE 80
 
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
