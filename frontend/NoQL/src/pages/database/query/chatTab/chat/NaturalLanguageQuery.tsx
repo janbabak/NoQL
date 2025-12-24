@@ -7,8 +7,8 @@ interface NaturalLanguageQueryProps {
  */
 export function NaturalLanguageQuery({ query }: NaturalLanguageQueryProps) {
   return (
-    <>
+    <div>
       <span style={{ fontWeight: 'bold' }}>You: </span>{query}
-    </>
+    </div>
   )
 }
