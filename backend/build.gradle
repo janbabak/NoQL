@@ -75,3 +75,35 @@ tasks.named('test') {
 		}
 	}
 }
+
+tasks.register('buildBackendDockerImage', Exec) {
+    group = "docker"
+    description = "Build backend Docker image (push by default, disable with -Ppush=false)"
+
+    dependsOn build
+
+    def imageName = "janbabak/noql-backend"
+    def imageVersion = project.version
+    def dockerFilePath = "${projectDir}/backend.Dockerfile"
+    def buildScriptPath = "${rootDir}/../infra/scripts/build-image.sh"
+
+    // Push is enabled unless explicitly disabled
+    def pushEnabled = !project.hasProperty("push") || project.property("push") != "false"
+
+    doFirst {
+        println "Docker backend image build started: ${imageName}:${imageVersion}"
+        println pushEnabled
+                ? "Docker push ENABLED"
+                : "Docker push DISABLED (local build only)"
+
+        if (pushEnabled) {
+            commandLine "bash", buildScriptPath, imageName, imageVersion, dockerFilePath
+        } else {
+            commandLine "bash", buildScriptPath, imageName, imageVersion, dockerFilePath, "-x", "push"
+        }
+    }
+
+    doLast {
+        println "Docker backend image built: ${imageName}:${imageVersion}"
+    }
+}

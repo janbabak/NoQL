@@ -20,6 +20,7 @@
 - `NOQL_DB_PASSWORD` - (required) Database password.
 
 **Local Database (for testing)**
+
 - should be the same as the database above (or there has to be another db running)
 - `POSTGRES_PASSWORD` - (required) Database password
 - `POSTGRES_USER` - (required) Database username
@@ -50,9 +51,18 @@
 - `CLAUDE_API_URL` - (required) for Claude models
 - `ANTHROPIC_VERSION` - (required) Anthropic API version
 
-## Gradle properties
+## Gradle Tasks
 
 - `showLogs` - Show logs of tests in the console. Default is `false`.
      ```bash
     ./gradlew test -PshowLogs
     ````
+
+- **Build** backend docker image
+     ```bash
+     ./gradlew buildBackendDockerImage -Ppush=false
+     ```
+- **Build** and **Push** backend docker image
+     ```bash
+     ./gradlew buildBackendDockerImage
+     ```
