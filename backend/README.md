@@ -66,3 +66,20 @@
      ```bash
      ./gradlew buildDockerImage
      ```
+  
+## Docker image
+
+- **How to run:**
+    - Portforward port desired port to `8080` in container
+    - Map plot service directory to `/app/plotService` in container to store plot images
+    - Map docker socket to `/var/run/docker.sock` in container
+    - Define necessary environment variables
+    ```bash
+    docker run -d \
+      --name noql-backend-test \            
+      -p 8080:8080 \              
+      -v "./plotService:/app/plotService" \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      --env-file ./backend/.env.local \
+      backend-test:0.0.1
+    ```
