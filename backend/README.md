@@ -56,20 +56,23 @@
 - `showLogs` - Show logs of tests in the console. Default is `false`.
      ```bash
     ./gradlew test -PshowLogs
-    ````
+    ```
+
+## Backend docker image
 
 - **Build** backend docker image
-     ```bash
-     ./gradlew buildDockerImage -Ppush=false
-     ```
-- **Build** and **Push** backend docker image
-     ```bash
-     ./gradlew buildDockerImage
-     ```
-  
-## Docker image
+    - Version is taken from `build.gradle` `version` attribute
+    ```bash
+    ./gradlew dockerBuildBackend -Ppush=false df
+    ```
 
-- **How to run:**
+- **Build** and **Push** backend docker image
+    - Version is taken from `build.gradle` `version` attribute
+    ```bash
+    ./gradlew dockerBuildBackend
+    ```
+
+- **Run** backend docker container
     - Portforward port desired port to `8080` in container
     - Map plot service directory to `/app/plotService` in container to store plot images
     - Map docker socket to `/var/run/docker.sock` in container
@@ -82,4 +85,32 @@
       -v /var/run/docker.sock:/var/run/docker.sock \
       --env-file ./backend/.env.local \
       backend-test:0.0.1
+    ```
+
+## Plot service docker image
+
+- **Build** plot service docker image
+    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
+    ```bash
+    ./gradlew dockerBuildPlotService -Ppush=false
+    ```
+
+- **Build** and **Push** plot service docker image
+    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
+    ```bash
+    ./gradlew dockerBuildPlotService
+    ```
+
+- **Run** plot service docker container
+    - Map plot service directory to `/app/plotService` in container to generate plot images
+    ```bash
+    docker run -d -it \
+     --name plot-service \
+     -v `pwd`/../plotService:/app/plotService \
+     janbabak/noql-plot-service:0.0.1
+    ```
+
+- **Generate plot** on running image
+    ```bash
+     docker exec plot-service python ./plotService/plot.py
     ```

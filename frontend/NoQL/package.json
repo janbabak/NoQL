@@ -10,8 +10,8 @@
 		"build:prod": "tsc && vite build --mode prod",
 		"lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview",
-		"buildDockerImage": "sh ../../infra/scripts/build-image.sh janbabak/noql-frontend $npm_package_version frontend.Dockerfile -x push",
-		"buildAndPushDockerImage": "sh ../../infra/scripts/build-image.sh janbabak/noql-frontend $npm_package_version frontend.Dockerfile"
+		"dockerBuildFrontend": "sh ../../infra/scripts/build-image.sh janbabak/noql-frontend $npm_package_version frontend.Dockerfile -x push",
+		"dockerPushFrontend": "sh ../../infra/scripts/build-image.sh janbabak/noql-frontend $npm_package_version frontend.Dockerfile"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.11.4",
