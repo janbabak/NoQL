@@ -22,6 +22,7 @@ and don't know query language syntax such as SQL.
 .github/                                  ... github actions (pipelines)
 ├─ workflows/
 backend/                                  ... backend app root
+|  README.md                            .  .. backend documentation
 ├─ src/                                   ... source code
 │  ├─ main/                               ... main code
 │  │  ├─ java.com.janbabak.noqlbackend/   
@@ -33,12 +34,13 @@ backend/                                  ... backend app root
 │  │  │  ├─ model/                        ... data models
 │  │  │  ├─ service/                      ... services
 │  │  │  ├─ validation/                   ... validation
-│  ├─ test/
+│  ├─ test/                               ... unit/integration tests
 │  swagger/                               ... swagger API documentation
 customModel/                              ... custom LLM api (separate project - gpt proxy)
 exampleDatabase/                          ... old example database
 frontend/                                 ... frontend app root
 ├─ NoQL/                 
+|  | README.md                            ... frontend documentation
 │  ├─ public/                             ... public files
 │  ├─ src/                                ... source code
 │  │  ├─ assets/
@@ -50,7 +52,6 @@ frontend/                                 ... frontend app root
 │  │  ├─ types/                           ... types
 infra/                                    ... infrastructure
 ├─ dev-stack/                             ... development stack (for backend)
-├─ dockerImages/                          ... docker images
 ├─ local-stack/                           ... local stack (for frontend, runs backend in docker)
 ├─ prod-stack/                            ... production stack
 ├─ scripts/                               ... scripts for building containers
