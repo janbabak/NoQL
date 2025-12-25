@@ -5,16 +5,12 @@
 This frontend supports **both build-time (Vite)** and **runtime (Docker)** environment variables.  
 The same Docker image can be reused across environments by injecting variables at container startup.
 
----
-
 ### Supported Variables
 
 | Variable | Description |
 |---------|------------|
 | `BACKEND_URL` | Base URL of the backend server |
 | `API_TIMEOUT_MILLIS` | API request timeout in milliseconds |
-
----
 
 ### Variable Format
 
@@ -36,8 +32,6 @@ API_TIMEOUT_MILLIS=40000
 
 These variables are injected dynamically at container startup.
 
----
-
 ### Adding or Modifying Environment Variables
 
 When introducing a new environment variable, the following files **must be updated**:
@@ -46,8 +40,6 @@ When introducing a new environment variable, the following files **must be updat
 - `frontend/NoQL/src/env.ts`
 - `frontend/NoQL/src/global.d.ts`
 - `frontend/NoQL/.env` (for local development)
-
----
 
 ### How the Environment Injection Works
 
@@ -96,8 +88,6 @@ The image version is read from the `version` field in `package.json`.
 npm run dockerBuildFrontend
 ```
 
----
-
 ### Build and Push Frontend Image
 Builds and pushes the frontend Docker image to the registry.  
 The image version is read from the `version` field in `package.json`.
@@ -105,8 +95,6 @@ The image version is read from the `version` field in `package.json`.
 ```bash
 npm run dockerPushFrontend
 ```
-
----
 
 ### Run Frontend Container
 
