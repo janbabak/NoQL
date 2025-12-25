@@ -1,109 +1,158 @@
-# NoQL backend
+# NoQL Backend
 
 ## Configuration
 
-- App can be configured by environment variables in the `backend/.env.local` file.
+The backend application is configured using environment variables.
+For local development, variables can be defined in `backend/.env.local`.
 
-### Environment variables
+## Environment Variables
 
-**Pagination**
+### Pagination
 
-- `PAGINATION_MAX_PAGE_SIZE` - Maximum page size of automatically paginated query result.
-- `PAGINATION_DEFAULT_PAGE_SIZE` - Default page size of automatically paginated query result.
+| Variable | Description |
+|--------|-------------|
+| `PAGINATION_MAX_PAGE_SIZE` | Maximum page size of automatically paginated query results |
+| `PAGINATION_DEFAULT_PAGE_SIZE` | Default page size of automatically paginated query results |
 
-**Database connection**
+### Database Connection
 
-- `NOQL_DB_NAME` - (required) Database name
-- `NOQL_DB_HOST` - (required) Database host
-- `NOQL_DB_PORT` - (required) Database port
-- `NOQL_DB_USERNAME` - (required) Database username
-- `NOQL_DB_PASSWORD` - (required) Database password.
+All database-related variables are **required**.
 
-**Local Database (for testing)**
+| Variable | Description |
+|--------|-------------|
+| `NOQL_DB_NAME` | Database name |
+| `NOQL_DB_HOST` | Database host |
+| `NOQL_DB_PORT` | Database port |
+| `NOQL_DB_USERNAME` | Database username |
+| `NOQL_DB_PASSWORD` | Database password |
 
-- should be the same as the database above (or there has to be another db running)
-- `POSTGRES_PASSWORD` - (required) Database password
-- `POSTGRES_USER` - (required) Database username
-- `POSTGRES_DB` - (required) Database name
+### Local Database (Testing Only)
 
-**Other**
+Used for running the application locally with a test database.
+The configuration should match the primary database settings unless a separate database is used.
 
-- `PLOT_SERVICE_CONTAINER_NAME` - (required) Name of the container running the plot service
-- `DEFAULT_USER_QUERY_LIMIT` - Default number of queries that can be executed by newly registered user.
+| Variable | Description |
+|--------|-------------|
+| `POSTGRES_DB` | Database name |
+| `POSTGRES_USER` | Database username |
+| `POSTGRES_PASSWORD` | Database password |
 
-**Security**
+### Other Configuration
 
-- `JWT_SECRET` - (required) Secret key for JWT token generation (at least 512 bits)
-- `JWT_EXPIRATION` - Expiration time of JWT token in seconds. (Default is 1 day)
-- `JWT_REFRESH_EXPIRATION` - Expiration time of JWT refresh token in seconds. (Default is 7 days)
-- `DATA_ENCRYPTION_KEY` - (required) Key for data encryption (256 bits encoded in base64)
+| Variable | Description |
+|--------|-------------|
+| `PLOT_SERVICE_CONTAINER_NAME` | Name of the container running the plot service |
+| `DEFAULT_USER_QUERY_LIMIT` | Default number of queries allowed for a newly registered user |
 
-**Api keys to external services**
+### Security
 
-- `GEMINI_API_KEY` - (required) Google Gemini model API key
-- `OPEN_AI_API_KEY` - (required) OpenAI API key - for GPT models
-- `CLAUDE_API_KEY` - (required) for Claude models
+All security-related variables are **required** unless stated otherwise.
+
+| Variable | Description |
+|--------|-------------|
+| `JWT_SECRET` | Secret key for JWT token generation (minimum 512 bits) |
+| `JWT_EXPIRATION` | JWT access token expiration time in seconds (default: 1 day) |
+| `JWT_REFRESH_EXPIRATION` | JWT refresh token expiration time in seconds (default: 7 days) |
+| `DATA_ENCRYPTION_KEY` | Data encryption key (256 bits, Base64-encoded) |
+
+### API Keys (External Services)
+
+All API keys listed below are **required**.
+
+| Variable | Description |
+|--------|-------------|
+| `GEMINI_API_KEY` | Google Gemini API key |
+| `OPEN_AI_API_KEY` | OpenAI API key (GPT models) |
+| `CLAUDE_API_KEY` | Anthropic Claude API key |
 
 ## Gradle Tasks
 
-- `showLogs` - Show logs of tests in the console. Default is `false`.
-     ```bash
-    ./gradlew test -PshowLogs
-    ```
+### Show Test Logs
 
-## Backend docker image
+By default, test logs are hidden. To enable log output:
 
-- **Build** backend docker image
-    - Version is taken from `build.gradle` `version` attribute
-    ```bash
-    ./gradlew dockerBuildBackend -Ppush=false df
-    ```
+```bash
+./gradlew test -PshowLogs
+```
 
-- **Build** and **Push** backend docker image
-    - Version is taken from `build.gradle` `version` attribute
-    ```bash
-    ./gradlew dockerBuildBackend
-    ```
+## Backend Docker Image
 
-- **Run** backend docker container
-    - Portforward port desired port to `8080` in container
-    - Map plot service directory to `/app/plotService` in container to store plot images
-    - Map docker socket to `/var/run/docker.sock` in container
-    - Define necessary environment variables
-    ```bash
-    docker run -d \
-      --name noql-backend-test \            
-      -p 8080:8080 \              
-      -v "./plotService:/app/plotService" \
-      -v /var/run/docker.sock:/var/run/docker.sock \
-      --env-file ./backend/.env.local \
-      backend-test:0.0.1
-    ```
+### Build Backend Image (Local)
 
-## Plot service docker image
+Builds the backend Docker image locally without pushing it.
+The image version is taken from the `version` field in `build.gradle`.
 
-- **Build** plot service docker image
-    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
-    ```bash
-    ./gradlew dockerBuildPlotService -Ppush=false
-    ```
+```bash
+./gradlew dockerBuildBackend -Ppush=false
+```
 
-- **Build** and **Push** plot service docker image
-    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
-    ```bash
-    ./gradlew dockerBuildPlotService
-    ```
+---
 
-- **Run** plot service docker container
-    - Map plot service directory to `/app/plotService` in container to generate plot images
-    ```bash
-    docker run -d -it \
-     --name plot-service \
-     -v `pwd`/../plotService:/app/plotService \
-     janbabak/noql-plot-service:0.0.1
-    ```
+### Build and Push Backend Image
 
-- **Generate plot** on running image
-    ```bash
-     docker exec plot-service python ./plotService/plot.py
-    ```
+Builds and pushes the backend Docker image to the registry.
+The image version is taken from the `version` field in `build.gradle`.
+
+```bash
+./gradlew dockerBuildBackend
+```
+
+---
+
+### Run Backend Container
+
+- Expose container port `8080`
+- Mount plot service output directory
+- Mount Docker socket for container orchestration
+- Provide required environment variables
+
+```bash
+docker run -d \
+  --name noql-backend-test \
+  -p 8080:8080 \
+  -v "./plotService:/app/plotService" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --env-file ./backend/.env.local \
+  backend-test:0.0.1
+```
+
+---
+
+## Plot Service Docker Image
+
+### Build Plot Service Image (Local)
+
+The image version is taken from `ext.docker.plotServiceVersion` in `build.gradle`.
+
+```bash
+./gradlew dockerBuildPlotService -Ppush=false
+```
+
+---
+
+### Build and Push Plot Service Image
+
+```bash
+./gradlew dockerBuildPlotService
+```
+
+---
+
+### Run Plot Service Container
+
+Mount the plot service directory to store generated plot images.
+
+```bash
+docker run -d -it \
+  --name plot-service \
+  -v "$(pwd)/../plotService:/app/plotService" \
+  janbabak/noql-plot-service:0.0.1
+```
+
+---
+
+### Generate Plot on Running Container
+
+```bash
+docker exec plot-service python ./plotService/plot.py
+```
