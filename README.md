@@ -103,18 +103,9 @@ cd NoQL/
 - It is necessary to create a `NoQL/backend/.env.local` file with the following content:
   ```dotenv
   # external services/apis
-  OPEN_AI_API_URL="https://api.openai.com/v1/chat/completions"
   OPEN_AI_API_KEY="" # input your api key
-  
-  GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models"
   GEMINI_API_KEY="" # input your api key
-  
-  LLAMA_API_URL="https://api.llama-api.com/chat/completions"
-  LLAMA_API_KEY="" # input your api key
-  
-  CLAUDE_API_URL="https://api.anthropic.com/v1/messages"
   CLAUDE_API_KEY="" # input your api key
-  ANTHROPIC_VERSION="2023-06-01"
   
   NOQL_DB_NAME="database"
   NOQL_DB_HOST="localhost"
@@ -131,7 +122,6 @@ cd NoQL/
   PAGINATION_MAX_PAGE_SIZE=100
   PAGINATION_DEFAULT_PAGE_SIZE=20
   
-  TRANSLATION_RETRIES=1
   PLOT_SERVICE_CONTAINER_NAME="plot-service-dev-stack"
   DEFAULT_USER_QUERY_LIMIT=150
   
