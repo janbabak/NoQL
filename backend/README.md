@@ -28,7 +28,6 @@
 
 **Other**
 
-- `TRANSLATION_RETRIES` - (required) Number of retries when translated query fails due to a syntax error
 - `PLOT_SERVICE_CONTAINER_NAME` - (required) Name of the container running the plot service
 - `DEFAULT_USER_QUERY_LIMIT` - Default number of queries that can be executed by newly registered user.
 
@@ -42,14 +41,8 @@
 **Api keys to external services**
 
 - `GEMINI_API_KEY` - (required) Google Gemini model API key
-- `GEMINI_API_URL` - (required) Google Gemini model API URL
 - `OPEN_AI_API_KEY` - (required) OpenAI API key - for GPT models
-- `OPEN_AI_API_URL` - (required) OpenAI API URL
-- `LLAMA_API_KEY` - (required) for Llama models
-- `LLAMA_API_URL` - (required) for Llama models
 - `CLAUDE_API_KEY` - (required) for Claude models
-- `CLAUDE_API_URL` - (required) for Claude models
-- `ANTHROPIC_VERSION` - (required) Anthropic API version
 
 ## Gradle Tasks
 

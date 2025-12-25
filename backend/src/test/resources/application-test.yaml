@@ -21,7 +21,6 @@ app:
     pagination:
       maxPageSize: "${PAGINATION_MAX_PAGE_SIZE:50}"
       defaultPageSize: "${PAGINATION_DEFAULT_PAGE_SIZE:10}"
-    translationRetries: "${TRANSLATION_RETRIES:3}"
     plotServiceContainerName: "${PLOT_SERVICE_CONTAINER_NAME:plot-service}"
     defaultUserQueryLimit: "${DEFAULT_USER_QUERY_LIMIT:10}"
   security:

@@ -18,9 +18,6 @@ public class Settings {
     @Value("${app.settings.pagination.defaultPageSize}")
     public Integer defaultPageSize;
 
-    @Value("${app.settings.translationRetries}")
-    public Integer translationRetries;
-
     @Value("${app.settings.plotServiceContainerName}")
     public String plotServiceContainerName;
 

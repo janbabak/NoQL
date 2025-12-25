@@ -38,7 +38,6 @@ class SettingsControllerTest {
     void getSettings() throws Exception {
         when(settingsMock.getMaxPageSize()).thenReturn(50);
         when(settingsMock.getDefaultPageSize()).thenReturn(10);
-        when(settingsMock.getTranslationRetries()).thenReturn(3);
         when(settingsMock.getPlotServiceContainerName()).thenReturn("plot-service-dev-stack");
         when(settingsMock.getDefaultUserQueryLimit()).thenReturn(10);
 
@@ -50,7 +49,6 @@ class SettingsControllerTest {
                         {
                              "maxPageSize": 50,
                              "defaultPageSize": 10,
-                             "translationRetries": 3,
                              "plotServiceContainerName": "plot-service-dev-stack",
                              "defaultUserQueryLimit": 10
                         }""", true));

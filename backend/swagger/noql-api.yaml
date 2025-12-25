@@ -1309,13 +1309,6 @@ components:
           type: integer
           format: int32
           example: 10
-        translationRetries:
-          description: |
-            Number of retries for query translation by LLM.<br />
-            Default value is 3 and can be changed by environment variable `TRANSLATION_RETRIES`.
-          type: integer
-          format: int32
-          example: 3
 
     CustomModel:
       type: object
