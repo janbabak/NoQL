@@ -1,4 +1,3 @@
-// src/env.ts
 type RuntimeEnv = {
   BACKEND_URL: string
   API_TIMEOUT_MILLIS: string

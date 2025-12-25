@@ -2,7 +2,6 @@ import { Paper } from '@mui/material'
 import styles from './Chat.module.css'
 import { ENV } from '@/env'
 
-
 interface PlotProps {
   plotUrl: string
 }

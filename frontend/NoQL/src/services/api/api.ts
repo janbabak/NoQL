@@ -4,7 +4,6 @@ import { localStorageService } from '../LocalStorageService.ts'
 import { authenticationApi } from './authenticationApi.ts'
 import { ENV } from '@/env'
 
-
 /** query parameter */
 interface ApiParameter {
   name: string
