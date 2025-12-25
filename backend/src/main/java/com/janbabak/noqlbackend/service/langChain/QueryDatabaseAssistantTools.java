@@ -55,6 +55,7 @@ public class QueryDatabaseAssistantTools {
     @SuppressWarnings("unused")
     @Tool("Execute query on database")
     public ToolExecutionResult executeQuery(@P("Database query in valid database query language") String query)  {
+        log.info("Execute query tool called");
         toolResult.setDbQuery(query);
         try {
             RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
@@ -80,6 +81,7 @@ public class QueryDatabaseAssistantTools {
     @SuppressWarnings("unused")
     @Tool("Generate plot from data")
     public ToolExecutionResult generatePlot(@P("Pyton script") String pythonCode) {
+        log.info("Generate plot tool called");
         toolResult.setScript(pythonCode);
         try {
             plotService.generatePlot(pythonCode, database, plotFileName);

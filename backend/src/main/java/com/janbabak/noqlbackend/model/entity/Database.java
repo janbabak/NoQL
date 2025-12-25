@@ -7,10 +7,7 @@ import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
@@ -23,6 +20,7 @@ import java.util.UUID;
  */
 @Entity
 @Data
+@ToString(exclude = {"chats", "user"})
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

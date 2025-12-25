@@ -11,6 +11,14 @@ bootRun {
 group = 'com.janbabak'
 version = '0.0.1'
 
+ext {
+    docker = [
+        repo: 'janbabak',
+        plotServiceVersion: '0.0.1',
+        buildScriptPath: "${rootDir}/../infra/scripts/build-image.sh"
+    ]
+}
+
 java {
 	sourceCompatibility = '17'
 }
@@ -74,4 +82,53 @@ tasks.named('test') {
 			showStandardStreams = true
 		}
 	}
+}
+
+tasks.register('dockerBuildBackend', Exec) {
+    group = "docker"
+    description = "Build backend Docker image (push by default, disable with -Ppush=false)"
+
+    dependsOn build
+
+    def imageName = "${docker.repo}/noql-backend"
+    def dockerFilePath = "${projectDir}/docker/backend.Dockerfile"
+    def pushEnabled = !project.hasProperty("push") || project.property("push") != "false"
+
+    doFirst {
+        println "Docker backend image build started: ${imageName}:${project.version}"
+        println "Docker push " + pushEnabled ? "ENABLED" : "DISABLED (local build only)"
+
+        if (pushEnabled) {
+            commandLine "bash", docker.buildScriptPath, imageName, project.version, dockerFilePath
+        } else {
+            commandLine "bash", docker.buildScriptPath, imageName, project.version, dockerFilePath, "-x", "push"
+        }
+    }
+
+    doLast {
+        println "Docker backend image built: ${imageName}:${project.version}"
+    }
+}
+
+tasks.register('dockerBuildPlotService', Exec) {
+    group = "docker"
+    description = "Build Plot service Docker image (push by default, disable with -Ppush=false)"
+
+	def imageName = "${docker.repo}/noql-plot-service"
+    def dockerFilePath = "${projectDir}/docker/plotService.Dockerfile"
+    def pushEnabled = !project.hasProperty("push") || project.property("push") != "false"
+
+    doFirst {
+        println "Docker plot service image build started: ${imageName}:${docker.plotServiceVersion}"
+        println "Docker push " + pushEnabled ? "ENABLED" : "DISABLED (local build only)"
+        if (pushEnabled) {
+            commandLine "bash", docker.buildScriptPath, imageName, docker.plotServiceVersion, dockerFilePath
+        } else {
+            commandLine "bash", docker.buildScriptPath, imageName, docker.plotServiceVersion, dockerFilePath, "-x", "push"
+        }
+    }
+
+    doLast {
+        println "Docker plot service image built: ${imageName}:${docker.plotServiceVersion}"
+    }
 }

@@ -46,7 +46,7 @@ export function ChatView() {
       {chatLoading
         ? ChatLoadingElement
         : <div ref={chatWindowRef} className={styles.chatWindow}>
-          {chat?.messages.map((message: ChatResponse) => {
+          {chat?.messages?.map((message: ChatResponse) => {
             return <ChatItem message={message} key={message.messageId} />
           })}</div>}
     </>

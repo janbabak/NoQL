@@ -20,6 +20,7 @@
 - `NOQL_DB_PASSWORD` - (required) Database password.
 
 **Local Database (for testing)**
+
 - should be the same as the database above (or there has to be another db running)
 - `POSTGRES_PASSWORD` - (required) Database password
 - `POSTGRES_USER` - (required) Database username
@@ -50,9 +51,66 @@
 - `CLAUDE_API_URL` - (required) for Claude models
 - `ANTHROPIC_VERSION` - (required) Anthropic API version
 
-## Gradle properties
+## Gradle Tasks
 
 - `showLogs` - Show logs of tests in the console. Default is `false`.
      ```bash
     ./gradlew test -PshowLogs
-    ````
+    ```
+
+## Backend docker image
+
+- **Build** backend docker image
+    - Version is taken from `build.gradle` `version` attribute
+    ```bash
+    ./gradlew dockerBuildBackend -Ppush=false df
+    ```
+
+- **Build** and **Push** backend docker image
+    - Version is taken from `build.gradle` `version` attribute
+    ```bash
+    ./gradlew dockerBuildBackend
+    ```
+
+- **Run** backend docker container
+    - Portforward port desired port to `8080` in container
+    - Map plot service directory to `/app/plotService` in container to store plot images
+    - Map docker socket to `/var/run/docker.sock` in container
+    - Define necessary environment variables
+    ```bash
+    docker run -d \
+      --name noql-backend-test \            
+      -p 8080:8080 \              
+      -v "./plotService:/app/plotService" \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      --env-file ./backend/.env.local \
+      backend-test:0.0.1
+    ```
+
+## Plot service docker image
+
+- **Build** plot service docker image
+    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
+    ```bash
+    ./gradlew dockerBuildPlotService -Ppush=false
+    ```
+
+- **Build** and **Push** plot service docker image
+    - Version is taken from `build.gradle` `ext.docker.plotServiceVersion` attribute
+    ```bash
+    ./gradlew dockerBuildPlotService
+    ```
+
+- **Run** plot service docker container
+    - Map plot service directory to `/app/plotService` in container to generate plot images
+    ```bash
+    docker run -d -it \
+     --name plot-service \
+     -v `pwd`/../plotService:/app/plotService \
+     janbabak/noql-plot-service:0.0.1
+    ```
+
+- **Generate plot** on running image
+    ```bash
+     docker exec plot-service python ./plotService/plot.py
+    ```
