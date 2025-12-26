@@ -43,6 +43,9 @@ jobs:
       - name: Set up Docker Buildx
         if: github.event_name == 'workflow_dispatch'
         uses: docker/setup-buildx-action@v3
+        with:
+          builder: backend-builder
+          install: true
 
       - name: Build & push Docker image
         if: github.event_name == 'workflow_dispatch'
