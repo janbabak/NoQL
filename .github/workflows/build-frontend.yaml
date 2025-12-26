@@ -32,5 +32,6 @@ jobs:
 
       - name: Build & push Docker image
         if: github.event_name == 'workflow_dispatch'
+        shell: bash
         working-directory: frontend/NoQL
         run: npm run dockerPushFrontend
