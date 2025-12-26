@@ -7,16 +7,11 @@ on:
       - master
     paths:
       - 'backend/**'
-
-  pull_request:
-    paths:
-      - 'backend/**'
   workflow_dispatch:
 
 jobs:
   validate-backend-version:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
