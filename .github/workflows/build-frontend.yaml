@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
+  validate-frontend-version:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
