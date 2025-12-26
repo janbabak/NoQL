@@ -5,10 +5,48 @@ on:
     branches-ignore:
       - main
       - master
+    paths:
+      - 'backend/**'
+
+  pull_request:
+    paths:
+      - 'backend/**'
   workflow_dispatch:
 
 jobs:
+  validate-backend-version:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Fetch main branch
+        run: git fetch origin main
+
+      - name: Get current backend version
+        id: pr_version
+        run: |
+          PR_VERSION=$(grep '^version' backend/build.gradle \
+          | awk -F= '{gsub(/[ '\'',]/,"",$2); print $2}')
+          echo "PR_VERSION=$PR_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get main backend version
+        id: main_version
+        run: |
+          MAIN_VERSION=$(git show origin/main:backend/build.gradle \
+          | grep '^version' \
+          | awk -F= '{gsub(/[ '\'',]/,"",$2); print $2}')
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check semantic version increment
+        run: |
+          ./ci/scripts/check-semantic-versioning.sh \
+            "${{ steps.pr_version.outputs.PR_VERSION }}" \
+            "${{ steps.main_version.outputs.MAIN_VERSION }}"
+
   build-backend:
+    needs: validate-backend-version
     runs-on: ubuntu-latest
 
     steps:
