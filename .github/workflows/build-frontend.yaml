@@ -38,7 +38,7 @@ jobs:
 
       - name: Check semantic version increment
         run: |
-          .ci/scripts/check-semantic-versioning.sh \
+          ./ci/scripts/check-semantic-versioning.sh \
             "${{ steps.pr_version.outputs.PR_VERSION }}" \
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
 
