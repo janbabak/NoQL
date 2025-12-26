@@ -99,6 +99,8 @@ npm run dockerBuildFrontend
 
 ### Build and Push Frontend Image
 
+Build and push can be executed by triggering a manual GitHub action.
+
 Builds and pushes the frontend Docker image to the registry.  
 The image version is read from the `version` field in `package.json`.
 
