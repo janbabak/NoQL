@@ -10,9 +10,18 @@ on:
 jobs:
   build-backend:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('backend/**.gradle*', 'backend/**/gradle-wrapper.properties') }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -37,6 +46,5 @@ jobs:
 
       - name: Build & push Docker image
         if: github.event_name == 'workflow_dispatch'
-        working-directory: frontend/NoQL
+        working-directory: backend
         run: ./gradlew dockerBuildBackend
-
