@@ -1,5 +1,6 @@
 # NoQL Frontend
 
+
 ## Environment Variables
 
 This frontend supports **both build-time (Vite)** and **runtime (Docker)** environment variables.  
