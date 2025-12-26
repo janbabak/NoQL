@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.6
+# syntax=docker/dockerfile:1.6 test
 
 # https://hub.docker.com/r/azul/zulu-openjdk-alpine
 FROM azul/zulu-openjdk-alpine:17.0.17
