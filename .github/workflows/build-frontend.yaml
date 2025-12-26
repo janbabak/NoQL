@@ -5,6 +5,8 @@ on:
     branches-ignore:
       - main
       - master
+    paths:
+      - 'frontend/NoQL/**'
   workflow_dispatch:
   pull_request:
     paths:
@@ -14,18 +16,16 @@ on:
 
 jobs:
   validate:
-    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR branch
+      - name: Checkout branch
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
 
       - name: Fetch main branch
         run: git fetch origin main
 
-      - name: Get PR package.json version
+      - name: Get current package.json version
         id: pr_version
         run: echo "PR_VERSION=$(jq -r '.version' frontend/NoQL/package.json)" >> $GITHUB_OUTPUT
 
@@ -41,9 +41,9 @@ jobs:
           .ci/scripts/check-semantic-versioning.sh \
             "${{ steps.pr_version.outputs.PR_VERSION }}" \
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
-          
 
   build-frontend:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
