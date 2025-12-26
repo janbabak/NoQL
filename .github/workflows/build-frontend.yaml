@@ -9,7 +9,6 @@ on:
 
 jobs:
   validate-frontend-version:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -49,7 +48,6 @@ jobs:
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
 
   build-frontend:
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
