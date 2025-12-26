@@ -5,8 +5,6 @@ on:
     branches-ignore:
       - main
       - master
-    paths:
-      - 'backend/**'
   workflow_dispatch:
 
 jobs:
@@ -19,14 +17,26 @@ jobs:
       - name: Fetch main branch
         run: git fetch origin main
 
+      # If backend changes aren't detected, don't validate backend version increase
+      - name: Detect backend changes
+        id: backend_changes
+        run: |
+          if git diff --name-only main ${{ github.sha }} | grep -q '^backend/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Get current backend version
+        if: steps.backend_changes.outputs.changed == 'true'
         id: pr_version
         run: |
           PR_VERSION=$(grep '^version' backend/build.gradle \
-          | awk -F= '{gsub(/[ '\'',]/,"",$2); print $2}')
+            | awk -F= '{gsub(/[ '\'',]/,"",$2); print $2}')
           echo "PR_VERSION=$PR_VERSION" >> $GITHUB_OUTPUT
 
       - name: Get main backend version
+        if: steps.backend_changes.outputs.changed == 'true'
         id: main_version
         run: |
           MAIN_VERSION=$(git show origin/main:backend/build.gradle \
@@ -35,6 +45,7 @@ jobs:
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
 
       - name: Check semantic version increment
+        if: steps.backend_changes.outputs.changed == 'true'
         run: |
           ./ci/scripts/check-semantic-versioning.sh \
             "${{ steps.pr_version.outputs.PR_VERSION }}" \
