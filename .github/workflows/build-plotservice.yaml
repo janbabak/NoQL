@@ -40,7 +40,7 @@ jobs:
         id: main_version
         run: |
           MAIN_VERSION=$(git show origin/main:backend/build.gradle \
-            | grep '^[[:space:]]*plotServiceVersion:' backend/build.gradle \
+            | grep '^[[:space:]]*plotServiceVersion:' \
             | awk -F: '{gsub(/[ '\'',]/,"",$2); print $2}')
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
 
