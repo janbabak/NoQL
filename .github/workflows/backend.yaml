@@ -12,5 +12,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  local:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ahoj
+        run: echo "runnnnnn"
+
   call_test:
     uses: ${{ github.repository }}/.github/workflows/backend/backend-reusable-test.yml@${{ github.ref_name }}
