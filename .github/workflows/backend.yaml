@@ -11,27 +11,11 @@ jobs:
   validate:
     uses: janbabak/NoQL/.github/workflows/backend-validate-version.yml@main
 
-  yes:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: yes
-        if: ${{ needs.validate.outputs.backend_changed == 'true' }}
-        run: echo "yeees"
-
-  no:
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - name: yes
-        if: ${{ needs.validate.outputs.backend_changed != 'true' }}
-        run: echo "nooo " + ${{ needs.validate.outputs.backend_changed }}
-
   build:
     needs: validate
     if: |
           needs.validate.outputs.backend_changed == 'true' ||
           github.event_name == 'workflow_dispatch'
-    uses: janbabak/NoQL/.github/workflows/backend/backend-build.yml@main
+    uses: janbabak/NoQL/.github/workflows/backend/backend/backend-build.yml@main
     with:
         push_docker: ${{ github.event_name == 'workflow_dispatch' }}
