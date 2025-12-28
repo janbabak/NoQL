@@ -9,4 +9,4 @@ on:
 
 jobs:
   call_test:
-    uses: ./.github/workflows/backend/backend-resusable-test.yml
+    uses: ./.github/workflows/backend/backend-reusable-test.yml
