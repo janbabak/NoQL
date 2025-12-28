@@ -1,18 +1,13 @@
 name: Validate backend version
 
 on:
-  workflow_call:
-    outputs:
-      backend_changed:
-        description: "Whether backend (excluding plotService) changed"
-        value: ${{ jobs.validate.outputs.backend_changed }}
+  workflow_call:  # no outputs here
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     outputs:
       backend_changed: ${{ steps.backend_changes.outputs.changed }}
-
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
