@@ -26,8 +26,10 @@ jobs:
             | grep -v '^backend/docker/plotService.Dockerfile$' \
             | grep -q .; then
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed pico"
           else
             echo "changed=false" >> $GITHUB_OUTPUT
+            echo "not changed pico"
           fi
 
       - name: Get current backend version
