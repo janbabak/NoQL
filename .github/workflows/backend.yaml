@@ -16,6 +16,6 @@ jobs:
     if: |
           needs.validate.outputs.backend_changed == 'true' ||
           github.event_name == 'workflow_dispatch'
-    uses: janbabak/NoQL/.github/workflows/backend-build.yml@main
+    uses: janbabak/NoQL/.github/workflows/backend/backend-build.yml@main
     with:
         push_docker: ${{ github.event_name == 'workflow_dispatch' }}
