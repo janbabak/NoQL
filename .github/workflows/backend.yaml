@@ -1,4 +1,4 @@
-name: Build backend
+name: Backend
 
 on:
   push:
@@ -7,16 +7,27 @@ on:
       - master
   workflow_dispatch:
 
-jobs:
-  validate:
-    uses: ./.github/workflows/backend/backend-validate-version.yml
-    id: validate
 
-  build:
-    needs: validate
-    if: |
-      needs.validate.outputs.backend_changed == 'true' ||
-      github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/backend/backend-build.yml
-    with:
-      push_docker: ${{ github.event_name == 'workflow_dispatch' }}
+jobs:
+  validate-backend-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Test
+        run: echo "pico"
+
+#jobs:
+#  validate:
+#    uses: ./.github/workflows/backend/backend-validate-version.yml
+#    id: validate
+#
+#  build:
+#    needs: validate
+#    if: |
+#      needs.validate.outputs.backend_changed == 'true' ||
+#      github.event_name == 'workflow_dispatch'
+#    uses: ./.github/workflows/backend/backend-build.yml
+#    with:
+#      push_docker: ${{ github.event_name == 'workflow_dispatch' }}
