@@ -8,4 +8,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print from reusable workflow
-        run: echo "Hello from backend reusable workflow"
+        run: echo "Hello from backend reusable workflow!"
