@@ -1,5 +1,9 @@
 name: Backend
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   push:
     branches-ignore:
