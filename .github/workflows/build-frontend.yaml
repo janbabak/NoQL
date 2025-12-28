@@ -48,6 +48,7 @@ jobs:
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
 
   build-frontend:
+    needs: validate-frontend-version
     runs-on: ubuntu-latest
 
     steps:
