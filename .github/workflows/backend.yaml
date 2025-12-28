@@ -9,21 +9,4 @@ on:
 
 jobs:
   call_test:
-    uses: ./.github/workflows/backend/backend-reusable-test.yml
-
-
-
-
-#jobs:
-#  validate:
-#    uses: ./.github/workflows/backend/backend-validate-version.yml
-#    id: validate
-
-#  build:
-#    needs: validate
-#    if: |
-#      needs.validate.outputs.backend_changed == 'true' ||
-#      github.event_name == 'workflow_dispatch'
-#    uses: ./.github/workflows/backend/backend-build.yml
-#    with:
-#      push_docker: ${{ github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/backend/backend-resusable-test.yml
