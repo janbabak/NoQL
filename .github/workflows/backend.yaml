@@ -1,8 +1,4 @@
-name: Backend
-
-permissions:
-  contents: read
-  id-token: write
+name: Build backend
 
 on:
   push:
@@ -12,11 +8,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  local:
-    runs-on: ubuntu-latest
-    steps:
-      - name: ahoj
-        run: echo "runnnnnn"
+  validate:
+    uses: janbabak/NoQL/.github/workflows/backend/backend-validate-version.yml@main
+    id: validate
 
-  call_test:
-    uses: janbabak/NoQL/.github/workflows/backend/backend-reusable-test.yml@424-split-pipeline-into-files-based-on-jobs
+  build:
+    needs: validate
+    if: |
+      needs.validate.outputs.backend_changed == 'true' ||
+      github.event_name == 'workflow_dispatch'
+    uses: janbabak/NoQL/.github/workflows/backend/backend-build.yml@main
+    with:
+      push_docker: ${{ github.event_name == 'workflow_dispatch' }}
