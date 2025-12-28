@@ -17,14 +17,19 @@ jobs:
       - name: Fetch main branch
         run: git fetch origin main
 
-      # If backend changes aren't detected, don't validate backend version increase
+      # If backend changes aren't detected, don't validate backend version increase, ignores plotService.Dockerfile
       - name: Detect backend changes
         id: backend_changes
         run: |
-          if git diff --name-only main ${{ github.sha }} | grep -q '^backend/'; then
+          if git diff --name-only origin/main ${{ github.sha }} \
+            | grep '^backend/' \
+            | grep -v '^backend/docker/plotService.Dockerfile$' \
+            | grep -q .; then
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed pico"
           else
             echo "changed=false" >> $GITHUB_OUTPUT
+            echo "not changed pico"
           fi
 
       - name: Get current backend version

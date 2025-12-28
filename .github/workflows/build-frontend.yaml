@@ -21,7 +21,7 @@ jobs:
       - name: Detect backend changes
         id: frontend_changes
         run: |
-          if git diff --name-only main ${{ github.sha }} | grep -q '^frontend/'; then
+          if git diff --name-only origin/main ${{ github.sha }} | grep -q '^frontend/'; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -48,6 +48,7 @@ jobs:
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
 
   build-frontend:
+    needs: validate-frontend-version
     runs-on: ubuntu-latest
 
     steps:
