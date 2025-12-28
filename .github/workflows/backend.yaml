@@ -19,4 +19,4 @@ jobs:
         run: echo "runnnnnn"
 
   call_test:
-    uses: janbabak/NoQL/.github/workflows/reusable.yml@main
+    uses: janbabak/NoQL/.github/workflows/backend/backend-reusable-test.yml
