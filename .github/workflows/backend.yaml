@@ -10,6 +10,7 @@ on:
 jobs:
   validate:
     uses: ./.github/workflows/backend/backend-validate-version.yml
+    id: validate
 
   build:
     needs: validate
