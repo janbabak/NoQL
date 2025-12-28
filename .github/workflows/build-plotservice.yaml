@@ -1,10 +1,14 @@
 name: Build Plot service
 
 on:
+  push:
+    branches-ignore:
+      - main
+      - master
   workflow_dispatch:
 
 jobs:
-  validate-backend-version:
+  validate-plot-service-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -14,7 +18,7 @@ jobs:
         run: git fetch origin main
 
       # If plot service changes aren't detected, don't validate plot service version increase
-      - name: Detect backend changes
+      - name: Detect plot service changes
         id: plot_service_changes
         run: |
           if git diff --name-only main ${{ github.sha }} | grep -q '^backend/docker/plotService.Dockerfile'; then
