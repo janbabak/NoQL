@@ -13,4 +13,4 @@ on:
 
 jobs:
   call_test:
-    uses: ./.github/workflows/backend/backend-reusable-test.yml
+    uses: ${{ github.repository }}/.github/workflows/backend/backend-reusable-test.yml@${{ github.ref_name }}
