@@ -29,33 +29,33 @@ jobs:
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-#
-#  # Validate frontend version has been increased when frontend changes have been detected
-#  validate-version:
-#    runs-on: ubuntu-latest
-#    needs: detect-changes
-#    if: needs.detect-changes.outputs.frontend_changed == 'true
-#
-#    steps:
-#      - name: Checkout branch
-#        uses: actions/checkout@v4
-#
-#      - name: Fetch main branch
-#        run: git fetch origin main
-#
-#      - name: Get current package.json version
-#        id: pr_version
-#        run: echo "PR_VERSION=$(jq -r '.version' frontend/NoQL/package.json)" >> $GITHUB_OUTPUT
-#
-#      - name: Get main package.json version
-#        id: main_version
-#        run: |
-#          git show origin/main:frontend/NoQL/package.json > main_package.json
-#          MAIN_VERSION=$(jq -r '.version' main_package.json)
-#          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
-#
-#      - name: Check semantic version increment
-#        run: |
-#          ./ci/scripts/check-semantic-versioning.sh \
-#            "${{ steps.pr_version.outputs.PR_VERSION }}" \
-#            "${{ steps.main_version.outputs.MAIN_VERSION }}"
+
+  # Validate frontend version has been increased when frontend changes have been detected
+  validate-version:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend_changed == 'true'
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Fetch main branch
+        run: git fetch origin main
+
+      - name: Get current package.json version
+        id: pr_version
+        run: echo "PR_VERSION=$(jq -r '.version' frontend/NoQL/package.json)" >> $GITHUB_OUTPUT
+
+      - name: Get main package.json version
+        id: main_version
+        run: |
+          git show origin/main:frontend/NoQL/package.json > main_package.json
+          MAIN_VERSION=$(jq -r '.version' main_package.json)
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check semantic version increment
+        run: |
+          ./ci/scripts/check-semantic-versioning.sh \
+            "${{ steps.pr_version.outputs.PR_VERSION }}" \
+            "${{ steps.main_version.outputs.MAIN_VERSION }}"
