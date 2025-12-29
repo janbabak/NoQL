@@ -9,7 +9,7 @@ bootRun {
 }
 
 group = 'com.janbabak'
-version = '0.0.3'
+version = '0.0.4'
 
 ext {
     docker = [
