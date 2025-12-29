@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: experimental
-        run: echo "hello"
       - name: Checkout repository
         uses: actions/checkout@v4
 
