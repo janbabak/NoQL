@@ -92,6 +92,8 @@ tasks.named('test') {
 }
 
 jacocoTestReport {
+    description = "Run test with code coverage"
+
     dependsOn test
 
     reports {
@@ -100,6 +102,7 @@ jacocoTestReport {
         csv.required = false
     }
 
+    // parse jacoco report, compute, and print total test coverage
     doLast {
         def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
         if (!reportFile.exists()) {
