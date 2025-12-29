@@ -64,6 +64,10 @@ jobs:
           echo "coverage=$TOTAL_COVERAGE" >> $GITHUB_OUTPUT
           echo "**Total Coverage:** ${TOTAL_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
 
+      - name: Update coverage badge JSON
+        # if: inputs.triggered_by_merge
+        run: ./ci/scripts/update-coverage-badge.sh backend_coverage.json "${{ steps.coverage.outputs.coverage }}"
+
       - name: Build backend
         working-directory: backend
         run: ./gradlew build
