@@ -16,7 +16,7 @@ on:
         required: true
 
 jobs:
-  build-frontend:
+  build:
     runs-on: ubuntu-latest
 
     steps:

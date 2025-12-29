@@ -1,21 +1,22 @@
-name: Validate backend version
+name: Validate backend
 
 on:
   workflow_call:
     outputs:
       backend_changed:
         description: 'True if backend code has changed on this branch.'
-        value: ${{ jobs.detect-backend-changes.outputs.backend_changed }}
+        value: ${{ jobs.detect-changes.outputs.backend_changed }}
 
 jobs:
   # Detect changes in the /backend folder (ignoring /backend/docker/plotService.Dockerfile)
-  detect-backend-changes:
+  detect-changes:
     runs-on: ubuntu-latest
     outputs:
       backend_changed: ${{ steps.detect.outputs.changed }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout branch
+        uses: actions/checkout@v4
 
       - name: Fetch main branch
         run: git fetch origin main
@@ -33,13 +34,14 @@ jobs:
           fi
 
   # Validate backend version has been increased when backend changes have been detected
-  validate-backend-version:
+  validate-version:
     runs-on: ubuntu-latest
-    needs: detect-backend-changes
-    if: needs.detect-backend-changes.outputs.backend_changed == 'true'
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_changed == 'true'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout branch
+        uses: actions/checkout@v4
 
       - name: Fetch main branch
         run: git fetch origin main
