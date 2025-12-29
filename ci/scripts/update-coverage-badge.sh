@@ -24,7 +24,8 @@ git config user.email "github-actions@github.com"
 git fetch origin "$BRANCH" || true
 git checkout -B "$BRANCH"
 git add "$BADGE_FILE"
-git commit -m "Update coverage badge [skip ci]" || echo "No changes to commit"
+git commit -m "Update coverage badge [skip ci]" || exit 0
+git push --force-with-lease origin "$BRANCH"
 
 # Push using the GitHub token for authentication
 git push https://x-access-token:${GH_ACCESS_TOKEN}@github.com/janbabak/NoQL.git "$BRANCH"
