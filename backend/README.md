@@ -67,6 +67,11 @@ All API keys listed below are **required**.
 
 ## Gradle Tasks
 
+## Run tests with coverage
+```bash
+./gradlew clean jacocoTestReport 
+```
+
 ### Show Test Logs
 
 By default, test logs are hidden. To enable log output:
