@@ -2,18 +2,18 @@ name: Build backend
 
 on:
   workflow_call:
-    inputs:
-      push_docker:
-        required: false
-        type: boolean
-        default: false
-    secrets:
-      DOCKERHUB_USERNAME:
-        description: 'Docker Hub username for login'
-        required: true
-      DOCKERHUB_TOKEN:
-        description: 'Docker Hub access token for login'
-        required: true
+#    inputs:
+#      push_docker:
+#        required: false
+#        type: boolean
+#        default: false
+#    secrets:
+#      DOCKERHUB_USERNAME:
+#        description: 'Docker Hub username for login'
+#        required: true
+#      DOCKERHUB_TOKEN:
+#        description: 'Docker Hub access token for login'
+#        required: true
 
 jobs:
   build:
