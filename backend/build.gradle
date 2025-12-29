@@ -1,7 +1,14 @@
+import groovy.xml.XmlSlurper
+import org.xml.sax.EntityResolver
+import org.xml.sax.InputSource
+
+import javax.xml.parsers.SAXParserFactory
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.0'
 	id 'io.spring.dependency-management' version '1.1.4'
+    id 'jacoco' // test coverage
 }
 
 bootRun {
@@ -10,6 +17,10 @@ bootRun {
 
 group = 'com.janbabak'
 version = '0.0.3'
+
+repositories {
+    mavenCentral()
+}
 
 ext {
     docker = [
@@ -20,7 +31,7 @@ ext {
 }
 
 java {
-	sourceCompatibility = '17'
+	sourceCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
@@ -31,10 +42,6 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-}
-
-repositories {
-	mavenCentral()
 }
 
 dependencies {
@@ -82,6 +89,55 @@ tasks.named('test') {
 			showStandardStreams = true
 		}
 	}
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+
+    doLast {
+        def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
+        if (!reportFile.exists()) {
+            println "JaCoCo report not found."
+            return
+        }
+
+        def factory = SAXParserFactory.newInstance()
+        factory.setNamespaceAware(true)
+        // because there were some issues with DOCTYPE parsing
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false)
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false)
+
+        def xmlReader = factory.newSAXParser().getXMLReader()
+
+        // Ignore external DTDs
+        xmlReader.setEntityResolver(new EntityResolver() {
+            InputSource resolveEntity(String publicId, String systemId) {
+                return new InputSource(new StringReader(""))
+            }
+        })
+
+        def slurper = new XmlSlurper(xmlReader)
+        def report = slurper.parse(reportFile)
+
+        def counters = report.counter.findAll { it.@type == 'INSTRUCTION' }
+        if (counters) {
+            def covered = counters[0].@covered.toInteger()
+            def missed = counters[0].@missed.toInteger()
+            def total = covered + missed
+            def coverage = (covered / total * 100).round(2)
+            println "Total Coverage: ${coverage}%"
+        } else {
+            println "No instruction counters found."
+        }
+    }
 }
 
 tasks.register('dockerBuildBackend', Exec) {
