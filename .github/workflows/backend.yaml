@@ -23,10 +23,8 @@ jobs:
       needs.validate-backend.outputs.backend_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/backend-build.yaml@main
-#    with:
-#      push_docker: ${{ inputs.push_docker }}
     with:
-      push_docker: false
+      push_docker: ${{ github.event.inputs.push_docker || false }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
