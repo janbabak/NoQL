@@ -1,5 +1,5 @@
 # This image is used by the PlotService in backend to generate plots
-# in an isolated environment (AI-generated Python scripts).
+# in an isolated environment (AI-generated Python scripts). test
 
 FROM python:3.12.12-alpine
 
