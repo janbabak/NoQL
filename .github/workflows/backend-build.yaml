@@ -28,13 +28,28 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('backend/**.gradle*', 'backend/**/gradle-wrapper.properties') }}
+          key: |
+            gradle-${{ hashFiles(
+              'backend/**.gradle*',
+              'backend/**/gradle-wrapper.properties',
+              'backend/settings.gradle*',
+              'backend/gradle/libs.versions.toml'
+            ) }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
+
+      - name: Run tests + coverage
+        working-directory: backend
+        run: ./gradlew test jacocoTestReport
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/build/reports/jacoco/test/jacocoTestReport.xml
 
       - name: Build backend
         working-directory: backend
