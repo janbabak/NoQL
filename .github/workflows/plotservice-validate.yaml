@@ -44,6 +44,13 @@ jobs:
       - name: Fetch main branch
         run: git fetch origin main
 
+      - name: Get current plot service version
+        id: pr_version
+        run: |
+          PR_VERSION=$(grep '^[[:space:]]*plotServiceVersion:' backend/build.gradle \
+            | awk -F: '{gsub(/[ '\'',]/,"",$2); print $2}')
+          echo "PR_VERSION=$PR_VERSION" >> $GITHUB_OUTPUT
+
       - name: Get main plot service version
         id: main_version
         run: |
@@ -51,12 +58,6 @@ jobs:
             | grep '^[[:space:]]*plotServiceVersion:' \
             | awk -F: '{gsub(/[ '\'',]/,"",$2); print $2}')
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check semantic version increment
-        run: |
-          ./ci/scripts/check-semantic-versioning.sh \
-            "${{ steps.pr_version.outputs.PR_VERSION }}" \
-            "${{ steps.main_version.outputs.MAIN_VERSION }}"
 
       - name: Check semantic version increment
         run: |
