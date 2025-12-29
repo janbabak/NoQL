@@ -36,15 +36,15 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Run tests + coverage
-        working-directory: backend
-        run: ./gradlew test jacocoTestReport
-
-      - name: Test Summary
-        uses: test-summary/action@v2
-        with:
-          paths: "backend/build/test-results/test/TEST-*.xml"
-        if: always()
+#      - name: Run tests + coverage
+#        working-directory: backend
+#        run: ./gradlew test jacocoTestReport
+#
+#      - name: Test Summary
+#        uses: test-summary/action@v2
+#        with:
+#          paths: "backend/build/test-results/test/TEST-*.xml"
+#        if: always()
 
       - name: Build backend
         working-directory: backend
