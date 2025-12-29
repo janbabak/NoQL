@@ -14,6 +14,9 @@ on:
       DOCKERHUB_TOKEN:
         description: 'Docker Hub access token for login'
         required: true
+      GH_ACCESS_TOKEN:
+        description: 'GitHub access token with Contents read-write permissions'
+        required: true
 
 jobs:
   build:
