@@ -16,11 +16,11 @@ on:
 jobs:
   build-backend:
     uses: janbabak/NoQL/.github/workflows/backend-build.yaml@main
-    with:
-      push_docker: ${{ inputs.push_docker }}
-#    secrets:
-#      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-#      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+#    with:
+#      push_docker: ${{ inputs.push_docker }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 #  validate-backend:
 #    uses: janbabak/NoQL/.github/workflows/backend-validate.yaml@main
