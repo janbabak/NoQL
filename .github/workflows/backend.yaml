@@ -19,9 +19,9 @@ jobs:
 
   build-backend:
     needs: validate-backend
-    if: |
-      needs.validate-backend.outputs.backend_changed == 'true' ||
-      github.event_name == 'workflow_dispatch'
+#    if: |
+#      needs.validate-backend.outputs.backend_changed == 'true' ||
+#      github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/backend-build.yaml@main
     with:
       push_docker: ${{ inputs.push_docker }}
