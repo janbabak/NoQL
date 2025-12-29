@@ -8,7 +8,7 @@ on:
         value: ${{ jobs.detect-changes.outputs.frontend_changed }}
 
 jobs:
-  # Detect changes in the /backend folder (ignoring /backend/docker/plotService.Dockerfile)
+  # Detect changes in the /frontend folder
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
