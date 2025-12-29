@@ -1,0 +1,24 @@
+name: Frontend pipeline
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  validate-frontend:
+    uses: janbabak/NoQL/.github/workflows/frontend-validate.yaml@main
+
+  build:
+    needs: validate-frontend
+    if: |
+      needs.validate-frontend.outputs.frontend_changed == 'true' ||
+      github.event_name == 'workflow_dispatch'
+    uses: janbabak/NoQL/.github/workflows/frontend-build.yaml@main
+    with:
+      push_docker: ${{ github.event_name == 'workflow_dispatch' }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
