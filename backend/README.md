@@ -67,9 +67,16 @@ All API keys listed below are **required**.
 
 ## Gradle Tasks
 
-## Run tests with coverage
+## Test Coverage
+
+Generate JaCoco report
 ```bash
-./gradlew clean jacocoTestReport 
+./gradlew jacocoTestReport 
+```
+
+Get total coverage
+```bash
+./gradlew computeTotalTestCoverage
 ```
 
 ### Show Test Logs
