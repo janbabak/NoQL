@@ -100,7 +100,6 @@ jacocoTestReport {
         csv.required = false
     }
 
-
     doLast {
         def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
         if (!reportFile.exists()) {

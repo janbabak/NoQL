@@ -28,13 +28,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: |
-            gradle-${{ hashFiles(
-              'backend/**.gradle*',
-              'backend/**/gradle-wrapper.properties',
-              'backend/settings.gradle*',
-              'backend/gradle/libs.versions.toml'
-            ) }}
+          key: gradle-${{ hashFiles('backend/**.gradle*', 'backend/**/gradle-wrapper.properties') }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
