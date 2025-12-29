@@ -57,7 +57,7 @@ All security-related variables are **required** unless stated otherwise.
 
 ### API Keys (External Services)
 
-All API keys listed below are **required**. test
+All API keys listed below are **required**.
 
 | Variable | Description |
 |--------|-------------|
