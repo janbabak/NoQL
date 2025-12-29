@@ -14,14 +14,21 @@ on:
       DOCKERHUB_TOKEN:
         description: 'Docker Hub access token for login'
         required: true
+      GH_ACCESS_TOKEN:
+        description: 'GitHub access token with Contents read-write permissions'
+        required: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      total_coverage: ${{ steps.coverage.outputs.coverage }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/cache@v3
         with:
@@ -50,13 +57,20 @@ jobs:
         if: always()
 
       - name: Coverage Summary
+        id: coverage
         if: always()
         working-directory: backend
         run: |
           TOTAL_COVERAGE=$(./gradlew computeTotalTestCoverage -q)
           echo "Total test coverage ${TOTAL_COVERAGE}%"
-          echo "coverage=$TOTAL_COVERAGE%" >> $GITHUB_OUTPUT
+          echo "coverage=$TOTAL_COVERAGE" >> $GITHUB_OUTPUT
           echo "**Total Coverage:** ${TOTAL_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update coverage badge JSON
+        if: inputs.triggered_by_merge
+        run: ./ci/scripts/update-coverage-badge.sh backend_coverage.json "${{ steps.coverage.outputs.coverage }}"
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Build backend
         working-directory: backend
