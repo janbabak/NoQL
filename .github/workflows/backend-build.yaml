@@ -7,13 +7,13 @@ on:
         required: false
         type: boolean
         default: false
-    secrets:
-      DOCKERHUB_USERNAME:
-        description: 'Docker Hub username for login'
-        required: true
-      DOCKERHUB_TOKEN:
-        description: 'Docker Hub access token for login'
-        required: true
+#    secrets:
+#      DOCKERHUB_USERNAME:
+#        description: 'Docker Hub username for login'
+#        required: true
+#      DOCKERHUB_TOKEN:
+#        description: 'Docker Hub access token for login'
+#        required: true
 
 jobs:
   build:
