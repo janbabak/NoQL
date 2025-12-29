@@ -67,6 +67,8 @@ jobs:
       - name: Update coverage badge JSON
         # if: inputs.triggered_by_merge
         run: ./ci/scripts/update-coverage-badge.sh backend_coverage.json "${{ steps.coverage.outputs.coverage }}"
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Build backend
         working-directory: backend

@@ -27,4 +27,4 @@ git add "$BADGE_FILE"
 git commit -m "Update coverage badge [skip ci]" || echo "No changes to commit"
 
 # Push using the GitHub token for authentication
-git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git "$BRANCH"
+git push https://x-access-token:${GH_ACCESS_TOKEN}@github.com/${GITHUB_REPOSITORY}.git "$BRANCH"
