@@ -44,12 +44,10 @@ jobs:
         run: git fetch origin main
 
       - name: Get current package.json version
-        if: steps.frontend_changes.outputs.changed == 'true'
         id: pr_version
         run: echo "PR_VERSION=$(jq -r '.version' frontend/NoQL/package.json)" >> $GITHUB_OUTPUT
 
       - name: Get main package.json version
-        if: steps.frontend_changes.outputs.changed == 'true'
         id: main_version
         run: |
           git show origin/main:frontend/NoQL/package.json > main_package.json
@@ -57,7 +55,6 @@ jobs:
           echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_OUTPUT
 
       - name: Check semantic version increment
-        if: steps.frontend_changes.outputs.changed == 'true'
         run: |
           ./ci/scripts/check-semantic-versioning.sh \
             "${{ steps.pr_version.outputs.PR_VERSION }}" \
