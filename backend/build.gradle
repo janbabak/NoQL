@@ -16,7 +16,7 @@ bootRun {
 }
 
 group = 'com.janbabak'
-version = '0.0.4'
+version = '0.0.5'
 
 repositories {
     mavenCentral()
@@ -101,6 +101,10 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
+}
+
+tasks.register('computeTotalTestCoverage') {
+    dependsOn jacocoTestReport
 
     // parse jacoco report, compute, and print total test coverage
     doLast {
@@ -135,7 +139,7 @@ jacocoTestReport {
             def missed = counters[0].@missed.toInteger()
             def total = covered + missed
             def coverage = (covered / total * 100).round(2)
-            println "Total Coverage: ${coverage}%"
+            println "${coverage}"
         } else {
             println "No instruction counters found."
         }
