@@ -1,4 +1,4 @@
-# NoQL Frontend
+# NoQL Frontend tests
 
 ## Environment Variables
 
