@@ -38,7 +38,7 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Run tests + coverage
+      - name: Run tests with coverage
         working-directory: backend
         run: ./gradlew test jacocoTestReport
 
@@ -47,6 +47,15 @@ jobs:
         with:
           paths: "backend/build/test-results/test/TEST-*.xml"
         if: always()
+
+      - name: Coverage Summary
+        working-directory: backend
+        run: |
+          TOTAL_COVERAGE=$(./gradlew computeTotalTestCoverage -q)
+          echo "Total test coverage ${TOTAL_COVERAGE}"
+          echo "coverage=$TOTAL_COVERAGE" >> $GITHUB_OUTPUT
+          echo "## 🧪 Test Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "**Total Coverage:** ${TOTAL_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
 
       - name: Build backend
         working-directory: backend
