@@ -14,7 +14,7 @@ version = '0.0.3'
 ext {
     docker = [
         repo: 'janbabak',
-        plotServiceVersion: '0.0.2',
+        plotServiceVersion: '0.0.1',
         buildScriptPath: "${rootDir}/../infra/scripts/build-image.sh"
     ]
 }
