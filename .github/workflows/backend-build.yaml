@@ -43,7 +43,7 @@ jobs:
         run: ./gradlew test jacocoTestReport
 
       - name: Summary setup
-        run: echo "# 🧪 Test Results:" >> $GITHUB_STEP_SUMMARY
+        run: echo "## 🧪 Test Results:" >> $GITHUB_STEP_SUMMARY
 
       - name: Test Summary
         uses: test-summary/action@v2
