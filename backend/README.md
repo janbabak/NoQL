@@ -1,4 +1,4 @@
-# NoQL Backend test
+# NoQL Backend
 
 ## Configuration
 
