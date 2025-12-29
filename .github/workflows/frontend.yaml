@@ -11,7 +11,7 @@ jobs:
   validate-frontend:
     uses: janbabak/NoQL/.github/workflows/frontend-validate.yaml@main
 
-  build:
+  build-frontend:
     needs: validate-frontend
     if: |
       needs.validate-frontend.outputs.frontend_changed == 'true' ||
