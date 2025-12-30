@@ -4,6 +4,7 @@ on:
   workflow_call:
     inputs:
       push_docker:
+        description: 'True if docker images should be built and pushed to Dockerhub'
         required: false
         type: boolean
         default: false
