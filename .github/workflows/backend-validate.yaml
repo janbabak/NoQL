@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Validate PR title
         if: github.event_name == 'pull_request'
         run: ./ci/scripts/validate-pr-title.sh
