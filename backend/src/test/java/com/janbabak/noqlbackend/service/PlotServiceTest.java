@@ -22,11 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlotServiceTest {
 
     @Autowired
-    @SuppressWarnings("unused")
     private PlotService plotService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @ParameterizedTest
@@ -72,12 +70,12 @@ class PlotServiceTest {
     @DisplayName("Create file name")
     void testCreateFileName() {
         // given
-        String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
-        String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
-        String expectedFileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+        final String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
+        final String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
+        final String expectedFileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
 
         // when
-        String actualFileName = PlotService.createFileName(UUID.fromString(chatId), UUID.fromString(messageId));
+        final String actualFileName = PlotService.createFileName(UUID.fromString(chatId), UUID.fromString(messageId));
 
         // then
         assertEquals(expectedFileName, actualFileName);
@@ -87,11 +85,11 @@ class PlotServiceTest {
     @DisplayName("Create file URL")
     void testCreateFileUrl() {
         // given
-        String fileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
-        String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+        final String fileName = "68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+        final String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
 
         // when
-        String actualFileUrl = PlotService.createFileUrl(fileName);
+        final String actualFileUrl = PlotService.createFileUrl(fileName);
 
         // then
         assertEquals(expectedUrl, actualFileUrl);
@@ -101,12 +99,12 @@ class PlotServiceTest {
     @DisplayName("Create file URL from IDs")
     void testCreateFileUrlFromIds() {
         // given
-        String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
-        String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
-        String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
+        final String chatId = "68712114-b7b4-451a-a6eb-1c6e822509ae";
+        final String messageId = "12345678-b7b4-451a-a6eb-1c6e822509ae";
+        final String expectedUrl = "/static/images/68712114-b7b4-451a-a6eb-1c6e822509ae--12345678-b7b4-451a-a6eb-1c6e822509ae.png";
 
         // when
-        String actualFileUrl = PlotService.createFileUrl(UUID.fromString(chatId), UUID.fromString(messageId));
+        final String actualFileUrl = PlotService.createFileUrl(UUID.fromString(chatId), UUID.fromString(messageId));
 
         // then
         assertEquals(expectedUrl, actualFileUrl);

@@ -152,7 +152,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authenticationService.authenticate(authenticationRequest));
 
         // then
@@ -236,7 +236,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authenticationService.refreshToken(refreshToken));
 
         // then
@@ -309,7 +309,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertTrue(actual);
@@ -323,7 +323,7 @@ class AuthenticationServiceTest {
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertTrue(actual);
@@ -349,7 +349,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertFalse(actual);
@@ -393,7 +393,7 @@ class AuthenticationServiceTest {
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is nothing")
     void ifNotAdminOrSelfRequestThrowAccessDeniedIsNothing() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         final String email = "john.doe@yahoo.com";
         final User user = User.builder()
                 .id(userId)
@@ -426,7 +426,7 @@ class AuthenticationServiceTest {
     void ifNotAdminThrowAccessDeniedThrown() {
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+        final AccessDeniedException exception = assertThrows(AccessDeniedException.class,
                 () -> authenticationService.ifNotAdminThrowAccessDenied());
         assertEquals("Admin ROLE required.", exception.getMessage());
     }

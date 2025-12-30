@@ -49,7 +49,7 @@ class ChatQueryWithResponseServiceTest {
     private final Database postgresDatabase;
 
     public ChatQueryWithResponseServiceTest() {
-        User testUser = User.builder()
+        final User testUser = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -73,14 +73,14 @@ class ChatQueryWithResponseServiceTest {
     @DisplayName("Test getMessagesFromChat")
     void getMessagesFromChat() throws EntityNotFoundException {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Test chat")
                 .build();
 
-        List<ChatQueryWithResponse> chatQueryWithResponses = List.of(
+        final List<ChatQueryWithResponse> chatQueryWithResponses = List.of(
                 ChatQueryWithResponse.builder()
                         .id(UUID.randomUUID())
                         .chat(chat)
@@ -109,12 +109,12 @@ class ChatQueryWithResponseServiceTest {
     @DisplayName("Test getMessagesFromChat chat not found")
     void getMessagesFromChatChatNotFound() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatQueryWithResponseService.getMessagesFromChat(chatId));
 
         // then
@@ -125,14 +125,14 @@ class ChatQueryWithResponseServiceTest {
     @DisplayName("Test load message data - message not found")
     void testGetDataByMessageIdNotFound() {
         // given
-        UUID messageId = UUID.randomUUID();
-        int page = 0;
-        String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
+        final UUID messageId = UUID.randomUUID();
+        final int page = 0;
+        final String expectedErrorMsg = "Message of id: \"" + messageId + "\" not found.";
 
         when(chatQueryWithResponseRepositoryMock.findById(messageId)).thenReturn(Optional.empty());
 
         // then
-        Exception exception = assertThrows(EntityNotFoundException.class,
+        final Exception exception = assertThrows(EntityNotFoundException.class,
                 () -> chatQueryWithResponseService.getDataByMessageId(messageId, page, 10));
 
         assertEquals(expectedErrorMsg, exception.getMessage());
@@ -142,11 +142,10 @@ class ChatQueryWithResponseServiceTest {
     @MethodSource("testGetDataByMessageIdLlmResponseHasEmptyQueryTestDataProvider")
     @DisplayName("Test load message data - LLM response has empty query")
     void testGetDataByMessageIdLlmResponseHasEmptyQueryTest(String query) throws EntityNotFoundException {
-
         // given
-        UUID messageId = UUID.randomUUID();
+        final UUID messageId = UUID.randomUUID();
 
-        ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse chatQueryWithResponse = ChatQueryWithResponse.builder()
                 .id(messageId)
                 .dbQuery(query)
                 .chat(Chat.builder()

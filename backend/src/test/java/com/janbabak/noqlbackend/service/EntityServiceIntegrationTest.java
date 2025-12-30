@@ -45,41 +45,34 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class EntityServiceIntegrationTest {
+class EntityServiceIntegrationTest {
 
     @Autowired
     @InjectMocks
     private DatabaseEntityService databaseService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatService chatService;
 
     @Autowired
     ChatTestUtilService chatTestUtilService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatRepository chatRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatQueryWithResponseService chatQueryWithResponseService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private AuthenticationService authenticationService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private DatabaseServiceFactory databaseServiceFactoryMock;
 
     @Mock
@@ -91,14 +84,14 @@ public class EntityServiceIntegrationTest {
 
     @BeforeAll
     void setUp() throws UserAlreadyExistsException {
-        RegisterRequest registerUserRequest = RegisterRequest.builder()
+        final RegisterRequest registerUserRequest = RegisterRequest.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
                 .password("password")
                 .build();
 
-        RegisterRequest registerAdminRequest = RegisterRequest.builder()
+        final RegisterRequest registerAdminRequest = RegisterRequest.builder()
                 .firstName("admin")
                 .lastName("admin")
                 .email("admin.admin@gmail.com")
@@ -115,14 +108,14 @@ public class EntityServiceIntegrationTest {
     @DisplayName("Test create, modify, and delete objects")
     void testCreateModifyAndDeleteObjectDatabase() throws DatabaseConnectionException, EntityNotFoundException {
         // create objects
-        List<Database> databases = createDatabases();
-        Database postgres = databases.get(0);
-        Database mysql = databases.get(1);
-        Database adminMysql = databases.get(2);
+        final List<Database> databases = createDatabases();
+        final Database postgres = databases.get(0);
+        final Database mysql = databases.get(1);
+        final Database adminMysql = databases.get(2);
 
         AuthenticationService.authenticateUser(testUser);
-        List<ChatDto> postgresChats = createChats(postgres, 3);
-        List<ChatDto> mysqlChats = createChats(mysql, 3);
+        final List<ChatDto> postgresChats = createChats(postgres, 3);
+        final List<ChatDto> mysqlChats = createChats(mysql, 3);
 
         AuthenticationService.authenticateUser(testAdmin);
         createChats(adminMysql, 2);
@@ -152,7 +145,7 @@ public class EntityServiceIntegrationTest {
      * @throws DatabaseConnectionException should not happen
      */
     List<Database> createDatabases() throws DatabaseConnectionException, EntityNotFoundException {
-        CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
                 .name("Local Postgres")
                 .engine(DatabaseEngine.POSTGRES)
                 .port(5432)
@@ -162,7 +155,7 @@ public class EntityServiceIntegrationTest {
                 .userId(testUser.getId())
                 .build();
 
-        CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
                 .name("Local Postgres")
                 .engine(DatabaseEngine.MYSQL)
                 .port(3306)
@@ -172,7 +165,7 @@ public class EntityServiceIntegrationTest {
                 .userId(testUser.getId())
                 .build();
 
-        CreateDatabaseRequest createAdminMysqlRequest = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest createAdminMysqlRequest = CreateDatabaseRequest.builder()
                 .name("Local Postgres")
                 .engine(DatabaseEngine.MYSQL)
                 .port(3306)
@@ -184,11 +177,11 @@ public class EntityServiceIntegrationTest {
 
         when(databaseServiceFactoryMock.getDatabaseDAO(any())).thenReturn(databaseDaoMock);
 
-        Database createdPostgres = databaseService.create(createPostgresRequest);
-        Database createdMsql = databaseService.create(createMysqlRequest);
+        final Database createdPostgres = databaseService.create(createPostgresRequest);
+        final Database createdMsql = databaseService.create(createMysqlRequest);
 
         AuthenticationService.authenticateUser(testAdmin);
-        Database createdAdminMysql = databaseService.create(createAdminMysqlRequest);
+        final Database createdAdminMysql = databaseService.create(createAdminMysqlRequest);
 
         assertEquals(3, databaseService.findAll().size());
         assertEquals(1, databaseService.findAll(testAdmin.getId()).size());
@@ -209,7 +202,7 @@ public class EntityServiceIntegrationTest {
      * @throws EntityNotFoundException should not happen
      */
     List<ChatDto> createChats(Database database, int count) throws EntityNotFoundException {
-        List<ChatDto> chats = new ArrayList<>();
+        final List<ChatDto> chats = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             chats.add(chatService.create(database.getId()));
         }
@@ -229,7 +222,7 @@ public class EntityServiceIntegrationTest {
      */
     void addMessagesToChat(UUID chatId, int numberOfMessages) throws EntityNotFoundException {
         for (int i = 0; i < numberOfMessages; i++) {
-            ChatQueryWithResponse message = ChatQueryWithResponse.builder()
+            final ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                     .nlQuery("Find all users older than 25")
                     .resultDescription("Displaying all users older than 25.")
                     .dbQuery("SELECT * FROM users WHERE age > 25")
@@ -264,7 +257,7 @@ public class EntityServiceIntegrationTest {
      * @throws DatabaseConnectionException should not happen
      */
     void updateDatabase(UUID databaseId) throws EntityNotFoundException, DatabaseConnectionException {
-        UpdateDatabaseRequest request = UpdateDatabaseRequest.builder()
+        final UpdateDatabaseRequest request = UpdateDatabaseRequest.builder()
                 .name("New name")
                 .host("localhost")
                 .password("new-password")
@@ -273,7 +266,7 @@ public class EntityServiceIntegrationTest {
 
         databaseService.update(databaseId, request);
 
-        Database updatedDatabase = databaseService.findById(databaseId);
+        final Database updatedDatabase = databaseService.findById(databaseId);
 
         // verify that the database was updated
         assertEquals(request.getName(), updatedDatabase.getName());
@@ -294,7 +287,7 @@ public class EntityServiceIntegrationTest {
 
         chatService.deleteChatById(chatId);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findById(chatId, null, false));
         assertEquals("Chat of id: \"" + chatId + "\" not found.", exception.getMessage());
         assertEquals(7, chatRepository.findAll().size());
@@ -317,7 +310,7 @@ public class EntityServiceIntegrationTest {
 
         databaseService.deleteById(databaseId);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseService.findById(databaseId));
         assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
         assertEquals(1, databaseService.findAll(testUser.getId()).size());
