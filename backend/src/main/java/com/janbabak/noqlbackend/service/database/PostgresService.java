@@ -67,7 +67,7 @@ public class PostgresService extends SqlDatabaseService {
                 ));
             }
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         }
     }
 
@@ -86,31 +86,31 @@ public class PostgresService extends SqlDatabaseService {
 
         // removes the "FOREIGN KEY (" prefix
         final String foreignKeySubstring = "FOREIGN KEY (";
-        constraintDefinition = constraintDefinition.substring(foreignKeySubstring.length());
+        String constraint = constraintDefinition.substring(foreignKeySubstring.length());
 
         String referencingColumn = "";
         final String referencesSubstring = ") REFERENCES ";
-        final int endOfReferencingColumnName = constraintDefinition.indexOf(referencesSubstring);
+        final int endOfReferencingColumnName = constraint.indexOf(referencesSubstring);
         if (endOfReferencingColumnName != -1) {
-            referencingColumn = constraintDefinition.substring(0, endOfReferencingColumnName);
-            constraintDefinition = constraintDefinition.substring(
+            referencingColumn = constraint.substring(0, endOfReferencingColumnName);
+            constraint = constraint.substring(
                     endOfReferencingColumnName + referencesSubstring.length());
         }
 
         // if table or schema name contains "(" in its name, // doesn't work
-        final int leftBraceIndex = constraintDefinition.indexOf("(");
+        final int leftBraceIndex = constraint.indexOf("(");
         String referencedSchemaAndTable = "";
         if (leftBraceIndex != -1) {
-            referencedSchemaAndTable = constraintDefinition.substring(0, leftBraceIndex);
+            referencedSchemaAndTable = constraint.substring(0, leftBraceIndex);
             // + 1 to remove the "(" character
-            constraintDefinition = constraintDefinition.substring(leftBraceIndex + 1);
+            constraint = constraint.substring(leftBraceIndex + 1);
         }
         final Pair<String, String> referencedSchemaAndTableParsed = parseSchemaAndTable(referencedSchemaAndTable);
         final String referencedSchema = referencedSchemaAndTableParsed.a;
         final String referencedTable = referencedSchemaAndTableParsed.b;
 
         // -1 to remove the ")" character
-        final String referencedColumn = constraintDefinition.substring(0, constraintDefinition.length() - 1);
+        final String referencedColumn = constraint.substring(0, constraintDefinition.length() - 1);
 
         return new ForeignKeyData(
                 referencingSchema,

@@ -39,15 +39,15 @@ public class EncryptionUtil {
             NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
             IllegalBlockSizeException, BadPaddingException {
 
-        SecretKey secretKey = getKeyFromBase64(base64Key);
-        byte[] iv = generateIV();
+        final SecretKey secretKey = getKeyFromBase64(base64Key);
+        final byte[] iv = generateIV();
 
-        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
-        GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
+        final Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        final GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
 
-        byte[] cipherText = cipher.doFinal(plainText.getBytes());
-        byte[] encryptedData = new byte[iv.length + cipherText.length];
+        final byte[] cipherText = cipher.doFinal(plainText.getBytes());
+        final byte[] encryptedData = new byte[iv.length + cipherText.length];
         System.arraycopy(iv, 0, encryptedData, 0, iv.length); // copy iv to the beginning of the array
         System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length); // copy (append) cipherText
 
@@ -71,20 +71,20 @@ public class EncryptionUtil {
             NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
             IllegalBlockSizeException, BadPaddingException {
 
-        SecretKey secretKey = getKeyFromBase64(base64Key);
-        byte[] decodedData = Base64.getDecoder().decode(cipherText);
+        final SecretKey secretKey = getKeyFromBase64(base64Key);
+        final byte[] decodedData = Base64.getDecoder().decode(cipherText);
 
-        byte[] iv = new byte[GCM_IV_LENGTH];
+        final byte[] iv = new byte[GCM_IV_LENGTH];
         System.arraycopy(decodedData, 0, iv, 0, iv.length);
 
-        byte[] encryptedText = new byte[decodedData.length - GCM_IV_LENGTH];
+        final byte[] encryptedText = new byte[decodedData.length - GCM_IV_LENGTH];
         System.arraycopy(decodedData, GCM_IV_LENGTH, encryptedText, 0, encryptedText.length);
 
-        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
-        GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
+        final Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        final GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, iv);
         cipher.init(Cipher.DECRYPT_MODE, secretKey, spec);
 
-        byte[] plainText = cipher.doFinal(encryptedText);
+        final byte[] plainText = cipher.doFinal(encryptedText);
         return new String(plainText);
     }
 
@@ -95,7 +95,7 @@ public class EncryptionUtil {
      * @return SecretKey
      */
     private static SecretKey getKeyFromBase64(String base64Key) {
-        byte[] decodedKey = Base64.getDecoder().decode(base64Key);
+        final byte[] decodedKey = Base64.getDecoder().decode(base64Key);
         return new SecretKeySpec(decodedKey, AES);
     }
 
@@ -105,7 +105,7 @@ public class EncryptionUtil {
      * @return byte[] iv
      */
     private static byte[] generateIV() {
-        byte[] iv = new byte[GCM_IV_LENGTH];
+        final byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);
         return iv;
     }

@@ -110,18 +110,18 @@ public class QueryService {
      *                   default value is defined by {@code PAGINATION_DEFAULT_PAGE_SIZE} env,<br />
      *                   max allowed size is defined by {@code PAGINATION_MAX_PAGE_SIZE} env
      * @return query result
-     * @throws EntityNotFoundException     queried database not found.
+     * @throws EntityNotFoundException queried database not found.
      */
     public ConsoleResponse executeQueryLanguageSelectQuery(UUID databaseId, String query, Integer page, Integer pageSize)
             throws EntityNotFoundException {
 
         log.info("Execute query language query: query={}, database_id={}.", query, databaseId);
 
-        Database database = databaseEntityService.findById(databaseId);
+        final Database database = databaseEntityService.findById(databaseId);
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
         try {
-            RetrievedData data = queryExecutionService.executeQuery(query, database, page, pageSize);
+            final RetrievedData data = queryExecutionService.executeQuery(query, database, page, pageSize);
             return new ConsoleResponse(data, query, null);
         } catch (BadRequestException | DatabaseConnectionException | DatabaseExecutionException | SQLException e) {
             return ConsoleResponse.failedResponse(e.getMessage());
@@ -140,7 +140,7 @@ public class QueryService {
     public RetrievedData getDataByMessageId(UUID messageId, Integer page, Integer pageSize)
             throws EntityNotFoundException {
 
-        ChatQueryWithResponse message = chatQueryWithResponseService.findById(messageId);
+        final ChatQueryWithResponse message = chatQueryWithResponseService.findById(messageId);
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
         return messageDataDAO.retrieveDataFromMessage(message, message.getChat().getDatabase(), page, pageSize);
     }
@@ -166,7 +166,7 @@ public class QueryService {
 
         log.info("Execute chat, database_id={}", databaseId);
 
-        Database database = databaseEntityService.findById(databaseId);
+        final Database database = databaseEntityService.findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
@@ -177,28 +177,29 @@ public class QueryService {
             return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
         }
 
-        List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
+        final List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);
         ChatQueryWithResponse chatQueryWithResponse = chatService.addEmptyMessageToChat(chatId);
-        String plotFileName = PlotService.createFileName(chatId, chatQueryWithResponse.getId());
+        final String plotFileName = PlotService.createFileName(chatId, chatQueryWithResponse.getId());
 
-        String createScript = databaseServiceFactory.getDatabaseService(database)
+        final String createScript = databaseServiceFactory.getDatabaseService(database)
                 .retrieveSchema().generateCreateScript();
 
-        QueryDatabaseLLMService.LLMServiceRequest llmServiceRequest = new QueryDatabaseLLMService.LLMServiceRequest(
-                queryRequest.getQuery(),
-                createSystemQuery(createScript, database),
-                database,
-                plotFileName,
-                queryRequest.getModel(),
-                pageSize,
-                chatHistory);
+        final QueryDatabaseLLMService.LLMServiceRequest llmServiceRequest =
+                new QueryDatabaseLLMService.LLMServiceRequest(
+                        queryRequest.getQuery(),
+                        createSystemQuery(createScript, database),
+                        database,
+                        plotFileName,
+                        queryRequest.getModel(),
+                        pageSize,
+                        chatHistory);
 
-        QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(llmServiceRequest);
+        final QueryDatabaseLLMService.LLMServiceResult response = llmService.executeUserRequest(llmServiceRequest);
 
         chatQueryWithResponse = chatQueryWithResponseService.updateEmptyMessage(
                 chatQueryWithResponse, queryRequest.getQuery(), response);
 
-        String plotUrl = chatQueryWithResponse.getPlotScript() != null
+        final String plotUrl = chatQueryWithResponse.getPlotScript() != null
                 ? PlotService.createFileUrl(plotFileName)
                 : null;
 

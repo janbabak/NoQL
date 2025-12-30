@@ -132,10 +132,10 @@ public class PlotService {
             } catch (InterruptedException e) {
                 log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",
                         output, error, e.getMessage());
-                throw new PlotScriptExecutionException(output.toString());
+                throw new PlotScriptExecutionException(output.toString(), e);
             }
         } catch (IOException e) {
-            throw new PlotScriptExecutionException(e.getMessage());
+            throw new PlotScriptExecutionException(e.getMessage(), e);
         }
     }
 

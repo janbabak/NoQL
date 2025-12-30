@@ -10,4 +10,8 @@ public class DatabaseExecutionException extends Exception {
     public DatabaseExecutionException(String message) {
         super(message);
     }
+
+    public DatabaseExecutionException(String message, Exception e) {
+        super(message, e);
+    }
 }

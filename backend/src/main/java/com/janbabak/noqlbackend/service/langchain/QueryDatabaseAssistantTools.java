@@ -58,7 +58,7 @@ public class QueryDatabaseAssistantTools {
         log.info("Execute query tool called");
         toolResult.setDbQuery(query);
         try {
-            RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
+            final RetrievedData retrievedData = queryService.executeQuery(query, database, page, pageSize);
             toolResult
                     .setRetrievedData(retrievedData)
                     .setDbQueryExecutedSuccessSuccessfully(true)
@@ -97,7 +97,7 @@ public class QueryDatabaseAssistantTools {
     }
 
     private ToolExecutionResult handleError(String context, Exception exception, Consumer<String> errorSetter) {
-        String errorMessage = context + ": " + exception.getMessage();
+        final String errorMessage = context + ": " + exception.getMessage();
         log.error(errorMessage);
         errorSetter.accept(errorMessage);
         return ToolExecutionResult.failure(errorMessage);

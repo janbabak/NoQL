@@ -54,7 +54,7 @@ public class BaseLLMService {
             return buildGoogleGeminiModel(modelId);
         }
 
-        String errorMsg = "Unsupported model ID: " + modelId;
+        final String errorMsg = "Unsupported model ID: " + modelId;
         log.error(errorMsg);
         throw new BadRequestException(errorMsg);
     }

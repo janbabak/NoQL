@@ -17,7 +17,7 @@ public record UpdateCustomModelReqeust(
         String host,
 
         @Nullable
-        @Min(value = 1)
+        @Min(1)
         Integer port
 ) {
 }

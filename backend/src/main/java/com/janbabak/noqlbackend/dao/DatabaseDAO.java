@@ -75,7 +75,7 @@ public abstract class DatabaseDAO {
                 }
             });
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         }
     }
 
@@ -94,7 +94,7 @@ public abstract class DatabaseDAO {
             statement.executeUpdate(query);
             statement.close();
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         } finally {
             disconnect();
         }
@@ -150,7 +150,7 @@ public abstract class DatabaseDAO {
             connection.setAutoCommit(!readOnly);
         } catch (SQLException e) {
             log.error("Error while connecting to database - message={}.", e.getMessage());
-            throw new DatabaseConnectionException(e.getMessage());
+            throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
 }

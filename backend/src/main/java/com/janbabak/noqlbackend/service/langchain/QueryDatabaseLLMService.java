@@ -32,8 +32,8 @@ public class QueryDatabaseLLMService extends BaseLLMService {
 
     public LLMServiceResult executeUserRequest(LLMServiceRequest request) throws BadRequestException {
 
-        int page = 0;
-        QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
+        final int page = 0;
+        final QueryDatabaseAssistantTools assistantTools = new QueryDatabaseAssistantTools(
                 request.database,
                 request.plotFileName,
                 page,
@@ -41,13 +41,13 @@ public class QueryDatabaseLLMService extends BaseLLMService {
                 queryService,
                 plotService);
 
-        Assistant assistant = buildAssistant(request.modelId, assistantTools);
-        List<ChatMessage> messages = buildMessages(request);
+        final Assistant assistant = buildAssistant(request.modelId, assistantTools);
+        final List<ChatMessage> messages = buildMessages(request);
 
-        String response = assistant.chat(messages);
+        final String response = assistant.chat(messages);
         log.info("LLM response: {}", response);
 
-        QueryDatabaseToolResult toolResult = assistantTools.getToolResult();
+        final QueryDatabaseToolResult toolResult = assistantTools.getToolResult();
         log.info("LLM tool result: {}", toolResult);
 
         return new LLMServiceResult(response, toolResult);
@@ -85,13 +85,13 @@ public class QueryDatabaseLLMService extends BaseLLMService {
      * Build chat messages including system message, chat history and user query.
      */
     private List<ChatMessage> buildMessages(LLMServiceRequest request) {
-        List<ChatMessage> messages = new ArrayList<>();
+        final List<ChatMessage> messages = new ArrayList<>();
 
         if (request.systemQuery != null && !request.systemQuery.isBlank()) {
             messages.add(SystemMessage.from(request.systemQuery));
         }
 
-        for (ChatQueryWithResponse chatEntry : request.chatHistory) {
+        for (final ChatQueryWithResponse chatEntry : request.chatHistory) {
             if (chatEntry.getNlQuery() == null || chatEntry.getNlQuery().isBlank()) {
                 continue;
             }
@@ -105,9 +105,9 @@ public class QueryDatabaseLLMService extends BaseLLMService {
     }
 
     private AiMessage buildAiMessage(ChatQueryWithResponse chatEntry) {
-        List<ToolExecutionRequest> toolExecutionRequests = new ArrayList<>();
+        final List<ToolExecutionRequest> toolExecutionRequests = new ArrayList<>();
 
-        Map<String, Object> attributes = new HashMap<>();
+        final Map<String, Object> attributes = new HashMap<>();
 
         if (chatEntry.dbQueryExecuted()) {
             toolExecutionRequests.add(

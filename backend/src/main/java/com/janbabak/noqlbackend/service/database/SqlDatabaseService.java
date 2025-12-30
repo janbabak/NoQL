@@ -60,7 +60,7 @@ public abstract class SqlDatabaseService extends BaseDatabaseService {
                 table.columns().put(columnName, new SqlDatabaseStructure.Column(columnName, dataType, primaryKey));
             }
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         }
     }
 

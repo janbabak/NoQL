@@ -20,7 +20,7 @@ public class QueryUtils {
     }
 
     /**
-     * Set pagination in SQL query using {@code LIMIT} and {@code OFFSET}.
+     * Construct SQL query using {@code LIMIT} and {@code OFFSET}.
      *
      * @param query    database language query
      * @param page     number of page (first page has index 0), if null, default value is 0
@@ -31,49 +31,44 @@ public class QueryUtils {
      * @return database language query with pagination, page number and page size
      * @throws BadRequestException pageSize value is greater than maximum allowed value
      */
-    public static PaginatedQuery setPaginationInSqlQuery(
+    public static PaginatedQuery constructPaginatedSqlQuery(
             String query,
             Integer page,
             Integer pageSize,
             Database database) throws BadRequestException {
 
         // defaults
-        if (page == null) {
-            page = 0;
-        }
-        if (page < 0) {
-            String error = "Page number cannot be negative, page=" + page;
-            log.error(error);
-            throw new BadRequestException(error);
-        }
-        if (pageSize == null) {
-            pageSize = Settings.getDefaultPageSizeStatic();
-        }
-        if (pageSize > Settings.getMaxPageSizeStatic()) {
-            String error = "Page size is greater than maximum allowed value=" + Settings.getMaxPageSizeStatic();
+        final int resultPage = page != null ? page : 0;
+        if (resultPage < 0) {
+            final String error = "Page number cannot be negative, resultPage=" + resultPage;
             log.error(error);
             throw new BadRequestException(error);
         }
 
-        query = query.trim();
+        final int resultPageSize = pageSize != null ? pageSize : Settings.getDefaultPageSizeStatic();
+        if (resultPageSize > Settings.getMaxPageSizeStatic()) {
+            final String error = "Page size is greater than maximum allowed value=" + Settings.getMaxPageSizeStatic();
+            log.error(error);
+            throw new BadRequestException(error);
+        }
 
-        query = switch (database.getEngine()) {
-            case POSTGRES, MYSQL -> "SELECT * FROM (%s) AS query LIMIT %d OFFSET %d;"
-                    .formatted(trimAndRemoveTrailingSemicolon(query), pageSize, page * pageSize);
+        final String resultQuery = switch (database.getEngine()) {
+            case POSTGRES, MYSQL -> "SELECT * FROM (%s) AS query LIMIT %d OFFSET %d;".formatted(
+                    trimAndRemoveTrailingSemicolon(query), resultPageSize, resultPage * resultPageSize);
         };
 
-        return new PaginatedQuery(query, page, pageSize);
+        return new PaginatedQuery(resultQuery, page, pageSize);
     }
 
     public static String trimAndRemoveTrailingSemicolon(String query) {
-        query = query.trim();
+        final String trimmedQuery = query.trim();
 
-        if (query.isEmpty()) {
-            return query;
+        if (trimmedQuery.isEmpty()) {
+            return trimmedQuery;
         }
 
         // removes trailing semicolon if it is present
-        return query.charAt(query.length() - 1) == ';'
+        return trimmedQuery.charAt(query.length() - 1) == ';'
                 ? query.substring(0, query.length() - 1).trim()
                 : query;
     }
@@ -103,13 +98,14 @@ public class QueryUtils {
     public static Long getTotalCountSql(String selectQuery, BaseDatabaseService databaseService)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
-        selectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
-        String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;".formatted(selectQuery);
+        final String trimmedSelectQuery = trimAndRemoveTrailingSemicolon(selectQuery);
+        final String selectCountQuery = "SELECT COUNT(*) AS count from (%s) AS all_results;"
+                .formatted(trimmedSelectQuery);
 
         try (ResultSetWrapper result = databaseService.executeQuery(selectCountQuery)) {
             return result.resultSet().next() ? result.resultSet().getLong(1) : null;
         } catch (SQLException e) {
-            throw new DatabaseExecutionException("Cannot parse total count value from query");
+            throw new DatabaseExecutionException("Cannot parse total count value from query", e);
         }
     }
 }

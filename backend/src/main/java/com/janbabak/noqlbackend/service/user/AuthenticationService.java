@@ -51,9 +51,9 @@ public class AuthenticationService {
 
         log.info("Created new user with default query limit: {}", settings.getDefaultUserQueryLimit());
 
-        User user = userRepository.save(new User(request, passwordEncoder, role, settings.getDefaultUserQueryLimit()));
-        String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        final User user = userRepository.save(new User(request, passwordEncoder, role, settings.getDefaultUserQueryLimit()));
+        final String jwtToken = jwtService.generateToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
@@ -72,11 +72,11 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        User user = userRepository.findByEmail(request.email()).orElseThrow(
+        final User user = userRepository.findByEmail(request.email()).orElseThrow(
                 () -> new EntityNotFoundException(USER, request.email()));
 
-        String jwtToken = jwtService.generateToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        final String jwtToken = jwtService.generateToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
@@ -93,14 +93,14 @@ public class AuthenticationService {
      * @throws EntityNotFoundException user not found.
      */
     public AuthenticationResponse refreshToken(String refreshToken) throws EntityNotFoundException {
-        String userEmail = jwtService.extractUsername(refreshToken);
+        final String userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
-            User user = userRepository.findByEmail(userEmail).orElseThrow(
+            final User user = userRepository.findByEmail(userEmail).orElseThrow(
                     () -> new EntityNotFoundException(USER, userEmail));
 
             if (jwtService.isTokenValid(refreshToken, user)) {
-                String accessToken = jwtService.generateToken(user);
-                String newRefreshToken = jwtService.generateRefreshToken(user);
+                final String accessToken = jwtService.generateToken(user);
+                final String newRefreshToken = jwtService.generateRefreshToken(user);
                 return AuthenticationResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(newRefreshToken)
@@ -122,7 +122,7 @@ public class AuthenticationService {
             return null;
         }
 
-        Optional<User> user = userRepository.findById(id);
+        final Optional<User> user = userRepository.findById(id);
 
         if (user.isEmpty()
                 || authenticationFacadeInterface.getAuthentication() == null
@@ -177,7 +177,7 @@ public class AuthenticationService {
      * @param user user to authenticate
      */
     public static void authenticateUser(User user) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+        final UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 user, null, user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

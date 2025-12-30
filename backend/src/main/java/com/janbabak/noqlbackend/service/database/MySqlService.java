@@ -38,11 +38,11 @@ public class MySqlService extends SqlDatabaseService {
                 final String referencedTable = resultSet.getString("referenced_table");
                 final String referencedColumn = resultSet.getString("referenced_column");
 
-                Schema schema = dbStructure.schemas().get(referencingSchema);
+                final Schema schema = dbStructure.schemas().get(referencingSchema);
                 if (schema == null) {
                     continue;
                 }
-                Table table = schema.tables().get(referencingTable);
+                final Table table = schema.tables().get(referencingTable);
                 if (table == null) {
                     continue;
                 }
@@ -53,7 +53,7 @@ public class MySqlService extends SqlDatabaseService {
                 column.setForeignKey(new ForeignKey(referencedSchema, referencedTable, referencedColumn));
             }
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         }
     }
 }

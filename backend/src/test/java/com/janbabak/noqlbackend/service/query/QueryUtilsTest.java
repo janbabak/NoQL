@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import static com.janbabak.noqlbackend.service.query.QueryUtils.setPaginationInSqlQuery;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.constructPaginatedSqlQuery;
 import static com.janbabak.noqlbackend.service.query.QueryUtils.trimAndRemoveTrailingSemicolon;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
@@ -19,7 +19,7 @@ class QueryUtilsTest {
     @ParameterizedTest
     @MethodSource("setPaginationDataProvider")
     @DisplayName("Test set pagination")
-    void testSetPagination(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
+    void testConstructPaginationQuery(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
             throws BadRequestException {
 
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
@@ -32,7 +32,7 @@ class QueryUtilsTest {
             Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
 
             // when
-            QueryUtils.PaginatedQuery actualValue = setPaginationInSqlQuery(query, page, pageSize, database);
+            QueryUtils.PaginatedQuery actualValue = constructPaginatedSqlQuery(query, page, pageSize, database);
 
             // then
             assertEquals(expectedQuery, actualValue);
@@ -96,7 +96,7 @@ class QueryUtilsTest {
     @ParameterizedTest
     @MethodSource("setPaginationBadRequestDataProvider")
     @DisplayName("Test set pagination with bad request")
-    void testSetPaginationBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
+    void testConstructPaginationQueryBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
             // given
             if (page >= 0) { // otherwise unnecessary stubbing error
@@ -107,7 +107,7 @@ class QueryUtilsTest {
 
             // when
             BadRequestException exception = assertThrows(BadRequestException.class,
-                    () -> setPaginationInSqlQuery(query, page, pageSize, database));
+                    () -> constructPaginatedSqlQuery(query, page, pageSize, database));
 
             // then
             assertEquals(errorMessage, exception.getMessage());

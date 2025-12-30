@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 
 import static com.janbabak.noqlbackend.service.query.QueryUtils.getTotalCount;
-import static com.janbabak.noqlbackend.service.query.QueryUtils.setPaginationInSqlQuery;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.constructPaginatedSqlQuery;
 
 @Slf4j
 @Service
@@ -46,7 +46,7 @@ public class MessageDataDAO {
         final BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
         final QueryUtils.PaginatedQuery paginatedQuery;
         try {
-            paginatedQuery = setPaginationInSqlQuery(message.getDbQuery(), page, pageSize, database);
+            paginatedQuery = constructPaginatedSqlQuery(message.getDbQuery(), page, pageSize, database);
         } catch (BadRequestException e) {
             log.error("Failed to set pagination in SQL query: {}", e.getMessage());
             return null;
