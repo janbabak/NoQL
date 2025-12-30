@@ -1,13 +1,6 @@
 name: Backend
 
 on:
-  workflow_dispatch:
-    inputs:
-      push_docker:
-        description: 'True if docker images should be built and pushed to Dockerhub'
-        required: false
-        default: false
-        type: boolean
   pull_request:
     types:
       - opened
@@ -17,6 +10,13 @@ on:
       - closed
     branches:
         - main
+  workflow_dispatch:
+    inputs:
+      push_docker:
+        description: 'True if docker images should be built and pushed to Dockerhub'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   validate:
