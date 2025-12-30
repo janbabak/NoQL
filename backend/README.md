@@ -5,7 +5,6 @@
 The backend application is configured using environment variables.
 For local development, variables can be defined in `backend/.env.local`.
 
-
 ## Environment Variables
 
 ### Pagination
