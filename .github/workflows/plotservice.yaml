@@ -1,10 +1,15 @@
 name: Plot service
 
 on:
-  push:
-    branches-ignore:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - closed
+    branches:
       - main
-      - master
   workflow_dispatch:
     inputs:
       push_docker:
