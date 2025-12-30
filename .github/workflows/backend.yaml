@@ -1,4 +1,4 @@
-name: Backend pipeline
+name: Backend
 
 on:
   push:
@@ -19,13 +19,13 @@ on:
         - main
 
 jobs:
-  validate-backend:
+  validate:
     uses: janbabak/NoQL/.github/workflows/backend-validate.yaml@main
 
-  test-backend:
-    needs: validate-backend
+  test:
+    needs: validate
     if: |
-      needs.validate-backend.outputs.backend_changed == 'true' ||
+      needs.validate.outputs.backend_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/backend-test.yaml@main
     with:
@@ -33,8 +33,8 @@ jobs:
     secrets:
       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
-  build-backend:
-    needs: test-backend
+  build:
+    needs: test
     uses: janbabak/NoQL/.github/workflows/backend-build.yaml@main
     with:
       push_docker: ${{ github.event.inputs.push_docker || false }}

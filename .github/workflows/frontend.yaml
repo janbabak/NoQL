@@ -1,4 +1,4 @@
-name: Frontend pipeline
+name: Frontend
 
 on:
   push:
@@ -14,13 +14,13 @@ on:
         type: boolean
 
 jobs:
-  validate-frontend:
+  validate:
     uses: janbabak/NoQL/.github/workflows/frontend-validate.yaml@main
 
-  build-frontend:
-    needs: validate-frontend
+  build:
+    needs: validate
     if: |
-      needs.validate-frontend.outputs.frontend_changed == 'true' ||
+      needs.validate.outputs.frontend_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/frontend-build.yaml@main
     with:

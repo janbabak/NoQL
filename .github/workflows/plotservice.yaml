@@ -1,4 +1,4 @@
-name: Plot service pipeline
+name: Plot service
 
 on:
   push:
@@ -14,13 +14,13 @@ on:
         type: boolean
 
 jobs:
-  validate-plot-service:
+  validate:
     uses: janbabak/NoQL/.github/workflows/plotservice-validate.yaml@main
 
-  build-plot-service:
-    needs: validate-plot-service
+  build:
+    needs: validate
     if: |
-      needs.validate-plot-service.outputs.plot_service_changed == 'true' ||
+      needs.validate.outputs.plot_service_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/plotservice-build.yaml@main
     with:
