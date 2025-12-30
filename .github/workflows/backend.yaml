@@ -21,8 +21,6 @@ on:
 jobs:
   validate:
     uses: janbabak/NoQL/.github/workflows/backend-validate.yaml@main
-    with:
-      validate_pr: ${{ github.event_name == 'pull_request' || false }}
 
   test:
     needs: validate
