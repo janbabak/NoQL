@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Custom-PMD-Ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                             http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>
+        Our custom PMD ruleset. We import standard rules and exclude or customize specific ones.
+    </description>
+
+    <!-- Import the rule categories you want to use -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="UnitTestShouldIncludeAssert"/>
+    </rule>
+
+    <!-- Import the codestyle category, but exclude specific rules -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="LongVariable"/>
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="FieldNamingConventions"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="MethodArgumentCouldBeFinal"/>
+    </rule>
+</ruleset>
