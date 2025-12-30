@@ -35,7 +35,7 @@ class SettingsControllerTest {
     @Test
     @DisplayName("Get settings with ADMIN role")
     @WithMockUser(roles = "ADMIN")
-    void getSettings() throws Exception {
+    void testGetSettings() throws Exception {
         when(settingsMock.getMaxPageSize()).thenReturn(50);
         when(settingsMock.getDefaultPageSize()).thenReturn(10);
         when(settingsMock.getPlotServiceContainerName()).thenReturn("plot-service-dev-stack");
@@ -57,7 +57,7 @@ class SettingsControllerTest {
     @Test
     @DisplayName("Get settings with anonymous user")
     @WithAnonymousUser
-    void getSettingAnonymousUser() throws Exception {
+    void testGetSettingAnonymousUser() throws Exception {
         mockMvc.perform(get("/settings"))
                 .andExpect(status().isUnauthorized());
     }
@@ -65,7 +65,7 @@ class SettingsControllerTest {
     @Test
     @DisplayName("Get settings with USER role")
     @WithMockUser(roles = "USER")
-    void getSettingUser() throws Exception {
+    void testGetSettingUser() throws Exception {
         mockMvc.perform(get("/settings"))
                 .andExpect(status().isForbidden());
     }

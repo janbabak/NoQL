@@ -52,7 +52,7 @@ public class DatabaseEntityService {
     public Database findById(UUID databaseId) throws EntityNotFoundException {
         log.info("Get database by id={}.", databaseId);
 
-        Database database = databaseRepository.findById(databaseId)
+        final Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
@@ -101,7 +101,7 @@ public class DatabaseEntityService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(request.getUserId());
 
-        User user = userRepository.findById(request.getUserId()).orElseThrow(
+        final User user = userRepository.findById(request.getUserId()).orElseThrow(
                 () -> new EntityNotFoundException(EntityNotFoundException.Entity.USER, request.getUserId()));
 
         Database database = Database.builder()
@@ -121,7 +121,7 @@ public class DatabaseEntityService {
 
         // create default chat
         if (request.getCreateDefaultChat()) {
-            Chat chat = Chat.builder()
+            final Chat chat = Chat.builder()
                     .name(NEW_CHAT_NAME)
                     .modificationDate(Timestamp.from(Instant.now()))
                     .database(database)
@@ -148,17 +148,31 @@ public class DatabaseEntityService {
 
         log.info("Update database of id={}.", databaseId);
 
-        Database database = findById(databaseId);
+        final Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
-        if (data.getName() != null) database.setName(data.getName());
-        if (data.getHost() != null) database.setHost(data.getHost());
-        if (data.getPort() != null) database.setPort(data.getPort());
-        if (data.getDatabase() != null) database.setDatabase(data.getDatabase());
-        if (data.getUserName() != null) database.setUserName(data.getUserName());
-        if (data.getPassword() != null) database.setPassword(encryptionService.encryptCredentials(data.getPassword()));
-        if (data.getEngine() != null) database.setEngine(data.getEngine());
+        if (data.getName() != null) {
+            database.setName(data.getName());
+        }
+        if (data.getHost() != null) {
+            database.setHost(data.getHost());
+        }
+        if (data.getPort() != null) {
+            database.setPort(data.getPort());
+        }
+        if (data.getDatabase() != null) {
+            database.setDatabase(data.getDatabase());
+        }
+        if (data.getUserName() != null) {
+            database.setUserName(data.getUserName());
+        }
+        if (data.getPassword() != null) {
+            database.setPassword(encryptionService.encryptCredentials(data.getPassword()));
+        }
+        if (data.getEngine() != null) {
+            database.setEngine(data.getEngine());
+        }
 
         testConnection(database);
 
@@ -174,7 +188,7 @@ public class DatabaseEntityService {
     public void deleteById(UUID databaseId) {
         log.info("Delete database by id={}.", databaseId);
 
-        Optional<Database> database = databaseRepository.findById(databaseId);
+        final Optional<Database> database = databaseRepository.findById(databaseId);
 
         if (database.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.get().getUserId());
@@ -195,7 +209,7 @@ public class DatabaseEntityService {
     public DatabaseStructureDto getDatabaseStructureByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = findById(databaseId);
+        final Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
@@ -215,7 +229,7 @@ public class DatabaseEntityService {
     public String getDatabaseCreateScriptByDatabaseId(UUID databaseId)
             throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException {
 
-        Database database = findById(databaseId);
+        final Database database = findById(databaseId);
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUserId());
 
@@ -229,7 +243,7 @@ public class DatabaseEntityService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      */
     private void testConnection(Database database) throws DatabaseConnectionException {
-        DatabaseDAO databaseDAO = databaseServiceFactory.getDatabaseDAO(database);
+        final DatabaseDAO databaseDAO = databaseServiceFactory.getDatabaseDAO(database);
         databaseDAO.testConnection();
     }
 }

@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class PostgresDAOTest extends AbstractSqlDAOTest {
 
+    @Override
     public DatabaseDAO getDatabaseDao() {
         return postgresDAO;
     }
@@ -36,7 +37,7 @@ class PostgresDAOTest extends AbstractSqlDAOTest {
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:postgresql://localhost:" + getPostgresPort() + "/test-database";
+        final String expected = "jdbc:postgresql://localhost:" + getPostgresPort() + "/test-database";
         assertEquals(expected, getDatabaseDao().createConnectionUrl());
     }
 }

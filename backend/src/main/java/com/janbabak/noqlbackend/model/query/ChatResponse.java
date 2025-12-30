@@ -33,7 +33,7 @@ public class ChatResponse {
                 chatQueryWithResponse.getTimestamp(),
                 null);
 
-        String error = getError(chatQueryWithResponse);
+        final String error = getError(chatQueryWithResponse);
         if (error != null) {
             this.error = error;
         }

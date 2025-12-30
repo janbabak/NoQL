@@ -60,9 +60,9 @@ class UserControllerTest {
     @Test
     @DisplayName("Get all users with ADMIN role")
     @WithMockUser("ADMIN")
-    void getAll() throws Exception {
+    void testGetAll() throws Exception {
         // given
-        User user1 = User.builder()
+        final User user1 = User.builder()
                 .id(UUID.fromString("cf11c153-2948-4922-bca7-3e407a40da02"))
                 .firstName("John")
                 .lastName("Doe")
@@ -72,7 +72,7 @@ class UserControllerTest {
                 .queryLimit(5)
                 .build();
 
-        User user2 = User.builder()
+        final User user2 = User.builder()
                 .id(UUID.fromString("df11c153-2948-4922-bca7-3e407a40da02"))
                 .firstName("Jane")
                 .lastName("Doe")
@@ -81,7 +81,7 @@ class UserControllerTest {
                 .role(Role.ROLE_ADMIN)
                 .build();
 
-        List<User> users = List.of(user1, user2);
+        final List<User> users = List.of(user1, user2);
 
         when(userServiceMock.findAll()).thenReturn(users);
 
@@ -95,7 +95,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Get all users with USER role")
     @WithMockUser(roles = "USER")
-    void getAllForbidden() throws Exception {
+    void testGetAllForbidden() throws Exception {
         //given
         when(userServiceMock.findAll()).thenThrow(new AccessDeniedException("Access denied"));
 
@@ -108,7 +108,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Get all users with anonymous user")
     @WithAnonymousUser
-    void getAllUnauthorized() throws Exception {
+    void testGetAllUnauthorized() throws Exception {
         mockMvc.perform(get(ROOT_URL))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -117,7 +117,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Get user by id with USER role")
     @WithMockUser(roles = "USER")
-    void getById() throws Exception {
+    void testGetById() throws Exception {
         // given
         when(userServiceMock.findById(testUser.getId())).thenReturn(testUser);
 
@@ -131,7 +131,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Get user by id with anonymous user")
     @WithAnonymousUser
-    void getByIdUnauthorized() throws Exception {
+    void testGetByIdUnauthorized() throws Exception {
         mockMvc.perform(get(ROOT_URL + "/{userId}", testUser.getId()))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
@@ -140,7 +140,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Test find user by id - user not found")
     @WithMockUser(roles = "USER")
-    void getByIdUserNotFound() throws Exception {
+    void testGetByIdUserNotFound() throws Exception {
         // given
         when(userServiceMock.findById(testUser.getId())).thenThrow(new EntityNotFoundException(USER, testUser.getId()));
 
@@ -154,9 +154,9 @@ class UserControllerTest {
     @DisplayName("Update user")
     @MethodSource("updateDatabaseDataProvider")
     @WithMockUser(roles = "USER")
-    void updateUser(String request, User updatedUser, String response, Boolean success) throws Exception {
+    void testUpdateUser(String request, User updatedUser, String response, Boolean success) throws Exception {
         // given
-        UUID userId = UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02");
+        final UUID userId = UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02");
 
         if (success) {
             when(userServiceMock.updateUser(eq(userId), any())).thenReturn(updatedUser);
@@ -280,7 +280,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Update user with anonymous user")
     @WithAnonymousUser
-    void updateUserUnauthorized() throws Exception {
+    void testUpdateUserUnauthorized() throws Exception {
         mockMvc.perform(put(ROOT_URL + "/{userId}", testUser.getId())
                         .with(csrf()))
                 .andDo(print())
@@ -290,7 +290,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Delete user")
     @WithMockUser(roles = "USER")
-    void deleteUser() throws Exception {
+    void testDeleteUser() throws Exception {
         // then
         mockMvc.perform(delete(ROOT_URL + "/{userId}", testUser.getId())
                         .with(csrf()))
@@ -301,7 +301,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Delete user with anonymous user")
     @WithAnonymousUser
-    void deleteUserUnauthorized() throws Exception {
+    void testDeleteUserUnauthorized() throws Exception {
         mockMvc.perform(delete(ROOT_URL + "/{userId}", testUser.getId())
                         .with(csrf()))
                 .andDo(print())

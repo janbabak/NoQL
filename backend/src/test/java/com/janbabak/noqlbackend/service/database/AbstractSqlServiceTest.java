@@ -66,10 +66,10 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
         assertEquals(name, table.name());
         assertEquals(columns.size(), table.columns().size());
         assertEquals(primaryKeys.size(), table.getPrimaryKeys().size());
-        for (String column : columns) {
+        for (final String column : columns) {
             assertTrue(table.columns().containsKey(column));
         }
-        for (String primaryKey : primaryKeys) {
+        for (final String primaryKey : primaryKeys) {
             assertTrue(table.getPrimaryKeys().contains(primaryKey));
         }
     }
@@ -78,7 +78,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        SqlDatabaseService databaseService = getSqlService(getDatabase());
+        final SqlDatabaseService databaseService = getSqlService(getDatabase());
         databaseService.setDatabaseDaoMetadata(getDatabase());
         databaseStructure = databaseService.retrieveSchema();
     }
@@ -86,7 +86,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test user table")
     void testUserTable() {
-        Table table = getUserTable();
+        final Table table = getUserTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("id"));
@@ -110,7 +110,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test address table")
     void testAddressTable() {
-        Table table = getAddressTable();
+        final Table table = getAddressTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("id"));
@@ -135,7 +135,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test order table")
     void testOrderTable() {
-        Table table = getOrderTable();
+        final Table table = getOrderTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("id"));
@@ -173,7 +173,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test specialisation table")
     void testSpecialisationTable() {
-        Table table = getSpecialisationTable();
+        final Table table = getSpecialisationTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("id"));
@@ -188,7 +188,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test student table")
     void testStudentTable() {
-        Table table = getStudentTable();
+        final Table table = getStudentTable();
 
         assertEquals(new Column("id", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("id"));
@@ -210,7 +210,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test fit_wiki table")
     void testFitWikiTable() {
-        Table table = getFitWikiTable();
+        final Table table = getFitWikiTable();
 
         assertEquals(new Column("identifier", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("identifier"));
@@ -230,7 +230,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test course table")
     void testCourseTable() {
-        Table table = getCourseTable();
+        final Table table = getCourseTable();
 
         assertEquals(new Column("(identifier of course", INTEGER_DATA_TYPE, true, null),
                 table.columns().get("(identifier of course"));
@@ -242,7 +242,7 @@ public abstract class AbstractSqlServiceTest extends LocalDatabaseTest {
     @Test
     @DisplayName("Test exam table")
     void testExamTable() {
-        Table table = getExamTable();
+        final Table table = getExamTable();
 
         assertEquals(new Column("student", INTEGER_DATA_TYPE, true,
                         new ForeignKey(getCvutSchema(), "student", "id")),

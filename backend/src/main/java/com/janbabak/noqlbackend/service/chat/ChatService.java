@@ -56,7 +56,7 @@ public class ChatService {
     public ChatDto findById(UUID chatId, Integer pageSize, Boolean includeData) throws EntityNotFoundException {
         log.info("Get chat by id={}", chatId);
 
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+        final Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
@@ -68,11 +68,11 @@ public class ChatService {
                 .messages(chat.getMessages()
                         .stream()
                         .map(message -> {
-                            String plotFileUrl = message.plotGenerated()
+                            final String plotFileUrl = message.plotGenerated()
                                     ? PlotService.createFileUrl(chat.getId(), message.getId())
                                     : null;
 
-                            RetrievedData data = includeData
+                            final RetrievedData data = includeData
                                     ? messageDataDAO.retrieveDataFromMessage(
                                             message, chat.getDatabase(), 0, pageSize)
                                     : null;
@@ -92,18 +92,18 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the database
      */
     public List<ChatHistoryItem> findChatsByDatabaseId(UUID databaseId) throws EntityNotFoundException {
-        Database database = databaseRepository.findById(databaseId)
+        final Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUser().getId());
 
         return chatRepository.findAllByDatabaseOrderByModificationDateDesc(database)
                 .stream()
-                .map((chat -> ChatHistoryItem
+                .map(chat -> ChatHistoryItem
                         .builder()
                         .id(chat.getId())
                         .name(chat.getName())
-                        .build()))
+                        .build())
                 .toList();
     }
 
@@ -117,7 +117,7 @@ public class ChatService {
     public ChatDto create(UUID databaseId) throws EntityNotFoundException {
         log.info("Create new chat.");
 
-        Database database = databaseRepository.findById(databaseId)
+        final Database database = databaseRepository.findById(databaseId)
                 .orElseThrow(() -> new EntityNotFoundException(DATABASE, databaseId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(database.getUser().getId());
@@ -145,12 +145,12 @@ public class ChatService {
     public ChatQueryWithResponse addEmptyMessageToChat(UUID chatId)
             throws EntityNotFoundException {
 
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+        final Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
-        Timestamp timestamp = Timestamp.from(Instant.now());
-        ChatQueryWithResponse message = ChatQueryWithResponse.builder()
+        final Timestamp timestamp = Timestamp.from(Instant.now());
+        final ChatQueryWithResponse message = ChatQueryWithResponse.builder()
                 .chat(chat)
                 .build();
 
@@ -171,7 +171,7 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     public void renameChat(UUID chatId, String name) throws EntityNotFoundException {
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+        final Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
@@ -186,7 +186,7 @@ public class ChatService {
      * @throws org.springframework.security.access.AccessDeniedException if the user is not the owner of the chat
      */
     public void deleteChatById(UUID chatId) {
-        Optional<Chat> chat = chatRepository.findById(chatId);
+        final Optional<Chat> chat = chatRepository.findById(chatId);
 
         if (chat.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.get().getDatabase().getUser().getId());

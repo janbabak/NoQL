@@ -96,7 +96,7 @@ public class Database {
         if (chats == null) {
             chats = new ArrayList<>();
         }
-        for (Chat c: chats) {
+        for (final Chat c: chats) {
             if (chat.getId() != null && c.getId().equals(chat.getId())) {
                 return;
             }
@@ -110,8 +110,6 @@ public class Database {
      * @param newChats new chats
      */
     public void addChats(Collection<Chat> newChats) {
-        for (Chat chat: newChats) {
-            addChat(chat);
-        }
+        newChats.forEach(this::addChat);
     }
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.MockedStatic;
 
-import static com.janbabak.noqlbackend.service.query.QueryUtils.setPaginationInSqlQuery;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.constructPaginatedSqlQuery;
 import static com.janbabak.noqlbackend.service.query.QueryUtils.trimAndRemoveTrailingSemicolon;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
@@ -17,9 +17,9 @@ import static org.mockito.Mockito.mockStatic;
 class QueryUtilsTest {
 
     @ParameterizedTest
-    @MethodSource("setPaginationDataProvider")
-    @DisplayName("Test set pagination")
-    void testSetPagination(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
+    @MethodSource("constructPaginatedQueryDataProvider")
+    @DisplayName("Test construct paginated quey")
+    void testConstructPaginatedQuery(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
             throws BadRequestException {
 
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
@@ -29,10 +29,10 @@ class QueryUtilsTest {
                 settingsMockedStatic.when(Settings::getDefaultPageSizeStatic).thenReturn(10);
             }
 
-            Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
+            final Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
 
             // when
-            QueryUtils.PaginatedQuery actualValue = setPaginationInSqlQuery(query, page, pageSize, database);
+            final QueryUtils.PaginatedQuery actualValue = constructPaginatedSqlQuery(query, page, pageSize, database);
 
             // then
             assertEquals(expectedQuery, actualValue);
@@ -40,7 +40,7 @@ class QueryUtilsTest {
     }
 
     @SuppressWarnings("all") // sql warnings
-    static Object[][] setPaginationDataProvider() {
+    static Object[][] constructPaginatedQueryDataProvider() {
         return new Object[][]{
                 // trailing semicolon
                 {
@@ -94,20 +94,20 @@ class QueryUtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("setPaginationBadRequestDataProvider")
-    @DisplayName("Test set pagination with bad request")
-    void testSetPaginationBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
+    @MethodSource("constructPaginatedQueryBadRequestDataProvider")
+    @DisplayName("Test construct paginated query with bad request")
+    void testConstructPaginatedQueryBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
             // given
             if (page >= 0) { // otherwise unnecessary stubbing error
                 settingsMockedStatic.when(Settings::getMaxPageSizeStatic).thenReturn(50);
             }
-            Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
+            final Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
 
 
             // when
-            BadRequestException exception = assertThrows(BadRequestException.class,
-                    () -> setPaginationInSqlQuery(query, page, pageSize, database));
+            final BadRequestException exception = assertThrows(BadRequestException.class,
+                    () -> constructPaginatedSqlQuery(query, page, pageSize, database));
 
             // then
             assertEquals(errorMessage, exception.getMessage());
@@ -115,7 +115,7 @@ class QueryUtilsTest {
     }
 
     @SuppressWarnings("all") // sql warnings
-    static Object[][] setPaginationBadRequestDataProvider() {
+    static Object[][] constructPaginatedQueryBadRequestDataProvider() {
         return new Object[][]{
                 // page size greater than maximum allowed
                 {
@@ -141,7 +141,7 @@ class QueryUtilsTest {
     @DisplayName("Test trim and remove trailing semicolon")
     void testTrimAndRemoveTrailingSemicolon(String query, String expectedQuery) {
         // when
-        String actualValue = trimAndRemoveTrailingSemicolon(query);
+        final String actualValue = trimAndRemoveTrailingSemicolon(query);
 
         // then
         assertEquals(expectedQuery, actualValue);

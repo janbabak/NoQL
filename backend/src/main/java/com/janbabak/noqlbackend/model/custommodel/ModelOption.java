@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.customModel;
+package com.janbabak.noqlbackend.model.custommodel;
 
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import lombok.Builder;

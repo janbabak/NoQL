@@ -21,15 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ChatQueryWithResponseRepositoryTest {
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatQueryWithResponseRepository chatQueryWithResponseRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private DatabaseRepository databaseRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private UserRepository userRepository;
 
     @AfterEach
@@ -40,7 +37,7 @@ class ChatQueryWithResponseRepositoryTest {
     @Test
     void testFindLatestMessage() {
         // given
-        User user = User.builder()
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -51,7 +48,7 @@ class ChatQueryWithResponseRepositoryTest {
         userRepository.save(user);
 
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .name("Testing database")
                 .host("localhost")
                 .port(5432)
@@ -63,40 +60,40 @@ class ChatQueryWithResponseRepositoryTest {
                 .user(user)
                 .build();
 
-        Chat chat1 = Chat.builder()
+        final Chat chat1 = Chat.builder()
                 .name("Testing chat")
                 .modificationDate(Timestamp.valueOf("2024-05-01 10:10:10.0"))
                 .messages(new ArrayList<>())
                 .build();
-        Chat chat2 = Chat.builder()
+        final Chat chat2 = Chat.builder()
                 .name("New chat")
                 .modificationDate(Timestamp.valueOf("2024-05-01 10:10:10.0"))
                 .messages(new ArrayList<>())
                 .build();
         database.addChats(List.of(chat1, chat2));
 
-        ChatQueryWithResponse message1 = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse message1 = ChatQueryWithResponse.builder()
                 .chat(chat1)
                 .nlQuery("Show data from table")
                 .dbQuery("SELECT * FROM table")
                 .dbQueryExecutionSuccess(true)
                 .timestamp(Timestamp.valueOf("2024-05-26 10:10:10.0"))
                 .build();
-        ChatQueryWithResponse message2 = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse message2 = ChatQueryWithResponse.builder()
                 .nlQuery("Get all records from table")
                 .dbQuery("SELECT all FROM table")
                 .dbQueryExecutionSuccess(false)
                 .dbExecutionErrorMessage("Error executing query")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:11:10.0"))
                 .build();
-        ChatQueryWithResponse message3 = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse message3 = ChatQueryWithResponse.builder()
                 .nlQuery("plot users by age")
                 .plotScript("import matplotlib.pyplot as plt; ...")
                 .plotGenerationSuccess(false)
                 .plotGenerationErrorMessage("Error generating plot")
                 .timestamp(Timestamp.valueOf("2024-05-27 10:10:10.0"))
                 .build();
-        ChatQueryWithResponse message4 = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse message4 = ChatQueryWithResponse.builder()
                 .nlQuery("Find all entries")
                 .dbQuery("SELECT * FROM table")
                 .dbQueryExecutionSuccess(true)
@@ -110,7 +107,7 @@ class ChatQueryWithResponseRepositoryTest {
         databaseRepository.save(database);
 
         // when
-        ChatQueryWithResponse latestMessage = chatQueryWithResponseRepository
+        final ChatQueryWithResponse latestMessage = chatQueryWithResponseRepository
                 .findLatestMessageFromChat(chat1.getId())
                 .orElseThrow(() -> new RuntimeException("No message found"));
 

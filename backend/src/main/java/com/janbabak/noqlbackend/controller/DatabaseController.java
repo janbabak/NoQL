@@ -11,7 +11,7 @@ import com.janbabak.noqlbackend.model.query.*;
 import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.query.QueryService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
-import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
+import com.janbabak.noqlbackend.service.langchain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

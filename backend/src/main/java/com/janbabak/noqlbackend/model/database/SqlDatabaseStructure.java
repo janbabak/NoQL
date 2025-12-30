@@ -27,8 +27,9 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
      *
      * @return insert script
      */
+    @Override
     public String generateCreateScript() {
-        StringBuilder script = new StringBuilder();
+        final StringBuilder script = new StringBuilder();
 
         // schemas
         schemas().forEach((schemaName, schema) -> {
@@ -46,7 +47,7 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
                         .append(tableName)
                         .append("\n(");
 
-                List<String> primaryKeys = table.getPrimaryKeys();
+                final List<String> primaryKeys = table.getPrimaryKeys();
 
                 // columns
                 table.getColumnsSortedByPrimaryKey().forEach(column -> script
@@ -75,6 +76,7 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
      *
      * @return DTO
      */
+    @Override
     public SqlDatabaseStructureDto toDto() {
         return new SqlDatabaseStructureDto(this);
     }
@@ -108,12 +110,12 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
          * @return names of columns
          */
         public List<String> getPrimaryKeys() {
-            List<String> primaryKeys = new ArrayList<>();
-            for (Map.Entry<String, Column> entry : columns.entrySet()) {
-                if (entry.getValue().getIsPrimaryKey()) {
-                    primaryKeys.add(entry.getKey());
+            final List<String> primaryKeys = new ArrayList<>();
+            columns.forEach((key, value) -> {
+                if (value.isPrimaryKey) {
+                    primaryKeys.add(key);
                 }
-            }
+            });
             return primaryKeys;
         }
 
@@ -154,7 +156,7 @@ public record SqlDatabaseStructure(Map<String, Schema> schemas) implements Datab
         @JsonIgnore
         public String getReferencingString() {
             return " REFERENCES "
-                    + (referencedSchema.equals(DEFAULT_SCHEMA) ? "" : referencedSchema + ".")
+                    + (DEFAULT_SCHEMA.equals(referencedSchema) ? "" : referencedSchema + ".")
                     + referencedTable + "(" + referencedColumn + "),";
         }
     }

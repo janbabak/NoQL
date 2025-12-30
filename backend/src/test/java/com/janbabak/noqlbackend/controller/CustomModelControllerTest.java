@@ -1,7 +1,7 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.customModel.ModelOption;
+import com.janbabak.noqlbackend.model.custommodel.ModelOption;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.service.CustomModelService;
@@ -67,7 +67,7 @@ class CustomModelControllerTest {
     @WithMockUser(roles = "USER")
     void testGetAllCustomModels() throws Exception {
         // given
-        CustomModel gptProxy = CustomModel.builder()
+        final CustomModel gptProxy = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("Gpt proxy")
                 .host("localhost")
@@ -75,7 +75,7 @@ class CustomModelControllerTest {
                 .user(testUser)
                 .build();
 
-        List<CustomModel> customModels = List.of(localModel, gptProxy);
+        final List<CustomModel> customModels = List.of(localModel, gptProxy);
 
         when(customModelServiceMock.findAll(testUser.getId())).thenReturn(customModels);
 
@@ -100,7 +100,7 @@ class CustomModelControllerTest {
     @WithMockUser(roles = "USER")
     void testGetAllModels() throws Exception {
         // given
-        List<ModelOption> allModels = List.of(
+        final List<ModelOption> allModels = List.of(
                 ModelOption.builder()
                         .label("GPT 4")
                         .value("gpt-4")
@@ -146,7 +146,7 @@ class CustomModelControllerTest {
     @WithMockUser(roles = "USER")
     void testGetCustomModelByIdNotFound() throws Exception {
         // given
-        UUID customModelId = UUID.randomUUID();
+        final UUID customModelId = UUID.randomUUID();
 
         when(customModelServiceMock.findById(customModelId)).thenThrow(EntityNotFoundException.class);
 
@@ -295,7 +295,7 @@ class CustomModelControllerTest {
             throws Exception {
 
         // given
-        UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
+        final UUID customModelId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
         if (success) {
             when(customModelServiceMock.update(eq(customModelId), any())).thenReturn(updatedModel);
@@ -413,7 +413,7 @@ class CustomModelControllerTest {
     @WithMockUser(roles = "USER")
     void testDeleteCustomModelById() throws Exception {
         // given
-        UUID customModelId = UUID.randomUUID();
+        final UUID customModelId = UUID.randomUUID();
 
         // then
         mockMvc.perform(delete(ROOT_URL + "/{localModelId}", customModelId)

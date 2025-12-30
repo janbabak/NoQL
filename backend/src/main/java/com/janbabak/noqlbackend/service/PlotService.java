@@ -51,7 +51,7 @@ public class PlotService {
      *                            {@code ./backend/gradlew -p backend bootRun} command, the value from build.gradle is
      *                            used)
      */
-    PlotService(Settings settings,
+    public PlotService(Settings settings,
                 DatabaseCredentialsEncryptionService encryptionService,
                 @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
 
@@ -98,16 +98,17 @@ public class PlotService {
             createPlotScript(replaceCredentialsInScript(scriptContent, database, fileName));
             log.debug("Starting process: docker exec {} python ./{}/{}",
                     settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME);
-            ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "docker exec %s python ./%s/%s"
-                    .formatted(settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME));
+            final ProcessBuilder processBuilder = new ProcessBuilder(
+                    "sh", "-c", "docker exec %s python ./%s/%s".formatted(
+                            settings.getPlotServiceContainerName(), WORKING_DIRECTORY_NAME, PLOT_SCRIPT_NAME));
 
-            Process process = processBuilder.start();
+            final Process process = processBuilder.start();
 
             // read output and return it if failure
-            BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            StringBuilder output = new StringBuilder();
-            StringBuilder error = new StringBuilder();
+            final BufferedReader outputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            final StringBuilder output = new StringBuilder();
+            final StringBuilder error = new StringBuilder();
             String line;
             while ((line = outputReader.readLine()) != null) {
                 output.append(line);
@@ -121,7 +122,7 @@ public class PlotService {
 
             try {
                 process.waitFor(GENERATE_PLOT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                int exitCode = process.exitValue();
+                final int exitCode = process.exitValue();
                 process.destroy();
                 if (exitCode != 0) { // fail
                     log.error("Plot scrip execution failed. exit code: {}, output: '{}', error: '{}'",
@@ -131,10 +132,10 @@ public class PlotService {
             } catch (InterruptedException e) {
                 log.error("Plot script execution failed. output: '{}', error: '{}', exception: '{}'",
                         output, error, e.getMessage());
-                throw new PlotScriptExecutionException(output.toString());
+                throw new PlotScriptExecutionException(output.toString(), e);
             }
         } catch (IOException e) {
-            throw new PlotScriptExecutionException(e.getMessage());
+            throw new PlotScriptExecutionException(e.getMessage(), e);
         }
     }
 
@@ -178,15 +179,16 @@ public class PlotService {
      * @param fileName      name of the file to save plot
      * @return script with real credentials
      */
-    String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
-        scriptContent = scriptContent.replace(QueryService.USER_PLACEHOLDER, database.getUserName());
-        scriptContent = scriptContent.replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase());
-        scriptContent = scriptContent.replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, fileName);
-        scriptContent = scriptContent.replace(QueryService.PASSWORD_PLACEHOLDER,
-                encryptionService.decryptCredentials(database.getPassword()));
-        scriptContent = scriptContent.replace(QueryService.HOST_PLACEHOLDER,
-                database.getHost().equals("localhost") ? QueryService.DOCKER_LOCALHOST : database.getHost());
-        return scriptContent.replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
+    /* default */ String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
+         return scriptContent
+                .replace(QueryService.USER_PLACEHOLDER, database.getUserName())
+                .replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase())
+                .replace(QueryService.PLOT_FILE_NAME_PLACEHOLDER, fileName)
+                .replace(QueryService.PASSWORD_PLACEHOLDER,
+                        encryptionService.decryptCredentials(database.getPassword()))
+                .replace(QueryService.HOST_PLACEHOLDER,
+                        "localhost".equals(database.getHost()) ? QueryService.DOCKER_LOCALHOST : database.getHost())
+                .replace(QueryService.PORT_PLACEHOLDER, database.getPort().toString());
     }
 
     /**
@@ -217,7 +219,7 @@ public class PlotService {
      * @throws IOException cannot write into the file
      */
     private void createPlotScript(String scriptContent) throws IOException {
-        FileWriter writer = new FileWriter(script, false);
+        final FileWriter writer = new FileWriter(script, false);
         writer.write(scriptContent);
         writer.close();
     }

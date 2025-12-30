@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.customModel;
+package com.janbabak.noqlbackend.model.custommodel;
 
 import com.janbabak.noqlbackend.validation.FirstValidationGroup;
 import com.janbabak.noqlbackend.validation.SecondValidationGroup;

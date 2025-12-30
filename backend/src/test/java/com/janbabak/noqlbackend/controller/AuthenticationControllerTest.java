@@ -179,9 +179,9 @@ class AuthenticationControllerTest {
     @WithAnonymousUser
     void refreshToken() throws Exception {
         // given
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw";
 
-        AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
+        final AuthenticationResponse expectedResponse = AuthenticationResponse.builder()
                 .accessToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTczNX0.Vem92uCmIvcErFhri54NmQvxdk3qfElLcGJ9LZ_9TeCyO66v20_r8QeuCfUVMn_dTApmdHCyk-O9ARwgbcyrUw")
                 .refreshToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc3ODE3MDUsImV4cCI6MTcyNzc4MTc2NX0.HT5KK391gGf5oohjKOH_ky0Pp9ze43l4CLeygQCkwf7R4iLlv1oJ9PU4U6Ct3_SBxrSn1AW7T_kWqcEjF0Vrdg")
                 .user(User.builder()

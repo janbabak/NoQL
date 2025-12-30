@@ -108,9 +108,9 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test find database by id")
     void testFindDatabaseBy() throws EntityNotFoundException {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .name("local postgres")
                 .user(testUser)
@@ -119,10 +119,10 @@ class DatabaseEntityServiceTest {
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
 
         // when
-        Database actual = databaseEntityService.findById(databaseId);
+        final Database actual = databaseEntityService.findById(databaseId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepositoryMock).findById(idCaptor.capture());
         assertEquals(databaseId, idCaptor.getValue());
         assertEquals(database, actual);
@@ -132,17 +132,17 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test find database by id not found")
     void testFindDatabaseByIdNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.findById(databaseId));
 
         // then
         assertEquals("Database of id: \"" + databaseId + "\" not found.", exception.getMessage());
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepositoryMock).findById(idCaptor.capture());
         assertEquals(databaseId, idCaptor.getValue());
     }
@@ -151,36 +151,36 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test find all databases")
     void testFindAllDatabases() {
         // given
-        Database database1 = Database.builder()
+        final Database database1 = Database.builder()
                 .id(UUID.randomUUID())
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .user(testUser)
                 .build();
 
-        Database database2 = Database.builder()
+        final Database database2 = Database.builder()
                 .id(UUID.randomUUID())
                 .engine(DatabaseEngine.MYSQL)
                 .name("remote mysql")
                 .user(testUser)
                 .build();
 
-        Database database3 = Database.builder()
+        final Database database3 = Database.builder()
                 .id(UUID.randomUUID())
                 .engine(DatabaseEngine.MYSQL)
                 .name("remote mysql")
                 .user(User.builder().id(UUID.randomUUID()).firstName("Different user").build())
                 .build();
 
-        List<Database> databases = List.of(database1, database2, database3);
-        List<Database> databasesOfTestUser = List.of(database1, database2);
+        final List<Database> databases = List.of(database1, database2, database3);
+        final List<Database> databasesOfTestUser = List.of(database1, database2);
 
         when(databaseRepositoryMock.findAll()).thenReturn(databases);
         when(databaseRepositoryMock.findAllByUserId(eq(testUser.getId()))).thenReturn(databasesOfTestUser);
 
         // when
-        List<Database> actualAll = databaseEntityService.findAll();
-        List<Database> actualTestUserDatabases = databaseEntityService.findAll(testUser.getId());
+        final List<Database> actualAll = databaseEntityService.findAll();
+        final List<Database> actualTestUserDatabases = databaseEntityService.findAll(testUser.getId());
 
         // then
         assertEquals(3, actualAll.size());
@@ -200,10 +200,10 @@ class DatabaseEntityServiceTest {
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
 
         // when
-        Database actual = databaseEntityService.create(request);
+        final Database actual = databaseEntityService.create(request);
 
         // then
-        ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
+        final ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
         verify(databaseRepositoryMock).save(databaseCaptor.capture());
         assertEquals(database, databaseCaptor.getValue());
         assertEquals(database, actual);
@@ -246,18 +246,18 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test create database connection failed")
     void testCreateDatabaseConnectionFailed() throws DatabaseConnectionException {
         // given
-        CreateDatabaseRequest request = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest request = CreateDatabaseRequest.builder()
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .userId(testUser.getId())
                 .build();
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .user(testUser)
                 .build();
 
-        PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
+        final PostgresDAO postgresDao = mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
         when(userRepositoryMock.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -271,9 +271,9 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test update database")
     void testUpdateDatabase() throws EntityNotFoundException, DatabaseConnectionException {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
@@ -281,12 +281,12 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
+        final UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
                 .name("remote postgres")
                 .engine(DatabaseEngine.MYSQL)
                 .build();
 
-        Database updatedDatabase = Database.builder()
+        final Database updatedDatabase = Database.builder()
                 .id(databaseId)
                 .engine(DatabaseEngine.MYSQL)
                 .name("remote postgres")
@@ -299,10 +299,10 @@ class DatabaseEntityServiceTest {
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
 
         // when
-        Database actual = databaseEntityService.update(databaseId, updateDatabaseRequest);
+        final Database actual = databaseEntityService.update(databaseId, updateDatabaseRequest);
 
         // then
-        ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
+        final ArgumentCaptor<Database> databaseCaptor = ArgumentCaptor.forClass(Database.class);
         verify(databaseRepositoryMock).save(databaseCaptor.capture());
         assertEquals(updatedDatabase, databaseCaptor.getValue());
         assertEquals(database, actual);
@@ -312,9 +312,9 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test update database not found")
     void testUpdateDatabaseNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
+        final UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
                 .name("remote postgres")
                 .engine(DatabaseEngine.MYSQL)
                 .build();
@@ -322,7 +322,7 @@ class DatabaseEntityServiceTest {
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.update(databaseId, updateDatabaseRequest));
 
         // then
@@ -333,9 +333,9 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test update database connection failed")
     void testUpdateDatabaseConnectionFailed() throws DatabaseConnectionException {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
@@ -343,14 +343,14 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
+        final UpdateDatabaseRequest updateDatabaseRequest = UpdateDatabaseRequest.builder()
                 .name("remote postgres")
                 .password("wrong password")
                 .engine(DatabaseEngine.MYSQL)
                 .build();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
-        PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
+        final PostgresDAO postgresDao = mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(postgresDao);
 
@@ -363,7 +363,7 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test delete database by id")
     void testDeleteDatabaseById() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(Database.builder()
                 .id(UUID.randomUUID())
@@ -374,7 +374,7 @@ class DatabaseEntityServiceTest {
         databaseEntityService.deleteById(databaseId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(databaseRepositoryMock).deleteById(idCaptor.capture());
         assertEquals(databaseId, idCaptor.getValue());
     }
@@ -383,18 +383,17 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test get database structure")
     void testGetDatabaseStructure()
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
-
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
                 .user(testUser)
                 .build();
 
-        PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
+        final PostgresService postgresServiceMock = mock(PostgresService.class);
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
@@ -402,7 +401,7 @@ class DatabaseEntityServiceTest {
         when(postgresServiceMock.retrieveSchema()).thenReturn(databaseStructure);
 
         // when
-        DatabaseStructureDto actual = databaseEntityService.getDatabaseStructureByDatabaseId(databaseId);
+        final DatabaseStructureDto actual = databaseEntityService.getDatabaseStructureByDatabaseId(databaseId);
 
         // then
         assertEquals(databaseStructure.toDto(), actual);
@@ -412,13 +411,13 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test get database structure not found")
     void testGetDatabaseStructureNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         // when
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.getDatabaseStructureByDatabaseId(databaseId));
 
         // then
@@ -431,9 +430,9 @@ class DatabaseEntityServiceTest {
             throws DatabaseConnectionException, DatabaseExecutionException, EntityNotFoundException {
 
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .engine(DatabaseEngine.POSTGRES)
                 .name("local postgres")
@@ -441,7 +440,7 @@ class DatabaseEntityServiceTest {
                 .build();
 
         // language=SQL
-        String expectedCreateScript = """
+        final String expectedCreateScript = """
                 CREATE SCHEMA IF NOT EXISTS public;
 
                 CREATE TABLE IF NOT EXISTS public.user
@@ -452,8 +451,8 @@ class DatabaseEntityServiceTest {
                     age integer
                 );""";
 
-        PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
-        SqlDatabaseStructure sqlDatabaseStructureMock = Mockito.mock(SqlDatabaseStructure.class);
+        final PostgresService postgresServiceMock = mock(PostgresService.class);
+        final SqlDatabaseStructure sqlDatabaseStructureMock = mock(SqlDatabaseStructure.class);
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
@@ -462,7 +461,7 @@ class DatabaseEntityServiceTest {
         when(sqlDatabaseStructureMock.generateCreateScript()).thenReturn(expectedCreateScript);
 
         // when
-        String actual = databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId);
+        final String actual = databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId);
 
         // then
         assertEquals(expectedCreateScript, actual);
@@ -472,12 +471,12 @@ class DatabaseEntityServiceTest {
     @DisplayName("Test get database create script not found")
     void testGetDatabaseCreateScriptNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.getDatabaseCreateScriptByDatabaseId(databaseId));
 
         // then
