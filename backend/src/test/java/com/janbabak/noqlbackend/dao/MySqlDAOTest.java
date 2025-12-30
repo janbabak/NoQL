@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MySqlDAOTest extends AbstractSqlDAOTest {
 
+    @Override
     public DatabaseDAO getDatabaseDao() {
         return mySqlDAO;
     }
@@ -37,7 +38,7 @@ class MySqlDAOTest extends AbstractSqlDAOTest {
     @Test
     @DisplayName("Test create connection URL")
     void testCreateConnectionUrl() {
-        String expected = "jdbc:mysql://localhost:" + getMySqlPort() + "/test-database";
+        final String expected = "jdbc:mysql://localhost:" + getMySqlPort() + "/test-database";
         assertEquals(expected, getDatabaseDao().createConnectionUrl());
     }
 }

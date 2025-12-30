@@ -62,7 +62,7 @@ class UserControllerTest {
     @WithMockUser("ADMIN")
     void getAll() throws Exception {
         // given
-        User user1 = User.builder()
+        final User user1 = User.builder()
                 .id(UUID.fromString("cf11c153-2948-4922-bca7-3e407a40da02"))
                 .firstName("John")
                 .lastName("Doe")
@@ -72,7 +72,7 @@ class UserControllerTest {
                 .queryLimit(5)
                 .build();
 
-        User user2 = User.builder()
+        final User user2 = User.builder()
                 .id(UUID.fromString("df11c153-2948-4922-bca7-3e407a40da02"))
                 .firstName("Jane")
                 .lastName("Doe")
@@ -81,7 +81,7 @@ class UserControllerTest {
                 .role(Role.ROLE_ADMIN)
                 .build();
 
-        List<User> users = List.of(user1, user2);
+        final List<User> users = List.of(user1, user2);
 
         when(userServiceMock.findAll()).thenReturn(users);
 
@@ -156,7 +156,7 @@ class UserControllerTest {
     @WithMockUser(roles = "USER")
     void updateUser(String request, User updatedUser, String response, Boolean success) throws Exception {
         // given
-        UUID userId = UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02");
+        final UUID userId = UUID.fromString("af11c153-2948-4922-bca7-3e407a40da02");
 
         if (success) {
             when(userServiceMock.updateUser(eq(userId), any())).thenReturn(updatedUser);

@@ -48,14 +48,14 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testCreateChat() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        ChatDto chatDto = ChatDto.builder()
+        final UUID databaseId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
+        final ChatDto chatDto = ChatDto.builder()
                 .id(chatId)
                 .name("New chat")
                 .build();
         // language=JSON
-        String responseContent =
+        final String responseContent =
                 """
                          {
                              "id":"%s",
@@ -83,7 +83,7 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testCreateChatNotExistingDatabase() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(chatServiceMock.create(databaseId)).thenThrow(EntityNotFoundException.class);
 
@@ -115,8 +115,8 @@ class ChatControllerTest {
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetChatById() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
-        ChatDto chatDto = ChatDto.builder()
+        final UUID chatId = UUID.randomUUID();
+        final ChatDto chatDto = ChatDto.builder()
                 .id(chatId)
                 .name("Test chat")
                 .build();
@@ -135,7 +135,7 @@ class ChatControllerTest {
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testGetChatByIdNotFound() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatServiceMock.findById(eq(chatId), any(), eq(true))).thenThrow(EntityNotFoundException.class);
 
@@ -159,7 +159,7 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testDeleteChatById() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         // then
         mockMvc.perform(delete(ROOT_URL + "/{chatId}", chatId)
@@ -183,8 +183,8 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testRenameChat() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
-        String name = "Find all users";
+        final UUID chatId = UUID.randomUUID();
+        final String name = "Find all users";
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
@@ -199,8 +199,8 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testRenameChatNotFound() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
-        String name = "Find all users";
+        final UUID chatId = UUID.randomUUID();
+        final String name = "Find all users";
 
         doThrow(EntityNotFoundException.class).when(chatServiceMock).renameChat(chatId, name);
 
@@ -217,8 +217,8 @@ class ChatControllerTest {
     @WithMockUser(roles = "USER")
     void testRenameChatNameTooLong() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
-        String name = "To long name. More than 32 chars.";
+        final UUID chatId = UUID.randomUUID();
+        final String name = "To long name. More than 32 chars.";
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)
@@ -233,8 +233,8 @@ class ChatControllerTest {
     @WithMockUser(username = "john.doe@gmail.com", roles = "USER")
     void testRenameChatEmtpyName() throws Exception {
         // given
-        UUID chatId = UUID.randomUUID();
-        String name = "";
+        final UUID chatId = UUID.randomUUID();
+        final String name = "";
 
         // then
         mockMvc.perform(put(ROOT_URL + "/{chatId}/name", chatId)

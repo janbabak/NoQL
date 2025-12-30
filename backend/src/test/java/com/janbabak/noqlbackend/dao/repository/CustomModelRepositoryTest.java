@@ -34,27 +34,27 @@ class CustomModelRepositoryTest {
     @DisplayName("Filter databases by user id")
     void testFilterDatabasesByUserId() {
         // given
-        User user1 = User.builder()
+        final User user1 = User.builder()
                 .id(UUID.randomUUID())
                 .email("user1@email.cz")
                 .build();
 
-        User user2 = User.builder()
+        final User user2 = User.builder()
                 .id(UUID.randomUUID())
                 .email("user2@email.cz")
                 .build();
 
-        CustomModel model1 = CustomModel.builder()
+        final CustomModel model1 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .user(user1)
                 .build();
 
-        CustomModel model2 = CustomModel.builder()
+        final CustomModel model2 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .user(user1)
                 .build();
 
-        CustomModel model3 = CustomModel.builder()
+        final CustomModel model3 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .user(user2)
                 .build();
@@ -66,10 +66,10 @@ class CustomModelRepositoryTest {
         customModelRepository.save(model2);
         customModelRepository.save(model3);
 
-        List<CustomModel> expected = List.of(model1, model2);
+        final List<CustomModel> expected = List.of(model1, model2);
 
         // when
-        List<CustomModel> actual = customModelRepository.findAllByUserId(user1.getId());
+        final List<CustomModel> actual = customModelRepository.findAllByUserId(user1.getId());
 
         // then
         assertEquals(actual, expected);

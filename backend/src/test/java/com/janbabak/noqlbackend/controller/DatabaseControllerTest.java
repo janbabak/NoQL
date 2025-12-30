@@ -59,7 +59,6 @@ class DatabaseControllerTest {
     private DatabaseEntityService databaseServiceMock;
 
     @MockBean
-    @SuppressWarnings("unused") // mock is used internally
     private QueryService queryService;
 
     @MockBean
@@ -89,7 +88,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetAllDatabases() throws Exception {
         // given
-        Database localMysql = Database.builder()
+        final Database localMysql = Database.builder()
                 .id(UUID.randomUUID())
                 .name("Local MySQL")
                 .host("localhost")
@@ -101,7 +100,7 @@ class DatabaseControllerTest {
                 .engine(DatabaseEngine.MYSQL)
                 .user(testUser)
                 .build();
-        List<Database> databases = List.of(localPostgres, localMysql);
+        final List<Database> databases = List.of(localPostgres, localMysql);
 
         when(databaseServiceMock.findAll(null)).thenReturn(databases);
 
@@ -139,7 +138,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetDatabaseByIdNotFound() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseServiceMock.findById(databaseId)).thenThrow(EntityNotFoundException.class);
 
@@ -319,7 +318,7 @@ class DatabaseControllerTest {
             throws Exception {
 
         // given
-        UUID databaseId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
+        final UUID databaseId = UUID.fromString("6678fc72-1a55-4146-b74b-b3f5aac677df");
 
         if (success) {
             when(databaseServiceMock.update(eq(databaseId), any())).thenReturn(updatedDatabase);
@@ -501,7 +500,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testDeleteDatabaseById() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         // then
         mockMvc.perform(delete(ROOT_URL + "/{databaseId}", databaseId)
@@ -526,11 +525,11 @@ class DatabaseControllerTest {
     void testQueryChat() throws Exception {
 
         // given
-        Integer pageSize = 2;
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
-        ChatResponse response = ChatResponse.builder()
+        final Integer pageSize = 2;
+        final UUID databaseId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
+        final QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
+        final ChatResponse response = ChatResponse.builder()
                 .dbQuery("SELECT * FROM users WHERE age > 25")
                 .nlQuery("find all users older than 25")
                 .timestamp(null)
@@ -566,12 +565,12 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testExecuteChatBadRequest() throws Exception {
         // given
-        Integer pageSize = 2;
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest(null, null);
+        final Integer pageSize = 2;
+        final UUID databaseId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
+        final QueryRequest request = new QueryRequest(null, null);
         // language=JSON
-        String response = """
+        final String response = """
                 {
                    "query":"must not be blank",
                    "model":"must not be null"
@@ -596,10 +595,10 @@ class DatabaseControllerTest {
     @WithAnonymousUser
     void testExecuteChatByAnotherUser() throws Exception {
         // given
-        Integer pageSize = 2;
-        UUID databaseId = UUID.randomUUID();
-        UUID chatId = UUID.randomUUID();
-        QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
+        final Integer pageSize = 2;
+        final UUID databaseId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
+        final QueryRequest request = new QueryRequest("find all users older than 25", "gpt-4o");
 
         // then
         mockMvc.perform(post(ROOT_URL + "/{databaseId}/query/chat", databaseId, chatId, pageSize)
@@ -618,9 +617,9 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testExecuteQueryLanguageQuery() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
-        Integer page = 0;
-        Integer pageSize = 2;
+        final UUID databaseId = UUID.randomUUID();
+        final Integer page = 0;
+        final Integer pageSize = 2;
         @SuppressWarnings("all")
         // language=SQL
         String query = """
@@ -628,7 +627,7 @@ class DatabaseControllerTest {
                 FROM public."user" u
                 JOIN public.address a ON u.id = a.user_id;
                 """;
-        ConsoleResponse response = ConsoleResponse.builder()
+        final ConsoleResponse response = ConsoleResponse.builder()
                 .data(new RetrievedData(
                         List.of("id", "name", "age", "sex", "email", "created_at", "city", "street", "state"),
                         List.of(
@@ -664,12 +663,12 @@ class DatabaseControllerTest {
     @WithAnonymousUser
     void testExecuteQueryLanguageQueryByAnotherUser() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
-        int page = 0;
-        int pageSize = 2;
+        final UUID databaseId = UUID.randomUUID();
+        final int page = 0;
+        final int pageSize = 2;
         @SuppressWarnings("all")
         // language=SQL
-        String query = """
+        final String query = """
                 SELECT u.*, a.city, a.street, a.state
                 FROM public."user" u
                 JOIN public.address a ON u.id = a.user_id;
@@ -693,8 +692,8 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetDatabaseStructure() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
-        SqlDatabaseStructureDto databaseStructure = new SqlDatabaseStructureDto(List.of(
+        final UUID databaseId = UUID.randomUUID();
+        final SqlDatabaseStructureDto databaseStructure = new SqlDatabaseStructureDto(List.of(
                 new SchemaDto("public",
                         List.of(
                                 new TableDto("address", List.of(
@@ -721,7 +720,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetDatabaseStructureNotFound() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseServiceMock.getDatabaseStructureByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
@@ -736,7 +735,7 @@ class DatabaseControllerTest {
     @WithAnonymousUser
     void testGetDatabaseStructureByAnotherUser() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/structure", databaseId))
@@ -749,10 +748,10 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetCreateScript() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
         @SuppressWarnings("all")
         // language=SQL
-        String createScript = """
+        final String createScript = """
                 CREATE SCHEMA IF NOT EXISTS "public";
 
                 CREATE TABLE IF NOT EXISTS public.address
@@ -785,7 +784,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void testGetDatabaseCreateScriptNotFound() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseServiceMock.getDatabaseCreateScriptByDatabaseId(databaseId))
                 .thenThrow(EntityNotFoundException.class);
@@ -801,7 +800,7 @@ class DatabaseControllerTest {
     @WithAnonymousUser
     void testGetDatabaseCreateScriptByAnotherUser() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/createScript", databaseId))
@@ -814,8 +813,8 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void getChatsOfDatabase() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
-        List<ChatHistoryItem> response = List.of(
+        final UUID databaseId = UUID.randomUUID();
+        final List<ChatHistoryItem> response = List.of(
                 new ChatHistoryItem(UUID.randomUUID(), "oldest user"),
                 new ChatHistoryItem(UUID.randomUUID(), "New chat"));
 
@@ -833,7 +832,7 @@ class DatabaseControllerTest {
     @WithMockUser(roles = "USER")
     void getChatsOfNotExistingDatabase() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(chatService.findChatsByDatabaseId(databaseId)).thenThrow(EntityNotFoundException.class);
 
@@ -848,7 +847,7 @@ class DatabaseControllerTest {
     @WithAnonymousUser
     void getChatsOfDatabaseByAnotherUser() throws Exception {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         // then
         mockMvc.perform(get(ROOT_URL + "/{databaseId}/chats", databaseId))
