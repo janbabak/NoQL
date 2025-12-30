@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       push_docker:
-        description: 'Push Docker image'
+        description: 'True if docker images should be built and pushed to Dockerhub'
         required: false
         default: false
         type: boolean
@@ -44,4 +44,3 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
