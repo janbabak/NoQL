@@ -110,7 +110,7 @@ public class PostgresService extends SqlDatabaseService {
         final String referencedTable = referencedSchemaAndTableParsed.b;
 
         // -1 to remove the ")" character
-        final String referencedColumn = constraint.substring(0, constraintDefinition.length() - 1);
+        final String referencedColumn = constraint.substring(0, constraint.length() - 1);
 
         return new ForeignKeyData(
                 referencingSchema,

@@ -55,6 +55,6 @@ public class Chat {
      * @param newMessages new messages
      */
     public void addMessages(Collection<ChatQueryWithResponse> newMessages) {
-        messages.forEach(this::addMessage);
+        newMessages.forEach(this::addMessage);
     }
 }

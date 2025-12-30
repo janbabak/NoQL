@@ -40,7 +40,7 @@ public class QueryUtils {
         // defaults
         final int resultPage = page != null ? page : 0;
         if (resultPage < 0) {
-            final String error = "Page number cannot be negative, resultPage=" + resultPage;
+            final String error = "Page number cannot be negative, page=" + page;
             log.error(error);
             throw new BadRequestException(error);
         }
@@ -57,7 +57,7 @@ public class QueryUtils {
                     trimAndRemoveTrailingSemicolon(query), resultPageSize, resultPage * resultPageSize);
         };
 
-        return new PaginatedQuery(resultQuery, page, pageSize);
+        return new PaginatedQuery(resultQuery, resultPage, resultPageSize);
     }
 
     public static String trimAndRemoveTrailingSemicolon(String query) {
@@ -68,9 +68,9 @@ public class QueryUtils {
         }
 
         // removes trailing semicolon if it is present
-        return trimmedQuery.charAt(query.length() - 1) == ';'
-                ? query.substring(0, query.length() - 1).trim()
-                : query;
+        return trimmedQuery.charAt(trimmedQuery.length() - 1) == ';'
+                ? trimmedQuery.substring(0, trimmedQuery.length() - 1).trim()
+                : trimmedQuery;
     }
 
 

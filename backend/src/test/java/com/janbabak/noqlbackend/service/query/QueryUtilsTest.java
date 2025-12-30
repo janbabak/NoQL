@@ -17,9 +17,9 @@ import static org.mockito.Mockito.mockStatic;
 class QueryUtilsTest {
 
     @ParameterizedTest
-    @MethodSource("setPaginationDataProvider")
-    @DisplayName("Test set pagination")
-    void testConstructPaginationQuery(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
+    @MethodSource("constructPaginatedQueryDataProvider")
+    @DisplayName("Test construct paginated quey")
+    void testConstructPaginatedQuery(String query, Integer page, Integer pageSize, QueryUtils.PaginatedQuery expectedQuery)
             throws BadRequestException {
 
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
@@ -40,7 +40,7 @@ class QueryUtilsTest {
     }
 
     @SuppressWarnings("all") // sql warnings
-    static Object[][] setPaginationDataProvider() {
+    static Object[][] constructPaginatedQueryDataProvider() {
         return new Object[][]{
                 // trailing semicolon
                 {
@@ -94,9 +94,9 @@ class QueryUtilsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("setPaginationBadRequestDataProvider")
-    @DisplayName("Test set pagination with bad request")
-    void testConstructPaginationQueryBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
+    @MethodSource("constructPaginatedQueryBadRequestDataProvider")
+    @DisplayName("Test construct paginated query with bad request")
+    void testConstructPaginatedQueryBadRequest(String query, Integer page, Integer pageSize, String errorMessage) {
         try (MockedStatic<Settings> settingsMockedStatic = mockStatic(Settings.class)) {
             // given
             if (page >= 0) { // otherwise unnecessary stubbing error
@@ -115,7 +115,7 @@ class QueryUtilsTest {
     }
 
     @SuppressWarnings("all") // sql warnings
-    static Object[][] setPaginationBadRequestDataProvider() {
+    static Object[][] constructPaginatedQueryBadRequestDataProvider() {
         return new Object[][]{
                 // page size greater than maximum allowed
                 {
