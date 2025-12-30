@@ -26,7 +26,8 @@ jobs:
     needs: validate
     if: |
       needs.validate.outputs.backend_changed == 'true' ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged)
     uses: janbabak/NoQL/.github/workflows/backend-test.yaml@main
     with:
       triggered_by_merge: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged }}
