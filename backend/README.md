@@ -67,6 +67,18 @@ All API keys listed below are **required**.
 
 ## Gradle Tasks
 
+## Lint
+
+Lint main source code. Rules can be modified at [pmd-main.xml](./config/pmd/pmd-main.xml)
+```bash
+./gradlew pmdMain 
+```
+
+Lint test source code. Rules can be modified at [pmd-test.xml](./config/pmd/pmd-test.xml)
+```bash
+./gradlew pmdTest 
+```
+
 ## Test Coverage
 
 Generate JaCoco report
