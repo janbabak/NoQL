@@ -40,7 +40,7 @@ class QueryDatabaseLLMServiceTest {
     @MockBean
     private PlotService plotService;
 
-    private final QueryDatabaseLLMService.LLMServiceRequest request =
+    /* default */ private final QueryDatabaseLLMService.LLMServiceRequest request =
             QueryDatabaseLLMService.LLMServiceRequest.builder()
                     .userQuery("Find emails of all users")
                     .systemQuery("You are an expert SQL assistant.")

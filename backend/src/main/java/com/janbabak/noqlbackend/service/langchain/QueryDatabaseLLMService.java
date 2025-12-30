@@ -72,7 +72,7 @@ public class QueryDatabaseLLMService extends BaseLLMService {
     }
 
     // package private for testing
-    Assistant buildAssistant(String modelId, QueryDatabaseAssistantTools assistantTools)
+    /* default */ Assistant buildAssistant(String modelId, QueryDatabaseAssistantTools assistantTools)
             throws BadRequestException {
 
         return AiServices.builder(Assistant.class)

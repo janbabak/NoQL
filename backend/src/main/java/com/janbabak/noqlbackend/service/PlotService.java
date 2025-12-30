@@ -51,7 +51,7 @@ public class PlotService {
      *                            {@code ./backend/gradlew -p backend bootRun} command, the value from build.gradle is
      *                            used)
      */
-    PlotService(Settings settings,
+    public PlotService(Settings settings,
                 DatabaseCredentialsEncryptionService encryptionService,
                 @Value("${app.config.workingDirectory}") String appWorkingDirectory) {
 
@@ -179,7 +179,7 @@ public class PlotService {
      * @param fileName      name of the file to save plot
      * @return script with real credentials
      */
-    String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
+    /* default */ String replaceCredentialsInScript(String scriptContent, Database database, String fileName) {
          return scriptContent
                 .replace(QueryService.USER_PLACEHOLDER, database.getUserName())
                 .replace(QueryService.DATABASE_PLACEHOLDER, database.getDatabase())
