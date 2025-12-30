@@ -16,7 +16,7 @@ public class ResourceConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String path = "file:" + workingDirectory + "/plotService/plots/";
+        final String path = "file:" + workingDirectory + "/plotService/plots/";
         registry.addResourceHandler(IMAGES_STATIC_FOLDER + "**")
                 .addResourceLocations(path);
     }

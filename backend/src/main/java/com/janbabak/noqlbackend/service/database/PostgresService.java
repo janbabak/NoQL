@@ -23,6 +23,7 @@ import java.sql.*;
 public class PostgresService extends SqlDatabaseService {
 
     public PostgresService(PostgresDAO postgresDAO) {
+        super();
         databaseDAO = postgresDAO;
     }
 
@@ -33,16 +34,17 @@ public class PostgresService extends SqlDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
+    @Override
     protected void retrieveForeignKeys(SqlDatabaseStructure db)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         try (ResultSetWrapper result = databaseDAO.getForeignKeys()) {
             while (result.resultSet().next()) {
-                String constraintDefinition = result.resultSet().getString("constraint_definition");
-                String referencingSchemaAndTable = result.resultSet().getString(TABLE_NAME_COLUMN_NAME);
-                ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
+                final String constraintDefinition = result.resultSet().getString("constraint_definition");
+                final String referencingSchemaAndTable = result.resultSet().getString(TABLE_NAME_COLUMN_NAME);
+                final ForeignKeyData foreignKeyData = parseForeignKey(referencingSchemaAndTable, constraintDefinition);
 
-                Schema schema = db.schemas().get(foreignKeyData.referencingSchema);
+                final Schema schema = db.schemas().get(foreignKeyData.referencingSchema);
                 if (schema == null) {
                     continue;
                 }
@@ -54,7 +56,7 @@ public class PostgresService extends SqlDatabaseService {
                         continue;
                     }
                 }
-                Column column = table.columns().get(foreignKeyData.referencingColumn);
+                final Column column = table.columns().get(foreignKeyData.referencingColumn);
                 if (column == null) {
                     continue;
                 }
@@ -78,37 +80,37 @@ public class PostgresService extends SqlDatabaseService {
      * @return foreign key data
      */
     private ForeignKeyData parseForeignKey(String referencingSchemaAndTableName, String constraintDefinition) {
-        Pair<String, String> referencingSchemaAndTableParsed = parseSchemaAndTable(referencingSchemaAndTableName);
-        String referencingSchema = referencingSchemaAndTableParsed.a;
-        String referencingTable = referencingSchemaAndTableParsed.b;
+        final Pair<String, String> referencingSchemaAndTableParsed = parseSchemaAndTable(referencingSchemaAndTableName);
+        final String referencingSchema = referencingSchemaAndTableParsed.a;
+        final String referencingTable = referencingSchemaAndTableParsed.b;
 
         // removes the "FOREIGN KEY (" prefix
-        String FOREIGN_KEY_SUBSTRING = "FOREIGN KEY (";
-        constraintDefinition = constraintDefinition.substring(FOREIGN_KEY_SUBSTRING.length());
+        final String foreignKeySubstring = "FOREIGN KEY (";
+        constraintDefinition = constraintDefinition.substring(foreignKeySubstring.length());
 
         String referencingColumn = "";
-        String REFERENCES_SUBSTRING = ") REFERENCES ";
-        int endOfReferencingColumnName = constraintDefinition.indexOf(REFERENCES_SUBSTRING);
+        final String referencesSubstring = ") REFERENCES ";
+        final int endOfReferencingColumnName = constraintDefinition.indexOf(referencesSubstring);
         if (endOfReferencingColumnName != -1) {
             referencingColumn = constraintDefinition.substring(0, endOfReferencingColumnName);
             constraintDefinition = constraintDefinition.substring(
-                    endOfReferencingColumnName + REFERENCES_SUBSTRING.length());
+                    endOfReferencingColumnName + referencesSubstring.length());
         }
 
         // if table or schema name contains "(" in its name, // doesn't work
-        int leftBraceIndex = constraintDefinition.indexOf("(");
+        final int leftBraceIndex = constraintDefinition.indexOf("(");
         String referencedSchemaAndTable = "";
         if (leftBraceIndex != -1) {
             referencedSchemaAndTable = constraintDefinition.substring(0, leftBraceIndex);
             // + 1 to remove the "(" character
             constraintDefinition = constraintDefinition.substring(leftBraceIndex + 1);
         }
-        Pair<String, String> referencedSchemaAndTableParsed = parseSchemaAndTable(referencedSchemaAndTable);
-        String referencedSchema = referencedSchemaAndTableParsed.a;
-        String referencedTable = referencedSchemaAndTableParsed.b;
+        final Pair<String, String> referencedSchemaAndTableParsed = parseSchemaAndTable(referencedSchemaAndTable);
+        final String referencedSchema = referencedSchemaAndTableParsed.a;
+        final String referencedTable = referencedSchemaAndTableParsed.b;
 
         // -1 to remove the ")" character
-        String referencedColumn = constraintDefinition.substring(0, constraintDefinition.length() - 1);
+        final String referencedColumn = constraintDefinition.substring(0, constraintDefinition.length() - 1);
 
         return new ForeignKeyData(
                 referencingSchema,
@@ -127,7 +129,7 @@ public class PostgresService extends SqlDatabaseService {
      * @return [schemaName, tableName]
      */
     private Pair<String, String> parseSchemaAndTable(String data) {
-        int dotIndex = data.indexOf(".");
+        final int dotIndex = data.indexOf(".");
 
         // when dot is not found, table comes from the default (public) schema
         if (dotIndex == -1) {
@@ -135,8 +137,8 @@ public class PostgresService extends SqlDatabaseService {
         }
 
         // when dot is found, it usually separates the schema and table name (unless the schema name contains dot)
-        String schema = data.substring(0, dotIndex);
-        String table = data.substring(dotIndex + 1);
+        final String schema = data.substring(0, dotIndex);
+        final String table = data.substring(dotIndex + 1);
 
         return new Pair<>(schema, table);
     }

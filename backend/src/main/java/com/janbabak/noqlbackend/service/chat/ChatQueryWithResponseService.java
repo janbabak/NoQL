@@ -47,7 +47,7 @@ public class ChatQueryWithResponseService {
      * @throws EntityNotFoundException chat not found
      */
     public List<ChatQueryWithResponse> getMessagesFromChat(UUID chatId) throws EntityNotFoundException {
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+        final Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         return chatQueryWithResponseRepository.findAllByChatOrderByTimestamp(chat);
     }
@@ -64,7 +64,7 @@ public class ChatQueryWithResponseService {
     public RetrievedData getDataByMessageId(UUID messageId, Integer page, Integer pageSize)
             throws EntityNotFoundException {
 
-        ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
+        final ChatQueryWithResponse message = chatQueryWithResponseRepository.findById(messageId)
                 .orElseThrow(() -> new EntityNotFoundException(MESSAGE, messageId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(message.getChat().getDatabase().getUserId());
@@ -79,7 +79,7 @@ public class ChatQueryWithResponseService {
     public ChatQueryWithResponse updateEmptyMessage( // TODO: test
             ChatQueryWithResponse message, String nlQuery, QueryDatabaseLLMService.LLMServiceResult llmResult) {
 
-        Timestamp timestamp = Timestamp.from(Instant.now());
+        final Timestamp timestamp = Timestamp.from(Instant.now());
 
         message.setNlQuery(nlQuery);
         message.setResultDescription(llmResult.llmResponse());

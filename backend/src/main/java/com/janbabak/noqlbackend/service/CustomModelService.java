@@ -41,7 +41,7 @@ public class CustomModelService {
     public CustomModel findById(UUID customModelId) throws EntityNotFoundException {
         log.info("Get custom model by id={}.", customModelId);
 
-        CustomModel model = customModelRepository.findById(customModelId)
+        final CustomModel model = customModelRepository.findById(customModelId)
                 .orElseThrow(() -> new EntityNotFoundException(CUSTOM_MODEL, customModelId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(model.getUserId());
@@ -85,7 +85,7 @@ public class CustomModelService {
      */
     public List<ModelOption> getAllModels(UUID userId) {
         // add default models
-        List<ModelOption> models = new java.util.ArrayList<>(Arrays.stream(LlmModel.values())
+        final List<ModelOption> models = new java.util.ArrayList<>(Arrays.stream(LlmModel.values())
                 .map(model -> new ModelOption(model.getLabel(), model.getModel()))
                 .toList());
 
@@ -112,10 +112,10 @@ public class CustomModelService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(request.userId());
 
-        User user = userRepository.findById(request.userId()).orElseThrow(
+        final User user = userRepository.findById(request.userId()).orElseThrow(
                 () -> new EntityNotFoundException(EntityNotFoundException.Entity.USER, request.userId()));
 
-        CustomModel customModel = CustomModel.builder()
+        final CustomModel customModel = CustomModel.builder()
                 .name(request.name())
                 .host(request.host())
                 .port(request.port())
@@ -136,14 +136,20 @@ public class CustomModelService {
     public CustomModel update(UUID customModelId, UpdateCustomModelReqeust data) throws EntityNotFoundException {
         log.info("Update custom model.");
 
-        CustomModel customModel = customModelRepository.findById(customModelId)
+        final CustomModel customModel = customModelRepository.findById(customModelId)
                 .orElseThrow(() -> new EntityNotFoundException(CUSTOM_MODEL, customModelId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(customModel.getUserId());
 
-        if (data.name() != null) customModel.setName(data.name());
-        if (data.host() != null) customModel.setHost(data.host());
-        if (data.port() != null) customModel.setPort(data.port());
+        if (data.name() != null) {
+            customModel.setName(data.name());
+        }
+        if (data.host() != null) {
+            customModel.setHost(data.host());
+        }
+        if (data.port() != null) {
+            customModel.setPort(data.port());
+        }
 
         return customModelRepository.save(customModel);
     }
@@ -157,7 +163,7 @@ public class CustomModelService {
     public void delete(UUID customModelId) {
         log.info("Delete custom model by id={}.", customModelId);
 
-        Optional<CustomModel> customModel = customModelRepository.findById(customModelId);
+        final Optional<CustomModel> customModel = customModelRepository.findById(customModelId);
 
         if (customModel.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(customModel.get().getUserId());

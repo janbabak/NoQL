@@ -43,8 +43,8 @@ public class MessageDataDAO {
             return null;
         }
 
-        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-        QueryUtils.PaginatedQuery paginatedQuery;
+        final BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
+        final QueryUtils.PaginatedQuery paginatedQuery;
         try {
             paginatedQuery = setPaginationInSqlQuery(message.getDbQuery(), page, pageSize, database);
         } catch (BadRequestException e) {
@@ -52,7 +52,7 @@ public class MessageDataDAO {
             return null;
         }
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query())) {
-            Long totalCount = getTotalCount(message.getDbQuery(), database, databaseService);
+            final Long totalCount = getTotalCount(message.getDbQuery(), database, databaseService);
             return new RetrievedData(result.resultSet(), paginatedQuery.page(), paginatedQuery.pageSize(), totalCount);
         } catch (DatabaseExecutionException | SQLException | DatabaseConnectionException | BadRequestException e) {
             log.error("Failed to retrieve data from message {}: {}", message.getId(), e.getMessage());

@@ -20,21 +20,23 @@ import java.sql.SQLException;
 public class MySqlService extends SqlDatabaseService {
 
     public MySqlService(MySqlDAO mySqlDAO) {
+        super();
         databaseDAO = mySqlDAO;
     }
 
+    @Override
     protected void retrieveForeignKeys(SqlDatabaseStructure dbStructure)
             throws DatabaseConnectionException, DatabaseExecutionException {
 
         try (ResultSetWrapper result = databaseDAO.getForeignKeys()) {
-            ResultSet resultSet = result.resultSet();
+            final ResultSet resultSet = result.resultSet();
             while (resultSet.next()) {
-                String referencingSchema = resultSet.getString("referencing_schema");
-                String referencingTable = resultSet.getString("referencing_table");
-                String referencingColumn = resultSet.getString("referencing_column");
-                String referencedSchema = resultSet.getString("referenced_schema");
-                String referencedTable = resultSet.getString("referenced_table");
-                String referencedColumn = resultSet.getString("referenced_column");
+                final String referencingSchema = resultSet.getString("referencing_schema");
+                final String referencingTable = resultSet.getString("referencing_table");
+                final String referencingColumn = resultSet.getString("referencing_column");
+                final String referencedSchema = resultSet.getString("referenced_schema");
+                final String referencedTable = resultSet.getString("referenced_table");
+                final String referencedColumn = resultSet.getString("referenced_column");
 
                 Schema schema = dbStructure.schemas().get(referencingSchema);
                 if (schema == null) {
@@ -44,7 +46,7 @@ public class MySqlService extends SqlDatabaseService {
                 if (table == null) {
                     continue;
                 }
-                Column column = table.columns().get(referencingColumn);
+                final Column column = table.columns().get(referencingColumn);
                 if (column == null) {
                     continue;
                 }

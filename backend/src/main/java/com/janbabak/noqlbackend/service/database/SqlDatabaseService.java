@@ -22,9 +22,10 @@ public abstract class SqlDatabaseService extends BaseDatabaseService {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
+    @Override
     public SqlDatabaseStructure retrieveSchema() throws DatabaseConnectionException, DatabaseExecutionException {
 
-        SqlDatabaseStructure dbStructure = new SqlDatabaseStructure();
+        final SqlDatabaseStructure dbStructure = new SqlDatabaseStructure();
         retrieveSchemasTablesColumns(dbStructure);
         retrieveForeignKeys(dbStructure);
 
@@ -41,18 +42,18 @@ public abstract class SqlDatabaseService extends BaseDatabaseService {
     protected void retrieveSchemasTablesColumns(SqlDatabaseStructure dbStructure)
             throws DatabaseConnectionException, DatabaseExecutionException {
         try (ResultSetWrapper result = databaseDAO.getSchemasTablesColumns()) {
-            ResultSet resultSet = result.resultSet();
+            final ResultSet resultSet = result.resultSet();
             while (resultSet.next()) {
-                String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
-                String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
-                String columnName = resultSet.getString(COLUMN_NAME_COLUMN_NAME);
-                String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
-                Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
+                final String tableSchema = resultSet.getString(TABLE_SCHEMA_COLUMN_NAME);
+                final String tableName = resultSet.getString(TABLE_NAME_COLUMN_NAME);
+                final String columnName = resultSet.getString(COLUMN_NAME_COLUMN_NAME);
+                final String dataType = resultSet.getString(DATA_TYPE_COLUMN_NAME);
+                final Boolean primaryKey = resultSet.getBoolean(PRIMARY_KEY_COLUMN_NAME);
 
-                SqlDatabaseStructure.Schema schema =
+                final SqlDatabaseStructure.Schema schema =
                         dbStructure.schemas().computeIfAbsent(tableSchema, SqlDatabaseStructure.Schema::new);
 
-                SqlDatabaseStructure.Table table =
+                final SqlDatabaseStructure.Table table =
                         schema.tables().computeIfAbsent(tableName, SqlDatabaseStructure.Table::new);
 
                 // columnName key definitely doesn't exist - no need of checking it out

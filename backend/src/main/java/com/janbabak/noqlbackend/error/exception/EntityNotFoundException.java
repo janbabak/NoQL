@@ -6,6 +6,7 @@ public class EntityNotFoundException extends Exception {
 
     @SuppressWarnings("unused")
     public EntityNotFoundException() {
+        super();
     }
 
     @SuppressWarnings("unused")

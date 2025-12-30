@@ -63,8 +63,8 @@ public abstract class DatabaseDAO {
 
         try {
             log.info("Execute read-only query={}.", query);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            final Statement statement = connection.createStatement();
+            final ResultSet resultSet = statement.executeQuery(query);
             return new ResultSetWrapper(resultSet, () -> {
                 try {
                     disconnect();
@@ -90,7 +90,7 @@ public abstract class DatabaseDAO {
         try {
             connect(false);
             log.info("Execute query={}.", query);
-            Statement statement = connection.createStatement();
+            final Statement statement = connection.createStatement();
             statement.executeUpdate(query);
             statement.close();
         } catch (SQLException e) {

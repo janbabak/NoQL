@@ -72,7 +72,7 @@ public class User implements UserDetails {
         if (databases == null) {
             databases = new ArrayList<>();
         }
-        for (Database db : databases) {
+        for (final Database db : databases) {
             if (db.getId().equals(database.getId())) {
                 return; // database already in the list
             }
@@ -85,7 +85,7 @@ public class User implements UserDetails {
         if (models == null) {
             models = new ArrayList<>();
         }
-        for (CustomModel m : models) {
+        for (final CustomModel m : models) {
             if (m.getId().equals(model.getId())) {
                 return; // model already in the list
             }

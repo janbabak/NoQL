@@ -37,9 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader(AUTHORIZATION);
-        final String userEmail;
-        final String jwtToken;
-
         //no, or wrong authentication
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response); //request continues
@@ -47,7 +44,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         //authenticate
-        jwtToken = authHeader.substring(7); // "Bearer " has 7 chars
+        final String jwtToken = authHeader.substring(7); // "Bearer " has 7 chars
+        final String userEmail;
         try {
             userEmail = jwtService.extractUsername(jwtToken);
         } catch (ExpiredJwtException e) {
@@ -55,10 +53,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new AccessDeniedException("JWT token expired");
         }
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
             if (jwtService.isTokenValid(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

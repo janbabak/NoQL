@@ -30,7 +30,7 @@ public record RetrievedData(
 
         this(new ArrayList<>(), new ArrayList<>(), page, pageSize, totalCount);
 
-        ResultSetMetaData rsmd = resultSet.getMetaData();
+        final ResultSetMetaData rsmd = resultSet.getMetaData();
 
         // columns
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
@@ -39,9 +39,9 @@ public record RetrievedData(
 
         // rows
         while (resultSet.next()) {
-            List<String> row = new ArrayList<>();
+            final List<String> row = new ArrayList<>();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                String value = resultSet.getString(i);
+                final String value = resultSet.getString(i);
                 row.add(value != null ? value.trim() : null);
             }
             rows.add(row);
