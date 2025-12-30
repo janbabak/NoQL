@@ -13,14 +13,18 @@ on:
         default: false
         type: boolean
   pull_request:
-      types:
-        - closed  # triggers when PR is closed
-      branches:
+    types:
+      - opened
+      - edited
+      - synchronize
+    branches:
         - main
 
 jobs:
   validate:
     uses: janbabak/NoQL/.github/workflows/backend-validate.yaml@main
+    with:
+      validate_pr: ${{ github.event_name == 'pull_request' || false }}
 
   test:
     needs: validate

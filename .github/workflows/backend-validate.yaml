@@ -2,14 +2,32 @@ name: Validate backend
 
 on:
   workflow_call:
+    inputs:
+      validate_pr:
+        description: 'If true, validates pull request title'
+        required: false
+        type: boolean
+        default: false
     outputs:
       backend_changed:
         description: 'True if backend code has changed on this branch.'
         value: ${{ jobs.detect-changes.outputs.backend_changed }}
 
 jobs:
+  # Validate pull request title
+  validate-pr-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR title
+        if: github.event_name == 'pull_request'
+        run: ./ci/scripts/validate-pr-title.sh
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
   # Detect changes in the /backend folder
   detect-changes:
+    needs: validate-pr-title
     runs-on: ubuntu-latest
     outputs:
       backend_changed: ${{ steps.detect.outputs.changed }}
