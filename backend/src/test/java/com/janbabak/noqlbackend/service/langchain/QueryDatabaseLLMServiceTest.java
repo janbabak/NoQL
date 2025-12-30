@@ -32,15 +32,12 @@ import static org.mockito.Mockito.*;
 class QueryDatabaseLLMServiceTest {
 
     @SpyBean
-    @SuppressWarnings("unused")
     private QueryDatabaseLLMService queryDatabaseLLMServiceSpy;
 
     @MockBean
-    @SuppressWarnings("unused")
     private QueryExecutionService queryExecutionService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private PlotService plotService;
 
     private final QueryDatabaseLLMService.LLMServiceRequest request =
@@ -68,7 +65,7 @@ class QueryDatabaseLLMServiceTest {
     @DisplayName("Test execute user request")
     @SneakyThrows
     void testExecuteUserRequest() {
-        Assistant assistantMock = mock(Assistant.class);
+        final Assistant assistantMock = mock(Assistant.class);
         when(assistantMock.chat(anyList()))
                 .thenReturn("Mocked LLM response");
 
@@ -81,7 +78,7 @@ class QueryDatabaseLLMServiceTest {
                 .buildAssistant(anyString(), any());
 
         // when
-        QueryDatabaseLLMService.LLMServiceResult result =
+        final QueryDatabaseLLMService.LLMServiceResult result =
                 queryDatabaseLLMServiceSpy.executeUserRequest(request);
 
         // then
@@ -98,11 +95,11 @@ class QueryDatabaseLLMServiceTest {
     @SuppressWarnings("unchecked")
     void testBuildMessages() {
         // given
-        Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
+        final Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
                 "buildMessages", QueryDatabaseLLMService.LLMServiceRequest.class);
         method.setAccessible(true);
 
-        List<ChatMessage> expectedMessages = List.of(
+        final List<ChatMessage> expectedMessages = List.of(
                 SystemMessage.from("You are an expert SQL assistant."),
                 UserMessage.from("Plot sex of users"),
                 AiMessage.builder()
@@ -130,7 +127,7 @@ class QueryDatabaseLLMServiceTest {
         );
 
         // when
-        List<ChatMessage> actualMessages = (List<ChatMessage>) method.invoke(queryDatabaseLLMServiceSpy, request);
+        final List<ChatMessage> actualMessages = (List<ChatMessage>) method.invoke(queryDatabaseLLMServiceSpy, request);
 
         // then
         assertEquals(expectedMessages, actualMessages);
@@ -142,12 +139,12 @@ class QueryDatabaseLLMServiceTest {
     @MethodSource("testBuildLLMResponseMessageData")
     void testBuildLLMResponseMessage(ChatQueryWithResponse chatEntry, AiMessage expected) {
         // given
-        Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
+        final Method method = QueryDatabaseLLMService.class.getDeclaredMethod(
                 "buildAiMessage", ChatQueryWithResponse.class);
         method.setAccessible(true);
 
         // when
-        AiMessage actual = (AiMessage) method.invoke(queryDatabaseLLMServiceSpy, chatEntry);
+        final AiMessage actual = (AiMessage) method.invoke(queryDatabaseLLMServiceSpy, chatEntry);
 
         // theen
         assertEquals(expected, actual);
@@ -356,10 +353,10 @@ class QueryDatabaseLLMServiceTest {
             throw new IllegalArgumentException("Must provide an even number of arguments (key-value pairs).");
         }
 
-        Map<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < keyValues.length; i += 2) {
-            String key = (String) keyValues[i];
-            Object value = keyValues[i + 1];
+            final String key = (String) keyValues[i];
+            final Object value = keyValues[i + 1];
             map.put(key, value);
         }
         return map;

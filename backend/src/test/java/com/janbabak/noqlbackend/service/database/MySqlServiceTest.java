@@ -34,50 +34,62 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
         TIMESTAMP_DATA_TYPE = "timestamp";
     }
 
+    @Override
     protected Database getDatabase() {
         return mySqlDatabase;
     }
 
+    @Override
     protected SqlDatabaseService getSqlService(Database database) {
         return mySqlService;
     }
 
+    @Override
     protected String getDefaultSchema() {
         return DATABASE_NAME;
     }
 
+    @Override
     protected String getCvutSchema() {
         return getDefaultSchema();
     }
 
+    @Override
     protected Table getUserTable() {
         return getTable(getDefaultSchema(), "user");
     }
 
+    @Override
     protected Table getAddressTable() {
         return getTable(getDefaultSchema(), "address");
     }
 
+    @Override
     protected Table getOrderTable() {
         return getTable(getDefaultSchema(), "order");
     }
 
+    @Override
     protected Table getSpecialisationTable() {
         return getTable(getDefaultSchema(), "specialisation");
     }
 
+    @Override
     protected Table getStudentTable() {
         return getTable(getDefaultSchema(), "student");
     }
 
+    @Override
     protected Table getFitWikiTable() {
         return getTable(getDefaultSchema(), "fit_wiki");
     }
 
+    @Override
     protected Table getCourseTable() {
         return getTable(getDefaultSchema(), "course");
     }
 
+    @Override
     protected Table getExamTable() {
         return getTable(getDefaultSchema(), "exam");
     }
@@ -111,7 +123,7 @@ class MySqlServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test default schema/database")
     void testDefaultSchema() {
-        SqlDatabaseStructure.Schema schema = databaseStructure.schemas().get(getDefaultSchema());
+        final SqlDatabaseStructure.Schema schema = databaseStructure.schemas().get(getDefaultSchema());
 
         assertEquals(getDefaultSchema(), schema.name());
         assertEquals(8, schema.tables().size());

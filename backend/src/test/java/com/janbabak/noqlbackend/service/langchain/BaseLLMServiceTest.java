@@ -1,6 +1,7 @@
 package com.janbabak.noqlbackend.service.langchain;
 
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
@@ -15,23 +16,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class BaseLLMServiceTest {
+class BaseLLMServiceTest {
 
     @Autowired
-    @SuppressWarnings("unused")
     private BaseLLMService llmService;
 
     @Test
     @DisplayName("Test get model by invalid model id")
-    public void testGetModelInvalidModelId() {
+    void testGetModelInvalidModelId() {
 
-        String unsupportedModelId = "unsupported-model";
+        final String unsupportedModelId = "unsupported-model";
 
-        Exception exception = assertThrows(BadRequestException.class,
+        final Exception exception = assertThrows(BadRequestException.class,
                 () -> llmService.getModel(unsupportedModelId));
 
-        String expectedMessage = "Unsupported model ID: " + unsupportedModelId;
-        String actualMessage = exception.getMessage();
+        final String expectedMessage = "Unsupported model ID: " + unsupportedModelId;
+        final String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
@@ -39,8 +39,8 @@ public class BaseLLMServiceTest {
     @ParameterizedTest
     @DisplayName("Test get model by valid model id")
     @MethodSource("provideValidModelIds")
-    public void testGetModelValidModelId(String modelId, Class<?> clazz) throws BadRequestException {
-        var model = llmService.getModel(modelId);
+    void testGetModelValidModelId(String modelId, Class<?> clazz) throws BadRequestException {
+        final ChatModel model = llmService.getModel(modelId);
         assertNotNull(model);
         assertInstanceOf(clazz, model);
     }

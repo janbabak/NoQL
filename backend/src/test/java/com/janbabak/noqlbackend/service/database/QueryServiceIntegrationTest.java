@@ -56,31 +56,24 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     private QueryService queryService;
 
     @MockBean
-    @SuppressWarnings("unused")
     private QueryDatabaseLLMService llmApiServiceMock;
 
     @MockBean
-    @SuppressWarnings("unused")
     private PlotService plotServiceMock;
 
     @Autowired
-    @SuppressWarnings("unused")
     private DatabaseEntityService databaseService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatService chatService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private ChatTestUtilService chatTestUtilService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private AuthenticationService authenticationService;
 
     @Autowired
-    @SuppressWarnings("unused")
     private DatabaseCredentialsEncryptionService encryptionService;
 
     private User testUser;
@@ -110,7 +103,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     protected void setUp() throws Exception {
         super.setUp();
 
-        RegisterRequest registerUserRequest = RegisterRequest.builder()
+        final RegisterRequest registerUserRequest = RegisterRequest.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
@@ -121,7 +114,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
         AuthenticationService.authenticateUser(testUser);
 
-        CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest createPostgresRequest = CreateDatabaseRequest.builder()
                 .name("Postgres database")
                 .host(postgresDatabase.getHost())
                 .port(postgresDatabase.getPort())
@@ -132,7 +125,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .userId(testUser.getId())
                 .build();
 
-        CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
+        final CreateDatabaseRequest createMysqlRequest = CreateDatabaseRequest.builder()
                 .name("Postgres database")
                 .host(mySqlDatabase.getHost())
                 .port(mySqlDatabase.getPort())
@@ -172,13 +165,13 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
             throws DatabaseConnectionException, BadRequestException, EntityNotFoundException {
 
         // given
-        UUID databaseId = database.getId();
-        Integer page = 1;
-        Integer pageSize = 5;
+        final UUID databaseId = database.getId();
+        final Integer page = 1;
+        final Integer pageSize = 5;
         // language=SQL
-        String query = "SELECT id, name, age, sex, email FROM eshop_user ORDER BY name;";
+        final String query = "SELECT id, name, age, sex, email FROM eshop_user ORDER BY name;";
 
-        ConsoleResponse expectedResponse = ConsoleResponse.builder()
+        final ConsoleResponse expectedResponse = ConsoleResponse.builder()
                 .error(null)
                 .dbQuery(query)
                 .data(new RetrievedData(
@@ -194,7 +187,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .build();
 
         // when
-        ConsoleResponse consoleResponse = queryService.executeQueryLanguageSelectQuery(
+        final ConsoleResponse consoleResponse = queryService.executeQueryLanguageSelectQuery(
                 databaseId, query, page, pageSize);
 
         // then
@@ -229,15 +222,15 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     ) throws EntityNotFoundException {
 
         // given
-        UUID databaseId = getDatabase().getId();
-        ChatDto chat = chatService.create(databaseId);
-        for (var message : messages) {
+        final UUID databaseId = getDatabase().getId();
+        final ChatDto chat = chatService.create(databaseId);
+        for (final ChatQueryWithResponse message : messages) {
             chatTestUtilService.addMessageToChat(chat.id(), message);
         }
-        ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
+        final ChatQueryWithResponse lastMessage = messages.get(messages.size() - 1);
 
         // when
-        RetrievedData queryResponse = queryService.getDataByMessageId(lastMessage.getId(), page, pageSize);
+        final RetrievedData queryResponse = queryService.getDataByMessageId(lastMessage.getId(), page, pageSize);
 
         // then
         assertTrue(pageSize >= queryResponse.rows().size());
@@ -357,9 +350,9 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     ) throws EntityNotFoundException, DatabaseConnectionException, DatabaseExecutionException, BadRequestException {
 
         // given
-        UUID databaseId = getDatabase().getId();
-        ChatDto chat = chatService.create(databaseId);
-        for (ChatQueryWithResponse message : messages) {
+        final UUID databaseId = getDatabase().getId();
+        final ChatDto chat = chatService.create(databaseId);
+        for (final ChatQueryWithResponse message : messages) {
             chatTestUtilService.addMessageToChat(chat.id(), message);
         }
 
@@ -367,7 +360,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                 .thenReturn(llmResponse);
 
         // when
-        ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);
+        final ChatResponse actual = queryService.queryChat(databaseId, chat.id(), request, pageSize);
 
         // message id, timestamp, and plot url are generated, so we need to set them manually
         expectedResponse.setMessageId(actual.getMessageId());
@@ -387,7 +380,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
      * @return page size, total count, plot result, messages, request, LLM response, expected response
      */
     Object[][] testQueryChatWithPlotDataProvider() {
-        RetrievedData data1 = RetrievedData.builder()
+        final RetrievedData data1 = RetrievedData.builder()
                 .page(0)
                 .pageSize(8)
                 .totalCount(2L)
@@ -397,7 +390,7 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
                         List.of("F", "10")))
                 .build();
 
-        RetrievedData data2 = RetrievedData.builder()
+        final RetrievedData data2 = RetrievedData.builder()
                 .page(0)
                 .pageSize(8)
                 .totalCount(22L)

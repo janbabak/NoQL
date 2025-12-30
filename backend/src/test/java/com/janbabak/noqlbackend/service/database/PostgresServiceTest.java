@@ -35,50 +35,62 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
         TIMESTAMP_DATA_TYPE = "timestamp without time zone";
     }
 
+    @Override
     protected Database getDatabase() {
         return postgresDatabase;
     }
 
+    @Override
     protected SqlDatabaseService getSqlService(Database database) {
         return postgresService;
     }
 
+    @Override
     protected String getDefaultSchema() {
         return "public";
     }
 
+    @Override
     protected String getCvutSchema() {
         return "cvut";
     }
 
+    @Override
     protected Table getUserTable() {
         return getTable(getDefaultSchema(), "user");
     }
 
+    @Override
     protected Table getAddressTable() {
         return getTable(getDefaultSchema(), "address");
     }
 
+    @Override
     protected Table getOrderTable() {
         return getTable(getDefaultSchema(), "order");
     }
 
+    @Override
     protected Table getSpecialisationTable() {
         return getTable(getCvutSchema(), "specialisation");
     }
 
+    @Override
     protected Table getStudentTable() {
         return getTable(getCvutSchema(), "student");
     }
 
+    @Override
     protected Table getFitWikiTable() {
         return getTable(getCvutSchema(), "fit_wiki");
     }
 
+    @Override
     protected Table getCourseTable() {
         return getTable(getCvutSchema(), "course");
     }
 
+    @Override
     protected Table getExamTable() {
         return getTable(getCvutSchema(), "exam");
     }
@@ -122,7 +134,7 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test public schema")
     void testPublicSchema() {
-        Schema schema = databaseStructure.schemas().get(getDefaultSchema());
+        final Schema schema = databaseStructure.schemas().get(getDefaultSchema());
 
         assertEquals(getDefaultSchema(), schema.name());
         assertEquals(3, schema.tables().size());
@@ -144,7 +156,7 @@ class PostgresServiceTest extends AbstractSqlServiceTest {
     @Test
     @DisplayName("Test cvut schema")
     void testCvutSchema() {
-        Schema schema = databaseStructure.schemas().get(getCvutSchema());
+        final Schema schema = databaseStructure.schemas().get(getCvutSchema());
 
         assertEquals(getCvutSchema(), schema.name());
         assertEquals(5, schema.tables().size());

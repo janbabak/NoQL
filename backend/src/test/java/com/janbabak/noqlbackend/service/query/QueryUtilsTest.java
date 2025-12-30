@@ -29,10 +29,10 @@ class QueryUtilsTest {
                 settingsMockedStatic.when(Settings::getDefaultPageSizeStatic).thenReturn(10);
             }
 
-            Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
+            final Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
 
             // when
-            QueryUtils.PaginatedQuery actualValue = constructPaginatedSqlQuery(query, page, pageSize, database);
+            final QueryUtils.PaginatedQuery actualValue = constructPaginatedSqlQuery(query, page, pageSize, database);
 
             // then
             assertEquals(expectedQuery, actualValue);
@@ -102,11 +102,11 @@ class QueryUtilsTest {
             if (page >= 0) { // otherwise unnecessary stubbing error
                 settingsMockedStatic.when(Settings::getMaxPageSizeStatic).thenReturn(50);
             }
-            Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
+            final Database database = Database.builder().engine(DatabaseEngine.POSTGRES).build();
 
 
             // when
-            BadRequestException exception = assertThrows(BadRequestException.class,
+            final BadRequestException exception = assertThrows(BadRequestException.class,
                     () -> constructPaginatedSqlQuery(query, page, pageSize, database));
 
             // then
@@ -141,7 +141,7 @@ class QueryUtilsTest {
     @DisplayName("Test trim and remove trailing semicolon")
     void testTrimAndRemoveTrailingSemicolon(String query, String expectedQuery) {
         // when
-        String actualValue = trimAndRemoveTrailingSemicolon(query);
+        final String actualValue = trimAndRemoveTrailingSemicolon(query);
 
         // then
         assertEquals(expectedQuery, actualValue);
