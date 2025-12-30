@@ -19,7 +19,7 @@ public class FileUtils {
             return Files.readString(Paths.get(path));
         } catch (IOException e) {
             log.error("Cannot read file at path {}: {}", path, e.getMessage());
-            throw new RuntimeException("Cannot read file: " + path);
+            throw new RuntimeException("Cannot read file: " + path, e);
         }
     }
 }

@@ -81,7 +81,7 @@ public class LocalDatabaseTest {
         mySqlDatabase = createDatabase(mySqlContainer, DatabaseEngine.MYSQL);
         mySqlDAO.databaseMetadata(mySqlDatabase);
 
-        Scripts initScripts = getInitializationScripts();
+        final Scripts initScripts = getInitializationScripts();
         if (initScripts == null) {
             return;
         }
@@ -91,12 +91,13 @@ public class LocalDatabaseTest {
 
     @AfterAll
     protected void tearDown() throws DatabaseConnectionException, DatabaseExecutionException {
-        Scripts cleanupScript = getCleanupScript();
-        if (cleanupScript == null) {
-            return;
-        }
-
-//        executeScripts(cleanupScript);
+        /*
+         final Scripts cleanupScript = getCleanupScript();
+         if (cleanupScript == null) {
+           return;
+         }
+         executeScripts(cleanupScript);
+        */
     }
 
     /**
@@ -112,7 +113,7 @@ public class LocalDatabaseTest {
         }
 
         if (scripts.mySqlScript != null) {
-            for (String command : Arrays.stream(scripts.mySqlScript.split(COMMAND_SEPARATOR)).toList()) {
+            for (final String command : Arrays.stream(scripts.mySqlScript.split(COMMAND_SEPARATOR)).toList()) {
                 mySqlDAO.updateDatabase(command);
             }
         }

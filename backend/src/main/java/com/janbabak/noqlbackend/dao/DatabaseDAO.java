@@ -63,8 +63,8 @@ public abstract class DatabaseDAO {
 
         try {
             log.info("Execute read-only query={}.", query);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            final Statement statement = connection.createStatement();
+            final ResultSet resultSet = statement.executeQuery(query);
             return new ResultSetWrapper(resultSet, () -> {
                 try {
                     disconnect();
@@ -75,7 +75,7 @@ public abstract class DatabaseDAO {
                 }
             });
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         }
     }
 
@@ -86,15 +86,15 @@ public abstract class DatabaseDAO {
      * @throws DatabaseConnectionException cannot establish connection with the database
      * @throws DatabaseExecutionException  query execution failed (syntax error)
      */
-    void updateDatabase(String query) throws DatabaseConnectionException, DatabaseExecutionException {
+    /* default */ void updateDatabase(String query) throws DatabaseConnectionException, DatabaseExecutionException {
         try {
             connect(false);
             log.info("Execute query={}.", query);
-            Statement statement = connection.createStatement();
+            final Statement statement = connection.createStatement();
             statement.executeUpdate(query);
             statement.close();
         } catch (SQLException e) {
-            throw new DatabaseExecutionException(e.getMessage());
+            throw new DatabaseExecutionException(e.getMessage(), e);
         } finally {
             disconnect();
         }
@@ -150,7 +150,7 @@ public abstract class DatabaseDAO {
             connection.setAutoCommit(!readOnly);
         } catch (SQLException e) {
             log.error("Error while connecting to database - message={}.", e.getMessage());
-            throw new DatabaseConnectionException(e.getMessage());
+            throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
 }

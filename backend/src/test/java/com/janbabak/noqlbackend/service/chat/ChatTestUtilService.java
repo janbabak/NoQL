@@ -39,11 +39,11 @@ public class ChatTestUtilService {
     public void addMessageToChat(UUID chatId, ChatQueryWithResponse message)
             throws EntityNotFoundException {
 
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
+        final Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT, chatId));
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(chat.getDatabase().getUser().getId());
 
-        Timestamp timestamp = Timestamp.from(Instant.now());
+        final Timestamp timestamp = Timestamp.from(Instant.now());
         message.setTimestamp(timestamp);
         message.setChat(chat);
         chat.addMessage(message);

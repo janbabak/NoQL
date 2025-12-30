@@ -69,12 +69,20 @@ public class UserService {
 
         authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
 
-        User userToUpdate = findById(userId);
+        final User userToUpdate = findById(userId);
 
-        if (data.firstName() != null) userToUpdate.setFirstName(data.firstName());
-        if (data.lastName() != null) userToUpdate.setLastName(data.lastName());
-        if (data.queryLimit() != null) userToUpdate.setQueryLimit(data.queryLimit());
-        if (data.password() != null) userToUpdate.setPassword(passwordEncoder.encode(data.password()));
+        if (data.firstName() != null) {
+            userToUpdate.setFirstName(data.firstName());
+        }
+        if (data.lastName() != null) {
+            userToUpdate.setLastName(data.lastName());
+        }
+        if (data.queryLimit() != null) {
+            userToUpdate.setQueryLimit(data.queryLimit());
+        }
+        if (data.password() != null) {
+            userToUpdate.setPassword(passwordEncoder.encode(data.password()));
+        }
         if (data.email() != null && !data.email().isEmpty()) {
             userRepository.findByEmail(data.email()).ifPresent(user -> {
                 if (!user.getId().equals(userId)) {
@@ -103,7 +111,7 @@ public class UserService {
     public void deleteUser(UUID userId) {
         log.info("Delete user by id={}.", userId);
 
-        Optional<User> user = userRepository.findById(userId);
+        final Optional<User> user = userRepository.findById(userId);
 
         if (user.isPresent()) {
             authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -122,8 +130,8 @@ public class UserService {
     public Integer decrementQueryLimit(UUID userId) throws EntityNotFoundException {
         log.info("Decrement query limit for user with id={}.", userId);
 
-        User user = findById(userId);
-        int odlLimit = user.getQueryLimit();
+        final User user = findById(userId);
+        final int odlLimit = user.getQueryLimit();
         user.setQueryLimit(Math.max(odlLimit - 1, 0));
         userRepository.save(user);
         return odlLimit;

@@ -41,7 +41,7 @@ public class Chat {
         if (messages == null) {
             messages = new ArrayList<>();
         }
-        for (ChatQueryWithResponse message: messages) {
+        for (final ChatQueryWithResponse message: messages) {
             if (message.getId() != null && message.getId() == newMessage.getId()) {
                 return;
             }
@@ -55,8 +55,6 @@ public class Chat {
      * @param newMessages new messages
      */
     public void addMessages(Collection<ChatQueryWithResponse> newMessages) {
-        for (ChatQueryWithResponse message: newMessages) {
-            addMessage(message);
-        }
+        newMessages.forEach(this::addMessage);
     }
 }

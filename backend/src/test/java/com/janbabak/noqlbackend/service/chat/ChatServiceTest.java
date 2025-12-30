@@ -49,7 +49,6 @@ class ChatServiceTest {
     private PlotService plotServiceMock;
 
     @Mock
-    @SuppressWarnings("unused") // used in the ChatService
     private AuthenticationService authenticationServiceMock;
 
     private final User testUser = User.builder()
@@ -64,25 +63,25 @@ class ChatServiceTest {
     @DisplayName("Test find chat by id")
     void testFindChatById() throws EntityNotFoundException {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Test chat")
                 .messages(new ArrayList<>())
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatDto expected = new ChatDto(
+        final ChatDto expected = new ChatDto(
                 chatId, "Test chat", new ArrayList<>(), null, null);
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(chat));
 
         // when
-        ChatDto actual = chatService.findById(chatId, null, true);
+        final ChatDto actual = chatService.findById(chatId, null, true);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(chatRepositoryMock).findById(idCaptor.capture());
         assertEquals(chatId, idCaptor.getValue());
         assertEquals(expected, actual);
@@ -92,9 +91,9 @@ class ChatServiceTest {
     @DisplayName("Test find chat by id - user is not owner of the chat")
     void testFindChatByIdUserIsNotOwner() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Test chat")
                 .messages(new ArrayList<>())
@@ -114,12 +113,12 @@ class ChatServiceTest {
     @DisplayName("Test find chat by id not found")
     void testFindChatByIdNotFound() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findById(chatId, null, true));
 
         // then
@@ -130,31 +129,31 @@ class ChatServiceTest {
     @DisplayName("Test find chats by database id")
     void testFindChatsByDatabaseId() throws EntityNotFoundException {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
                 .user(testUser)
                 .build();
 
-        Chat chat1 = Chat.builder()
+        final Chat chat1 = Chat.builder()
                 .id(UUID.randomUUID())
                 .name("Find the oldest user")
                 .messages(new ArrayList<>())
                 .database(database)
                 .build();
 
-        Chat chat2 = Chat.builder()
+        final Chat chat2 = Chat.builder()
                 .id(UUID.randomUUID())
                 .name("find emails of all users")
                 .messages(new ArrayList<>())
                 .database(database)
                 .build();
 
-        List<Chat> chats = List.of(chat1, chat2);
+        final List<Chat> chats = List.of(chat1, chat2);
 
-        List<ChatHistoryItem> expected = List.of(
+        final List<ChatHistoryItem> expected = List.of(
                 new ChatHistoryItem(chat1.getId(), "Find the oldest user"),
                 new ChatHistoryItem(chat2.getId(), "find emails of all users"));
 
@@ -162,10 +161,10 @@ class ChatServiceTest {
         when(chatRepositoryMock.findAllByDatabaseOrderByModificationDateDesc(database)).thenReturn(chats);
 
         // when
-        List<ChatHistoryItem> actual = chatService.findChatsByDatabaseId(databaseId);
+        final List<ChatHistoryItem> actual = chatService.findChatsByDatabaseId(databaseId);
 
         // then
-        ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
+        final ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
         verify(chatRepositoryMock).findAllByDatabaseOrderByModificationDateDesc(databaseArgumentCaptor.capture());
         assertEquals(database, databaseArgumentCaptor.getValue());
         assertEquals(expected, actual);
@@ -175,9 +174,9 @@ class ChatServiceTest {
     @DisplayName("Test find chats by database id - user is not database owner")
     void testFindChatsByDatabaseIdUserIsNotOwner() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
                 .user(testUser2)
@@ -195,12 +194,12 @@ class ChatServiceTest {
     @DisplayName("Test find chats by database id not found")
     void testFindChatsByDatabaseIdNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findChatsByDatabaseId(databaseId));
 
         // then
@@ -211,29 +210,29 @@ class ChatServiceTest {
     @DisplayName("Test create chat")
     void testCreate() throws EntityNotFoundException {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
                 .user(testUser)
                 .build();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(UUID.randomUUID())
                 .name("New chat")
                 .messages(new ArrayList<>())
                 .database(database)
                 .build();
 
-        ChatDto expected = new ChatDto(
+        final ChatDto expected = new ChatDto(
                 chat.getId(), "New chat", new ArrayList<>(), null, databaseId);
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         when(chatRepositoryMock.save(any())).thenReturn(chat);
 
         // when
-        ChatDto actual = chatService.create(databaseId);
+        final ChatDto actual = chatService.create(databaseId);
 
         // then
         assertEquals(expected, actual);
@@ -243,9 +242,9 @@ class ChatServiceTest {
     @DisplayName("Test create chat - user is not owner of the database")
     void testCreateUserIsNotOwner() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
-        Database database = Database.builder()
+        final Database database = Database.builder()
                 .id(databaseId)
                 .name("Test database")
                 .user(testUser2)
@@ -263,12 +262,12 @@ class ChatServiceTest {
     @DisplayName("Test create chat database not found")
     void testCreateDatabaseNotFound() {
         // given
-        UUID databaseId = UUID.randomUUID();
+        final UUID databaseId = UUID.randomUUID();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.create(databaseId));
 
         // then
@@ -279,16 +278,16 @@ class ChatServiceTest {
     @DisplayName("Test add empty message to chat")
     void testAddEmptyMessageToChat() throws EntityNotFoundException {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
                 .database(Database.builder().user(testUser).build())
                 .build();
 
-        ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
+        final ChatQueryWithResponse expected = ChatQueryWithResponse.builder()
                 .id(UUID.randomUUID())
                 .chat(chat)
                 .build();
@@ -297,7 +296,7 @@ class ChatServiceTest {
         when(messageRepositoryMock.save(any())).thenReturn(expected);
 
         // when
-        ChatQueryWithResponse actual = chatService.addEmptyMessageToChat(chatId);
+        final ChatQueryWithResponse actual = chatService.addEmptyMessageToChat(chatId);
 
         // then
         assertEquals(expected, actual);
@@ -307,9 +306,9 @@ class ChatServiceTest {
     @DisplayName("Test add empty message to chat - user is not owner of the chat")
     void testAddMessageToChatUserIsNotOwner() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
@@ -327,12 +326,12 @@ class ChatServiceTest {
     @DisplayName("Test add message to empty chat not found")
     void testAddMessageToChatNotFound() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.addEmptyMessageToChat(chatId));
 
         // then
@@ -343,11 +342,11 @@ class ChatServiceTest {
     @DisplayName("Test rename chat")
     void testRenameChat() throws EntityNotFoundException {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        String newName = "User's age distribution";
+        final String newName = "User's age distribution";
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
@@ -360,7 +359,7 @@ class ChatServiceTest {
         chatService.renameChat(chatId, newName);
 
         // then
-        ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
+        final ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
         verify(chatRepositoryMock).save(chatCaptor.capture());
         assertEquals(newName, chatCaptor.getValue().getName());
     }
@@ -369,11 +368,11 @@ class ChatServiceTest {
     @DisplayName("Test rename chat - user is not owner of the chat")
     void testRenameChatUserIsNotOwner() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        String newName = "User's age distribution";
+        final String newName = "User's age distribution";
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
@@ -392,11 +391,11 @@ class ChatServiceTest {
     @DisplayName("Test rename chat name longer than limit")
     void testRenameChatLongName() throws EntityNotFoundException {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        String newName = "Histogram of user's age distribution";
+        final String newName = "Histogram of user's age distribution";
 
-        Chat chat = Chat.builder()
+        final Chat chat = Chat.builder()
                 .id(chatId)
                 .name("Visualize age of users")
                 .messages(new ArrayList<>())
@@ -409,7 +408,7 @@ class ChatServiceTest {
         chatService.renameChat(chatId, newName);
 
         // then
-        ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
+        final ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
         verify(chatRepositoryMock).save(chatCaptor.capture());
         assertEquals("Histogram of user's age distribu", chatCaptor.getValue().getName());
     }
@@ -418,14 +417,14 @@ class ChatServiceTest {
     @DisplayName("Test rename chat not found")
     void testRenameChatNotFound() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
-        String newName = "User's age distribution";
+        final String newName = "User's age distribution";
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.renameChat(chatId, newName));
 
         // then
@@ -436,7 +435,7 @@ class ChatServiceTest {
     @DisplayName("Test delete chat by id")
     void testDeleteChatById() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(Chat.builder()
                 .id(chatId)
@@ -447,8 +446,8 @@ class ChatServiceTest {
         chatService.deleteChatById(chatId);
 
         // then
-        ArgumentCaptor<UUID> repositoryIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<String> plotIdCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<UUID> repositoryIdCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<String> plotIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(chatRepositoryMock).deleteById(repositoryIdCaptor.capture());
         verify(plotServiceMock).deletePlots(plotIdCaptor.capture());
         assertEquals(chatId, repositoryIdCaptor.getValue());
@@ -459,7 +458,7 @@ class ChatServiceTest {
     @DisplayName("Test delete chat by id - user is not owner of the chat")
     void testDeleteChatByIdUserIsNotOwner() {
         // given
-        UUID chatId = UUID.randomUUID();
+        final UUID chatId = UUID.randomUUID();
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.of(Chat.builder()
                 .id(chatId)

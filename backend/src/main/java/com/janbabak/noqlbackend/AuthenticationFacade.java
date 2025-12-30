@@ -24,7 +24,7 @@ public class AuthenticationFacade implements AuthenticationFacadeInterface {
      */
     @Override
     public boolean isAdmin() {
-        Authentication auth = getAuthentication();
+        final Authentication auth = getAuthentication();
         return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(Role.ROLE_ADMIN.name()));
     }
 }

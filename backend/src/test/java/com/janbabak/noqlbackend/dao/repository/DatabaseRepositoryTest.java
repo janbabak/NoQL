@@ -34,27 +34,27 @@ class DatabaseRepositoryTest {
     @DisplayName("Filter databases by user id")
     void testFilterDatabasesByUserId() {
         // given
-        User user1 = User.builder()
+        final User user1 = User.builder()
                 .id(UUID.randomUUID())
                 .email("user1@email.cz")
                 .build();
 
-        User user2 = User.builder()
+        final User user2 = User.builder()
                 .id(UUID.randomUUID())
                 .email("user2@email.cz")
                 .build();
 
-        Database database1 = Database.builder()
+        final Database database1 = Database.builder()
                 .id(UUID.randomUUID())
                 .user(user1)
                 .build();
 
-        Database database2 = Database.builder()
+        final Database database2 = Database.builder()
                 .id(UUID.randomUUID())
                 .user(user1)
                 .build();
 
-        Database database3 = Database.builder()
+        final Database database3 = Database.builder()
                 .id(UUID.randomUUID())
                 .user(user2)
                 .build();
@@ -66,10 +66,10 @@ class DatabaseRepositoryTest {
         databaseRepository.save(database2);
         databaseRepository.save(database3);
 
-        List<Database> expected = List.of(database1, database2);
+        final List<Database> expected = List.of(database1, database2);
 
         // when
-        List<Database> actual = databaseRepository.findAllByUserId(user1.getId());
+        final List<Database> actual = databaseRepository.findAllByUserId(user1.getId());
 
         // then
         assertEquals(actual, expected);

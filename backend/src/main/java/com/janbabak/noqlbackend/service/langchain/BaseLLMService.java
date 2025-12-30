@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service.langChain;
+package com.janbabak.noqlbackend.service.langchain;
 
 import com.janbabak.noqlbackend.config.llm.AnthropiConfig;
 import com.janbabak.noqlbackend.config.llm.GeminiConfig;
@@ -54,7 +54,7 @@ public class BaseLLMService {
             return buildGoogleGeminiModel(modelId);
         }
 
-        String errorMsg = "Unsupported model ID: " + modelId;
+        final String errorMsg = "Unsupported model ID: " + modelId;
         log.error(errorMsg);
         throw new BadRequestException(errorMsg);
     }

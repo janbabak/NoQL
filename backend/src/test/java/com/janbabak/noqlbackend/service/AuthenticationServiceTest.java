@@ -63,10 +63,10 @@ class AuthenticationServiceTest {
     @DisplayName("Register new user")
     void registerNewUser() throws UserAlreadyExistsException {
         // given
-        String email = "john@gmail.com";
-        RegisterRequest registerRequest = new RegisterRequest(
+        final String email = "john@gmail.com";
+        final RegisterRequest registerRequest = new RegisterRequest(
                 "John", "Doe", email, "password");
-        User user = User.builder()
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -74,9 +74,9 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.ROLE_USER)
                 .build();
-        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
+        final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        final AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
         when(userRepositoryMock.save(any(User.class))).thenReturn(user);
@@ -84,7 +84,7 @@ class AuthenticationServiceTest {
         when(jwtServiceMock.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
-        AuthenticationResponse actual = authenticationService.register(registerRequest, Role.ROLE_USER);
+        final AuthenticationResponse actual = authenticationService.register(registerRequest, Role.ROLE_USER);
 
         // then
         assertEquals(authenticationResponse, actual);
@@ -94,10 +94,10 @@ class AuthenticationServiceTest {
     @DisplayName("Register user already exists")
     void registerUserAlreadyExists() {
         // given
-        String email = "john@gmail.com";
-        RegisterRequest registerRequest = new RegisterRequest(
+        final String email = "john@gmail.com";
+        final RegisterRequest registerRequest = new RegisterRequest(
                 "John", "Doe", email, "password");
-        User user = User.builder()
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -117,9 +117,9 @@ class AuthenticationServiceTest {
     @DisplayName("Authenticate existing user")
     void authenticateExistingUser() throws EntityNotFoundException {
         // given
-        String email = "john@gmail.com";
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, "password");
-        User user = User.builder()
+        final String email = "john@gmail.com";
+        final AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, "password");
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -127,16 +127,16 @@ class AuthenticationServiceTest {
                 .password("password")
                 .role(Role.ROLE_USER)
                 .build();
-        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
+        final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJob256aWtAZ21haWwuY29tIiwiaWF0IjoxNzI1MTE3MjQ1LCJleHAiOjE3MjUyMDM2NDV9.4oCm9owj7de-IsYqU8KJrQVaG8WYqeeWx2jAsjPJ8wxhAltW1YkMAc9cs2R2Ckhzh7v3Vg8RhRDQor8WPW7luw";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        final AuthenticationResponse authenticationResponse = new AuthenticationResponse(accessToken, refreshToken, user);
 
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.of(user));
         when(jwtServiceMock.generateToken(user)).thenReturn(accessToken);
         when(jwtServiceMock.generateRefreshToken(user)).thenReturn(refreshToken);
 
         // when
-        AuthenticationResponse actual = authenticationService.authenticate(authenticationRequest);
+        final AuthenticationResponse actual = authenticationService.authenticate(authenticationRequest);
 
         // then
         assertEquals(authenticationResponse, actual);
@@ -146,13 +146,13 @@ class AuthenticationServiceTest {
     @DisplayName("Authenticate not existing user")
     void authenticateNotExistingUser() {
         // given
-        String email = "john@gmail.com";
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, "password");
+        final String email = "john@gmail.com";
+        final AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, "password");
 
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authenticationService.authenticate(authenticationRequest));
 
         // then
@@ -163,11 +163,11 @@ class AuthenticationServiceTest {
     @DisplayName("Refresh token - valid token")
     void refreshTokenValid() throws EntityNotFoundException {
         // given
-        String email = "john@gmail.com";
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-44";
-        String newRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-33";
-        User user = User.builder()
+        final String email = "john@gmail.com";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        final String accessToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-44";
+        final String newRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-33";
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -183,7 +183,7 @@ class AuthenticationServiceTest {
         when(jwtServiceMock.generateRefreshToken(user)).thenReturn(newRefreshToken);
 
         // when
-        AuthenticationResponse actual = authenticationService.refreshToken(refreshToken);
+        final AuthenticationResponse actual = authenticationService.refreshToken(refreshToken);
 
         // then
         assertEquals(accessToken, actual.accessToken());
@@ -195,7 +195,7 @@ class AuthenticationServiceTest {
     @DisplayName("Refresh token - invalid token")
     void refreshTokenInvalid() {
         // given
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
         when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(null);
 
         // then
@@ -206,9 +206,9 @@ class AuthenticationServiceTest {
     @DisplayName("Refresh token - token not valid for user")
     void refreshTokenTokenNotValidForUser() {
         // given
-        String email = "john@gmail.com";
-        String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
-        User user = User.builder()
+        final String email = "john@gmail.com";
+        final String refreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYWJrYUBlbWFpbC5jb20iLCJpYXQiOjE3Mjc2MDEwMzcsImV4cCI6MTcyNzYwMTE1N30.IyF9FgOzG_-6HxdJb7k-k0yY7oGoxPVtCG3MzKS0uKW-AmxTMrgN9GdaW5b0JnazJhAxsHCgV4ruxZ_GVEp-cQ";
+        final User user = User.builder()
                 .id(UUID.randomUUID())
                 .firstName("John")
                 .lastName("Doe")
@@ -229,14 +229,14 @@ class AuthenticationServiceTest {
     @DisplayName("Refresh token - user not found")
     void refreshTokenUserNotFound() {
         // given
-        String email = "john@gmail.com";
-        String refreshToken = "validRefreshToken";
+        final String email = "john@gmail.com";
+        final String refreshToken = "validRefreshToken";
 
         when(jwtServiceMock.extractUsername(refreshToken)).thenReturn(email);
         when(userRepositoryMock.findByEmail(email)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> authenticationService.refreshToken(refreshToken));
 
         // then
@@ -247,9 +247,9 @@ class AuthenticationServiceTest {
     @DisplayName("Check if requesting self")
     void checkIfRequestingSelf() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        String email = "john.doe@yahoo.com";
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final String email = "john.doe@yahoo.com";
+        final User user = User.builder()
                 .id(userId)
                 .email(email)
                 .firstName("John")
@@ -262,7 +262,7 @@ class AuthenticationServiceTest {
         when(authenticationFacadeInterfaceMock.getAuthentication()).thenReturn(authentication);
 
         // when
-        User actual = authenticationService.checkIfRequestingSelf(userId);
+        final User actual = authenticationService.checkIfRequestingSelf(userId);
 
         // then
         assertEquals(user, actual);
@@ -272,8 +272,8 @@ class AuthenticationServiceTest {
     @DisplayName("Check if requesting self fails")
     void checkIfRequestingSelfFails() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final User user = User.builder()
                 .id(userId)
                 .email("john.doe@yahoo.com")
                 .firstName("John")
@@ -293,9 +293,9 @@ class AuthenticationServiceTest {
     @DisplayName("Check if user is admin or self request - is self request")
     void isAdminOrSelfRequestTestIsSelfRequest() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        String email = "john.doe@yahoo.com";
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final String email = "john.doe@yahoo.com";
+        final User user = User.builder()
                 .id(userId)
                 .email(email)
                 .firstName("John")
@@ -309,7 +309,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertTrue(actual);
@@ -319,11 +319,11 @@ class AuthenticationServiceTest {
     @DisplayName("Check if user is admin or self request - is admin")
     void isAdminOrSelfRequestTestIsAdmin() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertTrue(actual);
@@ -333,9 +333,9 @@ class AuthenticationServiceTest {
     @DisplayName("Check if user is admin or self request - is nothing")
     void isAdminOrSelfRequestTestIsNothing() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        String email = "john.doe@yahoo.com";
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final String email = "john.doe@yahoo.com";
+        final User user = User.builder()
                 .id(userId)
                 .email("different@email.cz")
                 .firstName("John")
@@ -349,7 +349,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        boolean actual = authenticationService.isAdminOrSelfRequest(userId);
+        final boolean actual = authenticationService.isAdminOrSelfRequest(userId);
 
         // then
         assertFalse(actual);
@@ -359,9 +359,9 @@ class AuthenticationServiceTest {
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is self request")
     void ifNotAdminOrSelfRequestThrowAccessDeniedIsSelfRequest() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        String email = "john.doe@yahoo.com";
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final String email = "john.doe@yahoo.com";
+        final User user = User.builder()
                 .id(userId)
                 .email(email)
                 .firstName("John")
@@ -382,7 +382,7 @@ class AuthenticationServiceTest {
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is  admin")
     void ifNotAdminOrSelfRequestThrowAccessDeniedIsAdmin() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(true);
 
         // then
@@ -393,9 +393,9 @@ class AuthenticationServiceTest {
     @DisplayName("Check AccessDeniedExceptions thrown if user is not admin or self request - is nothing")
     void ifNotAdminOrSelfRequestThrowAccessDeniedIsNothing() {
         // given
-        UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
-        String email = "john.doe@yahoo.com";
-        User user = User.builder()
+        final UUID userId = UUID.fromString("d9223610-04b5-49e1-8b4e-7b3aeac8836a");
+        final String email = "john.doe@yahoo.com";
+        final User user = User.builder()
                 .id(userId)
                 .email("different@email.com")
                 .firstName("John")
@@ -409,7 +409,7 @@ class AuthenticationServiceTest {
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // then
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+        final AccessDeniedException exception = assertThrows(AccessDeniedException.class,
                 () -> authenticationService.ifNotAdminOrSelfRequestThrowAccessDenied(userId));
         assertEquals("Access denied.", exception.getMessage());
     }
@@ -426,8 +426,8 @@ class AuthenticationServiceTest {
     void ifNotAdminThrowAccessDeniedThrown() {
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
 
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> authenticationService.ifNotAdminThrowAccessDenied());
+        final AccessDeniedException exception = assertThrows(AccessDeniedException.class,
+                authenticationService::ifNotAdminThrowAccessDenied);
         assertEquals("Admin ROLE required.", exception.getMessage());
     }
 

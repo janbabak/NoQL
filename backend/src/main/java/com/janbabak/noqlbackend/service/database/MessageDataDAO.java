@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 
 import static com.janbabak.noqlbackend.service.query.QueryUtils.getTotalCount;
-import static com.janbabak.noqlbackend.service.query.QueryUtils.setPaginationInSqlQuery;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.constructPaginatedSqlQuery;
 
 @Slf4j
 @Service
@@ -43,16 +43,16 @@ public class MessageDataDAO {
             return null;
         }
 
-        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
-        QueryUtils.PaginatedQuery paginatedQuery;
+        final BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
+        final QueryUtils.PaginatedQuery paginatedQuery;
         try {
-            paginatedQuery = setPaginationInSqlQuery(message.getDbQuery(), page, pageSize, database);
+            paginatedQuery = constructPaginatedSqlQuery(message.getDbQuery(), page, pageSize, database);
         } catch (BadRequestException e) {
             log.error("Failed to set pagination in SQL query: {}", e.getMessage());
             return null;
         }
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query())) {
-            Long totalCount = getTotalCount(message.getDbQuery(), database, databaseService);
+            final Long totalCount = getTotalCount(message.getDbQuery(), database, databaseService);
             return new RetrievedData(result.resultSet(), paginatedQuery.page(), paginatedQuery.pageSize(), totalCount);
         } catch (DatabaseExecutionException | SQLException | DatabaseConnectionException | BadRequestException e) {
             log.error("Failed to retrieve data from message {}: {}", message.getId(), e.getMessage());

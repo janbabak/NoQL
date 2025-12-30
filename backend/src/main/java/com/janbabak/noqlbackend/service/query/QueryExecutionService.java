@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 
 import static com.janbabak.noqlbackend.service.query.QueryUtils.getTotalCount;
-import static com.janbabak.noqlbackend.service.query.QueryUtils.setPaginationInSqlQuery;
+import static com.janbabak.noqlbackend.service.query.QueryUtils.constructPaginatedSqlQuery;
 
 @Slf4j
 @Service
@@ -30,11 +30,11 @@ public class QueryExecutionService {
 
         validateQuery(query);
 
-        QueryUtils.PaginatedQuery paginatedQuery = setPaginationInSqlQuery(query, page, pageSize, database);
-        BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
+        final QueryUtils.PaginatedQuery paginatedQuery = constructPaginatedSqlQuery(query, page, pageSize, database);
+        final BaseDatabaseService databaseService = databaseServiceFactory.getDatabaseService(database);
 
         try (ResultSetWrapper result = databaseService.executeQuery(paginatedQuery.query())) {
-            Long totalCount = getTotalCount(query, database, databaseService);
+            final Long totalCount = getTotalCount(query, database, databaseService);
             return new RetrievedData(result.resultSet(), paginatedQuery.page(), paginatedQuery.pageSize(), totalCount);
         }
     }

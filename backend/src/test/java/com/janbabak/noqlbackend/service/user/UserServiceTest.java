@@ -35,24 +35,23 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoderMock;
 
     @Mock
-    @SuppressWarnings("unused") // used in userService
     private AuthenticationService authenticationService;
 
     @Test
     @DisplayName("Find user by id")
     void testFindUserById() throws EntityNotFoundException {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        User user = User.builder().id(userId).build();
+        final User user = User.builder().id(userId).build();
 
-        when(userRepositoryMock.findById(userId)).thenReturn(java.util.Optional.of(user));
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        User actual = userService.findById(userId);
+        final User actual = userService.findById(userId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(userRepositoryMock).findById(idCaptor.capture());
         assertEquals(userId, idCaptor.getValue());
         assertEquals(user, actual);
@@ -62,12 +61,12 @@ class UserServiceTest {
     @DisplayName("Find user by id - user not found")
     void testFindUserByIdUserNotFound() {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        when(userRepositoryMock.findById(userId)).thenReturn(java.util.Optional.empty());
+        when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> userService.findById(userId));
 
         // then
@@ -78,7 +77,7 @@ class UserServiceTest {
     @DisplayName("Find user by id - access denied")
     void testFindUserByIdAccessDenied() {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
         doThrow(new AccessDeniedException("Access Denied"))
                 .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -91,14 +90,14 @@ class UserServiceTest {
     @DisplayName("Find all users")
     void testFindAllUsers() {
         // given
-        User user1 = User.builder().id(UUID.randomUUID()).build();
-        User user2 = User.builder().id(UUID.randomUUID()).build();
-        List<User> users = List.of(user1, user2);
+        final User user1 = User.builder().id(UUID.randomUUID()).build();
+        final User user2 = User.builder().id(UUID.randomUUID()).build();
+        final List<User> users = List.of(user1, user2);
 
         when(userRepositoryMock.findAll()).thenReturn(users);
 
         // when
-        List<User> actual = userService.findAll();
+        final List<User> actual = userService.findAll();
 
         // then
         assertEquals(2, actual.size());
@@ -109,9 +108,9 @@ class UserServiceTest {
     @DisplayName("Update user")
     void testUpdateUser() throws EntityNotFoundException {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        User user = User.builder()
+        final User user = User.builder()
                 .id(userId)
                 .firstName("john")
                 .lastName("doe")
@@ -120,7 +119,7 @@ class UserServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        UpdateUserRequest request = UpdateUserRequest.builder()
+        final UpdateUserRequest request = UpdateUserRequest.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@gmail.com")
@@ -128,7 +127,7 @@ class UserServiceTest {
                 .queryLimit(1000)
                 .build();
 
-        User updatedUser = User.builder()
+        final User updatedUser = User.builder()
                 .id(userId)
                 .firstName("John")
                 .lastName("Doe")
@@ -142,10 +141,10 @@ class UserServiceTest {
         when(userRepositoryMock.save(user)).thenReturn(updatedUser);
 
         // when
-        User actual = userService.updateUser(userId, request);
+        final User actual = userService.updateUser(userId, request);
 
         // then
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(updatedUser, userCaptor.getValue());
         assertEquals(updatedUser, actual);
@@ -155,9 +154,9 @@ class UserServiceTest {
     @DisplayName("Update user - email already taken")
     void testUpdateUserEmailTaken() {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        User user = User.builder()
+        final User user = User.builder()
                 .id(userId)
                 .firstName("john")
                 .lastName("doe")
@@ -166,11 +165,11 @@ class UserServiceTest {
                 .role(Role.ROLE_USER)
                 .build();
 
-        UpdateUserRequest request = UpdateUserRequest.builder()
+        final UpdateUserRequest request = UpdateUserRequest.builder()
                 .email("john@email.com")
                 .build();
 
-        User existingUser = User.builder()
+        final User existingUser = User.builder()
                 .id(UUID.randomUUID())
                 .email("john@email.com")
                 .build();
@@ -179,7 +178,7 @@ class UserServiceTest {
         when(userRepositoryMock.findByEmail(eq("john@email.com"))).thenReturn(Optional.of(existingUser));
 
         // when
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> userService.updateUser(userId, request));
 
         // then
@@ -190,14 +189,14 @@ class UserServiceTest {
     @DisplayName("Update user - user not found")
     void testUpdateUserUserNotFound() {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
 
-        UpdateUserRequest request = UpdateUserRequest.builder().firstName("new name").build();
+        final UpdateUserRequest request = UpdateUserRequest.builder().firstName("new name").build();
 
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> userService.updateUser(userId, request));
 
         // then
@@ -208,8 +207,8 @@ class UserServiceTest {
     @DisplayName("Find user by id - access denied")
     void testUpdateUserByIdAccessDenied() {
         // given
-        UUID userId = UUID.randomUUID();
-        UpdateUserRequest request = UpdateUserRequest.builder().firstName("new name").build();
+        final UUID userId = UUID.randomUUID();
+        final UpdateUserRequest request = UpdateUserRequest.builder().firstName("new name").build();
 
         doThrow(new AccessDeniedException("Access Denied"))
                 .when(authenticationService).ifNotAdminOrSelfRequestThrowAccessDenied(userId);
@@ -222,8 +221,8 @@ class UserServiceTest {
     @DisplayName("Delete user")
     void testDeleteUser() {
         // given
-        UUID userId = UUID.randomUUID();
-        User user = User.builder().id(userId).build();
+        final UUID userId = UUID.randomUUID();
+        final User user = User.builder().id(userId).build();
 
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
@@ -231,7 +230,7 @@ class UserServiceTest {
         userService.deleteUser(userId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(userRepositoryMock).deleteById(idCaptor.capture());
         assertEquals(userId, idCaptor.getValue());
     }
@@ -240,16 +239,16 @@ class UserServiceTest {
     @DisplayName("Decrement query limit")
     void testDecrementQueryLimit() throws EntityNotFoundException {
         // given
-        UUID userId = UUID.randomUUID();
-        User user = User.builder().id(userId).queryLimit(10).build();
+        final UUID userId = UUID.randomUUID();
+        final User user = User.builder().id(userId).queryLimit(10).build();
 
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        int actual = userService.decrementQueryLimit(userId);
+        final int actual = userService.decrementQueryLimit(userId);
 
         // then
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(9, userCaptor.getValue().getQueryLimit());
         assertEquals(10, actual);
@@ -259,16 +258,16 @@ class UserServiceTest {
     @DisplayName("Decrement query limit - limit exceeded")
     void testDecrementQueryLimitExceeded() throws EntityNotFoundException {
         // given
-        UUID userId = UUID.randomUUID();
-        User user = User.builder().id(userId).queryLimit(0).build();
+        final UUID userId = UUID.randomUUID();
+        final User user = User.builder().id(userId).queryLimit(0).build();
 
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.of(user));
 
         // when
-        int actual = userService.decrementQueryLimit(userId);
+        final int actual = userService.decrementQueryLimit(userId);
 
         // then
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        final ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepositoryMock).save(userCaptor.capture());
         assertEquals(0, userCaptor.getValue().getQueryLimit());
         assertEquals(0, actual);
@@ -278,11 +277,11 @@ class UserServiceTest {
     @DisplayName("Decrement query limit - user not found")
     void testDecrementQueryLimitUserNotFound() {
         // given
-        UUID userId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
         when(userRepositoryMock.findById(userId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> userService.decrementQueryLimit(userId));
 
         // then

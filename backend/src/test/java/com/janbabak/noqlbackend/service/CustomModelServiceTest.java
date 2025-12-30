@@ -3,9 +3,9 @@ package com.janbabak.noqlbackend.service;
 import com.janbabak.noqlbackend.dao.repository.CustomModelRepository;
 import com.janbabak.noqlbackend.dao.repository.UserRepository;
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.customModel.CreateCustomModelRequest;
-import com.janbabak.noqlbackend.model.customModel.ModelOption;
-import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
+import com.janbabak.noqlbackend.model.custommodel.CreateCustomModelRequest;
+import com.janbabak.noqlbackend.model.custommodel.ModelOption;
+import com.janbabak.noqlbackend.model.custommodel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.model.entity.User;
 import com.janbabak.noqlbackend.model.query.LlmModel;
@@ -51,9 +51,9 @@ class CustomModelServiceTest {
     @DisplayName("Test find custom model by id")
     void testFindCustomModelById() throws EntityNotFoundException {
         // given
-        UUID customModelId = UUID.randomUUID();
+        final UUID customModelId = UUID.randomUUID();
 
-        CustomModel customModel = CustomModel.builder()
+        final CustomModel customModel = CustomModel.builder()
                 .id(customModelId)
                 .name("Local model")
                 .host("localhost")
@@ -64,10 +64,10 @@ class CustomModelServiceTest {
         when(customModelRepositoryMock.findById(customModelId)).thenReturn(Optional.of(customModel));
 
         // when
-        CustomModel actual = customModelService.findById(customModelId);
+        final CustomModel actual = customModelService.findById(customModelId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(customModelRepositoryMock).findById(idCaptor.capture());
         assertEquals(customModelId, idCaptor.getValue());
         assertEquals(customModel, actual);
@@ -77,7 +77,7 @@ class CustomModelServiceTest {
     @DisplayName("Test find all custom models")
     void testFindAllCustomModels() {
         // given
-        CustomModel customModel1 = CustomModel.builder()
+        final CustomModel customModel1 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("Local model")
                 .host("localhost")
@@ -85,7 +85,7 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        CustomModel customModel2 = CustomModel.builder()
+        final CustomModel customModel2 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("CVUT model")
                 .host("https://www.cvut.cz/llm")
@@ -93,7 +93,7 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        CustomModel customModel3 = CustomModel.builder()
+        final CustomModel customModel3 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("Different user's model")
                 .host("https://www.cvut.cz/llm")
@@ -101,15 +101,15 @@ class CustomModelServiceTest {
                 .user(User.builder().id(UUID.randomUUID()).build())
                 .build();
 
-        List<CustomModel> allCustomModels = List.of(customModel1, customModel2, customModel3);
-        List<CustomModel> testUsersCustomModels = List.of(customModel1, customModel2);
+        final List<CustomModel> allCustomModels = List.of(customModel1, customModel2, customModel3);
+        final List<CustomModel> testUsersCustomModels = List.of(customModel1, customModel2);
 
         when(customModelRepositoryMock.findAll()).thenReturn(allCustomModels);
         when(customModelRepositoryMock.findAllByUserId(testUser.getId())).thenReturn(testUsersCustomModels);
 
         // when
-        List<CustomModel> actualAllModels = customModelService.findAll();
-        List<CustomModel> actualTestUsersModels = customModelService.findAll(testUser.getId());
+        final List<CustomModel> actualAllModels = customModelService.findAll();
+        final List<CustomModel> actualTestUsersModels = customModelService.findAll(testUser.getId());
 
         // then
         assertEquals(3, actualAllModels.size());
@@ -122,7 +122,7 @@ class CustomModelServiceTest {
     @DisplayName("Test get all models")
     void testGetAllModels() {
         // given
-        CustomModel customModel1 = CustomModel.builder()
+        final CustomModel customModel1 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("Local model")
                 .host("localhost")
@@ -130,7 +130,7 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        CustomModel customModel2 = CustomModel.builder()
+        final CustomModel customModel2 = CustomModel.builder()
                 .id(UUID.randomUUID())
                 .name("CVUT model")
                 .host("https://www.cvut.cz/llm")
@@ -138,12 +138,12 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        List<CustomModel> customModels = List.of(customModel1, customModel2);
+        final List<CustomModel> customModels = List.of(customModel1, customModel2);
 
         when(customModelRepositoryMock.findAllByUserId(testUser.getId())).thenReturn(customModels);
 
         // when
-        List<ModelOption> actual = customModelService.getAllModels(testUser.getId());
+        final List<ModelOption> actual = customModelService.getAllModels(testUser.getId());
 
         // then
         assertEquals(LlmModel.values().length + customModels.size(), actual.size());
@@ -153,14 +153,14 @@ class CustomModelServiceTest {
     @DisplayName("Test create custom model")
     void testCreateCustomModel() throws EntityNotFoundException {
         // given
-        CreateCustomModelRequest request = CreateCustomModelRequest.builder()
+        final CreateCustomModelRequest request = CreateCustomModelRequest.builder()
                 .name("Local model")
                 .host("localhost")
                 .port(8085)
                 .userId(testUser.getId())
                 .build();
 
-        CustomModel customModel = CustomModel.builder()
+        final CustomModel customModel = CustomModel.builder()
                 .name("Local model")
                 .host("localhost")
                 .port(8085)
@@ -171,10 +171,10 @@ class CustomModelServiceTest {
         when(userRepositoryMock.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
         // when
-        CustomModel actual = customModelService.create(request);
+        final CustomModel actual = customModelService.create(request);
 
         // then
-        ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
+        final ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
         verify(customModelRepositoryMock).save(customModelCaptor.capture());
         assertEquals(customModel, customModelCaptor.getValue());
         assertEquals(customModel, actual);
@@ -184,9 +184,9 @@ class CustomModelServiceTest {
     @DisplayName("Test update custom model")
     void testUpdateCustomModel() throws EntityNotFoundException {
         // given
-        UUID customModelId = UUID.randomUUID();
+        final UUID customModelId = UUID.randomUUID();
 
-        CustomModel customModel = CustomModel.builder()
+        final CustomModel customModel = CustomModel.builder()
                 .id(customModelId)
                 .name("Local model")
                 .host("localhost")
@@ -194,13 +194,13 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        UpdateCustomModelReqeust updateCustomModelReqeust = UpdateCustomModelReqeust.builder()
+        final UpdateCustomModelReqeust updateCustomModelReqeust = UpdateCustomModelReqeust.builder()
                 .name("CVUT model")
                 .host("https://www.cvut.cz/llm")
                 .port(8080)
                 .build();
 
-        CustomModel updatedCustomModel = CustomModel.builder()
+        final CustomModel updatedCustomModel = CustomModel.builder()
                 .id(customModelId)
                 .name("CVUT model")
                 .host("https://www.cvut.cz/llm")
@@ -212,10 +212,10 @@ class CustomModelServiceTest {
         when(customModelRepositoryMock.save(customModel)).thenReturn(updatedCustomModel);
 
         // when
-        CustomModel actual = customModelService.update(customModelId, updateCustomModelReqeust);
+        final CustomModel actual = customModelService.update(customModelId, updateCustomModelReqeust);
 
         // then
-        ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
+        final ArgumentCaptor<CustomModel> customModelCaptor = ArgumentCaptor.forClass(CustomModel.class);
         verify(customModelRepositoryMock).save(customModelCaptor.capture());
         assertEquals(updatedCustomModel, customModelCaptor.getValue());
         assertEquals(updatedCustomModel, actual);
@@ -225,8 +225,8 @@ class CustomModelServiceTest {
     @DisplayName("Test delete custom model")
     void testDeleteCustomModel() {
         // given
-        UUID customModelId = UUID.randomUUID();
-        CustomModel customModel = CustomModel.builder()
+        final UUID customModelId = UUID.randomUUID();
+        final CustomModel customModel = CustomModel.builder()
                 .id(customModelId)
                 .user(testUser)
                 .build();
@@ -237,7 +237,7 @@ class CustomModelServiceTest {
         customModelService.delete(customModelId);
 
         // then
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
+        final ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(customModelRepositoryMock).deleteById(idCaptor.capture());
         assertEquals(customModelId, idCaptor.getValue());
     }

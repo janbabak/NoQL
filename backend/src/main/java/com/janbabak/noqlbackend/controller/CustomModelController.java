@@ -1,9 +1,9 @@
 package com.janbabak.noqlbackend.controller;
 
 import com.janbabak.noqlbackend.error.exception.EntityNotFoundException;
-import com.janbabak.noqlbackend.model.customModel.CreateCustomModelRequest;
-import com.janbabak.noqlbackend.model.customModel.ModelOption;
-import com.janbabak.noqlbackend.model.customModel.UpdateCustomModelReqeust;
+import com.janbabak.noqlbackend.model.custommodel.CreateCustomModelRequest;
+import com.janbabak.noqlbackend.model.custommodel.ModelOption;
+import com.janbabak.noqlbackend.model.custommodel.UpdateCustomModelReqeust;
 import com.janbabak.noqlbackend.model.entity.CustomModel;
 import com.janbabak.noqlbackend.service.CustomModelService;
 import com.janbabak.noqlbackend.validation.ValidationSequence;

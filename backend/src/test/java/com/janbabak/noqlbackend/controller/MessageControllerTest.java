@@ -46,10 +46,10 @@ class MessageControllerTest {
     @WithMockUser(roles = "USER")
     void testLoadChatResult() throws Exception {
         // given
-        UUID messageId = UUID.randomUUID();
-        Integer page = 1;
-        Integer pageSize = 2;
-        RetrievedData response = RetrievedData.builder()
+        final UUID messageId = UUID.randomUUID();
+        final Integer page = 1;
+        final Integer pageSize = 2;
+        final RetrievedData response = RetrievedData.builder()
                 .page(page)
                 .pageSize(pageSize)
                 .totalCount(10L)
@@ -78,9 +78,9 @@ class MessageControllerTest {
     @WithAnonymousUser
     void testLoadChatResultByAnotherUser() throws Exception {
         // given
-        UUID messageId = UUID.randomUUID();
-        Integer page = 1;
-        Integer pageSize = 2;
+        final UUID messageId = UUID.randomUUID();
+        final Integer page = 1;
+        final Integer pageSize = 2;
 
         // then
         mockMvc.perform(
