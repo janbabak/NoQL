@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service.langChain;
+package com.janbabak.noqlbackend.service.langchain;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.entity.Database;
@@ -6,7 +6,7 @@ import com.janbabak.noqlbackend.service.PlotService;
 import com.janbabak.noqlbackend.service.query.QueryExecutionService;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.AiMessage;
-import com.janbabak.noqlbackend.service.langChain.QueryDatabaseAssistantTools.QueryDatabaseToolResult;
+import com.janbabak.noqlbackend.service.langchain.QueryDatabaseAssistantTools.QueryDatabaseToolResult;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;

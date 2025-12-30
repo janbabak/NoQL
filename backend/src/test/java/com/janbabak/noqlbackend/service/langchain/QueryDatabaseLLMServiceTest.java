@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service.langChain;
+package com.janbabak.noqlbackend.service.langchain;
 
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.service.PlotService;

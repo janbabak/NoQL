@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.model.customModel;
+package com.janbabak.noqlbackend.model.custommodel;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;

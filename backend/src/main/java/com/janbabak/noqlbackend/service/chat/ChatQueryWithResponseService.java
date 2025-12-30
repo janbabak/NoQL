@@ -7,7 +7,7 @@ import com.janbabak.noqlbackend.model.entity.Chat;
 import com.janbabak.noqlbackend.model.entity.ChatQueryWithResponse;
 import com.janbabak.noqlbackend.model.query.RetrievedData;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
-import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
+import com.janbabak.noqlbackend.service.langchain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

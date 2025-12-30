@@ -1,4 +1,4 @@
-package com.janbabak.noqlbackend.service.langChain;
+package com.janbabak.noqlbackend.service.langchain;
 
 import com.janbabak.noqlbackend.config.llm.AnthropiConfig;
 import com.janbabak.noqlbackend.config.llm.GeminiConfig;

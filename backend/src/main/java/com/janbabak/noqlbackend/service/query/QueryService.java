@@ -10,7 +10,7 @@ import com.janbabak.noqlbackend.service.chat.ChatService;
 import com.janbabak.noqlbackend.service.database.DatabaseEntityService;
 import com.janbabak.noqlbackend.service.database.DatabaseServiceFactory;
 import com.janbabak.noqlbackend.service.database.MessageDataDAO;
-import com.janbabak.noqlbackend.service.langChain.QueryDatabaseLLMService;
+import com.janbabak.noqlbackend.service.langchain.QueryDatabaseLLMService;
 import com.janbabak.noqlbackend.service.user.AuthenticationService;
 import com.janbabak.noqlbackend.service.user.UserService;
 import lombok.RequiredArgsConstructor;
