@@ -43,7 +43,7 @@ jobs:
 
   docker:
     needs: build-jar
-    if: ${{ inputs.push_docker }}
+    if: inputs.push_docker
     runs-on: ubuntu-latest
 
     steps:
