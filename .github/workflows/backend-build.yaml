@@ -41,7 +41,7 @@ jobs:
 
       - name: Build backend
         working-directory: backend
-        run: ./gradlew build -x test
+        run: ./gradlew build -x test -x pmdMain -x pmdTest
 
       - name: Login to Docker Hub
         if: inputs.push_docker

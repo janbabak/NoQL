@@ -63,3 +63,30 @@ jobs:
           ./ci/scripts/check-semantic-versioning.sh \
             "${{ steps.pr_version.outputs.PR_VERSION }}" \
             "${{ steps.main_version.outputs.MAIN_VERSION }}"
+
+  # Lint
+  lint:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_changed == 'true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('backend/**.gradle*', 'backend/**/gradle-wrapper.properties') }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Run tests with coverage
+        working-directory: backend
+        run: ./gradlew clean pmdMain pmdTest
