@@ -25,6 +25,8 @@ jobs:
     uses: janbabak/NoQL/.github/workflows/backend-test.yaml@main
     with:
       triggered_by_merge: false
+    secrets:
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
 
   build-backend:
     needs: validate-backend
