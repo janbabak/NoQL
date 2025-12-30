@@ -83,7 +83,6 @@ dependencies {
 pmd {
     toolVersion = '7.15.0'
     sourceSets = [sourceSets.main, sourceSets.test]
-//    ruleSets = ["${project.rootDir}/pmd/ruleset.xml"]
 }
 
 tasks.withType(Pmd).configureEach {
