@@ -12,6 +12,11 @@ on:
         required: false
         default: false
         type: boolean
+  pull_request:
+      types:
+        - closed  # triggers when PR is closed
+      branches:
+        - main
 
 jobs:
   validate-backend:
