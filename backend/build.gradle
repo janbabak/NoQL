@@ -16,7 +16,7 @@ bootRun {
 }
 
 group = 'com.janbabak'
-version = '0.0.7'
+version = '0.0.5'
 
 repositories {
     mavenCentral()
