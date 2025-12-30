@@ -138,7 +138,7 @@ class CustomModelServiceTest {
                 .user(testUser)
                 .build();
 
-        List<CustomModel> customModels = List.of(customModel1, customModel2);
+        final List<CustomModel> customModels = List.of(customModel1, customModel2);
 
         when(customModelRepositoryMock.findAllByUserId(testUser.getId())).thenReturn(customModels);
 

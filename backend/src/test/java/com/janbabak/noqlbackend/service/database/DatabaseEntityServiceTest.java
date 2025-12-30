@@ -257,7 +257,7 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        final PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
+        final PostgresDAO postgresDao = mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
         when(userRepositoryMock.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -322,7 +322,7 @@ class DatabaseEntityServiceTest {
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> databaseEntityService.update(databaseId, updateDatabaseRequest));
 
         // then
@@ -350,7 +350,7 @@ class DatabaseEntityServiceTest {
                 .build();
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
-        final PostgresDAO postgresDao = Mockito.mock(PostgresDAO.class);
+        final PostgresDAO postgresDao = mock(PostgresDAO.class);
         doThrow(DatabaseConnectionException.class).when(postgresDao).testConnection();
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(postgresDao);
 
@@ -393,7 +393,7 @@ class DatabaseEntityServiceTest {
                 .user(testUser)
                 .build();
 
-        final PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
+        final PostgresService postgresServiceMock = mock(PostgresService.class);
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);
@@ -451,8 +451,8 @@ class DatabaseEntityServiceTest {
                     age integer
                 );""";
 
-        final PostgresService postgresServiceMock = Mockito.mock(PostgresService.class);
-        final SqlDatabaseStructure sqlDatabaseStructureMock = Mockito.mock(SqlDatabaseStructure.class);
+        final PostgresService postgresServiceMock = mock(PostgresService.class);
+        final SqlDatabaseStructure sqlDatabaseStructureMock = mock(SqlDatabaseStructure.class);
 
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.of(database));
         when(databaseServiceFactoryMock.getDatabaseDAO(database)).thenReturn(databaseDaoMock);

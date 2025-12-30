@@ -118,7 +118,7 @@ class ChatServiceTest {
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findById(chatId, null, true));
 
         // then
@@ -164,7 +164,7 @@ class ChatServiceTest {
         final List<ChatHistoryItem> actual = chatService.findChatsByDatabaseId(databaseId);
 
         // then
-        ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
+        final ArgumentCaptor<Database> databaseArgumentCaptor = ArgumentCaptor.forClass(Database.class);
         verify(chatRepositoryMock).findAllByDatabaseOrderByModificationDateDesc(databaseArgumentCaptor.capture());
         assertEquals(database, databaseArgumentCaptor.getValue());
         assertEquals(expected, actual);
@@ -199,7 +199,7 @@ class ChatServiceTest {
         when(databaseRepositoryMock.findById(databaseId)).thenReturn(Optional.empty());
 
         // when
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+        final EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> chatService.findChatsByDatabaseId(databaseId));
 
         // then
@@ -419,7 +419,7 @@ class ChatServiceTest {
         // given
         final UUID chatId = UUID.randomUUID();
 
-        String newName = "User's age distribution";
+        final String newName = "User's age distribution";
 
         when(chatRepositoryMock.findById(chatId)).thenReturn(Optional.empty());
 

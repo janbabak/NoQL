@@ -15,6 +15,7 @@
         <exclude name="UnitTestContainsTooManyAsserts"/>
         <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
         <exclude name="UnitTestShouldIncludeAssert"/>
+        <exclude name="AvoidUsingHardCodedIP"/>
     </rule>
 
     <!-- Import the codestyle category, but exclude specific rules -->

@@ -811,7 +811,7 @@ class DatabaseControllerTest {
     @Test
     @DisplayName("Get chats of database")
     @WithMockUser(roles = "USER")
-    void getChatsOfDatabase() throws Exception {
+    void testGetChatsOfDatabase() throws Exception {
         // given
         final UUID databaseId = UUID.randomUUID();
         final List<ChatHistoryItem> response = List.of(
@@ -830,7 +830,7 @@ class DatabaseControllerTest {
     @Test
     @DisplayName("Get chats of not existing database")
     @WithMockUser(roles = "USER")
-    void getChatsOfNotExistingDatabase() throws Exception {
+    void testGetChatsOfNotExistingDatabase() throws Exception {
         // given
         final UUID databaseId = UUID.randomUUID();
 
@@ -845,7 +845,7 @@ class DatabaseControllerTest {
     @Test
     @DisplayName("Get chats of database by anonymous user")
     @WithAnonymousUser
-    void getChatsOfDatabaseByAnotherUser() throws Exception {
+    void testGetChatsOfDatabaseByAnotherUser() throws Exception {
         // given
         final UUID databaseId = UUID.randomUUID();
 

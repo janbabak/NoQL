@@ -71,7 +71,7 @@ class ChatQueryWithResponseServiceTest {
 
     @Test
     @DisplayName("Test getMessagesFromChat")
-    void getMessagesFromChat() throws EntityNotFoundException {
+    void testGetMessagesFromChat() throws EntityNotFoundException {
         // given
         final UUID chatId = UUID.randomUUID();
 
@@ -99,7 +99,7 @@ class ChatQueryWithResponseServiceTest {
                 .thenReturn(chatQueryWithResponses);
 
         // when
-        List<ChatQueryWithResponse> actual = chatQueryWithResponseService.getMessagesFromChat(chatId);
+        final List<ChatQueryWithResponse> actual = chatQueryWithResponseService.getMessagesFromChat(chatId);
 
         // then
         assertEquals(chatQueryWithResponses, actual);
@@ -107,7 +107,7 @@ class ChatQueryWithResponseServiceTest {
 
     @Test
     @DisplayName("Test getMessagesFromChat chat not found")
-    void getMessagesFromChatChatNotFound() {
+    void testGetMessagesFromChatChatNotFound() {
         // given
         final UUID chatId = UUID.randomUUID();
 

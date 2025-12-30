@@ -45,11 +45,7 @@ import static org.mockito.Mockito.when;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-public class QueryServiceIntegrationTest extends LocalDatabaseTest {
-
-    private Database getDatabase() {
-        return postgresDatabase;
-    }
+class QueryServiceIntegrationTest extends LocalDatabaseTest {
 
     @InjectMocks
     @Autowired
@@ -77,6 +73,10 @@ public class QueryServiceIntegrationTest extends LocalDatabaseTest {
     private DatabaseCredentialsEncryptionService encryptionService;
 
     private User testUser;
+
+    private Database getDatabase() {
+        return postgresDatabase;
+    }
 
     /**
      * Get scripts for initialization of the databases

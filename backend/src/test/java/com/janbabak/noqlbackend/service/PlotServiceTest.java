@@ -31,7 +31,7 @@ class PlotServiceTest {
     @MethodSource("replaceCredentialsDataProvider")
     @DisplayName("Replace credentials in the script")
     void testReplaceCredentialsInScript(String inputScript, Database database, String expectedScript, String fileName) {
-        String actualScript = plotService.replaceCredentialsInScript(inputScript, database, fileName);
+        final String actualScript = plotService.replaceCredentialsInScript(inputScript, database, fileName);
         assertEquals(expectedScript, actualScript);
     }
 

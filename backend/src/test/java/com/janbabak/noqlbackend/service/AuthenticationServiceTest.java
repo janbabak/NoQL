@@ -427,7 +427,7 @@ class AuthenticationServiceTest {
         when(authenticationFacadeInterfaceMock.isAdmin()).thenReturn(false);
 
         final AccessDeniedException exception = assertThrows(AccessDeniedException.class,
-                () -> authenticationService.ifNotAdminThrowAccessDenied());
+                authenticationService::ifNotAdminThrowAccessDenied);
         assertEquals("Admin ROLE required.", exception.getMessage());
     }
 
