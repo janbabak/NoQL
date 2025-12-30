@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       push_docker:
-        description: 'Push Docker image'
+        description: 'True if docker images should be built and pushed to Dockerhub'
         required: false
         default: false
         type: boolean

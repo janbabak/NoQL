@@ -8,24 +8,36 @@ on:
   workflow_dispatch:
     inputs:
       push_docker:
-        description: 'Push Docker image'
+        description: 'True if docker images should be built and pushed to Dockerhub'
         required: false
         default: false
         type: boolean
+  pull_request:
+      types:
+        - closed  # triggers when PR is closed
+      branches:
+        - main
 
 jobs:
   validate-backend:
     uses: janbabak/NoQL/.github/workflows/backend-validate.yaml@main
 
-  build-backend:
+  test-backend:
     needs: validate-backend
     if: |
       needs.validate-backend.outputs.backend_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
+    uses: janbabak/NoQL/.github/workflows/backend-test.yaml@main
+    with:
+      triggered_by_merge: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged }}
+    secrets:
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+
+  build-backend:
+    needs: test-backend
     uses: janbabak/NoQL/.github/workflows/backend-build.yaml@main
     with:
       push_docker: ${{ github.event.inputs.push_docker || false }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
