@@ -16,6 +16,7 @@ on:
 jobs:
   # Validate pull request title
   validate-pr-title:
+    if: inputs.validate_pr
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +28,6 @@ jobs:
 
   # Detect changes in the /backend folder
   detect-changes:
-    needs: validate-pr-title
     runs-on: ubuntu-latest
     outputs:
       backend_changed: ${{ steps.detect.outputs.changed }}
