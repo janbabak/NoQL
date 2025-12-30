@@ -11,7 +11,6 @@
 
     <!-- Import the rule categories you want to use -->
     <rule ref="category/java/bestpractices.xml">
-        <exclude name="GuardLogStatement"/>
         <exclude name="UnitTestContainsTooManyAsserts"/>
         <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
         <exclude name="UnitTestShouldIncludeAssert"/>
@@ -25,7 +24,6 @@
         <exclude name="LongVariable"/>
         <exclude name="AtLeastOneConstructor"/>
         <exclude name="FieldNamingConventions"/>
-        <exclude name="OnlyOneReturn"/>
         <exclude name="CommentDefaultAccessModifier"/>
         <exclude name="TooManyStaticImports"/>
         <exclude name="MethodArgumentCouldBeFinal"/>
