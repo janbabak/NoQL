@@ -23,6 +23,8 @@ jobs:
       needs.validate-backend.outputs.backend_changed == 'true' ||
       github.event_name == 'workflow_dispatch'
     uses: janbabak/NoQL/.github/workflows/backend-test.yaml@main
+    with:
+      triggered_by_merge: false
 
   build-backend:
     needs: validate-backend

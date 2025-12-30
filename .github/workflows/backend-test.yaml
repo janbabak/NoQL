@@ -2,6 +2,12 @@ name: Test backend
 
 on:
   workflow_call:
+    inputs:
+      triggered_by_merge:
+        description: 'True if pipeline was triggered by merging pull request'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -31,3 +37,27 @@ jobs:
       - name: Run tests with coverage
         working-directory: backend
         run: ./gradlew test jacocoTestReport
+
+      - name: Summary setup
+        run: echo "## 🧪 Test Results:" >> $GITHUB_STEP_SUMMARY
+
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: "backend/build/test-results/test/TEST-*.xml"
+        if: always()
+
+      - name: Coverage Summary
+        id: coverage
+        if: always()
+        working-directory: backend
+        run: |
+          TOTAL_COVERAGE=$(./gradlew computeTotalTestCoverage -q)
+          echo "Total test coverage ${TOTAL_COVERAGE}%"
+          echo "coverage=$TOTAL_COVERAGE" >> $GITHUB_OUTPUT
+          echo "**Total Coverage:** ${TOTAL_COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update coverage badge JSON
+        if: inputs.triggered_by_merge
+        run: ./ci/scripts/update-coverage-badge.sh backend_coverage.json "${{ steps.coverage.outputs.coverage }}"
+
