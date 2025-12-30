@@ -89,4 +89,4 @@ jobs:
 
       - name: Run tests with coverage
         working-directory: backend
-        run: ./gradlew clean pmdMain pmdTest
+        run: ./gradlew pmdMain pmdTest
