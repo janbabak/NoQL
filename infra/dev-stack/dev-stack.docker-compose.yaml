@@ -40,9 +40,9 @@ services:
 
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
-    image: janbabak/plot-service:1.0.0
+    image: janbabak/noql-plot-service:0.0.1
     container_name: plot-service-dev-stack
     tty: true
     stdin_open: true
     volumes:
-      - ../../plotService:/plotService
+      - ../../plotService:/app/plotService

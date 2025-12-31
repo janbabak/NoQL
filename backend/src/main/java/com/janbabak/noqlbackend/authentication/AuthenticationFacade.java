@@ -1,6 +1,5 @@
-package com.janbabak.noqlbackend;
+package com.janbabak.noqlbackend.authentication;
 
-import com.janbabak.noqlbackend.authentication.AuthenticationFacadeInterface;
 import com.janbabak.noqlbackend.model.Role;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
