@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eup pipefal
+set -euo pipefail
 
 # This script manages backend-stack (stack containing backend,  plot service, database, and example database)
 
@@ -159,14 +159,13 @@ registerNewDatabase() {
 }
 
 if [ $# -eq 0 ]; then
-    echo "args $#"
     usage
     exit 1
 fi
 
 case "$1" in
   create)
-
+    createStack
     ;;
   start)
     startLocalStack
