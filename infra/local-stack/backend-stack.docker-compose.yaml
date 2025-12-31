@@ -4,7 +4,7 @@ services:
   # Postgres database used by backend
   noql-postgres:
     image: postgres:16-alpine
-    container_name: noql-postgres-local-stack
+    container_name: noql-postgres-backend-stack
     ports:
       - "5432:5432"
     volumes:
@@ -21,7 +21,7 @@ services:
   # In noql UI, use container port, not mapped, and 'postgres' host
   postgres:
     image: postgres:16-alpine
-    container_name: example-postgres-local-stack
+    container_name: example-postgres-backend-stack
     ports:
       - "5433:5432"
     volumes:
@@ -33,7 +33,7 @@ services:
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
     image: janbabak/noql-plot-service:0.0.1
-    container_name: plot-service-local-stack
+    container_name: plot-service-backend-stack
     tty: true
     stdin_open: true
     volumes:
@@ -42,7 +42,7 @@ services:
   # Backend server
   noql-backend:
     image: janbabak/noql-backend:0.0.6
-    container_name: noql-backend-local-stack
+    container_name: noql-backend-backend-stack
     depends_on:
       noql-postgres:
         condition: service_healthy
@@ -55,6 +55,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # in order to be able ro tun docker commands (generate plots)
     environment:
       NOQL_DB_HOST: noql-postgres # override env file
-      PLOT_SERVICE_CONTAINER_NAME: plot-service-local-stack
+      PLOT_SERVICE_CONTAINER_NAME: plot-service-backend-stack
     env_file:
       - ../../backend/.env.local

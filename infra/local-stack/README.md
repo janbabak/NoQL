@@ -1,28 +1,39 @@
-# Backend Dev Stack
+# Dev stacks
 
-- **Starts Docker compose stack containing:**
+## Backend Dev Stack
+
+- **Docker compose stack containing:**
   - Backend server
   - Plot service
   - Backend database
   - Example Postgres database
+
+## Database Dev Stack
+
+- **Docker compose stack containing:**
+    - Plot service
+    - Backend database
+    - Example Postgres database
+    - Example MySQL database
   
+## Usage
 
-- Create stack:
+- **Create stack:**
     ```bash
-    ./infra/local-stack/scripts/backend-stack.sh create  
+    ./infra/local-stack/scripts/backend-stack.sh create <databse|backend>
     ```
 
-- Start existing stack:
+- **Start existing stack:**
     ```bash
-    ./infra/local-stack/scripts/backend-stack.sh start  
+    ./infra/local-stack/scripts/backend-stack.sh start <databse|backend> 
     ```
 
-- Stop stack:
+- **Stop stack:**
     ```bash
-    ./infra/local-stack/scripts/backend-stack.sh stop  
+    ./infra/local-stack/scripts/backend-stack.sh stop <databse|backend> 
     ```
 
-- Remove stack (keep data):
+- **Remove stack** (keep data):
     ```bash
-    ./infra/local-stack/scripts/backend-stack.sh remove  
+    ./infra/local-stack/scripts/backend-stack.sh remove <databse|backend>
     ```

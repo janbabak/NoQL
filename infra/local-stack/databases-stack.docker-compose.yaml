@@ -1,11 +1,10 @@
-# Starts backend dependencies (database, plot service) and example data source
-version: '3.9'
+# Start databases (dependencies of backend) - backend database, and example postgres and mysql databases
 
 services:
   # Postgres database used by backend
   noql-postgres:
     image: postgres:16-alpine
-    container_name: noql-postgres-dev-stack
+    container_name: noql-postgres-database-stack
     ports:
       - "5432:5432"
     volumes:
@@ -16,18 +15,19 @@ services:
   # Example data source that can be connected to backend
   postgres:
     image: postgres:16-alpine
-    container_name: example-postgres-dev-stack
+    container_name: example-postgres-database-stack
     ports:
       - "5433:5432"
     volumes:
       - ./example-postgres-data:/var/lib/postgresql/data
+      - ./sample-data.sql:/sample-data.sql
     env_file:
       - ../../backend/.env.local
 
   # Example data source that can be connected to backend
   mysql:
     image: mysql:8.4.0
-    container_name: example-mysql-dev-stack
+    container_name: example-mysql-database-stack
     ports:
       - "3306:3306"
     volumes:
@@ -41,7 +41,7 @@ services:
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
     image: janbabak/noql-plot-service:0.0.1
-    container_name: plot-service-dev-stack
+    container_name: plot-service-database-stack
     tty: true
     stdin_open: true
     volumes:

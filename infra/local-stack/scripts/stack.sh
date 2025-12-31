@@ -4,12 +4,15 @@ set -euo pipefail
 
 # This script manages backend-stack (stack containing backend,  plot service, database, and example database)
 
-STACK_NAME="backend-dev-stack"
+STACK_NAME="" # changed based on input
 BACKEND_URL="http://localhost:8080"
-DOCKER_COMPOSE_FILE="infra/local-stack/backend-dev.docker-compose.yaml"
+BACKEND_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/backend-stack.docker-compose.yaml"
+DATABASE_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/databases-stack.docker-compose.yaml"
+DOCKER_COMPOSE_FILE=""
+STACK_TYPE=""
 
 EXAMPLE_DB_SQL_INIT_SCRIPT="./sample-data.sql"
-EXAMPLE_DB_CONTAINER="example-postgres-local-stack"
+EXAMPLE_DB_CONTAINER=""
 EXAMPLE_DB_NAME="database"
 EXAMPLE_DB_USER="user"
 EXAMPLE_DB_PASSWORD="password"
@@ -24,9 +27,12 @@ createStack() {
     echo "Creating a local stack"
     runDockerCompose
     insertSampleData
-    registerNewUser
-    authenticateUser
-    registerNewDatabase
+
+    if [[ "$STACK_TYPE" == "backend" ]]; then
+        registerNewUser
+        authenticateUser
+        registerNewDatabase
+    fi
 }
 
 startLocalStack() {
@@ -45,22 +51,25 @@ removeLocalStack() {
 }
 
 usage() {
-    echo "Usage: $0 {create|start|stop|remove}"
+    echo "Usage: $0 {create|start|stop|remove} {backend|database}"
     echo
     echo "Commands:"
-    echo "  create  Create the local stack, insert sample data, register user and database"
-    echo "  start   Start existing containers"
-    echo "  stop    Stop running containers"
-    echo "  remove  Stop and remove containers and network"
+    echo "  create    Create the local stack, insert sample data, register user and database"
+    echo "  start     Start existing containers"
+    echo "  stop      Stop running containers"
+    echo "  remove    Stop and remove containers and network"
+    echo "  database  Use database stack"
+    echo "  backend   Use backend stack"
 }
 
 runDockerCompose() {
     docker compose \
-        --file infra/local-stack/backend-dev.docker-compose.yaml \
+        --file ${DOCKER_COMPOSE_FILE} \
         --env-file  backend/.env.local \
         --project-name ${STACK_NAME} \
         up --detach
 
+    sleep 20
     echo "Local stack started"
 }
 
@@ -158,10 +167,29 @@ registerNewDatabase() {
     fi
 }
 
-if [ $# -eq 0 ]; then
+if [ $# -le 1 ]; then
     usage
     exit 1
 fi
+
+case "$2" in
+    database)
+        DOCKER_COMPOSE_FILE=$DATABASE_STACK_DOCKER_COMPOSE_FILE
+        EXAMPLE_DB_CONTAINER="example-postgres-database-stack"
+        STACK_TYPE=$2
+        STACK_NAME="${2}-dev-stack"
+    ;;
+    backend)
+        DOCKER_COMPOSE_FILE=$BACKEND_STACK_DOCKER_COMPOSE_FILE
+        EXAMPLE_DB_CONTAINER="example-postgres-backend-stack"
+        STACK_TYPE=backend
+        STACK_NAME="${2}-dev-stack"
+    ;;
+    *)
+        usage
+        exit 1
+esac
+
 
 case "$1" in
   create)
@@ -178,6 +206,6 @@ case "$1" in
     ;;
   *)
     usage
-    exit 1
+    exit 2
     ;;
 esac

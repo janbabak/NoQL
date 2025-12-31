@@ -125,7 +125,7 @@ cd NoQL/
   PAGINATION_MAX_PAGE_SIZE=100
   PAGINATION_DEFAULT_PAGE_SIZE=20
   
-  PLOT_SERVICE_CONTAINER_NAME="plot-service-dev-stack"
+  PLOT_SERVICE_CONTAINER_NAME="plot-service-database-stack"
   DEFAULT_USER_QUERY_LIMIT=150
   
   # security
@@ -137,7 +137,7 @@ cd NoQL/
   DATA_ENCRYPTION_KEY="djfasgu98g438yth43iuhg34jnfmf343nfij34fij43fm34fnij34fi34f"
   ```
 
-- Start [Dev stack](infra/dev-stack/README.md).
+- Start [Dev stack](infra/local-stack/README.md).
 - Export environment variables.
   ```text
   set -o allexport
