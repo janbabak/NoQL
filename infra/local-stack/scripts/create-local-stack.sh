@@ -39,7 +39,7 @@ createNewDatabaseRecordInBackend() {
 }
 
 createLocalStack
-sleep 15
+sleep 20
 insertSampleData
-sleep 15
+sleep 20
 createNewDatabaseRecordInBackend

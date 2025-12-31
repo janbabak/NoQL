@@ -14,6 +14,7 @@ services:
       - ../../backend/.env.local
 
   # Example data source that can be connected to backend
+  # In noql UI, use container port, not mapped, and 'postgres' host
   postgres:
     image: postgres:16-alpine
     container_name: example-postgres-local-stack
@@ -27,15 +28,16 @@ services:
 
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
-    image: janbabak/plot-service:1.0.0
+    image: janbabak/noql-plot-service:0.0.1
     container_name: plot-service-local-stack
     tty: true
     stdin_open: true
     volumes:
-      - ../../plotService:/plotService
+      - ../../plotService:/app/plotService
 
+  # Backend server
   noql-backend:
-    image: janbabak/noql-backend:0.0.2
+    image: janbabak/noql-backend:0.0.6
     container_name: noql-backend-local-stack
     depends_on:
       - noql-postgres
