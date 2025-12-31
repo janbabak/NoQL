@@ -26,14 +26,24 @@ registerNewUser() {
 }
 
 authenticateUser() {
-    RESPONSE=$(curl --write-out "%{http_code}" --silent --output /dev/null \
-    --location "${BACKEND_URL}/auth/authenticate" \
-    --header 'Content-Type: application/json' \
-    --data-raw "{
-        \"email\": \"${USER_EMAIL}\",
-        \"password\": \"${USER_PASSWORD}\"
-    }")
-    echo $RESPONSE
+    RESPONSE=$(curl --location --silent "${BACKEND_URL}/auth/authenticate" \
+        --header 'Content-Type: application/json' \
+        --data-raw "{
+            \"email\": \"${USER_EMAIL}\",
+            \"password\": \"${USER_PASSWORD}\"
+        }")
+
+    # Extract accessToken using jq
+    AUTH_TOKEN=$(echo "$RESPONSE" | jq -r '.accessToken')
+
+    if [ "$AUTH_TOKEN" != "null" ] && [ -n "$AUTH_TOKEN" ]; then
+        echo "Authentication successful."
+        echo "Access token: $AUTH_TOKEN"
+    else
+        echo "Authentication failed. Response:"
+        echo "$RESPONSE"
+    fi
 }
 
+# registerNewUser
 authenticateUser
