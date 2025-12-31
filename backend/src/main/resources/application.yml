@@ -15,14 +15,14 @@ app:
     pagination:
       maxPageSize: "${PAGINATION_MAX_PAGE_SIZE:50}"
       defaultPageSize: "${PAGINATION_DEFAULT_PAGE_SIZE:10}"
-    plotServiceContainerName: "${PLOT_SERVICE_CONTAINER_NAME:plot-service}"
+    plotServiceContainerName: "${PLOT_SERVICE_CONTAINER_NAME:plot-service-database-stack}"
     defaultUserQueryLimit: "${DEFAULT_USER_QUERY_LIMIT:0}"
   security:
     jwt:
       secretKey: "${JWT_SECRET:secret}"
       expiration: "${JWT_EXPIRATION:365160}"
       refreshTokenExpiration: "${JWT_REFRESH_EXPIRATION:604800}"
-    dataEncryptionKey: "${DATA_ENCRYPTION_KEY:YWhvamFob2phaG9qYWhvamFob2phaG9qYWhvamFob2o=}"
+    dataEncryptionKey: "${DATA_ENCRYPTION_KEY:MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}"
   external-services:
     open-ai-api:
       api-key: "${OPEN_AI_API_KEY}"

@@ -12,11 +12,8 @@ plotService
 # Example databases
 exampleDatabase/data
 exampleDatabase/mysql-data
-infra/dev-stack/backend-database-data
-infra/dev-stack/example-mysql-data
-infra/dev-stack/example-postgres-data
-infra/local-stack/backend-database-data
-infra/local-stack/example-database-data
+infra/local-stack/backend-mysql-data
+infra/local-stack/example-postgres-data
 infra/pagila-postgres
 
 # Example project
