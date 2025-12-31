@@ -24,7 +24,7 @@ USER_ID=""
 AUTH_TOKEN=""
 
 createStack() {
-    echo "Creating a local stack"
+    echo "Creating a local ${STACK_TYPE} stack"
     runDockerCompose
     insertSampleData
 
@@ -36,17 +36,17 @@ createStack() {
 }
 
 startLocalStack() {
-    echo "Starting local stack"
+    echo "Starting local ${STACK_TYPE} stack"
     docker compose --file $DOCKER_COMPOSE_FILE --project-name ${STACK_NAME} start
 }
 
 stopLocalStack() {
-    echo "Stopping local stack"
+    echo "Stopping local ${STACK_TYPE} stack"
     docker compose --file ${DOCKER_COMPOSE_FILE} --project-name ${STACK_NAME} stop
 }
 
 removeLocalStack() {
-    echo "Removing local stack"
+    echo "Removing local ${STACK_TYPE} stack"
     docker compose --file ${DOCKER_COMPOSE_FILE} --project-name ${STACK_NAME} down
 }
 
@@ -174,16 +174,16 @@ fi
 
 case "$2" in
     database)
-        DOCKER_COMPOSE_FILE=$DATABASE_STACK_DOCKER_COMPOSE_FILE
-        EXAMPLE_DB_CONTAINER="example-postgres-database-stack"
         STACK_TYPE=$2
-        STACK_NAME="${2}-dev-stack"
+        STACK_NAME="${STACK_TYPE}-dev-stack"
+        DOCKER_COMPOSE_FILE=$DATABASE_STACK_DOCKER_COMPOSE_FILE
+        EXAMPLE_DB_CONTAINER="example-postgres-${STACK_TYPE}-stack"
     ;;
     backend)
+        STACK_TYPE=$2
+        STACK_NAME="${STACK_TYPE}-dev-stack"
         DOCKER_COMPOSE_FILE=$BACKEND_STACK_DOCKER_COMPOSE_FILE
-        EXAMPLE_DB_CONTAINER="example-postgres-backend-stack"
-        STACK_TYPE=backend
-        STACK_NAME="${2}-dev-stack"
+        EXAMPLE_DB_CONTAINER="example-postgres-${STACK_TYPE}-stack"
     ;;
     *)
         usage
