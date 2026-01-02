@@ -4,12 +4,20 @@ set -euo pipefail
 
 # This script manages backend-stack (stack containing backend,  plot service, database, and example database)
 
-STACK_NAME="" # changed based on input
 BACKEND_URL="http://localhost:8080"
-BACKEND_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/backend-stack.docker-compose.yaml"
-DATABASE_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/databases-stack.docker-compose.yaml"
-DOCKER_COMPOSE_FILE=""
+STACK_NAME=""
 STACK_TYPE=""
+
+DOCKER_COMPOSE_FILE=""
+BACKEND_DEV_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/backend-stack.docker-compose.yaml"
+DATABASE_DEV_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/databases-stack.docker-compose.yaml"
+PROD_STACK_DOCKER_COMPOSE_FILE="infra/local-stack/prod-stack.docker-compose.yaml"
+
+ENV_FILE="" # backend env file used to do database health check
+BACKEND_DEV_STACK_ENV_FILE="backend/.env.local"
+DATABASE_DEV_STACK_ENV_FILE="backend/.env.local"
+PROD_STACK_ENV_FILE="./infra/local-stack/.env.backend-prod"
+
 
 EXAMPLE_DB_SQL_INIT_SCRIPT="./sample-data.sql"
 EXAMPLE_DB_CONTAINER=""
@@ -24,7 +32,7 @@ USER_ID=""
 AUTH_TOKEN=""
 
 createStack() {
-    echo "Creating a local ${STACK_TYPE} stack"
+    echo "Creating ${STACK_TYPE}"
     runDockerCompose
     insertSampleData
 
@@ -36,22 +44,22 @@ createStack() {
 }
 
 startLocalStack() {
-    echo "Starting local ${STACK_TYPE} stack"
+    echo "Starting ${STACK_TYPE}"
     docker compose --file $DOCKER_COMPOSE_FILE --project-name ${STACK_NAME} start
 }
 
 stopLocalStack() {
-    echo "Stopping local ${STACK_TYPE} stack"
+    echo "Stopping ${STACK_TYPE}"
     docker compose --file ${DOCKER_COMPOSE_FILE} --project-name ${STACK_NAME} stop
 }
 
 removeLocalStack() {
-    echo "Removing local ${STACK_TYPE} stack"
+    echo "Removing local ${STACK_TYPE}"
     docker compose --file ${DOCKER_COMPOSE_FILE} --project-name ${STACK_NAME} down
 }
 
 usage() {
-    echo "Usage: $0 {create|start|stop|remove} {backend|database}"
+    echo "Usage: $0 {create|start|stop|remove} {backend|database|prod}"
     echo
     echo "Commands:"
     echo "  create    Create the local stack, insert sample data, register user and database"
@@ -63,9 +71,10 @@ usage() {
 }
 
 runDockerCompose() {
+    # env file is referenced because of the health check
     docker compose \
         --file ${DOCKER_COMPOSE_FILE} \
-        --env-file  backend/.env.local \
+        --env-file ${ENV_FILE} \
         --project-name ${STACK_NAME} \
         up --detach
 
@@ -176,14 +185,22 @@ case "$2" in
     database)
         STACK_TYPE=$2
         STACK_NAME="${STACK_TYPE}-dev-stack"
-        DOCKER_COMPOSE_FILE=$DATABASE_STACK_DOCKER_COMPOSE_FILE
+        DOCKER_COMPOSE_FILE=$DATABASE_DEV_STACK_DOCKER_COMPOSE_FILE
+        ENV_FILE=$DATABASE_DEV_STACK_ENV_FILE
         EXAMPLE_DB_CONTAINER="example-postgres-${STACK_TYPE}-stack"
     ;;
     backend)
         STACK_TYPE=$2
         STACK_NAME="${STACK_TYPE}-dev-stack"
-        DOCKER_COMPOSE_FILE=$BACKEND_STACK_DOCKER_COMPOSE_FILE
+        DOCKER_COMPOSE_FILE=$BACKEND_DEV_STACK_DOCKER_COMPOSE_FILE
+        ENV_FILE=$BACKEND_DEV_STACK_ENV_FILE
         EXAMPLE_DB_CONTAINER="example-postgres-${STACK_TYPE}-stack"
+    ;;
+    prod)
+        STACK_TYPE=$2
+        STACK_NAME="${STACK_TYPE}-stack"
+        DOCKER_COMPOSE_FILE=$PROD_STACK_DOCKER_COMPOSE_FILE
+        ENV_FILE=$PROD_STACK_ENV_FILE
     ;;
     *)
         usage

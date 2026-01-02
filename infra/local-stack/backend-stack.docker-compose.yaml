@@ -8,9 +8,13 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./stacks-data/backend-stack/backend-database-data:/var/lib/postgresql/data
+      - ./stack-data/backend-stack/backend-database-data:/var/lib/postgresql/data
     env_file:
       - ../../backend/.env.local
+    environment:
+      POSTGRES_USER: "${NOQL_DB_USERNAME}"
+      POSTGRES_PASSWORD: "${NOQL_DB_PASSWORD}"
+      POSTGRES_DB: "${NOQL_DB_NAME}"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -25,7 +29,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./stacks-data/backend-stack/example-postgres-data:/var/lib/postgresql/data
+      - ./stack-data/backend-stack/example-postgres-data:/var/lib/postgresql/data
       - ./sample-data.sql:/sample-data.sql
     env_file:
       - ../../backend/.env.local
