@@ -59,7 +59,7 @@ removeLocalStack() {
 }
 
 usage() {
-    echo "Usage: $0 {create|start|stop|remove} {backend|database}"
+    echo "Usage: $0 {create|start|stop|remove} {backend|database|prod}"
     echo
     echo "Commands:"
     echo "  create    Create the local stack, insert sample data, register user and database"
