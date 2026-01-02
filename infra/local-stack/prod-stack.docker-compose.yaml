@@ -1,0 +1,59 @@
+# Starts backend, its dependencies - database, plot service
+
+services:
+  # Postgres database used by backend
+  noql-postgres:
+    image: postgres:16-alpine
+    container_name: noql-postgres-prod-stack
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./stack-data/prod-stack/backend-database-data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.backend-prod
+    environment:
+      POSTGRES_USER: "${NOQL_DB_USERNAME}"
+      POSTGRES_PASSWORD: "${NOQL_DB_PASSWORD}"
+      POSTGRES_DB: "${NOQL_DB_NAME}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Plot service is isolated environment for running python scripts that generate plots
+  plot-service:
+    image: janbabak/noql-plot-service:0.0.1
+    container_name: plot-service-prod-stack
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./prod-plotService:/app/plotService
+
+  # Backend server
+  noql-backend:
+    image: janbabak/noql-backend:0.0.6
+    container_name: noql-backend-prod-stack
+    depends_on:
+      noql-postgres:
+        condition: service_healthy
+      plot-service:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./prod-plotService:/app/plotService
+      - /var/run/docker.sock:/var/run/docker.sock # in order to be able ro tun docker commands (generate plots)
+    env_file:
+      - .env.backend-prod
+
+  # Frontend SPA
+  noql-frontend:
+    image: janbabak/noql-frontend:0.0.1
+    container_name: noql-frontend-prod-stack
+    depends_on:
+      - noql-backend
+    ports:
+      - "80:80"
+    env_file:
+      - .env.frontend-prod

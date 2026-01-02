@@ -9,10 +9,15 @@ plotService
 
 .aws
 
+# Environment variables
+.env
+.env*
+!.env.template
+
 # Example databases
 exampleDatabase/data
 exampleDatabase/mysql-data
-infra/local-stack/stacks-data
+infra/local-stack/stack-data
 infra/pagila-postgres
 
 # Example project
