@@ -25,7 +25,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t3.micro
-      ImageId: ami-0ac7651d4986abaa9   # Amazon Linux 2023
+      ImageId: ami-0ac7651d4986abaa9  # Amazon Linux 2023
       KeyName: !Ref KeyName
       SecurityGroupIds:
         - !Ref InstanceSecurityGroup
@@ -40,7 +40,6 @@ Resources:
           # add the user to the docker group
           usermod -aG docker ec2-user
       BlockDeviceMappings:
-        # default root disk
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 30
@@ -51,4 +50,5 @@ Resources:
 
 Outputs:
   PublicIP:
+    Description: Public IP address of the EC2 instance
     Value: !GetAtt EC2Instance.PublicIp
