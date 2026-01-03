@@ -11,7 +11,7 @@ SSH_KEY_NAME="macbookPro14"
 
 aws cloudformation create-stack \
   --stack-name ${STACK_NAME} \
-  --template-body ${INFRA_FILE} \
+  --template-body "file://${INFRA_FILE}" \
   --parameters "ParameterKey=KeyName,ParameterValue=${SSH_KEY_NAME}" \
   --capabilities CAPABILITY_NAMED_IAM \
   --region ${REGION}
