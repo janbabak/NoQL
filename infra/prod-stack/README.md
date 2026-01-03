@@ -8,3 +8,8 @@ aws ec2 describe-key-pairs \                                                    
     --region eu-north-1 \
     --output table
 ```
+
+- Validate cloud formation
+```bash
+aws cloudformation validate-template --template-body ./infra.yaml
+```
