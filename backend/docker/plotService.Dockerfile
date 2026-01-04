@@ -34,7 +34,7 @@ RUN pip install --upgrade pip && \
         numpy==2.1.3 \
         psycopg2-binary==2.9.9 \
         sqlalchemy==2.0.36 \
-        mysql-connector-python==9.5.0 \
+        mysql-connector-python==9.5.0
 
 USER appuser
 
