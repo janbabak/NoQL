@@ -31,19 +31,19 @@ public class ChatQueryWithResponse {
     /**
      * Generated description of the result for the user
      */
-    @Column(length = 1024)
+    @Column(length = 2048)
     private String resultDescription;
 
     /**
      * Generated database language query
      */
-    @Column(length = 512)
+    @Column(length = 1024)
     private String dbQuery;
 
     @Column
     private Boolean dbQueryExecutionSuccess;
 
-    @Column(length = 1024)
+    @Column(length = 2048)
     private String dbExecutionErrorMessage;
 
     /**
@@ -55,7 +55,7 @@ public class ChatQueryWithResponse {
     @Column
     private Boolean plotGenerationSuccess;
 
-    @Column(length = 1024)
+    @Column(length = 2048)
     private String plotGenerationErrorMessage;
 
     @Column
@@ -84,3 +84,4 @@ public class ChatQueryWithResponse {
         return dbQueryExecuted() && dbQueryExecutionSuccess;
     }
 }
+
