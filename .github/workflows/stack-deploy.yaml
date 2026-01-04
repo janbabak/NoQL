@@ -1,0 +1,41 @@
+name: Deploy NoQL Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: 'Name of the CloudFormation stack'
+        required: true
+        default: noql-demo
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    env:
+      NOQL_AWS_REGION: ${{ env.NOQL_AWS_REGION }}
+      NOQL_SSH_KEY_NAME: ${{ env.AWS_SSH_KEY_NAME }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up AWS CLI & Make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make unzip curl
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.NOQL_AWS_REGION }}
+
+      - name: Run deploy
+        working-directory: infra/prod-stack
+        env:
+          NOQL_STACK_NAME: ${{ github.event.inputs.stack_name }}
+          NOQL_TEMPLATE: ${{ infra.yaml }}
+        run: make deploy
