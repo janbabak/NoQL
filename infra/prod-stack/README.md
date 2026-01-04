@@ -37,7 +37,7 @@
 
 - **Get IP output value** (public IP of the deployed EC2 instance)
     ```shell
-    make get-public-ip
+    make public-ip
     ```
 
 - **Show recent CloudFormation events** (useful for errors)
@@ -52,7 +52,7 @@
     make validate
     make deploy
     make status
-    make get-public-ip
+    make public-ip
     ```
 
 - **Tear down stack**
@@ -72,6 +72,54 @@
 
 - **Follow Docker Compose logs** on the EC2 instance (SSH into the instance first)
     ```shell
-    ssh -i /path/to/your/key.pem ec2-user@$(make get-public-ip)
+    ssh -i /path/to/your/key.pem ec2-user@$(make public-ip)
     docker-compose logs -f
     ```
+  
+---
+
+## Experiments
+
+```shell
+# add correct permissions to private key
+make deploy
+export NOQ_PROD_STACK_IP=$(make public-ip)
+
+chmod 400 ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem
+
+# connect using ssh
+ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQ_PROD_STACK_IP}
+
+# create folder
+mkdier noql-app
+
+# copy docker compose
+scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
+  infra/local-stack/prod-stack.docker-compose.yaml \
+  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/prod-stack.docker-compose.yaml
+  
+# copy backend envs
+scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
+  infra/local-stack/.env.backend-prod \
+  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/.env.backend-prod
+  
+# copy frontend envs
+scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
+  infra/local-stack/.env.frontend-prod \
+  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/.env.frontend-prod
+
+# start stack
+# update env
+
+docker compose \
+    --file noql-app/prod-stack.docker-compose.yaml \
+    --env-file noql-app/.env.backend-prod \
+    --project-name prod-stack \
+    up
+    
+# remove stack
+docker compose \
+  --file noql-app/prod-stack.docker-compose.yaml
+  --project-name prod-stack
+  down
+```

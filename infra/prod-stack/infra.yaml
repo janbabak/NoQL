@@ -82,25 +82,39 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
 
   EC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t3.micro
-      ImageId: ami-0ac7651d4986abaa9
+      ImageId: ami-0b46816ffa1234887 # linux 2024
       KeyName: !Ref KeyName
       SubnetId: !Ref PublicSubnet
       SecurityGroupIds:
         - !Ref InstanceSecurityGroup
       UserData:
-        !Base64 |
-        #!/bin/bash
-        yum update -y
-        yum install docker -y
-        yum install -y docker-compose-plugin
-        systemctl start docker
-        systemctl enable docker
-        usermod -aG docker ec2-user
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y docker
+          systemctl start docker
+          systemctl enable docker
+          usermod -aG docker ec2-user
+
+          # Install Docker Compose v2 plugin for ec2-user
+          mkdir -p /home/ec2-user/.docker/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.23.1/docker-compose-linux-x86_64 \
+               -o /home/ec2-user/.docker/cli-plugins/docker-compose
+          chmod +x /home/ec2-user/.docker/cli-plugins/docker-compose
+          chown -R ec2-user:ec2-user /home/ec2-user/.docker
+
+          # Create app folder
+          mkdir -p /home/ec2-user/noql-app
+          chown ec2-user:ec2-user /home/ec2-user/noql-app
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:

@@ -43,7 +43,7 @@ status:
 		--query 'Stacks[0].StackStatus'
 
 # Get IP output value (public IP of the deployed EC2 instance)
-get-public-ip:
+public-ip:
 	@aws cloudformation describe-stacks \
 		--stack-name $(NOQL_STACK_NAME) \
 		--region $(NOQL_AWS_REGION) \
