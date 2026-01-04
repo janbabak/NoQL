@@ -15,28 +15,26 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# Dependencies needed for scientific Python packages
-RUN apk add --no-cache \
-        build-base \
-        libpq-dev
+# Install system dependencies
+RUN apk add --no-cache build-base libpq-dev
 
-WORKDIR /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-RUN mkdir /app/plotService
+# Create plots folder and set ownership
+RUN mkdir -p /app/plotService/plots \
+    && chown -R appuser:appgroup /app/plotService
 
+WORKDIR /app/plotService
+
+# Install Python packages
 RUN pip install --upgrade pip && \
     pip install \
         matplotlib==3.9.2 \
         pandas==2.2.3 \
         numpy==2.1.3 \
         psycopg2-binary==2.9.9 \
-        sqlalchemy==2.0.36
-
-# Create a non-root user for better security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Ensure the working directory is owned by the non-root user
-RUN chown -R appuser:appgroup /app
+        sqlalchemy==2.0.36 \
+        mysql-connector-python==9.5.0
 
 USER appuser
 
