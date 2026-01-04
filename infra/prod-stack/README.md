@@ -87,29 +87,13 @@ export NOQ_PROD_STACK_IP=$(make public-ip)
 
 chmod 400 ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem
 
-# connect using ssh
-ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQ_PROD_STACK_IP}
-
-# create folder
-mkdier noql-app
-
-# copy docker compose
 scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
   infra/local-stack/prod-stack.docker-compose.yaml \
-  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/prod-stack.docker-compose.yaml
-  
-# copy backend envs
-scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
   infra/local-stack/.env.backend-prod \
-  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/.env.backend-prod
-  
-# copy frontend envs
-scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
   infra/local-stack/.env.frontend-prod \
-  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/.env.frontend-prod
-
-# start stack
-# update env
+  ec2-user@${NOQ_PROD_STACK_IP}:~/noql-app/
+  
+ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQ_PROD_STACK_IP}
 
 docker compose \
     --file noql-app/prod-stack.docker-compose.yaml \
@@ -119,7 +103,9 @@ docker compose \
     
 # remove stack
 docker compose \
-  --file noql-app/prod-stack.docker-compose.yaml
-  --project-name prod-stack
+  --file noql-app/prod-stack.docker-compose.yaml \
+  --project-name prod-stack \
   down
 ```
+
+tajneheslo99
