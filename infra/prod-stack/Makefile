@@ -16,16 +16,23 @@ NOQL_AWS_REGION ?= eu-north-1
 # Validate cloud formation template
 validate:
 	aws cloudformation validate-template \
-		--template-body file://$(NOQL_TEMPLATE)
+		--template-body file://$(NOQL_TEMPLATE) \
+		--region $(NOQL_AWS_REGION)
 
 
 # Deploy stack
 deploy: check-ssh-key
-	aws cloudformation create-stack \
+	aws cloudformation deploy \
 		--stack-name $(NOQL_STACK_NAME) \
-		--template-body file://$(NOQL_TEMPLATE) \
-		--parameters ParameterKey=KeyName,ParameterValue=$(NOQL_SSH_KEY_NAME) \
+		--template-file $(NOQL_TEMPLATE) \
+		--parameter-overrides KeyName=$(NOQL_SSH_KEY_NAME) \
 		--capabilities CAPABILITY_NAMED_IAM \
+		--region $(NOQL_AWS_REGION)
+
+# Wait until stack deployment is finished
+deploy-wait:
+	aws cloudformation wait stack-create-complete \
+		--stack-name $(NOQL_STACK_NAME) \
 		--region $(NOQL_AWS_REGION)
 
 # Describe stack status

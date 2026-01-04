@@ -18,7 +18,8 @@
 
 - **Deploy Stack**
     ```shell
-    make deploy
+    make deploy # if NOQL_SSH_KEY_NAME env is defined or
+    make deploy NOQL_SSH_KEY_NAME=macbookPro14
     ```
   
 - **Describe Stack status**
