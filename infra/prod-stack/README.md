@@ -2,45 +2,51 @@
 
 ## Useful commands
 
+- [Makefile](./Makefile) provides abstraction for commonly used commands
+- Environment variables
+  - `TEMPLATE` - specifies cloudformation file with infrastructure, default [infra.yaml](infra.yaml)
+  - `STACK_NAME` - stack name, default `noql-demo`
+  - `REGION` - AWS region, default `eu-central-1` (Stockholm)
+  - `SSH_KEY_NAME` - required for `make deploy`, define name of the SSH key used to access the EC2 instance.
+    You can list your keys using `make ec2-key-pairs`
 
-- Validate cloud formation
+
+- Validate cloud formation from `TEMPLATE`
     ```shell
-    aws cloudformation validate-template \
-      --template-body file://./infra.yaml
+    make validate
     ```
 
 - Deploy Stack
     ```shell
-    cd ../.. # must be urn from the root
-    ./infra/prod-stack/scripts/deploy.sh
+    make deploy
     ```
   
 - Describe Stack status
     ```shell
-    aws cloudformation describe-stacks \
-        --stack-name noql-demo \
-        --region eu-north-1 \
-        --query 'Stacks[0].StackStatus'
+    make status
+    ```
 
-- Get IP output value
+- Get IP output value (public IP of the deployed EC2 instance)
     ```shell
-    aws cloudformation describe-stacks \
-      --stack-name noql-demo \
-      --region eu-north-1 \
-      --query "Stacks[0].Outputs[?OutputKey=='PublicIP'].OutputValue" \
-      --output text
+    make get-public-ip
+    ```
+
+- Show recent CloudFormation events (useful for errors)
+    ```shell
+    make events
     ```
 
 - Tear down stack
     ```shell
-    aws cloudformation delete-stack \
-        --stack-name noql-demo \
-        --region eu-north-1
+    make tear-down
+    ```
+
+- Output true or false based on whether or not the stack exists
+    ```shell
+    make stack-exists
     ```
   
-- Describe EC2 key-pairs
+- Describe EC2 key-pairs (useful for defining `SSH_KEY_NAME`) env
     ```shell
-    aws ec2 describe-key-pairs \
-        --region eu-north-1 \
-        --output table
+    make ec2-key-pairs 
     ```
