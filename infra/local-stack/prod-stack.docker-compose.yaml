@@ -23,7 +23,7 @@ services:
 
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
-    image: janbabak/noql-plot-service:0.0.1
+    image: janbabak/noql-plot-service:0.0.2
     container_name: plot-service-prod-stack
     tty: true
     stdin_open: true
