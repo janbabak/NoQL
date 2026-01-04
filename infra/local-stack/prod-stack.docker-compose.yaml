@@ -16,14 +16,14 @@ services:
       POSTGRES_PASSWORD: "${NOQL_DB_PASSWORD}"
       POSTGRES_DB: "${NOQL_DB_NAME}"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${NOQL_DB_USERNAME} -d ${NOQL_DB_NAME}" ]
       interval: 5s
       timeout: 5s
       retries: 10
 
   # Plot service is isolated environment for running python scripts that generate plots
   plot-service:
-    image: janbabak/noql-plot-service:0.0.1
+    image: janbabak/noql-plot-service:0.0.3
     container_name: plot-service-prod-stack
     tty: true
     stdin_open: true
@@ -32,7 +32,7 @@ services:
 
   # Backend server
   noql-backend:
-    image: janbabak/noql-backend:0.0.6
+    image: janbabak/noql-backend:0.0.13
     container_name: noql-backend-prod-stack
     depends_on:
       noql-postgres:
@@ -49,7 +49,7 @@ services:
 
   # Frontend SPA
   noql-frontend:
-    image: janbabak/noql-frontend:0.0.1
+    image: janbabak/noql-frontend:0.0.2
     container_name: noql-frontend-prod-stack
     depends_on:
       - noql-backend
