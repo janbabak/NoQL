@@ -82,10 +82,11 @@
 
 ```shell
 # add correct permissions to private key
+chmod 400 ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem
+
 make deploy
 export NOQ_PROD_STACK_IP=$(make public-ip)
 
-chmod 400 ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem
 
 scp -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem \
   infra/local-stack/prod-stack.docker-compose.yaml \
@@ -101,11 +102,11 @@ docker compose \
     --project-name prod-stack \
     up
     
+# update frontend env
+    
 # remove stack
 docker compose \
   --file noql-app/prod-stack.docker-compose.yaml \
   --project-name prod-stack \
   down
 ```
-
-tajneheslo99

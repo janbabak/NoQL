@@ -112,9 +112,21 @@ Resources:
           chmod +x /home/ec2-user/.docker/cli-plugins/docker-compose
           chown -R ec2-user:ec2-user /home/ec2-user/.docker
 
-          # Create app folder
-          mkdir -p /home/ec2-user/noql-app
-          chown ec2-user:ec2-user /home/ec2-user/noql-app
+          # volume set up for plot service
+          APP_DIR=/home/ec2-user/noql-app
+          mkdir -p $APP_DIR
+          chown ec2-user:ec2-user $APP_DIR
+          
+          # Container runs as 'appuser' (UID 1000). Host directory must be owned by UID 1000.
+          PLOT_SERVICE_DIR=$APP_DIR/prod-plotService
+          mkdir -p $PLOT_SERVICE_DIR/plots
+          
+          # Set ownership of the host directory to the container's user (UID 1000).
+          chown -R 1000:1000 $PLOT_SERVICE_DIR 
+
+          # Ensure the user has write permissions
+          chmod -R 777 $PLOT_SERVICE_DIR
+          chmod -R 777 $PLOT_SERVICE_DIR/plots
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
