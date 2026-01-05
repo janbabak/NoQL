@@ -65,9 +65,9 @@ jobs:
       - name: Create .env files
         working-directory: infra/prod-stack
         run: |
-          echo "${{ secrets.FRONTEND_DOT_ENV }}" > .env.frontend
-          echo "BACKEND_URL=http://${NOQL_PROD_STACK_IP}:8080" >> .env.frontend
-          echo "${{ secrets.BACKEND_DOT_ENV }}" > .env.backend
+          echo "${{ secrets.FRONTEND_DOT_ENV }}" > .env.frontend-prod
+          echo "BACKEND_URL=http://${NOQL_PROD_STACK_IP}:8080" >> .env.frontend-prod
+          echo "${{ secrets.BACKEND_DOT_ENV }}" > .env.backend-prod
 
       - name: Create ssh key .pem file
         working-directory: infra/prod-stack
@@ -85,8 +85,8 @@ jobs:
         run: |
           scp -i sshKey.pem \
              ../local-stack/prod-stack.docker-compose.yaml \
-            .env.backend \
-            .env.frontend \
+            .env.backend-prod \
+            .env.frontend-prod \
             ec2-user@${NOQL_PROD_STACK_IP}:~/noql-app/
 
       - name: Start docker compose
@@ -95,7 +95,7 @@ jobs:
           ssh -i sshKey.pem ec2-user@${NOQL_PROD_STACK_IP} << 'EOF'
             docker compose \
                 --file noql-app/prod-stack.docker-compose.yaml \
-                --env-file noql-app/.env.backend \
+                --env-file noql-app/.env.backend-prod \
                 --project-name prod-stack \
                 up -d
           EOF
