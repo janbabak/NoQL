@@ -61,7 +61,7 @@ jobs:
       - name: Create ssh key .pem file
         working-directory: infra/prod-stack
         run: |
-          echo "${{ secret.AWS_SSH_KEY_VALUE }}" >> sshKey.pem
+          echo "${{ secrets.AWS_SSH_KEY_VALUE }}" > sshKey.pem
           chmod 400 ./sshKey.pem
 
       - name: Copy files
@@ -72,16 +72,16 @@ jobs:
           scp -i sshKey.pem \
             prod-stack.docker-compose.yaml \
             .env.backend \
-            .env.frontend-prod \
+            .env.frontend \
             ec2-user@${NOQL_PROD_STACK_IP}:~/noql-app/
 
       - name: Start docker compose
         working-directory: infra/prod-stack
         run: |
-          ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQl_PROD_STACK_IP}
+          ssh -i sshKey.pem ec2-user@${NOQL_PROD_STACK_IP}
 
           docker compose \
               --file noql-app/prod-stack.docker-compose.yaml \
-              --env-file noql-app/.env.backend-prod \
+              --env-file noql-app/.env.backend \
               --project-name prod-stack \
               up
