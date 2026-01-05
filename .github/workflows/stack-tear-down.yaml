@@ -1,0 +1,35 @@
+name: Tear down AWS Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack_name:
+        description: 'Name of the CloudFormation stack'
+        required: true
+        default: noql-demo
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    env:
+      NOQL_AWS_REGION: ${{ vars.NOQL_AWS_REGION }}
+      NOQL_SSH_KEY_NAME: ${{ vars.AWS_SSH_KEY_NAME }}
+      NOQL_STACK_NAME: ${{ github.event.inputs.stack_name }}
+      NOQL_TEMPLATE: infra.yaml
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Make
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.NOQL_AWS_REGION }}
+
+      - name: Run tear down
+        working-directory: infra/prod-stack
+        run: make tear-down
