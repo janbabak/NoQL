@@ -33,3 +33,73 @@ jobs:
       - name: Run deploy
         working-directory: infra/prod-stack
         run: make deploy
+
+  deploy-docker-compose:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    env:
+      NOQL_AWS_REGION: ${{ vars.NOQL_AWS_REGION }}
+      NOQL_SSH_KEY_NAME: ${{ vars.AWS_SSH_KEY_NAME }}
+      NOQL_STACK_NAME: ${{ github.event.inputs.stack_name }}
+      NOQL_TEMPLATE: infra.yaml
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Make
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.NOQL_AWS_REGION }}
+
+      - name: Compute stack IP
+        working-directory: infra/prod-stack
+        run: |
+          NOQL_PROD_STACK_IP=$(make public-ip)
+          echo "NOQL_PROD_STACK_IP=$NOQL_PROD_STACK_IP" >> $GITHUB_ENV
+
+      - name: Create .env files
+        working-directory: infra/prod-stack
+        run: |
+          echo "${{ secrets.FRONTEND_DOT_ENV }}" > .env.frontend
+          echo "BACKEND_URL=http://${NOQL_PROD_STACK_IP}:8080" >> .env.frontend
+          echo "${{ secrets.BACKEND_DOT_ENV }}" > .env.backend
+
+      - name: Create ssh key .pem file
+        working-directory: infra/prod-stack
+        run: |
+          echo "${{ secrets.AWS_SSH_KEY_VALUE }}" > sshKey.pem
+          chmod 400 ./sshKey.pem
+
+      - name: Add EC2 to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $NOQL_PROD_STACK_IP >> ~/.ssh/known_hosts
+
+      - name: Copy files
+        working-directory: infra/prod-stack
+        run: |
+          scp -i sshKey.pem \
+             ../local-stack/prod-stack.docker-compose.yaml \
+            .env.backend \
+            .env.frontend \
+            ec2-user@${NOQL_PROD_STACK_IP}:~/noql-app/
+
+      - name: Start docker compose
+        working-directory: infra/prod-stack
+        run: |
+          ssh -i sshKey.pem ec2-user@${NOQL_PROD_STACK_IP} << 'EOF'
+            docker compose \
+                --file noql-app/prod-stack.docker-compose.yaml \
+                --env-file noql-app/.env.backend \
+                --project-name prod-stack \
+                up -d
+          EOF
+
+      - name: Print stack URL
+        run: |
+          echo "Your stack is available at: http://${NOQL_PROD_STACK_IP}:80"
