@@ -2,26 +2,39 @@
 
 ## Pipeline (CI/CD)
 
-- There are two pipelines - CI pipeline and Deployment pipeline
+The project has **two pipelines**: the **CI pipeline** and the **Deployment pipeline**.
 
-### [CI pipeline](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+---
 
-- Triggered by pull request to main branch action happens or manually started.
-- Jobs:
-    - **Validate:**
-        - Detect changes in the `/backend` directory.
-        - If changes have been detected, verifies backend version has been increased and lint backend code.
-    - **Test:**
-        - Started if backend changes have been detected, PR has been merged, or on manual dispatch
-        - Executes unit/integration tests with coverage.
-        - Coverage can be found in the job summary output
-        - When triggered by PR merge, update `backend_coverage.json` file in `coverage-badge` branch which is used by
-          the coverage batch in the [../README.md](../README.md)
-    - **Build:**
-        - Builds backend jar
-        - If triggered manually with input `push_docker=true`, build and push docker image `janbabak/noql-backend` to
-          [hub.docker.com/r/janbabak/noql-backend](https://hub.docker.com/r/janbabak/noql-backend). Image tag
-          matches backend version.
+### [CI Pipeline](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+
+The CI pipeline is triggered automatically by **pull requests to the `main` branch** or can
+be [started manually](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml).
+
+#### Jobs:
+
+- **Validate**
+    - Detects changes in the [`/backend`](./) directory.
+    - If changes are found:
+        - Verifies that the backend version has been incremented.
+        - Lints the backend code.
+
+- **Test**
+    - Runs if:
+        - Backend changes were detected in the Validate job, or
+        - The PR has been merged, or
+        - The workflow is manually triggered.
+    - Executes **unit and integration tests** with coverage reporting.
+    - Coverage results are displayed in the **job summary**.
+    - When triggered by a **PR merge**, updates `backend_coverage.json` in the `coverage-badge` branch.  
+      This file is used by the **coverage badge** in the [main README](../README.md).
+
+- **Build**
+    - Builds the backend JAR file.
+    - If the workflow is manually triggered with `push_docker=true`:
+        - Builds and pushes the Docker image `janbabak/noql-backend`
+          to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
+        - The image tag matches the backend version.
 
 ## Configuration
 
