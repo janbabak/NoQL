@@ -6,10 +6,12 @@ The project has **two pipelines**: the **CI pipeline** and the **Deployment pipe
 
 ---
 
-### [CI Pipeline](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+### [CI Pipeline](../.github/workflows/backend.yaml)
 
 The CI pipeline is triggered automatically by **pull requests to the `main` branch** or can
 be [started manually](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml).
+
+Backend, frontend and plot service have their own CI pipelines.
 
 #### Jobs:
 
@@ -35,6 +37,24 @@ be [started manually](https://github.com/janbabak/NoQL/actions/workflows/backend
         - Builds and pushes the Docker image `janbabak/noql-backend`
           to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
         - The image tag matches the backend version.
+
+### [Deployment Pipeline](../.github/workflows/stack-deploy.yaml)
+
+Deploys all parts of the system (backend, frontend, plot service) to the AWS infrastructure.
+
+Deployment pipeline can be triggered only manually.
+
+#### Jobs:
+
+- **Deply Infra**
+    - Logs in into AWS cloud and deploy infrastructure defined in the cloud
+      formation [`infra.yaml`](../infra/prod-stack/infra.yaml)
+- **Deply Docker compose**
+    - Sets up environment variables from [`.env.backend-prod`](../infra/local-stack/.env.backend-prod)
+      and [`.env.frontend-prod`](../infra/local-stack/.env.frontend-prod) (More how to define
+      them [here](#Environment Variables))
+    - Start docker compose which pulls docker images from [docker hub](https://hub.docker.com/u/janbabak).
+    - IP address of the front end could be found in the output of the `Print stack URL` step.
 
 ## Configuration
 
