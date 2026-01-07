@@ -2,59 +2,83 @@
 
 ## Pipeline (CI/CD)
 
-The project has **two pipelines**: the **CI pipeline** and the **Deployment pipeline**.
+The backend part of the of a **CI pipelines** (for backend, frontend, and plot service), **Deployment pipeline** which
+deploys all components, and **Tear-down** pipeline that tears down AWS infrastructure.
 
 ---
 
-### [CI Pipeline](../.github/workflows/backend.yaml)
+### CI Pipelines
 
-The CI pipeline is triggered automatically by **pull requests to the `main` branch** or can
-be [started manually](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml).
+The CI pipeline is triggered automatically on **pull requests to the `main` branch** or can be
+started manually
+The backend, frontend, and plot service each have their **own dedicated CI pipelines**.
 
-Backend, frontend and plot service have their own CI pipelines.
+#### [Backend CI pipeline](../.github/workflows/backend.yaml)
 
-#### Jobs:
+##### Jobs
 
 - **Validate**
     - Detects changes in the [`/backend`](./) directory.
     - If changes are found:
         - Verifies that the backend version has been incremented.
-        - Lints the backend code.
+        - Runs linting on the backend code.
 
 - **Test**
-    - Runs if:
-        - Backend changes were detected in the Validate job, or
-        - The PR has been merged, or
+    - Runs when:
+        - Backend changes were detected in the *Validate* job, or
+        - A pull request has been merged, or
         - The workflow is manually triggered.
     - Executes **unit and integration tests** with coverage reporting.
-    - Coverage results are displayed in the **job summary**.
+    - Coverage results are available in the **job summary**.
     - When triggered by a **PR merge**, updates `backend_coverage.json` in the `coverage-badge` branch.  
-      This file is used by the **coverage badge** in the [main README](../README.md).
+      This file is used by the **coverage badge** displayed in the [main README](../README.md).
 
 - **Build**
     - Builds the backend JAR file.
     - If the workflow is manually triggered with `push_docker=true`:
         - Builds and pushes the Docker image `janbabak/noql-backend`
           to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
-        - The image tag matches the backend version.
+        - The Docker image tag matches the backend version.
+
+#### [Plot Service CI pipeline](../.github/workflows/plotservice.yaml)
+
+##### Jobs
+
+- **Validate**
+    - Detect changes in the [`plotService.Dockerfile`](../backend/docker/plotService.Dockerfile)
+    - If changes are found, verifies plot service version has been incremented
+- **Build**
+  - If the workflow is manually triggered with `push_docker=true`:
+  - Builds and pushes the Docker image `janbabak/noql-plot-service`
+  to [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service).
+  - The Docker image tag matches the backend version.
+
+---
 
 ### [Deployment Pipeline](../.github/workflows/stack-deploy.yaml)
 
-Deploys all parts of the system (backend, frontend, plot service) to the AWS infrastructure.
+The deployment pipeline deploys **all system components** (backend, frontend, and plot service)
+to the AWS infrastructure.
 
-Deployment pipeline can be triggered only manually.
+The pipeline can be triggered **only manually**.
 
-#### Jobs:
+#### Jobs
 
-- **Deply Infra**
-    - Logs in into AWS cloud and deploy infrastructure defined in the cloud
-      formation [`infra.yaml`](../infra/prod-stack/infra.yaml)
-- **Deply Docker compose**
-    - Sets up environment variables from [`.env.backend-prod`](../infra/local-stack/.env.backend-prod)
-      and [`.env.frontend-prod`](../infra/local-stack/.env.frontend-prod) (More how to define
-      them [here](#Environment Variables))
-    - Start docker compose which pulls docker images from [docker hub](https://hub.docker.com/u/janbabak).
-    - IP address of the front end could be found in the output of the `Print stack URL` step.
+- **Deploy Infrastructure**
+    - Authenticates with AWS.
+    - Deploys infrastructure defined in the CloudFormation template
+      [`infra.yaml`](../infra/prod-stack/infra.yaml).
+
+- **Deploy Docker Compose**
+    - Sets up environment variables from:
+        - [`.env.backend-prod`](../infra/local-stack/.env.backend-prod)
+        - [`.env.frontend-prod`](../infra/local-stack/.env.frontend-prod)  
+          (More details on environment variable configuration can be found [here](#configuration))
+    - Starts Docker Compose, which pulls Docker images from
+      [Docker Hub](https://hub.docker.com/u/janbabak).
+    - The frontend IP address is available in the output of the **Print stack URL** step.
+
+---
 
 ## Configuration
 
