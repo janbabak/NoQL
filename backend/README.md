@@ -2,20 +2,25 @@
 
 ## Pipeline (CI/CD)
 
-The backend part of the of a **CI pipelines** (for backend, frontend, and plot service), **Deployment pipeline** which
-deploys all components, and **Tear-down** pipeline that tears down AWS infrastructure.
+The project consists of:
+- **CI pipelines** for individual components (backend, frontend, and plot service),
+- A **Deployment pipeline** that deploys all components together,
+- A **Tear-down pipeline** that removes the AWS infrastructure.
 
 ---
 
-### CI Pipelines
+## CI Pipelines
 
-The CI pipeline is triggered automatically on **pull requests to the `main` branch** or can be
-started manually
-The backend, frontend, and plot service each have their **own dedicated CI pipelines**.
+CI pipelines are triggered automatically on **pull requests to the `main` branch** or can be
+**started manually**.
 
-#### [Backend CI pipeline](../.github/workflows/backend.yaml)
+The backend, frontend, and plot service each have their **own dedicated CI pipeline**.
 
-##### Jobs
+---
+
+### [Backend CI Pipeline](../.github/workflows/backend.yaml)
+
+#### Jobs
 
 - **Validate**
     - Detects changes in the [`/backend`](./) directory.
@@ -40,22 +45,26 @@ The backend, frontend, and plot service each have their **own dedicated CI pipel
           to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
         - The Docker image tag matches the backend version.
 
-#### [Plot Service CI pipeline](../.github/workflows/plotservice.yaml)
+---
 
-##### Jobs
+### [Plot Service CI Pipeline](../.github/workflows/plotservice.yaml)
+
+#### Jobs
 
 - **Validate**
-    - Detect changes in the [`plotService.Dockerfile`](../backend/docker/plotService.Dockerfile)
-    - If changes are found, verifies plot service version has been incremented
+    - Detects changes in [`plotService.Dockerfile`](../backend/docker/plotService.Dockerfile).
+    - If changes are found:
+        - Verifies that the plot service version has been incremented.
+
 - **Build**
-  - If the workflow is manually triggered with `push_docker=true`:
-  - Builds and pushes the Docker image `janbabak/noql-plot-service`
-  to [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service).
-  - The Docker image tag matches the backend version.
+    - Runs when the workflow is manually triggered with `push_docker=true`.
+    - Builds and pushes the Docker image `janbabak/noql-plot-service`
+      to [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service).
+    - The Docker image tag matches the plot service version.
 
 ---
 
-### [Deployment Pipeline](../.github/workflows/stack-deploy.yaml)
+## [Deployment Pipeline](../.github/workflows/stack-deploy.yaml)
 
 The deployment pipeline deploys **all system components** (backend, frontend, and plot service)
 to the AWS infrastructure.
