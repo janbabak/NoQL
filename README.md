@@ -170,7 +170,7 @@ The project uses a multi-pipeline CI/CD setup consisting of:
 
 ---
 
-## CI Pipelines
+## 🔁 CI Pipelines
 
 CI pipelines are triggered automatically on **pull requests targeting the `main` branch** and can
 also be **run manually**.
@@ -183,10 +183,12 @@ independent validation, testing, and builds.
 
 ### [Backend CI Pipeline](.github/workflows/backend.yaml)
 
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+
 #### Jobs
 
 - **Validate**
-    - Detects changes in the [`backend`](./) directory.
+    - Detects changes in the [`backend`](backend) directory.
     - If changes are detected:
         - Verifies that the backend version has been incremented.
         - Runs backend linting checks.
@@ -216,6 +218,8 @@ independent validation, testing, and builds.
 
 ### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
 
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
+
 #### Jobs
 
 - **Validate**
@@ -235,6 +239,8 @@ independent validation, testing, and builds.
 <summary><b>Frontend CI Pipeline</b></summary>
 
 ### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml)
 
 #### Jobs
 
@@ -257,6 +263,8 @@ independent validation, testing, and builds.
 ## Deployment Pipeline
 
 ### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-deploy.yaml)
 
 The deployment pipeline deploys **all system components** (backend, frontend, and plot service)
 to AWS.
@@ -283,6 +291,8 @@ to AWS.
 ## Tear-down Pipeline
 
 ### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
 
 The tear-down pipeline removes the AWS infrastructure.
 
