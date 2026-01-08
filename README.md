@@ -76,10 +76,27 @@ README.md
 - [ReactJs](https://react.dev)
 - [Material UI](https://mui.com)
 
-## ✅ Software requirements
+## ✅ Software Requirements
 
-- Java 17
-- Docker, Docker compose
+The following software must be installed for development, building, and deployment.
+
+- **Backend**
+    - Java 17
+    - Gradle (or use the Gradle wrapper)
+    - Docker
+    - Docker Compose
+
+- **Frontend**
+    - Node.js 18+
+    - Vite (installed via `npm install` as devDependency)
+    - Docker
+    - Docker Compose
+
+- **Deployment**
+    - AWS CLI
+    - Make
+
+---
 
 ## ▶️ How to Run
 
