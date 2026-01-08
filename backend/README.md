@@ -9,20 +9,20 @@ For local development, variables can be defined in `backend/.env.local`.
 
 ### Pagination
 
-| Variable | Description |
-|--------|-------------|
-| `PAGINATION_MAX_PAGE_SIZE` | Maximum page size of automatically paginated query results |
+| Variable                       | Description                                                |
+|--------------------------------|------------------------------------------------------------|
+| `PAGINATION_MAX_PAGE_SIZE`     | Maximum page size of automatically paginated query results |
 | `PAGINATION_DEFAULT_PAGE_SIZE` | Default page size of automatically paginated query results |
 
 ### Database Connection
 
 All database-related variables are **required**.
 
-| Variable | Description |
-|--------|-------------|
-| `NOQL_DB_NAME` | Database name |
-| `NOQL_DB_HOST` | Database host |
-| `NOQL_DB_PORT` | Database port |
+| Variable           | Description       |
+|--------------------|-------------------|
+| `NOQL_DB_NAME`     | Database name     |
+| `NOQL_DB_HOST`     | Database host     |
+| `NOQL_DB_PORT`     | Database port     |
 | `NOQL_DB_USERNAME` | Database username |
 | `NOQL_DB_PASSWORD` | Database password |
 
@@ -31,50 +31,52 @@ All database-related variables are **required**.
 Used for running the application locally with a test database.
 The configuration should match the primary database settings unless a separate database is used.
 
-| Variable | Description |
-|--------|-------------|
-| `POSTGRES_DB` | Database name |
-| `POSTGRES_USER` | Database username |
+| Variable            | Description       |
+|---------------------|-------------------|
+| `POSTGRES_DB`       | Database name     |
+| `POSTGRES_USER`     | Database username |
 | `POSTGRES_PASSWORD` | Database password |
 
 ### Other Configuration
 
-| Variable | Description |
-|--------|-------------|
-| `PLOT_SERVICE_CONTAINER_NAME` | Name of the container running the plot service |
-| `DEFAULT_USER_QUERY_LIMIT` | Default number of queries allowed for a newly registered user |
+| Variable                      | Description                                                   |
+|-------------------------------|---------------------------------------------------------------|
+| `PLOT_SERVICE_CONTAINER_NAME` | Name of the container running the plot service                |
+| `DEFAULT_USER_QUERY_LIMIT`    | Default number of queries allowed for a newly registered user |
 
 ### Security
 
 All security-related variables are **required** unless stated otherwise.
 
-| Variable | Description |
-|--------|-------------|
-| `JWT_SECRET` | Secret key for JWT token generation (minimum 512 bits) |
-| `JWT_EXPIRATION` | JWT access token expiration time in seconds (default: 1 day) |
+| Variable                 | Description                                                    |
+|--------------------------|----------------------------------------------------------------|
+| `JWT_SECRET`             | Secret key for JWT token generation (minimum 512 bits)         |
+| `JWT_EXPIRATION`         | JWT access token expiration time in seconds (default: 1 day)   |
 | `JWT_REFRESH_EXPIRATION` | JWT refresh token expiration time in seconds (default: 7 days) |
-| `DATA_ENCRYPTION_KEY` | Data encryption key (256 bits, Base64-encoded) |
+| `DATA_ENCRYPTION_KEY`    | Data encryption key (256 bits, Base64-encoded)                 |
 
 ### API Keys (External Services)
 
 All API keys listed below are **required**.
 
-| Variable | Description |
-|--------|-------------|
-| `GEMINI_API_KEY` | Google Gemini API key |
+| Variable          | Description                 |
+|-------------------|-----------------------------|
+| `GEMINI_API_KEY`  | Google Gemini API key       |
 | `OPEN_AI_API_KEY` | OpenAI API key (GPT models) |
-| `CLAUDE_API_KEY` | Anthropic Claude API key |
+| `CLAUDE_API_KEY`  | Anthropic Claude API key    |
 
 ## Gradle Tasks
 
 ## Lint
 
 Lint main source code. Rules can be modified at [pmd-main.xml](./config/pmd/pmd-main.xml)
+
 ```bash
 ./gradlew pmdMain 
 ```
 
 Lint test source code. Rules can be modified at [pmd-test.xml](./config/pmd/pmd-test.xml)
+
 ```bash
 ./gradlew pmdTest 
 ```
@@ -82,11 +84,13 @@ Lint test source code. Rules can be modified at [pmd-test.xml](./config/pmd/pmd-
 ## Test Coverage
 
 Generate JaCoco report
+
 ```bash
 ./gradlew jacocoTestReport 
 ```
 
 Get total coverage
+
 ```bash
 ./gradlew computeTotalTestCoverage
 ```

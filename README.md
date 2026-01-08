@@ -159,4 +159,150 @@ cd NoQL/
   ```bash
   npm run dev
   ```
+
+## 🔁 Pipelines (CI/CD)
+
+The project uses a multi-pipeline CI/CD setup consisting of:
+
+- **Component-specific CI pipelines** for the backend, frontend, and plot service
+- A **deployment pipeline** that provisions infrastructure and deploys all components
+- A **tear-down pipeline** that removes the AWS infrastructure
+
+---
+
+## 📦 CI Pipelines
+
+CI pipelines are triggered automatically on **pull requests targeting the `main` branch** and can
+also be **run manually**.
+
+Each component (backend, frontend, and plot service) has its **own dedicated CI pipeline**, allowing
+independent validation, testing, and builds.
+
+<details>
+<summary><b>Backend CI Pipeline</b></summary>
+
+### [Backend CI Pipeline](.github/workflows/backend.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in the [`backend`](backend) directory.
+    - If changes are detected:
+        - Verifies that the backend version has been incremented.
+        - Runs backend linting checks.
+
+- **Test**
+    - Runs when:
+        - Backend changes were detected in the **Validate** job, or
+        - A pull request has been merged, or
+        - The workflow is manually triggered.
+    - Executes **unit and integration tests** with coverage reporting.
+    - Coverage results are published in the **job summary**.
+    - When triggered by a **PR merge**, updates `backend_coverage.json` in the
+      `coverage-badge` branch.  
+      This file is used to generate the **coverage badge** displayed at the top of this file.
+
+- **Build**
+    - Builds the backend JAR artifact.
+    - If the workflow is manually triggered with `push_docker=true`:
+        - Builds and pushes the Docker image `janbabak/noql-backend`
+          to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
+        - The Docker image tag matches the backend version.
+
+</details>
+
+<details>
+<summary><b>Plot Service CI Pipeline</b></summary>
+
+### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in [`plotService.Dockerfile`](backend/docker/plotService.Dockerfile).
+    - If changes are detected:
+        - Verifies that the plot service version has been incremented.
+
+- **Build**
+    - Runs only when the workflow is manually triggered with `push_docker=true`.
+    - Builds and pushes the Docker image `janbabak/noql-plot-service`
+      to [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service).
+    - The Docker image tag matches the plot service version.
+
+</details>
+
+<details>
+<summary><b>Frontend CI Pipeline</b></summary>
+
+### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in the [`frontend`](frontend) directory.
+    - If changes are detected:
+        - Verifies that the frontend version has been incremented.
+
+- **Build**
+    - Builds and packages the frontend application.
+    - If the workflow is manually triggered with `push_docker=true`:
+        - Builds and pushes the Docker image `janbabak/noql-frontend`
+          to [Docker Hub](https://hub.docker.com/r/janbabak/noql-frontend).
+        - The Docker image tag matches the frontend version.
+
+</details>
+
+---
+
+## ,🚀 Deployment Pipeline
+
+### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-deploy.yaml)
+
+The deployment pipeline deploys **all system components** (backend, frontend, and plot service)
+to AWS.
+
+- The pipeline can be triggered **only manually**.
+- It accepts a single input parameter: **stack ID**.
+
+#### Jobs
+
+- **Deploy Infrastructure**
+    - Authenticates with AWS.
+    - Deploys infrastructure defined in the CloudFormation template:
+        - [`infra.yaml`](infra/prod-stack/infra.yaml)
+
+- **Deploy Application (Docker Compose)**
+    - Loads environment variables from:
+        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
+        -  [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
+    - Starts Docker Compose, pulling Docker images from Docker Hub.
+    - The frontend URL is printed in the output of the **Print stack URL** step.
+
+---
+
+## 🧹 Tear-down Pipeline
+
+### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
+
+▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
+
+The tear-down pipeline removes the AWS infrastructure.
+
+- The pipeline can be triggered **only manually**.
+- It accepts a single input parameter: **stack ID**.
+
+#### Jobs
+
+- **Tear Down Infrastructure**
+    - Authenticates with AWS.
+    - Deletes infrastructure defined in the CloudFormation template:
+        - [`infra.yaml`](infra/prod-stack/infra.yaml)
   
