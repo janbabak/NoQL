@@ -2,7 +2,6 @@
 
 ![Backend Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/janbabak/NoQL/coverage-badge/backend_coverage.json)
 
-
 [![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
 [![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
 [![Junit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
@@ -82,83 +81,22 @@ README.md
 - Java 17
 - Docker, Docker compose
 
-## 🎬 How to run
+## ▶️ How to Run
 
-### Clone repository
+The application can be run in several ways, depending on your needs:
 
-```bash
-git clone https://github.com/janbabak/NoQL.git
-cd NoQL/
-```
+- **Deploy to AWS (production-like)**
+    - Using GitHub Actions: see the **Deployment Pipeline** section
+    - Manual deployment: [`infra/prod-stack/README.md`](infra/prod-stack/README.md)
 
-### Backend
+- **Run locally with Docker Compose**
+    - Instructions: [`infra/local-stack/README.md`](infra/local-stack/README.md)
 
-#### Local stack
+- **Run components natively (development)**
+    - Backend: [`backend/README.md`](backend/README.md)
+    - Frontend: [`frontend/NoQL/README.md`](frontend/NoQL/README.md)
 
-- Local stack is used for frontend development. It uses a local database and a local backend running in docker containers (like docker-compose
-  services).
-- Details are in the [Local stack](infra/local-stack/README.md).
-
-#### Development stack
-
-- Development stack is used for backend development and frontend development. It uses a local database and other
-  dependencies running in docker containers (like docker-compose services) and backend running locally on the host machine.
-- It is necessary to create a `NoQL/backend/.env.local` file with the following content:
-  ```dotenv
-  # external services/apis
-  OPEN_AI_API_KEY="" # input your api key
-  GEMINI_API_KEY="" # input your api key
-  CLAUDE_API_KEY="" # input your api key
-  
-  NOQL_DB_NAME="database"
-  NOQL_DB_HOST="localhost"
-  NOQL_DB_PORT="5432"
-  NOQL_DB_USERNAME="user"
-  NOQL_DB_PASSWORD="password"
-  
-  # Local databases - should match the NOQL_DB_xxx credentials
-  POSTGRES_PASSWORD="password"
-  POSTGRES_USER="user"
-  POSTGRES_DB="database"
-  
-  # settings
-  PAGINATION_MAX_PAGE_SIZE=100
-  PAGINATION_DEFAULT_PAGE_SIZE=20
-  
-  PLOT_SERVICE_CONTAINER_NAME="plot-service-database-stack"
-  DEFAULT_USER_QUERY_LIMIT=150
-  
-  # security
-  JWT_SECRET="fkajlak4jt34ktj34t98vu44d5d4p54o5d45m34ik5n345m34wm5l431145l434u64bgjsuicvkaplcvqyevasswilmvbti09478jujhhdsbfasdhfbu4" # could be changed
-  # 30 min
-  JWT_EXPIRATION=1800
-  # 7 days
-  JWT_REFRESH_EXPIRATION=604800
-  DATA_ENCRYPTION_KEY="djfasgu98g438yth43iuhg34jnfmf343nfij34fij43fm34fnij34fi34f"
-  ```
-
-- Start [Dev stack](infra/local-stack/README.md).
-- Export environment variables.
-  ```text
-  set -o allexport
-  source backend/.env.local
-  set +o allexport
-  ```
-- Run the backend
-  ```bash
-  ./backend/gradlew -p backend bootRun
-  ```
-  
-### Frontend
-- Install the frontend dependencies
-  ```bash
-  cd frontend/NoQL 
-  npm install
-  ```
-- Start the frontend
-  ```bash
-  npm run dev
-  ```
+---
 
 ## 🔁 Pipelines (CI/CD)
 
@@ -168,9 +106,33 @@ The project uses a multi-pipeline CI/CD setup consisting of:
 - A **deployment pipeline** that provisions infrastructure and deploys all components
 - A **tear-down pipeline** that removes the AWS infrastructure
 
+### 🔐 Environment Variables and Secrets
+
+The following **secrets and variables** must be configured in **GitHub** for the CI/CD pipelines.
+
+#### Secrets
+
+| Name                    | Description                                                                                                                      |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| `AWS_ACCESS_KEY_ID`     | AWS access key ID used by deployment and tear-down pipelines                                                                     |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret access key used by deployment and tear-down pipelines                                                                 |
+| `AWS_SSH_KEY_VALUE`     | Private SSH key used to access the AWS EC2 instance                                                                              |
+| `BACKEND_DOT_ENV`       | Backend `.env` file content for the production stack, variables description: [backend/README.md](backend/README.md)              |
+| `FRONTEND_DOT_ENV`      | Frontend `.env` file content for the production stack, variables description: [frontend/NoQL/README.md](frontend/NoQL/README.md) |
+| `DOCKERHUB_USERNAME`    | Docker Hub username                                                                                                              |
+| `DOCKERHUB_TOKEN`       | Docker Hub access token                                                                                                          |
+| `GH_ACCESS_TOKEN`       | GitHub access token with read & write repository access                                                                          |
+
+#### Variables
+
+| Name               | Description                                                                                          |
+|--------------------|------------------------------------------------------------------------------------------------------|
+| `AWS_SSH_KEY_NAME` | Name of the EC2 SSH key pair how to get it: [infra/prod-stack/README.md](infra/prod-stack/README.md) |
+| `NOQL_AWS_REGION`  | AWS region where the infrastructure is deployed                                                      |
+
 ---
 
-## 📦 CI Pipelines
+### 📦 CI Pipelines
 
 CI pipelines are triggered automatically on **pull requests targeting the `main` branch** and can
 also be **run manually**.
@@ -181,11 +143,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Backend CI Pipeline</b></summary>
 
-### [Backend CI Pipeline](.github/workflows/backend.yaml)
+#### [Backend CI Pipeline](.github/workflows/backend.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in the [`backend`](backend) directory.
@@ -216,11 +178,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Plot Service CI Pipeline</b></summary>
 
-### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
+#### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in [`plotService.Dockerfile`](backend/docker/plotService.Dockerfile).
@@ -238,11 +200,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Frontend CI Pipeline</b></summary>
 
-### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
+#### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in the [`frontend`](frontend) directory.
@@ -260,9 +222,9 @@ independent validation, testing, and builds.
 
 ---
 
-## ,🚀 Deployment Pipeline
+### ,🚀 Deployment Pipeline
 
-### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
+#### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-deploy.yaml)
 
@@ -282,15 +244,15 @@ to AWS.
 - **Deploy Application (Docker Compose)**
     - Loads environment variables from:
         - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
-        -  [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
+        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
     - Starts Docker Compose, pulling Docker images from Docker Hub.
     - The frontend URL is printed in the output of the **Print stack URL** step.
 
 ---
 
-## 🧹 Tear-down Pipeline
+### 🧹 Tear-down Pipeline
 
-### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
+#### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
 
