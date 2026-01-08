@@ -159,4 +159,136 @@ cd NoQL/
   ```bash
   npm run dev
   ```
+
+## Pipelines (CI/CD)
+
+The project consists of:
+- **CI pipelines** for individual components (backend, frontend, and plot service),
+- A **Deployment pipeline** that deploys all components together,
+- A **Tear-down pipeline** that removes the AWS infrastructure.
+
+---
+
+###  CI Pipelines
+
+CI pipelines are triggered automatically on **pull requests to the `main` branch** or can be
+**started manually**.
+
+The backend, frontend, and plot service each have their **own dedicated CI pipeline**.
+
+<details>
+<summary><b>Backend CI pipeline</b></summary>
+
+### [Backend CI Pipeline](.github/workflows/backend.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in the [`backend`](./) directory.
+    - If changes are found:
+        - Verifies that the backend version has been incremented.
+        - Runs linting on the backend code.
+
+- **Test**
+    - Runs when:
+        - Backend changes were detected in the *Validate* job, or
+        - A pull request has been merged, or
+        - The workflow is manually triggered.
+    - Executes **unit and integration tests** with coverage reporting.
+    - Coverage results are available in the **job summary**.
+    - When triggered by a **PR merge**, updates `backend_coverage.json` in the `coverage-badge` branch.  
+      This file is used by the **coverage badge** displayed in the beginning of this file.
+
+- **Build**
+    - Builds the backend JAR file.
+    - If the workflow is manually triggered with `push_docker=true`:
+        - Builds and pushes the Docker image `janbabak/noql-backend`
+          to [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend).
+        - The Docker image tag matches the backend version.
+</details>
+
+<details>
+
+<summary><b>Plot Service CI Pipeline</b></summary>
+
+### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in [`plotService.Dockerfile`](backend/docker/plotService.Dockerfile).
+    - If changes are found:
+        - Verifies that the plot service version has been incremented.
+
+- **Build**
+    - Runs when the workflow is manually triggered with `push_docker=true`.
+    - Builds and pushes the Docker image `janbabak/noql-plot-service`
+      to [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service).
+    - The Docker image tag matches the plot service version.
+</details>
+
+<details>
+
+<summary><b>Frontend CI Pipeline</b></summary>
+
+### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
+
+#### Jobs
+
+- **Validate**
+    - Detects changes in the [`frontend`](frontend) directory.
+    - If changes are found:
+        - Verifies that the frontend version has been incremented.
+
+- **Build**
+    - Builds and package the app
+    - If the workflow is manually triggered with `push_docker=true`:
+        - Builds and pushes the Docker image `janbabak/noql-frontend`
+          to [Docker Hub](https://hub.docker.com/r/janbabak/noql-frontend).
+        - The Docker image tag matches the frontend version.
+
+</details>
+
+---
+
+### Deployment Pipeline
+
+[stack-deploy.yaml](.github/workflows/stack-deploy.yaml)
+
+The deployment pipeline deploys **all system components** (backend, frontend, and plot service)
+to the AWS infrastructure.
+
+The pipeline can be triggered **only manually** and accepts a single argument - stack id.
+
+#### Jobs
+
+- **Deploy Infrastructure**
+    - Authenticates with AWS.
+    - Deploys infrastructure defined in the CloudFormation template
+      [`infra.yaml`](infra/prod-stack/infra.yaml).
+
+- **Deploy Docker Compose**
+    - Sets up environment variables from:
+        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
+        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)  
+    - Starts Docker Compose, which pulls Docker images from
+      [Docker Hub](https://hub.docker.com/u/janbabak).
+    - The frontend IP address is available in the output of the **Print stack URL** step.
+
+---
+
+### Tear-down Pipeline
+
+[stack-tear-down.yaml](.github/workflows/stack-tear-down.yaml)
+
+The Tear-down pipeline tears down the AWS infrastructure.
+
+The pipeline can be triggered **only manually** and accepts a single argument - stack id.
+
+#### Jobs
+
+- **Deploy Infrastructure**
+    - Authenticates with AWS.
+    - Tears down infrastructure defined in the CloudFormation template
+      [`infra.yaml`](infra/prod-stack/infra.yaml).
   
