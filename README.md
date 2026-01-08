@@ -89,6 +89,7 @@ README.md
 - [Make](https://cs.wikipedia.org/wiki/Make)
 - [Git](https://git-scm.com)
 - [GitHub Actions](https://github.com/features/actions)
+- [Bash](https://cs.wikipedia.org/wiki/Bash)
 
 ## ✅ Software Requirements
 
