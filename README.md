@@ -162,26 +162,20 @@ cd NoQL/
   npm run dev
   ```
 
-## How to run
+## ▶️ How to Run
 
-There are several ways how to run this app.
+The application can be run in several ways, depending on your needs:
 
-- Deploy AWS stack
-    - How to deploy using GiHub actions: go to "Deployment Pipeline" section
-    - How to deploy manually: [README.md](/infra/prod-stack/README.md)
-- Run Docker compose stack manually
-    - How to run Docker compose stack: [README.md](/infra/local-stack/README.md)
-- Run Everything natively
-    - How to run Backend natively: [README.md](backend/README.md)
-    - How to run Frontend natively: [README.md](frontend/NoQL/README.md)
+- **Deploy to AWS (production-like)**
+    - Using GitHub Actions: see the **Deployment Pipeline** section
+    - Manual deployment: [`infra/prod-stack/README.md`](infra/prod-stack/README.md)
 
-## 🔁 Pipelines (CI/CD)
+- **Run locally with Docker Compose**
+    - Instructions: [`infra/local-stack/README.md`](infra/local-stack/README.md)
 
-The project uses a multi-pipeline CI/CD setup consisting of:
-
-- **Component-specific CI pipelines** for the backend, frontend, and plot service
-- A **deployment pipeline** that provisions infrastructure and deploys all components
-- A **tear-down pipeline** that removes the AWS infrastructure
+- **Run components natively (development)**
+    - Backend: [`backend/README.md`](backend/README.md)
+    - Frontend: [`frontend/NoQL/README.md`](frontend/NoQL/README.md)
 
 ---
 
