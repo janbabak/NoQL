@@ -2,7 +2,6 @@
 
 ![Backend Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/janbabak/NoQL/coverage-badge/backend_coverage.json)
 
-
 [![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
 [![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
 [![Junit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
@@ -95,14 +94,16 @@ cd NoQL/
 
 #### Local stack
 
-- Local stack is used for frontend development. It uses a local database and a local backend running in docker containers (like docker-compose
+- Local stack is used for frontend development. It uses a local database and a local backend running in docker
+  containers (like docker-compose
   services).
 - Details are in the [Local stack](infra/local-stack/README.md).
 
 #### Development stack
 
 - Development stack is used for backend development and frontend development. It uses a local database and other
-  dependencies running in docker containers (like docker-compose services) and backend running locally on the host machine.
+  dependencies running in docker containers (like docker-compose services) and backend running locally on the host
+  machine.
 - It is necessary to create a `NoQL/backend/.env.local` file with the following content:
   ```dotenv
   # external services/apis
@@ -148,8 +149,9 @@ cd NoQL/
   ```bash
   ./backend/gradlew -p backend bootRun
   ```
-  
+
 ### Frontend
+
 - Install the frontend dependencies
   ```bash
   cd frontend/NoQL 
@@ -159,6 +161,19 @@ cd NoQL/
   ```bash
   npm run dev
   ```
+
+## How to run
+
+There are several ways how to run this app.
+
+- Deploy AWS stack
+    - How to deploy using GiHub actions: go to "Deployment Pipeline" section
+    - How to deploy manually: [README.md](/infra/prod-stack/README.md)
+- Run Docker compose stack manually
+    - How to run Docker compose stack: [README.md](/infra/local-stack/README.md)
+- Run Everything natively
+    - How to run Backend natively: [README.md](backend/README.md)
+    - How to run Frontend natively: [README.md](frontend/NoQL/README.md)
 
 ## 🔁 Pipelines (CI/CD)
 
@@ -282,7 +297,7 @@ to AWS.
 - **Deploy Application (Docker Compose)**
     - Loads environment variables from:
         - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
-        -  [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
+        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
     - Starts Docker Compose, pulling Docker images from Docker Hub.
     - The frontend URL is printed in the output of the **Print stack URL** step.
 
