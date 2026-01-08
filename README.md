@@ -179,7 +179,41 @@ The application can be run in several ways, depending on your needs:
 
 ---
 
-## 📦 CI Pipelines
+## 🔁 Pipelines (CI/CD)
+
+The project uses a multi-pipeline CI/CD setup consisting of:
+
+- **Component-specific CI pipelines** for the backend, frontend, and plot service
+- A **deployment pipeline** that provisions infrastructure and deploys all components
+- A **tear-down pipeline** that removes the AWS infrastructure
+
+### 🔐 Environment Variables and Secrets
+
+The following **secrets and variables** must be configured in **GitHub** for the CI/CD pipelines.
+
+#### Secrets
+
+| Name                    | Description                                                                                                                      |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| `AWS_ACCESS_KEY_ID`     | AWS access key ID used by deployment and tear-down pipelines                                                                     |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret access key used by deployment and tear-down pipelines                                                                 |
+| `AWS_SSH_KEY_VALUE`     | Private SSH key used to access the AWS EC2 instance                                                                              |
+| `BACKEND_DOT_ENV`       | Backend `.env` file content for the production stack, variables description: [backend/README.md](backend/README.md)              |
+| `FRONTEND_DOT_ENV`      | Frontend `.env` file content for the production stack, variables description: [frontend/NoQL/README.md](frontend/NoQL/README.md) |
+| `DOCKERHUB_USERNAME`    | Docker Hub username                                                                                                              |
+| `DOCKERHUB_TOKEN`       | Docker Hub access token                                                                                                          |
+| `GH_ACCESS_TOKEN`       | GitHub access token with read & write repository access                                                                          |
+
+#### Variables
+
+| Name               | Description                                                                                          |
+|--------------------|------------------------------------------------------------------------------------------------------|
+| `AWS_SSH_KEY_NAME` | Name of the EC2 SSH key pair how to get it: [infra/prod-stack/README.md](infra/prod-stack/README.md) |
+| `NOQL_AWS_REGION`  | AWS region where the infrastructure is deployed                                                      |
+
+---
+
+### 📦 CI Pipelines
 
 CI pipelines are triggered automatically on **pull requests targeting the `main` branch** and can
 also be **run manually**.
@@ -190,11 +224,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Backend CI Pipeline</b></summary>
 
-### [Backend CI Pipeline](.github/workflows/backend.yaml)
+#### [Backend CI Pipeline](.github/workflows/backend.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in the [`backend`](backend) directory.
@@ -225,11 +259,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Plot Service CI Pipeline</b></summary>
 
-### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
+#### [Plot Service CI Pipeline](.github/workflows/plotservice.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in [`plotService.Dockerfile`](backend/docker/plotService.Dockerfile).
@@ -247,11 +281,11 @@ independent validation, testing, and builds.
 <details>
 <summary><b>Frontend CI Pipeline</b></summary>
 
-### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
+#### [Frontend CI Pipeline](.github/workflows/frontend.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml)
 
-#### Jobs
+##### Jobs
 
 - **Validate**
     - Detects changes in the [`frontend`](frontend) directory.
@@ -269,9 +303,9 @@ independent validation, testing, and builds.
 
 ---
 
-## ,🚀 Deployment Pipeline
+### ,🚀 Deployment Pipeline
 
-### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
+#### [Deployment Pipeline](.github/workflows/stack-deploy.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-deploy.yaml)
 
@@ -297,9 +331,9 @@ to AWS.
 
 ---
 
-## 🧹 Tear-down Pipeline
+### 🧹 Tear-down Pipeline
 
-### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
+#### [Tear-down Pipeline](.github/workflows/stack-tear-down.yaml)
 
 ▶️ [GitHub trigger](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
 
