@@ -18,6 +18,61 @@
 NoSQL is a tool that lets users query databases using natural language. It's designed for those who aren't developers
 and don't know query language syntax such as SQL.
 
+## 🧑‍🔬 Tech Stack
+
+### Backend
+- [Java 17](https://www.java.com/en/)
+- [Spring](https://spring.io)
+- [Gradle](https://gradle.org)
+- [PostgreSQL](https://www.postgresql.org)
+- [MySQL](https://www.mysql.com)
+- [Docker](https://www.docker.com)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Swagger](https://swagger.io)
+- [Python](https://www.python.org)
+- [Matplotlib](https://matplotlib.org)
+- [GPT API](https://openai.com/api/)
+- [Anthropic API](https://www.anthropic.com/learn/build-with-claude)
+
+### Frontend
+- [React](https://react.dev)
+- [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vite.dev)
+- [Material UI](https://mui.com)
+- [Nginx](https://nginx.org)
+
+### Infrastructure & Others
+- [AWS](https://aws.amazon.com/console/)
+- [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
+- [Make](https://cs.wikipedia.org/wiki/Make)
+- [Git](https://git-scm.com)
+- [GitHub Actions](https://github.com/features/actions)
+- [Bash](https://cs.wikipedia.org/wiki/Bash)
+
+---
+
+## ✅ Software Requirements
+
+The following software must be installed for development, building, and deployment.
+
+- **Backend**
+    - Java 17
+    - Gradle (or use the Gradle wrapper)
+    - Docker
+    - Docker Compose
+
+- **Frontend**
+    - Node.js 18+
+    - Vite (installed via `npm install` as devDependency)
+    - Docker
+    - Docker Compose
+
+- **Deployment**
+    - AWS CLI
+    - Make
+
+---
+
 ## 🌲Project structure
 
 ```text
@@ -84,54 +139,6 @@ infra/                                    ... infrastructure
 ├─ scripts/                               ... infra related scripts
 README.md                                 ... Documentation
 ```
-## 🧑‍🔬 Tech Stack
-
-### Backend
-- [Java 17](https://www.java.com/en/)
-- [Spring](https://spring.io)
-- [Gradle](https://gradle.org)
-- [PostgreSQL](https://www.postgresql.org)
-- [MySQL](https://www.mysql.com)
-- [Docker](https://www.docker.com)
-- [Docker Compose](https://docs.docker.com/compose/)
-- [Swagger](https://swagger.io)
-- [Python](https://www.python.org)
-- [Matplotlib](https://matplotlib.org)
-
-### Frontend
-- [React](https://react.dev)
-- [TypeScript](https://www.typescriptlang.org)
-- [Vite](https://vite.dev)
-- [Material UI](https://mui.com)
-- [Nginx](https://nginx.org)
-
-### Infrastructure & Others
-- [AWS](https://aws.amazon.com/console/)
-- [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
-- [Make](https://cs.wikipedia.org/wiki/Make)
-- [Git](https://git-scm.com)
-- [GitHub Actions](https://github.com/features/actions)
-- [Bash](https://cs.wikipedia.org/wiki/Bash)
-
-## ✅ Software Requirements
-
-The following software must be installed for development, building, and deployment.
-
-- **Backend**
-    - Java 17
-    - Gradle (or use the Gradle wrapper)
-    - Docker
-    - Docker Compose
-
-- **Frontend**
-    - Node.js 18+
-    - Vite (installed via `npm install` as devDependency)
-    - Docker
-    - Docker Compose
-
-- **Deployment**
-    - AWS CLI
-    - Make
 
 ---
 
