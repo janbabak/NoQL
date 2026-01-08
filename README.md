@@ -2,7 +2,7 @@
 
 ![Backend Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/janbabak/NoQL/coverage-badge/backend_coverage.json)
 
-[![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
+[![Java](https://img.shields.io/badge/Java-e4292d.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
 [![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
 [![Junit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
 [![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=flat&logo=Gradle&logoColor=white)](https://gradle.org)
@@ -11,16 +11,23 @@
 [![React](https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=React&logoColor=black)](https://react.dev)
 [![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=Docker&logoColor=white)](https://www.docker.com)
 ![Chatbot](https://img.shields.io/badge/ChatBot-0066FF.svg?style=flat&logo=ChatBot&logoColor=white)
-[![Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2.svg?style=flat&logo=Google-Gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
+![Chat GPT](https://img.shields.io/badge/ChatGPT-000000.svg?style=flat&logo=ChatBot&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
 
 ## ✏️ Description
 
-NoSQL is a tool that lets users query databases using natural language. It's designed for those who aren't developers
-and don't know query language syntax such as SQL.
+NoQL (No Query Language) is an **AI** tool for **data analysis**. It lets users connect to data sources like PostgreSQL,
+**query them using natural language**, and visualize results with tables and charts.
+
+The backend is built in **Java** with the **Spring framework** and uses **PostgreSQL** for data persistence. It
+integrates various **LLMs**, including **OpenAI GPT**, and **Claude Haiku** fron Anthropic. The frontend is a
+single-page app built with **TypeScript, React.js**, and **Material UI**, connected via a **REST API.**
 
 ## 🧑‍🔬 Tech Stack
 
 ### Backend
+
 - [Java 17](https://www.java.com/en/)
 - [Spring](https://spring.io)
 - [Gradle](https://gradle.org)
@@ -35,6 +42,7 @@ and don't know query language syntax such as SQL.
 - [Anthropic API](https://www.anthropic.com/learn/build-with-claude)
 
 ### Frontend
+
 - [React](https://react.dev)
 - [TypeScript](https://www.typescriptlang.org)
 - [Vite](https://vite.dev)
@@ -42,6 +50,7 @@ and don't know query language syntax such as SQL.
 - [Nginx](https://nginx.org)
 
 ### Infrastructure & Others
+
 - [AWS](https://aws.amazon.com/console/)
 - [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
 - [Make](https://cs.wikipedia.org/wiki/Make)
