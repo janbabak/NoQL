@@ -62,19 +62,34 @@ llmBenchmarks/                            ... benchmarks of LLM APIs
 .gitignore
 README.md
 ```
+## 🧑‍🔬 Tech Stack
 
-## 🧑‍🔬 Technologies
-
+### Backend
 - [Java 17](https://www.java.com/en/)
 - [Spring](https://spring.io)
 - [Gradle](https://gradle.org)
+- [PostgreSQL](https://www.postgresql.org)
+- [MySQL](https://www.mysql.com)
 - [Docker](https://www.docker.com)
-- [Docker compose](https://docs.docker.com/compose/)
-- [Postgres](https://www.postgresql.org)
-- [git](https://git-scm.com)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Swagger](https://swagger.io)
+- [Python](https://www.python.org)
+- [Matplotlib](https://matplotlib.org)
+
+### Frontend
+- [React](https://react.dev)
 - [TypeScript](https://www.typescriptlang.org)
-- [ReactJs](https://react.dev)
+- [Vite](https://vite.dev)
 - [Material UI](https://mui.com)
+- [Nginx](https://nginx.org)
+
+### Infrastructure & Others
+- [AWS](https://aws.amazon.com/console/)
+- [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html)
+- [Make](https://cs.wikipedia.org/wiki/Make)
+- [Git](https://git-scm.com)
+- [GitHub Actions](https://github.com/features/actions)
+- [Bash](https://cs.wikipedia.org/wiki/Bash)
 
 ## ✅ Software Requirements
 
