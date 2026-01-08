@@ -18,50 +18,6 @@
 NoSQL is a tool that lets users query databases using natural language. It's designed for those who aren't developers
 and don't know query language syntax such as SQL.
 
-## 🌲Project structure
-
-```text
-.github/                                  ... github actions (pipelines)
-├─ workflows/
-backend/                                  ... backend app root
-|  README.md                            .  .. backend documentation
-├─ src/                                   ... source code
-│  ├─ main/                               ... main code
-│  │  ├─ java.com.janbabak.noqlbackend/   
-│  │  │  ├─ authentication/               ... authentication
-│  │  │  ├─ config/                       ... spring configurations
-│  │  │  ├─ controller/                   ... REST controllers
-│  │  │  ├─ dao/                          ... data access objects
-│  │  │  ├─ error/                        ... error handling and exceptions
-│  │  │  ├─ model/                        ... data models
-│  │  │  ├─ service/                      ... services
-│  │  │  ├─ validation/                   ... validation
-│  ├─ test/                               ... unit/integration tests
-│  swagger/                               ... swagger API documentation
-customModel/                              ... custom LLM api (separate project - gpt proxy)
-exampleDatabase/                          ... old example database
-frontend/                                 ... frontend app root
-├─ NoQL/                 
-|  | README.md                            ... frontend documentation
-│  ├─ public/                             ... public files
-│  ├─ src/                                ... source code
-│  │  ├─ assets/
-│  │  ├─ components/                      ... reusable components
-│  │  ├─ pages/                           ... pages
-│  │  ├─ routes/                          ... routing
-│  │  ├─ services/                        ... services (api, logging,...)
-│  │  ├─ state/                           ... state management (Redux Toolkit)
-│  │  ├─ types/                           ... types
-infra/                                    ... infrastructure
-├─ dev-stack/                             ... development stack (for backend)
-├─ local-stack/                           ... local stack (for frontend, runs backend in docker)
-├─ prod-stack/                            ... production stack
-├─ scripts/                               ... scripts for building containers
-llmBenchmarks/                            ... benchmarks of LLM APIs
-.dockerignore
-.gitignore
-README.md
-```
 ## 🧑‍🔬 Tech Stack
 
 ### Backend
@@ -75,6 +31,8 @@ README.md
 - [Swagger](https://swagger.io)
 - [Python](https://www.python.org)
 - [Matplotlib](https://matplotlib.org)
+- [GPT API](https://openai.com/api/)
+- [Anthropic API](https://www.anthropic.com/learn/build-with-claude)
 
 ### Frontend
 - [React](https://react.dev)
@@ -90,6 +48,8 @@ README.md
 - [Git](https://git-scm.com)
 - [GitHub Actions](https://github.com/features/actions)
 - [Bash](https://cs.wikipedia.org/wiki/Bash)
+
+---
 
 ## ✅ Software Requirements
 
@@ -110,6 +70,75 @@ The following software must be installed for development, building, and deployme
 - **Deployment**
     - AWS CLI
     - Make
+
+---
+
+## 🌲Project structure
+
+```text
+.github/
+├─ workflows/                             ... GitHub workflows (pipelines)
+backend/                                  ... backend root
+├─ config
+|  ├─ pmd                                 ... PMD lint config files
+├─ docker                                 ... Docker containers used in backend
+├─ src/                                   ... source code
+│  ├─ main/                               ... main code
+│  │  ├─ java.
+|  |  |  ├─ com.janbabak.noqlbackend/   
+│  │  │  |  ├─ authentication/            ... authentication
+│  │  │  |  ├─ config/                    ... various configurations
+│  │  │  |  ├─ controller/                ... REST controllers
+│  │  │  |  ├─ dao/                       ... data access objects, repositories
+│  │  │  |  ├─ error/                     ... errors and exceptions handling
+│  │  │  |  ├─ model/                     ... data models
+│  │  │  |  ├─ service/                   ... services
+│  │  │  |  ├─ validation/                ... input validations
+|  |  |  ├─ resources
+|  |  |  |  ├─ static                     ... serves static resources
+|  |  |  |  | application.yaml            ... spring configuration 
+|  |  |  |  | logback.xml                 ... logger config
+│  ├─ test/                               ... unit/integration tests
+│  │  ├─ java.
+|  |  |  ├─ com.janbabak.noqlbackend/     ... tests source code
+|  |  |  ├─ resources
+|  |  |  |  ├─ dbScripts                  ... SQL scripts to initiate and clean up test databases
+|  |  |  |  ├─ llmResponses               ... Sample LLM responses - plots
+|  |  |  |  | application.yaml            ... spring test configuration 
+├─ swagger/                               ... API documentation
+| .env.local                              ... Environment variables used for local development
+| lombok.config                           ... Lombok configuration
+| README.md                               ... backend documentation
+ci/
+├─ scripts                                ... scripts used in pipelines
+customModel/                              ... [Deprecated ]custom LLM api (separate project - gpt proxy)
+exampleDatabase/                          ... [Deprecated] old example database
+frontend/                                 ... frontend app root
+├─ NoQL/                 
+│  ├─ public/                             ... public files
+│  ├─ src/                                ... source code
+│  │  ├─ assets/                          ... static assets such as images
+│  │  ├─ components/                      ... reusable components
+│  │  ├─ pages/                           ... pages
+│  │  ├─ routes/                          ... routing
+│  │  ├─ services/                        ... services (api, logging,...)
+│  │  ├─ state/                           ... state management (Redux Toolkit)
+│  │  ├─ types/                           ... types
+|  | .env                                 ... environment variables for local development
+|  | frontend.Dockerfile                  ... front end docker image
+|  | nginx.conf                           ... Nginx configuration
+|  | README.md                            ... frontend documentation
+infra/                                    ... infrastructure
+├─ local-stack/                           ... docker compose stacks, files, ...
+|  ├─ scripts                             ... scripts
+|  ├─ stack-date                          ... persists data from docker containers
+├─ prod-stack/                            ... AWS stack
+|  ├─ infra.yaml                          ... AWS infrastructure cloud formation
+|  ├─ Makefile                            ... deployment tasks
+|  ├─ README.md                           ... deployment documentation
+├─ scripts/                               ... infra related scripts
+README.md                                 ... Documentation
+```
 
 ---
 
