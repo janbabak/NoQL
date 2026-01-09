@@ -14,6 +14,20 @@
 ![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
 
+## 🗂️ Table of Contents
+
+- [Description](#-description)
+- [Tech Stack](#-tech-stack)
+- [Software Requirements](#-software-requirements)
+- [Architecture](#-architecture)
+- [Project Structure](#-project-structure)
+- [How to Run](#-how-to-run)
+- [Pipelines (CI/CD)](#-pipelines-cicd)
+    - [Environment Variables and Secrets](#-environment-variables-and-secrets)
+    - [CI Pipelines](#-ci-pipelines)
+    - [Deployment Pipeline](#-deployment-pipeline)
+    - [Tear-down Pipeline](#-tear-down-pipeline)
+
 ## ✏️ Description
 
 NoQL (No Query Language) is an **AI** tool for **data analysis**. It lets users connect to data sources like PostgreSQL,
@@ -93,7 +107,7 @@ The application is composed of the following main components:
 
 The overall system structure and request flow are illustrated in the diagrams below:
 
-![NoQL architecture](images/architecture%20diagram.png)
+![NoQL architecture](images/architecture-diagram.png)
 
 Query request flow:
 
@@ -101,7 +115,7 @@ Query request flow:
 
 ---
 
-## 🌲Project structure
+## 🌲 Project Structure
 
 ```text
 .github/
