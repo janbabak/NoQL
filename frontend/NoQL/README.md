@@ -6,7 +6,8 @@
 - [Project Structure](#-project-structure)
 - [Software Requirements](#-software-requirements)
 - [How to Run](#-how-to-run)
-- [Environment Variables](#-environment-variables)
+- [Environment Variables](#environment-variables)
+- [Frontend docker image](#frontend-docker-image)
 
 ---
 
