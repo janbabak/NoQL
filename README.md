@@ -184,7 +184,7 @@ README.md                                 ... Documentation
 
 ---
 
-## ▶️ How to Run
+## 🏃 How to Run
 
 The application can be run in several ways, depending on your needs:
 
