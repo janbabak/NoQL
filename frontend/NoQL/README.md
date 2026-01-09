@@ -1,5 +1,94 @@
 # NoQL Frontend
 
+## 🗂️ Table of Contents
+
+- [Description](#-description)
+- [Project Structure](#-project-structure)
+- [Software Requirements](#-software-requirements)
+- [How to Run](#-how-to-run)
+- [Environment Variables](#environment-variables)
+- [Frontend docker image](#frontend-docker-image)
+
+---
+
+## 📝 Description
+
+NoQL frontend client is a thin client written in React.js framework with TypeScript.
+
+---
+
+## 🌲 Project Structure
+
+```text
+frontend/
+├─ NoQL/                                  ... frontend app root                
+│  ├─ public/                             ... public files
+│  ├─ src/                                ... source code
+│  │  ├─ assets/                          ... static assets such as images
+│  │  ├─ components/                      ... reusable components
+│  │  ├─ pages/                           ... pages
+│  │  ├─ routes/                          ... routing
+│  │  ├─ services/                        ... services (api, logging,...)
+│  │  ├─ state/                           ... state management (Redux Toolkit)
+│  │  ├─ types/                           ... types
+|  | .env                                 ... environment variables for local development
+|  | frontend.Dockerfile                  ... front end docker image
+|  | nginx.conf                           ... Nginx configuration
+|  | README.md                            ... documentation
+```
+
+---
+
+## ✅ Software Requirements
+
+The following software must be installed for development, building, and deployment.
+
+- **Frontend**
+    - Node.js 18+
+    - Vite (installed via `npm install` as devDependency)
+    - Docker
+    - Docker Compose
+
+- **Deployment**
+    - AWS CLI
+    - Make
+
+---
+
+## 🏃 How to Run
+
+- **Run natively**
+    - Install dependencies
+      ```shell
+      npm install
+      ```
+    - Run frontend
+      ```shell
+      npm run dev
+      ```
+
+- **Run locally with Docker Compose**
+    - Instructions: [`../../infra/local-stack/README.md`](../../infra/local-stack/README.md)
+
+---
+
+## Other useful commands
+
+- **Build**
+  ```shell
+  npm run build
+  ```
+- **Build for production environment**
+  ```shell
+  npm run build:prod
+  ```
+- **Execute lint**
+    ```shell
+    npm run lint
+    ```
+
+---
+
 ## Environment Variables
 
 This frontend supports **both build-time (Vite)** and **runtime (Docker)** environment variables.  
