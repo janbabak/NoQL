@@ -14,7 +14,21 @@
 ![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
 
-## ✏️ Description
+## 🗂️ Table of Contents
+
+- [Description](#-description)
+- [Tech Stack](#-tech-stack)
+- [Software Requirements](#-software-requirements)
+- [Architecture](#-architecture)
+- [Project Structure](#-project-structure)
+- [How to Run](#-how-to-run)
+- [Pipelines (CI/CD)](#-pipelines-cicd)
+    - [Environment Variables and Secrets](#-environment-variables-and-secrets)
+    - [CI Pipelines](#-ci-pipelines)
+    - [Deployment Pipeline](#-deployment-pipeline)
+    - [Tear-down Pipeline](#-tear-down-pipeline)
+
+## 📝 Description
 
 NoQL (No Query Language) is an **AI** tool for **data analysis**. It lets users connect to data sources like PostgreSQL,
 **query them using natural language**, and visualize results with tables and charts.
@@ -81,7 +95,27 @@ The following software must be installed for development, building, and deployme
 
 ---
 
-## 🌲Project structure
+## 🏛 Architecture
+
+The application is composed of the following main components:
+
+- **Backend** – a thick server responsible for business logic, and API exposure
+- **Frontend** – a thin client responsible for user interaction
+- **Plot Service** – a dedicated service for plot generation
+- **PostgreSQL** – persistence layer for application data
+- **LLM(s)** – external AI agents that invoke backend functions
+
+The overall system structure and request flow are illustrated in the diagrams below:
+
+![NoQL architecture](images/architecture-diagram.png)
+
+Query request flow:
+
+![Request flow](images/flow-diagram.png)
+
+---
+
+## 🌲 Project Structure
 
 ```text
 .github/
@@ -150,7 +184,7 @@ README.md                                 ... Documentation
 
 ---
 
-## ▶️ How to Run
+## 🏃 How to Run
 
 The application can be run in several ways, depending on your needs:
 
