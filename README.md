@@ -28,7 +28,7 @@
     - [Deployment Pipeline](#-deployment-pipeline)
     - [Tear-down Pipeline](#-tear-down-pipeline)
 
-## ✏️ Description
+## 📝 Description
 
 NoQL (No Query Language) is an **AI** tool for **data analysis**. It lets users connect to data sources like PostgreSQL,
 **query them using natural language**, and visualize results with tables and charts.
@@ -95,7 +95,7 @@ The following software must be installed for development, building, and deployme
 
 ---
 
-## 🏗️ Architecture
+## 🏛 Architecture
 
 The application is composed of the following main components:
 
