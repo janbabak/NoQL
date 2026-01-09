@@ -81,6 +81,26 @@ The following software must be installed for development, building, and deployme
 
 ---
 
+## 🏗️ Architecture
+
+The application is composed of the following main components:
+
+- **Backend** – a thick server responsible for business logic, and API exposure
+- **Frontend** – a thin client responsible for user interaction
+- **Plot Service** – a dedicated service for plot generation
+- **PostgreSQL** – persistence layer for application data
+- **LLM(s)** – external AI agents that invoke backend functions
+
+The overall system structure and request flow are illustrated in the diagrams below:
+
+![NoQL architecture](images/architecture%20diagram.png)
+
+Query request flow:
+
+![Request flow](images/flow-diagram.png)
+
+---
+
 ## 🌲Project structure
 
 ```text
