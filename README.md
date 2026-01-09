@@ -39,6 +39,11 @@ The backend is built in **Java** with the **Spring framework** and uses **Postgr
 integrates various **LLMs**, including **OpenAI GPT**, and **Claude Haiku** fron Anthropic. The frontend is a
 single-page app built with **TypeScript, React.js**, and **Material UI**, connected via a **REST API.**
 
+
+**More Details:**
+- [Backend README](backend/README.md)
+- [Frontend README](frontend/NoQL/README.md)
+
 ---
 
 ## 🧑‍🔬 Tech Stack
@@ -89,7 +94,6 @@ The following software must be installed for development, building, and deployme
 
 - **Frontend**
     - Node.js 18+
-    - Vite (installed via `npm install` as devDependency)
     - Docker
     - Docker Compose
 
