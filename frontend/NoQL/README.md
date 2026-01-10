@@ -42,7 +42,7 @@ NoQL frontend client is a **thin, interactive client** written in **React.js** w
 
 ---
 
-## ‍🛠️ ️Tech Stack
+## ‍🛠️ Tech Stack
 
 - [React](https://react.dev)
 - [Redux](https://redux.js.org)
@@ -225,9 +225,9 @@ npm run dockerBuildFrontend
 
 ### Build and Push Frontend Image
 
-Build and push can be executed by triggering a manual GitHub action.
+Build and push can be executed by triggering a manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml).
 
-Builds and pushes the frontend Docker image to the registry.  
+Builds and pushes the frontend Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-frontend) registry.  
 The image version is read from the `version` field in `package.json`.
 
 ```bash
@@ -237,7 +237,7 @@ npm run dockerPushFrontend
 ### Run Frontend Container
 
 - Expose container port `80` to a desired host port
-- Provide required environment variables via an env file
+- Provide required environment variables via an .env file
 
 ```bash
 docker run -p 80:80 \

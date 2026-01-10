@@ -14,6 +14,21 @@
 
 ---
 
+## 🚀 Overview
+
+**NoQL Backend** service is a thick server that allows users to query structured data using natural language.
+It leverages Large Language Models (OpenAI, Claude, ...) and securely executes
+generated Python code inside isolated Docker containers to produce visualizations.
+
+**Key highlights:**
+
+- Java 17 + Spring Boot backend
+- Secure execution of user-generated code via Docker isolation
+- Multi-LLM support (OpenAI, Claude, ...)
+- Production-grade CI, testing, linting, and coverage
+
+---
+
 ## 🗂️ Table of Contents
 
 - [Description](#-description)
@@ -281,6 +296,9 @@ The image version is taken from the `version` field in `build.gradle`.
 
 ### Build and Push Backend Image
 
+Build and push can be executed by triggering a
+manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+
 Builds and pushes the backend Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend) registry.
 The image version is taken from the `version` field in `build.gradle`.
 
@@ -318,6 +336,9 @@ The image version is taken from `ext.docker.plotServiceVersion` in `build.gradle
 ```
 
 ### Build and Push Plot Service Image
+
+Build and push can be executed by triggering a
+manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
 
 Builds and pushes the plot service Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service)
 registry. The image version comes from `ext.docker.plotServiceVersion` in `build.gradle`.
