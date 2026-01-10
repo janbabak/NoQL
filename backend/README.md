@@ -3,14 +3,16 @@
 ![Backend Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/janbabak/NoQL/coverage-badge/backend_coverage.json)
 
 [![Java](https://img.shields.io/badge/Java-e4292d.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
-[![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
-[![Junit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
+[![Spring](https://img.shields.io/badge/Spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
+[![JUnit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
 [![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=flat&logo=Gradle&logoColor=white)](https://gradle.org)
-[![Postgres](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=Docker&logoColor=white)](https://www.docker.com)
-![Chat GPT](https://img.shields.io/badge/ChatGPT-000000.svg?style=flat&logo=ChatBot&logoColor=white)
-![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
+![ChatGPT](https://img.shields.io/badge/ChatGPT-000000.svg?style=flat&logo=OpenAI&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat)
+![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=amazonaws&logoColor=white)
+
+---
 
 ## 🗂️ Table of Contents
 
@@ -21,82 +23,92 @@
 - [Gradle Tasks](#gradle-tasks)
 - [Configuration](#configuration)
 - [Environment Variables](#environment-variables)
-- [Backend docker image](#backend-docker-image)
-- [Plot Service docker image](#plot-service-docker-image)
+- [Backend Docker Image](#backend-docker-image)
+- [Plot Service Docker Image](#plot-service-docker-image)
 
 ---
 
 ## 📝 Description
 
-NoQL backend is a thick server written in Java with the Spring framework. It uses Plot service - service that executes
-generated python scripts in separated docker environment.
+The **NoQL Backend** is a stateful (“thick”) server implemented in **Java** using the **Spring Framework**.
+
+Its responsibilities include:
+- Processing user queries
+- Communicating with LLM providers (OpenAI, Claude, ...)
+- Orchestrating the **Plot Service**, which executes dynamically generated Python scripts inside an isolated Docker environment
 
 ---
 
 ## 🌲 Project Structure
 
 ```text
-backend/                                  ... backend root
-├─ config
-|  ├─ pmd                                 ... PMD lint config files
-├─ docker                                 ... Docker containers used in backend
-├─ src/                                   ... source code
-│  ├─ main/                               ... main code
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/   
-│  │  │  |  ├─ authentication/            ... authentication
-│  │  │  |  ├─ config/                    ... various configurations
-│  │  │  |  ├─ controller/                ... REST controllers
-│  │  │  |  ├─ dao/                       ... data access objects, repositories
-│  │  │  |  ├─ error/                     ... errors and exceptions handling
-│  │  │  |  ├─ model/                     ... data models
-│  │  │  |  ├─ service/                   ... services
-│  │  │  |  ├─ validation/                ... input validations
-|  |  |  ├─ resources
-|  |  |  |  ├─ static                     ... serves static resources
-|  |  |  |  | application.yaml            ... spring configuration 
-|  |  |  |  | logback.xml                 ... logger config
-│  ├─ test/                               ... unit/integration tests
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/     ... tests source code
-|  |  |  ├─ resources
-|  |  |  |  ├─ dbScripts                  ... SQL scripts to initiate and clean up test databases
-|  |  |  |  ├─ llmResponses               ... Sample LLM responses - plots
-|  |  |  |  | application.yaml            ... spring test configuration 
-├─ swagger/                               ... API documentation
-| .env.local                              ... Environment variables used for local development
-| lombok.config                           ... Lombok configuration
-| README.md                               ... documentation
+backend/                                  # Backend root
+├─ config/
+│  └─ pmd/                                # PMD lint configuration
+├─ docker/                                # Docker-related resources
+├─ src/
+│  ├─ main/
+│  │  ├─ java/
+│  │  │  └─ com/janbabak/noqlbackend/
+│  │  │     ├─ authentication/            # Authentication & authorization
+│  │  │     ├─ config/                    # Spring and app configuration
+│  │  │     ├─ controller/                # REST controllers
+│  │  │     ├─ dao/                       # DAOs and repositories
+│  │  │     ├─ error/                     # Exception handling
+│  │  │     ├─ model/                     # Domain models
+│  │  │     ├─ service/                   # Business logic
+│  │  │     └─ validation/                # Input validation
+│  │  └─ resources/
+│  │     ├─ static/                       # Static resources
+│  │     ├─ application.yaml              # Spring configuration
+│  │     └─ logback.xml                   # Logging configuration
+│  └─ test/
+│     ├─ java/
+│     │  └─ com/janbabak/noqlbackend/      # Test sources
+│     └─ resources/
+│        ├─ dbScripts/                    # DB init & cleanup scripts
+│        ├─ llmResponses/                 # Sample LLM plot responses
+│        └─ application.yaml              # Test configuration
+├─ swagger/                               # OpenAPI / Swagger documentation
+├─ .env.local                             # Local environment variables
+├─ lombok.config                          # Lombok configuration
+└─ README.md                              # Documentation
 ```
+
+---
 
 ## ✅ Software Requirements
 
-The following software must be installed for development, building, and deployment.
+The following software is required for local development, building, and deployment of the backend service:
 
-- **Backend**
-    - Java 17
-    - Gradle (or use the Gradle wrapper)
-    - Docker
-    - Docker Compose
+### Backend
+
+- **Java 17** (required)
+- **Gradle** (or use the included Gradle Wrapper)
+- **Docker**
+- **Docker Compose**
+- **Postgres** (could be run as a Docker container)
+
+---
 
 ## 🏃 How to Run
 
-### Run natively
+You can run the backend either **natively** on your machine or **locally using Docker Compose**.
 
-**Build**
+### Run Natively
 
-```shell
+**Build the application**
+
+```bash
 ./gradlew clean build
 ```
 
-**Build without test**
-
+**Build without running test**
 ```shell
 ./gradlew clean build -x test
 ```
 
-**Run**
-
+**Start the application**
 ```shell
 ./gradlew bootRun
 ```
