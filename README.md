@@ -14,6 +14,25 @@
 ![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
 
+---
+
+## 🚀 Project Overview
+
+**NoQL (No Query Language)** is an **AI-powered, full-stack data analysis platform** that enables users to **query databases using natural language** and **visualize results instantly**.
+
+**Key Highlights:**
+
+- **Natural Language Queries:** Ask questions in plain English and get answers from your database
+- **Interactive Visualizations:** Generate tables and charts via a dedicated plot service
+- **Secure LLM Integration:** Backend integrates with **OpenAI GPT** and **Anthropic Claude** for intelligent query handling
+- **Modern Full-Stack Architecture:**
+    - **Backend:** Java + Spring Boot, PostgreSQL
+    - **Frontend:** React + TypeScript SPA
+    - **Plot Service:** Dockerized Python service for visualization
+- **Production-Ready DevOps:** Dockerized services, CI/CD pipelines, AWS deployment
+
+---
+
 ## 🗂️ Table of Contents
 
 - [Description](#-description)
@@ -32,21 +51,14 @@
 
 ## 📝 Description
 
-NoQL (No Query Language) is an **AI** tool for **data analysis**. It lets users connect to data sources like PostgreSQL,
-**query them using natural language**, and visualize results with tables and charts.
+More details about backend and fronend components are describe in:
 
-The backend is built in **Java** with the **Spring framework** and uses **PostgreSQL** for data persistence. It
-integrates various **LLMs**, including **OpenAI GPT**, and **Claude Haiku** fron Anthropic. The frontend is a
-single-page app built with **TypeScript, React.js**, and **Material UI**, connected via a **REST API.**
-
-
-**More Details:**
 - [Backend README](backend/README.md)
 - [Frontend README](frontend/NoQL/README.md)
 
 ---
 
-## 🧑‍🔬 Tech Stack
+## 🔨 Tech Stack
 
 ### Backend
 
@@ -84,40 +96,42 @@ single-page app built with **TypeScript, React.js**, and **Material UI**, connec
 
 ## ✅ Software Requirements
 
-The following software must be installed for development, building, and deployment.
+**Backend**
 
-- **Backend**
-    - Java 17
-    - Gradle (or use the Gradle wrapper)
-    - Docker
-    - Docker Compose
+- [Java 17](https://www.java.com/en/)
+- [Gradle](https://gradle.org) (or use the included Gradle Wrapper)
+- [Docker](https://www.docker.com)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-- **Frontend**
-    - Node.js 18+
-    - Docker
-    - Docker Compose
+**Frontend**
 
-- **Deployment**
-    - AWS CLI
-    - Make
+- [Node.js 18+](https://nodejs.org/en/blog/announcements/v18-release-announce)
+- [Docker](https://www.docker.com)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+**Deployment**
+
+- [AWS CLI](https://aws.amazon.com/cli/)
+- [Make](https://cs.wikipedia.org/wiki/Make)
+- [Bash](https://cs.wikipedia.org/wiki/Bash)
 
 ---
 
 ## 🏛 Architecture
 
-The application is composed of the following main components:
+The system is composed of **five main components**:
 
-- **Backend** – a thick server responsible for business logic, and API exposure
-- **Frontend** – a thin client responsible for user interaction
-- **Plot Service** – a dedicated service for plot generation
-- **PostgreSQL** – persistence layer for application data
-- **LLM(s)** – external AI agents that invoke backend functions
+- **Backend** – business logic and REST API
+- **Frontend** – user interaction SPA
+- **Plot Service** – isolated Python service for plots
+- **PostgreSQL** – data persistence
+- **LLM(s)** – external AI agents for natural language processing
 
-The overall system structure and request flow are illustrated in the diagrams below:
+**Components:**
 
 ![NoQL architecture](images/architecture-diagram.png)
 
-Query request flow:
+**Request flow diagrams:**
 
 ![Request flow](images/flow-diagram.png)
 
@@ -127,67 +141,23 @@ Query request flow:
 
 ```text
 .github/
-├─ workflows/                             ... GitHub workflows (pipelines)
-backend/                                  ... backend root
-├─ config
-|  ├─ pmd                                 ... PMD lint config files
-├─ docker                                 ... Docker containers used in backend
-├─ src/                                   ... source code
-│  ├─ main/                               ... main code
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/   
-│  │  │  |  ├─ authentication/            ... authentication
-│  │  │  |  ├─ config/                    ... various configurations
-│  │  │  |  ├─ controller/                ... REST controllers
-│  │  │  |  ├─ dao/                       ... data access objects, repositories
-│  │  │  |  ├─ error/                     ... errors and exceptions handling
-│  │  │  |  ├─ model/                     ... data models
-│  │  │  |  ├─ service/                   ... services
-│  │  │  |  ├─ validation/                ... input validations
-|  |  |  ├─ resources
-|  |  |  |  ├─ static                     ... serves static resources
-|  |  |  |  | application.yaml            ... spring configuration 
-|  |  |  |  | logback.xml                 ... logger config
-│  ├─ test/                               ... unit/integration tests
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/     ... tests source code
-|  |  |  ├─ resources
-|  |  |  |  ├─ dbScripts                  ... SQL scripts to initiate and clean up test databases
-|  |  |  |  ├─ llmResponses               ... Sample LLM responses - plots
-|  |  |  |  | application.yaml            ... spring test configuration 
-├─ swagger/                               ... API documentation
-| .env.local                              ... Environment variables used for local development
-| lombok.config                           ... Lombok configuration
-| README.md                               ... backend documentation
+├─ workflows/                             # GitHub workflows (pipelines)
+backend/                                  # backend root
 ci/
-├─ scripts                                ... scripts used in pipelines
-customModel/                              ... [Deprecated ]custom LLM api (separate project - gpt proxy)
-exampleDatabase/                          ... [Deprecated] old example database
-frontend/                                 ... frontend app root
-├─ NoQL/                 
-│  ├─ public/                             ... public files
-│  ├─ src/                                ... source code
-│  │  ├─ assets/                          ... static assets such as images
-│  │  ├─ components/                      ... reusable components
-│  │  ├─ pages/                           ... pages
-│  │  ├─ routes/                          ... routing
-│  │  ├─ services/                        ... services (api, logging,...)
-│  │  ├─ state/                           ... state management (Redux Toolkit)
-│  │  ├─ types/                           ... types
-|  | .env                                 ... environment variables for local development
-|  | frontend.Dockerfile                  ... front end docker image
-|  | nginx.conf                           ... Nginx configuration
-|  | README.md                            ... frontend documentation
-infra/                                    ... infrastructure
-├─ local-stack/                           ... docker compose stacks, files, ...
-|  ├─ scripts                             ... scripts
-|  ├─ stack-date                          ... persists data from docker containers
-├─ prod-stack/                            ... AWS stack
-|  ├─ infra.yaml                          ... AWS infrastructure cloud formation
-|  ├─ Makefile                            ... deployment tasks
-|  ├─ README.md                           ... deployment documentation
-├─ scripts/                               ... infra related scripts
-README.md                                 ... Documentation
+├─ scripts                                # scripts used in pipelines
+customModel/                              # [Deprecated ]custom LLM api (separate project - gpt proxy)
+exampleDatabase/                          # [Deprecated] old example database
+frontend/                                 # frontend app root
+infra/                                    # infrastructure
+├─ local-stack/                           # docker compose stacks, files, ...
+|  ├─ scripts                             # scripts
+|  ├─ stack-date                          # persists data from docker containers
+├─ prod-stack/                            # AWS stack
+|  ├─ infra.yaml                          # AWS infrastructure cloud formation
+|  ├─ Makefile                            # deployment tasks
+|  ├─ README.md                           # deployment documentation
+├─ scripts/                               # infra related scripts
+README.md                                 # Documentation
 ```
 
 ---
@@ -204,8 +174,8 @@ The application can be run in several ways, depending on your needs:
     - Instructions: [`infra/local-stack/README.md`](infra/local-stack/README.md)
 
 - **Run components natively (development)**
-    - Backend: [`backend/README.md`](backend/README.md)
-    - Frontend: [`frontend/NoQL/README.md`](frontend/NoQL/README.md)
+    - Backend: [`backend/README.md`](backend/README.md#-how-to-run)
+    - Frontend: [`frontend/NoQL/README.md`](frontend/NoQL/README.md#-how-to-run)
 
 ---
 
@@ -354,8 +324,8 @@ to AWS.
 
 - **Deploy Application (Docker Compose)**
     - Loads environment variables from:
-        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
-        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
+        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod) (Needs to be created)
+        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod) (Needs to be created)
     - Starts Docker Compose, pulling Docker images from Docker Hub.
     - The frontend URL is printed in the output of the **Print stack URL** step.
 

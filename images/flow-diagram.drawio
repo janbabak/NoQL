@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15" version="29.3.0">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15" version="29.3.0">
   <diagram id="prtHgNgQTEPvFCAcTncT" name="Page-1">
-    <mxGraphModel dx="1536" dy="949" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="589" dy="366" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -131,6 +131,17 @@
             <mxPoint y="-64" as="offset" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="3W9IHdldR34SlG2m_g_h-1" edge="1" parent="dNxyNK7c78bLwvsdeMH5-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.376;entryY=0.001;entryDx=0;entryDy=0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="330" as="sourcePoint" />
+            <mxPoint x="290.55999999999995" y="460.03999999999996" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3W9IHdldR34SlG2m_g_h-2" connectable="0" parent="3W9IHdldR34SlG2m_g_h-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Responses" vertex="1">
+          <mxGeometry relative="1" x="-0.255" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="dNxyNK7c78bLwvsdeMH5-22" parent="dNxyNK7c78bLwvsdeMH5-19" style="swimlane;html=1;startSize=20;horizontal=0;" value="LLM" vertex="1">
           <mxGeometry height="120" width="1020" x="20" y="640" as="geometry">
             <mxRectangle height="30" width="1020" x="20" y="420" as="alternateBounds" />
@@ -138,16 +149,6 @@
         </mxCell>
         <mxCell id="o3dvpvlpy3xRtAHU0Bc5-23" parent="dNxyNK7c78bLwvsdeMH5-22" style="rounded=1;whiteSpace=wrap;html=1;" value="LLM agent calls provided tool(s)" vertex="1">
           <mxGeometry height="40" width="560" x="50" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="FGAiEJvQ91RA6aHmpsYA-38" edge="1" parent="dNxyNK7c78bLwvsdeMH5-22" source="o3dvpvlpy3xRtAHU0Bc5-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.375;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.675;exitY=0.95;exitDx=0;exitDy=0;exitPerimeter=0;" value="Response">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="281" y="-60" />
-              <mxPoint x="280" y="-60" />
-            </Array>
-            <mxPoint x="300" y="-60" as="sourcePoint" />
-            <mxPoint x="280" y="40" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="o3dvpvlpy3xRtAHU0Bc5-52" edge="1" parent="dNxyNK7c78bLwvsdeMH5-19" source="o3dvpvlpy3xRtAHU0Bc5-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="o3dvpvlpy3xRtAHU0Bc5-51">
           <mxGeometry relative="1" as="geometry" />
