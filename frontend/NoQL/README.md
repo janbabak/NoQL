@@ -42,7 +42,7 @@ NoQL frontend client is a **thin, interactive client** written in **React.js** w
 
 ---
 
-## ‍🛠️ Tech Stack
+## 🔨 Tech Stack
 
 - [React](https://react.dev)
 - [Redux](https://redux.js.org)
