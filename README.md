@@ -354,8 +354,8 @@ to AWS.
 
 - **Deploy Application (Docker Compose)**
     - Loads environment variables from:
-        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod)
-        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod)
+        - [`.env.backend-prod`](infra/local-stack/.env.backend-prod) (Needs to be created)
+        - [`.env.frontend-prod`](infra/local-stack/.env.frontend-prod) (Needs to be created)
     - Starts Docker Compose, pulling Docker images from Docker Hub.
     - The frontend URL is printed in the output of the **Print stack URL** step.
 
