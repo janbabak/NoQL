@@ -117,11 +117,17 @@ backend/                                  # Backend root
 
 The following software is required for local development, building, and deployment of the backend service:
 
-- **Java 17** (required)
-- **Gradle** (or use the included Gradle Wrapper)
-- **Docker**
-- **Docker Compose**
-- **Postgres** (could be run as a Docker container)
+- **Backend**
+  - [Java 17](https://www.java.com/en/)
+    - [Gradle](https://gradle.org) (or use the included Gradle Wrapper)
+    - [Docker](https://www.docker.com)
+    - [Docker Compose](https://docs.docker.com/compose/)
+    - [PostgreSQL](https://www.postgresql.org) (could be run in Docker container)
+
+- **Deployment**
+    - [AWS CLI](https://aws.amazon.com/cli/)
+    - [Make](https://cs.wikipedia.org/wiki/Make)
+    - [Bash](https://cs.wikipedia.org/wiki/Bash)
 
 ---
 
