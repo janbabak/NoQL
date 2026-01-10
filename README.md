@@ -146,7 +146,6 @@ backend/                                  # backend root
 ci/
 ├─ scripts                                # scripts used in pipelines
 customModel/                              # [Deprecated ]custom LLM api (separate project - gpt proxy)
-exampleDatabase/                          # [Deprecated] old example database
 frontend/                                 # frontend app root
 infra/                                    # infrastructure
 ├─ local-stack/                           # docker compose stacks, files, ...
