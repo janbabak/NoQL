@@ -34,9 +34,11 @@
 The **NoQL Backend** is a stateful (“thick”) server implemented in **Java** using the **Spring Framework**.
 
 Its responsibilities include:
+
 - Processing user queries
 - Communicating with LLM providers (OpenAI, Claude, ...)
-- Orchestrating the **Plot Service**, which executes dynamically generated Python scripts inside an isolated Docker environment
+- Orchestrating the **Plot Service**, which executes dynamically generated Python scripts inside an isolated Docker
+  environment
 
 ---
 
@@ -55,7 +57,6 @@ Its responsibilities include:
 - [Matplotlib](https://matplotlib.org)
 - [GPT API](https://openai.com/api/)
 - [Anthropic API](https://www.anthropic.com/learn/build-with-claude)
-
 
 ---
 
@@ -84,7 +85,7 @@ backend/                                  # Backend root
 │  │     └─ logback.xml                   # Logging configuration
 │  └─ test/
 │     ├─ java/
-│     │  └─ com/janbabak/noqlbackend/      # Test sources
+│     │  └─ com/janbabak/noqlbackend/     # Test sources
 │     └─ resources/
 │        ├─ dbScripts/                    # DB init & cleanup scripts
 │        ├─ llmResponses/                 # Sample LLM plot responses
@@ -122,16 +123,20 @@ You can run the backend either **natively** on your machine or **locally using D
 ```
 
 **Build without running test**
+
 ```shell
 ./gradlew clean build -x test
 ```
 
 **Start the application**
+
+Database connection must be [configured](#configuration) to running Postgres database.
+
 ```shell
 ./gradlew bootRun
 ```
 
-### Run locally with Docker Compose**
+### Run locally with Docker Compose
 
 Instructions: [`../infra/local-stack/README.md`](../infra/local-stack/README.md)
 
@@ -193,7 +198,8 @@ By default, test logs are hidden. To enable log output:
 
 - App is configured using [src/main/resources/application.yml](src/main/resources/application.yml) file.
 - Tests use configurationt from [src/test/resources/application.yml](src/main/resources/application.yml) file
-- In this file you can change settings, port, apiKeys, secrets ...
+- In this file you can change settings, port, apiKeys, secrets, database connection, ...
+- Database connection can be configured in this file or using [environment variables](#environment-variables).
 
 ---
 
@@ -275,7 +281,7 @@ The image version is taken from the `version` field in `build.gradle`.
 
 ### Build and Push Backend Image
 
-Builds and pushes the backend Docker image to the registry.
+Builds and pushes the backend Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend) registry.
 The image version is taken from the `version` field in `build.gradle`.
 
 ```bash
@@ -312,6 +318,9 @@ The image version is taken from `ext.docker.plotServiceVersion` in `build.gradle
 ```
 
 ### Build and Push Plot Service Image
+
+Builds and pushes the plot service Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service)
+registry. The image version comes from `ext.docker.plotServiceVersion` in `build.gradle`.
 
 ```bash
 ./gradlew dockerBuildPlotService
