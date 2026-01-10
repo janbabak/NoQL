@@ -226,7 +226,7 @@ npm run dockerBuildFrontend
 ### Build and Push Frontend Image
 
 Build and push can be executed by triggering a
-manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml).
+manual [▶️ GitHub action](https://github.com/janbabak/NoQL/actions/workflows/frontend.yaml).
 
 Builds and pushes the frontend Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-frontend)
 registry.  

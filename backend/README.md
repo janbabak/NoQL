@@ -118,7 +118,7 @@ backend/                                  # Backend root
 The following software is required for local development, building, and deployment of the backend service:
 
 - **Backend**
-  - [Java 17](https://www.java.com/en/)
+    - [Java 17](https://www.java.com/en/)
     - [Gradle](https://gradle.org) (or use the included Gradle Wrapper)
     - [Docker](https://www.docker.com)
     - [Docker Compose](https://docs.docker.com/compose/)
@@ -303,7 +303,7 @@ The image version is taken from the `version` field in `build.gradle`.
 ### Build and Push Backend Image
 
 Build and push can be executed by triggering a
-manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
+manual [▶️ GitHub action](https://github.com/janbabak/NoQL/actions/workflows/backend.yaml)
 
 Builds and pushes the backend Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-backend) registry.
 The image version is taken from the `version` field in `build.gradle`.
@@ -344,7 +344,7 @@ The image version is taken from `ext.docker.plotServiceVersion` in `build.gradle
 ### Build and Push Plot Service Image
 
 Build and push can be executed by triggering a
-manual [GitHub action](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
+manual [▶️ GitHub action](https://github.com/janbabak/NoQL/actions/workflows/plotservice.yaml)
 
 Builds and pushes the plot service Docker image to the [Docker Hub](https://hub.docker.com/r/janbabak/noql-plot-service)
 registry. The image version comes from `ext.docker.plotServiceVersion` in `build.gradle`.
