@@ -127,67 +127,23 @@ Query request flow:
 
 ```text
 .github/
-├─ workflows/                             ... GitHub workflows (pipelines)
-backend/                                  ... backend root
-├─ config
-|  ├─ pmd                                 ... PMD lint config files
-├─ docker                                 ... Docker containers used in backend
-├─ src/                                   ... source code
-│  ├─ main/                               ... main code
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/   
-│  │  │  |  ├─ authentication/            ... authentication
-│  │  │  |  ├─ config/                    ... various configurations
-│  │  │  |  ├─ controller/                ... REST controllers
-│  │  │  |  ├─ dao/                       ... data access objects, repositories
-│  │  │  |  ├─ error/                     ... errors and exceptions handling
-│  │  │  |  ├─ model/                     ... data models
-│  │  │  |  ├─ service/                   ... services
-│  │  │  |  ├─ validation/                ... input validations
-|  |  |  ├─ resources
-|  |  |  |  ├─ static                     ... serves static resources
-|  |  |  |  | application.yaml            ... spring configuration 
-|  |  |  |  | logback.xml                 ... logger config
-│  ├─ test/                               ... unit/integration tests
-│  │  ├─ java.
-|  |  |  ├─ com.janbabak.noqlbackend/     ... tests source code
-|  |  |  ├─ resources
-|  |  |  |  ├─ dbScripts                  ... SQL scripts to initiate and clean up test databases
-|  |  |  |  ├─ llmResponses               ... Sample LLM responses - plots
-|  |  |  |  | application.yaml            ... spring test configuration 
-├─ swagger/                               ... API documentation
-| .env.local                              ... Environment variables used for local development
-| lombok.config                           ... Lombok configuration
-| README.md                               ... backend documentation
+├─ workflows/                             # GitHub workflows (pipelines)
+backend/                                  # backend root
 ci/
-├─ scripts                                ... scripts used in pipelines
-customModel/                              ... [Deprecated ]custom LLM api (separate project - gpt proxy)
-exampleDatabase/                          ... [Deprecated] old example database
-frontend/                                 ... frontend app root
-├─ NoQL/                 
-│  ├─ public/                             ... public files
-│  ├─ src/                                ... source code
-│  │  ├─ assets/                          ... static assets such as images
-│  │  ├─ components/                      ... reusable components
-│  │  ├─ pages/                           ... pages
-│  │  ├─ routes/                          ... routing
-│  │  ├─ services/                        ... services (api, logging,...)
-│  │  ├─ state/                           ... state management (Redux Toolkit)
-│  │  ├─ types/                           ... types
-|  | .env                                 ... environment variables for local development
-|  | frontend.Dockerfile                  ... front end docker image
-|  | nginx.conf                           ... Nginx configuration
-|  | README.md                            ... frontend documentation
-infra/                                    ... infrastructure
-├─ local-stack/                           ... docker compose stacks, files, ...
-|  ├─ scripts                             ... scripts
-|  ├─ stack-date                          ... persists data from docker containers
-├─ prod-stack/                            ... AWS stack
-|  ├─ infra.yaml                          ... AWS infrastructure cloud formation
-|  ├─ Makefile                            ... deployment tasks
-|  ├─ README.md                           ... deployment documentation
-├─ scripts/                               ... infra related scripts
-README.md                                 ... Documentation
+├─ scripts                                # scripts used in pipelines
+customModel/                              # [Deprecated ]custom LLM api (separate project - gpt proxy)
+exampleDatabase/                          # [Deprecated] old example database
+frontend/                                 # frontend app root
+infra/                                    # infrastructure
+├─ local-stack/                           # docker compose stacks, files, ...
+|  ├─ scripts                             # scripts
+|  ├─ stack-date                          # persists data from docker containers
+├─ prod-stack/                            # AWS stack
+|  ├─ infra.yaml                          # AWS infrastructure cloud formation
+|  ├─ Makefile                            # deployment tasks
+|  ├─ README.md                           # deployment documentation
+├─ scripts/                               # infra related scripts
+README.md                                 # Documentation
 ```
 
 ---
