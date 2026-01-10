@@ -46,7 +46,7 @@ single-page app built with **TypeScript, React.js**, and **Material UI**, connec
 
 ---
 
-## 🧑‍🔬 Tech Stack
+## ‍🔨 Tech Stack
 
 ### Backend
 

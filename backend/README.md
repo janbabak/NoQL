@@ -17,6 +17,7 @@
 ## 🗂️ Table of Contents
 
 - [Description](#-description)
+- [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Software Requirements](#-software-requirements)
 - [How to Run](#-how-to-run)
@@ -36,6 +37,25 @@ Its responsibilities include:
 - Processing user queries
 - Communicating with LLM providers (OpenAI, Claude, ...)
 - Orchestrating the **Plot Service**, which executes dynamically generated Python scripts inside an isolated Docker environment
+
+---
+
+## 🔨 Tech Stack
+
+- [Java 17](https://www.java.com/en/)
+- [Spring](https://spring.io)
+- [JUnit 5](https://junit.org/junit5/)
+- [Gradle](https://gradle.org)
+- [PostgreSQL](https://www.postgresql.org)
+- [MySQL](https://www.mysql.com)
+- [Docker](https://www.docker.com)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Swagger](https://swagger.io)
+- [Python](https://www.python.org)
+- [Matplotlib](https://matplotlib.org)
+- [GPT API](https://openai.com/api/)
+- [Anthropic API](https://www.anthropic.com/learn/build-with-claude)
+
 
 ---
 
@@ -80,8 +100,6 @@ backend/                                  # Backend root
 ## ✅ Software Requirements
 
 The following software is required for local development, building, and deployment of the backend service:
-
-### Backend
 
 - **Java 17** (required)
 - **Gradle** (or use the included Gradle Wrapper)
