@@ -1,11 +1,176 @@
 # NoQL Backend
 
+![Backend Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/janbabak/NoQL/coverage-badge/backend_coverage.json)
+
+[![Java](https://img.shields.io/badge/Java-e4292d.svg?style=flat&logo=java&logoColor=white&color=f1931c)](https://www.java.com/en/)
+[![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=flat&logo=spring&logoColor=white)](https://spring.io)
+[![Junit](https://img.shields.io/badge/JUnit5-25A162.svg?style=flat&logo=JUnit5&logoColor=white)](https://junit.org/junit5/)
+[![Gradle](https://img.shields.io/badge/Gradle-02303A.svg?style=flat&logo=Gradle&logoColor=white)](https://gradle.org)
+[![Postgres](https://img.shields.io/badge/PostgreSQL-4169E1.svg?style=flat&logo=PostgreSQL&logoColor=white)](https://www.postgresql.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=Docker&logoColor=white)](https://www.docker.com)
+![Chat GPT](https://img.shields.io/badge/ChatGPT-000000.svg?style=flat&logo=ChatBot&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-e3dacc.svg?style=flat&logo=ChatBot&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-f89500.svg?style=flat&logo=ownCloud&logoColor=white)
+
+## 🗂️ Table of Contents
+
+- [Description](#-description)
+- [Project Structure](#-project-structure)
+- [Software Requirements](#-software-requirements)
+- [How to Run](#-how-to-run)
+- [Gradle Tasks](#gradle-tasks)
+- [Configuration](#configuration)
+- [Environment Variables](#environment-variables)
+- [Backend docker image](#backend-docker-image)
+- [Plot Service docker image](#plot-service-docker-image)
+
+---
+
+## 📝 Description
+
+NoQL backend is a thick server written in Java with the Spring framework. It uses Plot service - service that executes
+generated python scripts in separated docker environment.
+
+---
+
+## 🌲 Project Structure
+
+```text
+backend/                                  ... backend root
+├─ config
+|  ├─ pmd                                 ... PMD lint config files
+├─ docker                                 ... Docker containers used in backend
+├─ src/                                   ... source code
+│  ├─ main/                               ... main code
+│  │  ├─ java.
+|  |  |  ├─ com.janbabak.noqlbackend/   
+│  │  │  |  ├─ authentication/            ... authentication
+│  │  │  |  ├─ config/                    ... various configurations
+│  │  │  |  ├─ controller/                ... REST controllers
+│  │  │  |  ├─ dao/                       ... data access objects, repositories
+│  │  │  |  ├─ error/                     ... errors and exceptions handling
+│  │  │  |  ├─ model/                     ... data models
+│  │  │  |  ├─ service/                   ... services
+│  │  │  |  ├─ validation/                ... input validations
+|  |  |  ├─ resources
+|  |  |  |  ├─ static                     ... serves static resources
+|  |  |  |  | application.yaml            ... spring configuration 
+|  |  |  |  | logback.xml                 ... logger config
+│  ├─ test/                               ... unit/integration tests
+│  │  ├─ java.
+|  |  |  ├─ com.janbabak.noqlbackend/     ... tests source code
+|  |  |  ├─ resources
+|  |  |  |  ├─ dbScripts                  ... SQL scripts to initiate and clean up test databases
+|  |  |  |  ├─ llmResponses               ... Sample LLM responses - plots
+|  |  |  |  | application.yaml            ... spring test configuration 
+├─ swagger/                               ... API documentation
+| .env.local                              ... Environment variables used for local development
+| lombok.config                           ... Lombok configuration
+| README.md                               ... documentation
+```
+
+## ✅ Software Requirements
+
+The following software must be installed for development, building, and deployment.
+
+- **Backend**
+    - Java 17
+    - Gradle (or use the Gradle wrapper)
+    - Docker
+    - Docker Compose
+
+## 🏃 How to Run
+
+### Run natively
+
+**Build**
+
+```shell
+./gradlew clean build
+```
+
+**Build without test**
+
+```shell
+./gradlew clean build -x test
+```
+
+**Run**
+
+```shell
+./gradlew bootRun
+```
+
+### Run locally with Docker Compose**
+
+Instructions: [`../infra/local-stack/README.md`](../infra/local-stack/README.md)
+
+---
+
+## Gradle Tasks
+
+### Lint
+
+**Lint main source code**
+
+Rules can be modified at [pmd-main.xml](./config/pmd/pmd-main.xml)
+
+```bash
+./gradlew pmdMain 
+```
+
+**Lint test source code**
+
+Rules can be modified at [pmd-test.xml](./config/pmd/pmd-test.xml)
+
+```bash
+./gradlew pmdTest 
+```
+
+### Tests
+
+**Execute unit integration tests**
+
+```shell
+./gradlew clean test
+```
+
+**Generate JaCoco test coverage report**
+
+```shell
+./gradlew jacocoTestReport 
+```
+
+**Get total coverage**
+
+```shell
+./gradlew computeTotalTestCoverage
+```
+
+**Show test logs**
+
+By default, test logs are hidden. To enable log output:
+
+```shell
+./gradlew test -PshowLogs
+```
+
+---
+
 ## Configuration
+
+**Spring Configuration**
+
+- App is configured using [src/main/resources/application.yml](src/main/resources/application.yml) file.
+- Tests use configurationt from [src/test/resources/application.yml](src/main/resources/application.yml) file
+- In this file you can change settings, port, apiKeys, secrets ...
+
+---
+
+## Environment Variables
 
 The backend application is configured using environment variables.
 For local development, variables can be defined in `backend/.env.local`.
-
-## Environment Variables
 
 ### Pagination
 
@@ -65,43 +230,7 @@ All API keys listed below are **required**.
 | `OPEN_AI_API_KEY` | OpenAI API key (GPT models) |
 | `CLAUDE_API_KEY`  | Anthropic Claude API key    |
 
-## Gradle Tasks
-
-## Lint
-
-Lint main source code. Rules can be modified at [pmd-main.xml](./config/pmd/pmd-main.xml)
-
-```bash
-./gradlew pmdMain 
-```
-
-Lint test source code. Rules can be modified at [pmd-test.xml](./config/pmd/pmd-test.xml)
-
-```bash
-./gradlew pmdTest 
-```
-
-## Test Coverage
-
-Generate JaCoco report
-
-```bash
-./gradlew jacocoTestReport 
-```
-
-Get total coverage
-
-```bash
-./gradlew computeTotalTestCoverage
-```
-
-### Show Test Logs
-
-By default, test logs are hidden. To enable log output:
-
-```bash
-./gradlew test -PshowLogs
-```
+---
 
 ## Backend Docker Image
 
@@ -114,8 +243,6 @@ The image version is taken from the `version` field in `build.gradle`.
 ./gradlew dockerBuildBackend -Ppush=false
 ```
 
----
-
 ### Build and Push Backend Image
 
 Builds and pushes the backend Docker image to the registry.
@@ -124,8 +251,6 @@ The image version is taken from the `version` field in `build.gradle`.
 ```bash
 ./gradlew dockerBuildBackend
 ```
-
----
 
 ### Run Backend Container
 
@@ -156,31 +281,25 @@ The image version is taken from `ext.docker.plotServiceVersion` in `build.gradle
 ./gradlew dockerBuildPlotService -Ppush=false
 ```
 
----
-
 ### Build and Push Plot Service Image
 
 ```bash
 ./gradlew dockerBuildPlotService
 ```
 
----
-
 ### Run Plot Service Container
 
 Mount the plot service directory to store generated plot images.
 
-```bash
+```shell
 docker run -d -it \
   --name plot-service \
   -v "$(pwd)/../plotService:/app/plotService" \
   janbabak/noql-plot-service:0.0.1
 ```
 
----
-
 ### Generate Plot on Running Container
 
-```bash
+```shell
 docker exec plot-service python ./plotService/plot.py
 ```
