@@ -69,9 +69,9 @@ frontend/
 │  │  ├─ state/                           # Redux Toolkit state management
 │  │  ├─ types/                           # TypeScript types and interfaces
 │  ├─ .env                                # Local development environment variables
-│  ├─ frontend.Dockerfile                  # Dockerfile for frontend container
-│  ├─ nginx.conf                           # Nginx configuration
-│  └─ README.md                            # Documentation
+│  ├─ frontend.Dockerfile                 # Dockerfile for frontend container
+│  ├─ nginx.conf                          # Nginx configuration
+│  └─ README.md                           # Documentation
 ```
 
 ---
