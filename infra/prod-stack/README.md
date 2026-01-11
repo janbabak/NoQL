@@ -2,13 +2,23 @@
 
 How to deploy NoQL to AWS stack
 
-## ✅ Software Requirements
+## Deploy stack using GitHub actions
+
+[▶️ Deploy Stack](https://github.com/janbabak/NoQL/actions/workflows/stack-deploy.yaml)
+
+[▶️ Tear-down Stack](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
+
+## Deploy stack locally
+
+[Makefile](./Makefile) provides abstraction for commonly used commands
+
+### ✅ Software Requirements
 
 - [Make](https://cs.wikipedia.org/wiki/Make)
 - [AWS CLI](https://aws.amazon.com/cli/)
 - [Bash](https://cs.wikipedia.org/wiki/Bash)
 
-## Configuration
+### Configuration
 
 - **Set up AWS CLI**
 ```shell
@@ -22,12 +32,8 @@ aws configure
   - `NOQL_SSH_KEY_NAME` - required for `make deploy`; define the name of the SSH key used to access the EC2 instance.
     Note that SSH key pairs are region-specific in AWS. You can list your keys in the configured region using `make ec2-key-pairs`.
 
-## How to deploy
 
-- [Makefile](./Makefile) provides abstraction for commonly used commands
-
-
-## Commands
+### Commands
 
 - **Validate CloudFormation template** from `NOQL_TEMPLATE`
     ```shell
