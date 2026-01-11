@@ -7,7 +7,6 @@ manually from your local machine using **Make** and the **AWS CLI**.
 
 ## Table of Contents
 
-- [Deployment guide](#deployment-guide)
 - [Deploy stack using GitHub Actions](#deploy-stack-using-github-actions)
 - [Deploy stack locally](#deploy-stack-locally)
     - [Software Requirements](#software-requirements)
