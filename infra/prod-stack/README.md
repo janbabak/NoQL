@@ -1,6 +1,20 @@
 # Deployment guide
 
-How to deploy NoQL to AWS stack
+This document describes how to deploy the **NoQL** application to AWS, either automatically using **GitHub Actions** or
+manually from your local machine using **Make** and the **AWS CLI**.
+
+---
+
+## Table of Contents
+
+- [Deployment guide](#deployment-guide)
+- [Deploy stack using GitHub Actions](#deploy-stack-using-github-actions)
+- [Deploy stack locally](#deploy-stack-locally)
+    - [Software Requirements](#software-requirements)
+    - [Configuration](#configuration)
+    - [Commands](#commands)
+
+---
 
 ## Deploy stack using GitHub actions
 
@@ -8,11 +22,13 @@ How to deploy NoQL to AWS stack
 
 [▶️ Tear-down Stack](https://github.com/janbabak/NoQL/actions/workflows/stack-tear-down.yaml)
 
+---
+
 ## Deploy stack locally
 
 [Makefile](./Makefile) provides abstraction for commonly used commands
 
-### ✅ Software Requirements
+### Software Requirements
 
 - [Make](https://cs.wikipedia.org/wiki/Make)
 - [AWS CLI](https://aws.amazon.com/cli/)
@@ -21,17 +37,18 @@ How to deploy NoQL to AWS stack
 ### Configuration
 
 - **Set up AWS CLI**
+
 ```shell
 aws configure
 ```
 
 - **Define environment variables**
-  - `NOQL_TEMPLATE` - specifies cloudformation file with infrastructure, default [infra.yaml](infra.yaml)
-  - `NOQL_STACK_NAME` - stack name, default `noql-demo`
-  - `NOQL_AWS_REGION` - AWS region, default `eu-north-1` (Stockholm)
-  - `NOQL_SSH_KEY_NAME` - required for `make deploy`; define the name of the SSH key used to access the EC2 instance.
-    Note that SSH key pairs are region-specific in AWS. You can list your keys in the configured region using `make ec2-key-pairs`.
-
+    - `NOQL_TEMPLATE` - specifies cloudformation file with infrastructure, default [infra.yaml](infra.yaml)
+    - `NOQL_STACK_NAME` - stack name, default `noql-demo`
+    - `NOQL_AWS_REGION` - AWS region, default `eu-north-1` (Stockholm)
+    - `NOQL_SSH_KEY_NAME` - required for `make deploy`; define the name of the SSH key used to access the EC2 instance.
+      Note that SSH key pairs are region-specific in AWS. You can list your keys in the configured region using
+      `make ec2-key-pairs`.
 
 ### Commands
 
@@ -44,7 +61,7 @@ aws configure
     ```shell
     make ec2-key-pairs 
     ```
-  
+
 - **Add correct permissions to SSH key**, if newly created
     ```shell
     chmod 400 ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem
@@ -61,7 +78,7 @@ aws configure
     make status
     ```
   | Status                  | Meaning                                                         |
-  |-------------------------|-----------------------------------------------------------------|
+    |-------------------------|-----------------------------------------------------------------|
   | CREATE_FAILED           | Something went wrong during creation; no resources remain.      |
   | ROLLBACK_COMPLETE       | Stack creation failed and CloudFormation cleaned up resources   |
   | ROLLBACK_IN_PROGRESS    | Stack creation failed and rollback is currently in progress     |
@@ -117,14 +134,14 @@ aws configure
     # change backend url env in /infra/local-stack/.env.frontend-prod
     
     # copy files
-    scp -i  ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem  \                                           ✔  20:23:46  
+    scp -i  ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem  \
       ../local-stack/prod-stack.docker-compose.yaml \
       ../local-stack/.env.backend-prod \
       ../local-stack/.env.frontend-prod \
       ec2-user@${NOQL_PROD_STACK_IP}:~/noql-app/
   
     # Start docker compose on the remove machin
-    ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQL_PROD_STACK_IP} << 'EOF'   ✔  33s   20:27:55  
+    ssh -i ~/Developer/privateCredentials/awsNoqlMacbookPro14.pem ec2-user@${NOQL_PROD_STACK_IP} << 'EOF'
     docker compose \
       --file noql-app/prod-stack.docker-compose.yaml \
       --env-file noql-app/.env.backend-prod \
