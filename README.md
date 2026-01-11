@@ -152,9 +152,6 @@ infra/                                    # infrastructure
 |  ├─ scripts                             # scripts
 |  ├─ stack-date                          # persists data from docker containers
 ├─ prod-stack/                            # AWS stack
-|  ├─ infra.yaml                          # AWS infrastructure cloud formation
-|  ├─ Makefile                            # deployment tasks
-|  ├─ README.md                           # deployment documentation
 ├─ scripts/                               # infra related scripts
 README.md                                 # Documentation
 ```
