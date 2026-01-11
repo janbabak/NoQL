@@ -43,12 +43,18 @@ aws configure
 ```
 
 - **Define environment variables**
-    - `NOQL_TEMPLATE` - specifies cloudformation file with infrastructure, default [infra.yaml](infra.yaml)
-    - `NOQL_STACK_NAME` - stack name, default `noql-demo`
-    - `NOQL_AWS_REGION` - AWS region, default `eu-north-1` (Stockholm)
-    - `NOQL_SSH_KEY_NAME` - required for `make deploy`; define the name of the SSH key used to access the EC2 instance.
-      Note that SSH key pairs are region-specific in AWS. You can list your keys in the configured region using
-      `make ec2-key-pairs`.
+
+  | Variable | Description |
+    |----------|-------------|
+  | `NOQL_TEMPLATE` | CloudFormation template file defining the infrastructure (default: `infra.yaml`) |
+  | `NOQL_STACK_NAME` | Name of the CloudFormation stack (default: `noql-demo`) |
+  | `NOQL_AWS_REGION` | AWS region where the stack will be deployed (default: `eu-north-1`, Stockholm) |
+  | `NOQL_SSH_KEY_NAME` | Name of the EC2 SSH key pair used to access the instance (required for `make deploy`, region-specific) |
+
+  You can list available EC2 key pairs in the configured region using:
+    ```shell
+    make ec2-key-pairs
+    ```
 
 ### Commands
 
@@ -78,7 +84,7 @@ aws configure
     make status
     ```
   | Status                  | Meaning                                                         |
-    |-------------------------|-----------------------------------------------------------------|
+              |-------------------------|-----------------------------------------------------------------|
   | CREATE_FAILED           | Something went wrong during creation; no resources remain.      |
   | ROLLBACK_COMPLETE       | Stack creation failed and CloudFormation cleaned up resources   |
   | ROLLBACK_IN_PROGRESS    | Stack creation failed and rollback is currently in progress     |
