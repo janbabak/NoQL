@@ -25,7 +25,7 @@ export function ChatItem({ message }: ChatItemProps) {
         <GeneratedQuery query={message.dbQuery} />}
 
       {message.dbExecutionErrorMessage != null &&
-        <ChatError errorMessage={message.dbExecutionErrorMessage} />}
+        <ChatError title="Query execution error" errorMessage={message.dbExecutionErrorMessage} />}
 
       {message.plotUrl != null && message.plotGenerationErrorMessage == null &&
         <Plot plotUrl={message.plotUrl} />}
