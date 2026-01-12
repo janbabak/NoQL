@@ -30,6 +30,9 @@ export function ChatItem({ message }: ChatItemProps) {
       {message.plotUrl != null && message.plotGenerationErrorMessage == null &&
         <Plot plotUrl={message.plotUrl} />}
 
+      {message.plotGenerationErrorMessage != null &&
+        <ChatError title="Plot execution error" errorMessage={message.plotGenerationErrorMessage} />}
+
       {message.data != null && message.dbExecutionErrorMessage == null &&
         <ChatResultComponent message={message} />}
     </div>
