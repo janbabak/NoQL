@@ -535,7 +535,8 @@ class DatabaseControllerTest {
                 .timestamp(null)
                 .messageId(UUID.randomUUID())
                 .plotUrl(null)
-                .error(null)
+                .dbExecutionErrorMessage(null)
+                .plotGenerationErrorMessage(null)
                 .data(new RetrievedData(
                         List.of("name", "email", "age"),
                         List.of(List.of("John", "john@gmail.com", "26"),
