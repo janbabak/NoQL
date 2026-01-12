@@ -16,8 +16,9 @@ interface ChatResponse {
   dbQuery: string | null,
   plotUrl: string | null,
   description: string | null,
+  dbExecutionErrorMessage: string | null,
+  plotGenerationErrorMessage: string | null,
   timestamp: Date,
-  error: string,
 }
 
 interface RetrievedData {

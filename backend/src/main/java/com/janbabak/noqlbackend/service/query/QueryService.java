@@ -174,7 +174,10 @@ public class QueryService {
 
         if (userService.decrementQueryLimit(database.getUserId()) <= 0) {
             log.info("Query limit exceeded");
-            return ChatResponse.failedResponse("Query limit exceeded", queryRequest.getQuery());
+            return ChatResponse.failedResponse(
+                    "Query limit exceeded",
+                    null,
+                    queryRequest.getQuery());
         }
 
         final List<ChatQueryWithResponse> chatHistory = chatQueryWithResponseService.getMessagesFromChat(chatId);

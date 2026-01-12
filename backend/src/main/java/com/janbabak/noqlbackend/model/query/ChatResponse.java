@@ -19,8 +19,9 @@ public class ChatResponse {
     private String dbQuery; // database query
     private String plotUrl;
     private String description;
+    private String dbExecutionErrorMessage;
+    private String plotGenerationErrorMessage;
     private Timestamp timestamp;
-    private String error;
 
     public ChatResponse(RetrievedData data, ChatQueryWithResponse chatQueryWithResponse, String plotUrl) {
         this(
@@ -30,31 +31,11 @@ public class ChatResponse {
                 chatQueryWithResponse.getDbQuery(),
                 plotUrl,
                 chatQueryWithResponse.getResultDescription(),
-                chatQueryWithResponse.getTimestamp(),
-                null);
-
-        final String error = getError(chatQueryWithResponse);
-        if (error != null) {
-            this.error = error;
-        }
+                chatQueryWithResponse.getDbExecutionErrorMessage(),
+                chatQueryWithResponse.getPlotGenerationErrorMessage(),
+                chatQueryWithResponse.getTimestamp());
     }
-
-    @Nullable
-    private static String getError(ChatQueryWithResponse chatQueryWithResponse) {
-        String error = null;
-        if (chatQueryWithResponse.getDbExecutionErrorMessage() != null) {
-            error = "Errors: \n" + chatQueryWithResponse.getDbExecutionErrorMessage();
-        }
-        if (chatQueryWithResponse.getPlotGenerationErrorMessage() != null) {
-            if (error == null) {
-                error = "Errors: \n" + chatQueryWithResponse.getPlotGenerationErrorMessage();
-            } else {
-                error += "\n" + chatQueryWithResponse.getPlotGenerationErrorMessage();
-            }
-        }
-        return error;
-    }
-
+    
     /**
      * Create response with error message and no data.
      *
@@ -62,8 +43,16 @@ public class ChatResponse {
      * @param nlQuery natural language query
      * @return response
      */
-    public static ChatResponse failedResponse(String error, String nlQuery) {
+    public static ChatResponse failedResponse(String dbExecutionErrorMessage, String plotGenerationErrorMessage, String nlQuery) {
         return new ChatResponse(
-                null, null, nlQuery, null, null, null, null, error);
+                null,
+                null,
+                nlQuery,
+                null,
+                null,
+                null,
+                dbExecutionErrorMessage,
+                plotGenerationErrorMessage,
+                null);
     }
 }

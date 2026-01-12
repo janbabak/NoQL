@@ -4,6 +4,7 @@ import { GeneratedQuery } from './GeneratedQuery.tsx'
 import { ChatResultComponent } from './ChatResultComponent.tsx'
 import { Plot } from './Plot.tsx'
 import { ChatResponseDescription } from './ChatResponseDescription.tsx'
+import { ChatError } from './ChatError.tsx'
 
 interface ChatItemProps {
   message: ChatResponse,
@@ -23,10 +24,13 @@ export function ChatItem({ message }: ChatItemProps) {
       {message.dbQuery != null && message.dbQuery != '' &&
         <GeneratedQuery query={message.dbQuery} />}
 
-      {message.plotUrl != null &&
+      {message.dbExecutionErrorMessage != null &&
+        <ChatError errorMessage={message.dbExecutionErrorMessage} />}
+
+      {message.plotUrl != null && message.plotGenerationErrorMessage == null &&
         <Plot plotUrl={message.plotUrl} />}
 
-      {message.data != null &&
+      {message.data != null && message.dbExecutionErrorMessage == null &&
         <ChatResultComponent message={message} />}
     </div>
   )
