@@ -55,6 +55,7 @@ More details about backend and fronend components are describe in:
 
 - [Backend README](backend/README.md)
 - [Frontend README](frontend/NoQL/README.md)
+- [📺 Demo](https://youtu.be/xKcn7_yoxrw)
 
 ---
 
